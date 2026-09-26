@@ -632,22 +632,10 @@ input[type='search'] {
 .move-e { transform: rotate(90deg); }
 .move-w { transform: rotate(-90deg); }
 @keyframes chevron-bob {
-  0%, 100% { translate: 0 0; opacity: 0.88; }
-  50% { translate: 0 -4%; opacity: 1; }
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
 }
-.move-s { animation-name: chevron-bob-s; }
-.move-e { animation-name: chevron-bob-e; }
-.move-w { animation-name: chevron-bob-w; }
-@keyframes chevron-bob-s {
-  0%, 100% { translate: 0 0; opacity: 0.88; }
-  50% { translate: 0 4%; opacity: 1; }
-}
-@keyframes chevron-bob-e {
-  0%, 100% { translate: 0 0; opacity: 0.88; }
-  50% { translate: 4% 0; opacity: 1; }
-}
-@keyframes chevron-bob-w {
-  0%, 100% { translate: 0 0; opacity: 0.88; }
+.move-s, .move-e, .move-w { animation-name: chevron-bob; }
   50% { translate: -4% 0; opacity: 1; }
 }
 
