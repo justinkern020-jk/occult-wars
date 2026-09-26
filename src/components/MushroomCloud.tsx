@@ -264,7 +264,17 @@ export function MushroomCloud({ active, onDone }: Props) {
       const baseY = groundY();
 
       // Phase envelopes
-      const flash = elapsed < 0.28 ? 1 - elapsed / 0.28 : Math.max(0, 1 - (elapsed - 0.28) / 0.5) * 0.15;
+      // Optical pulse: near-instant full white, harsh falloff, faint second kick
+      const flash =
+        elapsed < 0.08
+          ? 1
+          : elapsed < 0.22
+            ? 1 - ((elapsed - 0.08) / 0.14) * 0.55
+            : elapsed < 0.32
+              ? 0.45 - ((elapsed - 0.22) / 0.1) * 0.2
+              : elapsed < 0.48
+                ? 0.35 * (1 - (elapsed - 0.32) / 0.16) // second soft pulse peak ~0.32s
+                : Math.max(0, 0.12 - (elapsed - 0.48) / 0.55);
       const fireball = Math.min(1, Math.max(0, (elapsed - 0.05) / 0.9));
       const stemRise = Math.min(1, Math.max(0, (elapsed - 0.25) / 1.4));
       const capBloom = Math.min(1, Math.max(0, (elapsed - 0.7) / 1.8));
@@ -576,9 +586,10 @@ export function MushroomCloud({ active, onDone }: Props) {
         ctx.restore();
       }
 
-      // White-out flash overlay first frames
-      if (flash > 0.4) {
-        ctx.fillStyle = `rgba(255,255,248,${(flash - 0.4) * 1.2})`;
+      // White-out optical flash — washes the frame at detonation
+      if (flash > 0.05) {
+        const wash = Math.min(1, flash * 1.15);
+        ctx.fillStyle = `rgba(255,255,250,${wash})`;
         ctx.fillRect(0, 0, w, h);
       }
 
@@ -604,21 +615,24 @@ export function MushroomCloud({ active, onDone }: Props) {
       aria-hidden
     >
       <canvas ref={canvasRef} className="nuke-canvas" />
-      <div className="nuke-skull-wrap" data-testid="nuke-skull">
-        <img
-          className="nuke-skull"
-          src="/assets/vfx/skull-crossbones.png?v=4"
-          alt=""
-          draggable={false}
-        />
-      </div>
-      <div className="nuke-chrome-wrap" data-testid="nuke-chrome-header">
-        <img
-          className="nuke-chrome-header"
-          src="/assets/vfx/nukem-chrome-header.png?v=1"
-          alt="NUKE'M"
-          draggable={false}
-        />
+      <div className="nuke-flash" data-testid="nuke-flash" />
+      <div className="nuke-blast-compose">
+        <div className="nuke-skull-wrap" data-testid="nuke-skull">
+          <img
+            className="nuke-skull"
+            src="/assets/vfx/skull-crossbones.png?v=4"
+            alt=""
+            draggable={false}
+          />
+        </div>
+        <div className="nuke-chrome-wrap" data-testid="nuke-chrome-header">
+          <img
+            className="nuke-chrome-header"
+            src="/assets/vfx/nukem-chrome-header.png?v=1"
+            alt="NUKE'M"
+            draggable={false}
+          />
+        </div>
       </div>
     </div>
   );

@@ -3288,17 +3288,56 @@ input[type='search'] {
   height: 100%;
   pointer-events: none;
 }
-.nuke-skull-wrap {
+/* Blinding optical pulse — harsh peak, fast falloff into mushroom */
+.nuke-flash {
   position: absolute;
-  background: transparent;
-  /* Above the particle canvas so the skull actually reads */
-  z-index: 4;
+  inset: 0;
+  z-index: 12;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 62%, #ffffff 0%, #fffef5 28%, #ffe9b8 55%, #fff 100%);
+  opacity: 0;
+  animation: nuke-blinding-flash 0.72s cubic-bezier(0.15, 0.75, 0.25, 1) forwards;
+  mix-blend-mode: normal;
+}
+@keyframes nuke-blinding-flash {
+  0% { opacity: 0; }
+  1.5% { opacity: 1; }
+  7% { opacity: 1; }
+  16% { opacity: 0.72; }
+  28% { opacity: 0.22; }
+  36% { opacity: 0.48; } /* subtle second pulse */
+  48% { opacity: 0.12; }
+  65% { opacity: 0.04; }
+  100% { opacity: 0; }
+}
+/* Tight blast stack: skull + NUKE'M under the rising cloud, one viewport */
+.nuke-blast-compose {
+  position: absolute;
+  z-index: 5;
   left: 50%;
-  /* Sit under the mushroom cap / at the stem base */
-  top: 58%;
+  top: 54%;
   transform: translate(-50%, -50%);
-  width: min(72vw, 520px);
-  height: min(72vw, 520px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(6px, 1.2vh, 16px);
+  width: min(70vw, 480px);
+  max-height: min(72vh, 560px);
+  pointer-events: none;
+}
+.nuke-skull-wrap {
+  position: relative;
+  background: transparent;
+  z-index: 4;
+  left: auto;
+  top: auto;
+  transform: none;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  max-height: min(38vh, 280px);
   pointer-events: none;
   display: grid;
   place-items: center;
@@ -3316,21 +3355,23 @@ input[type='search'] {
   -webkit-user-drag: none;
 }
 @keyframes nuke-skull-life {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
-  8% { opacity: 1; transform: translate(-50%, -50%) scale(1.12); }
-  18% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  55% { opacity: 1; transform: translate(-50%, -48%) scale(1.04); }
-  78% { opacity: 0.9; transform: translate(-50%, -46%) scale(1.06); }
-  100% { opacity: 0; transform: translate(-50%, -44%) scale(1.1); }
+  0% { opacity: 0; transform: scale(0.4); }
+  8% { opacity: 1; transform: scale(1.1); }
+  18% { opacity: 1; transform: scale(1); }
+  55% { opacity: 1; transform: scale(1.03) translateY(-2%); }
+  78% { opacity: 0.9; transform: scale(1.05) translateY(-3%); }
+  100% { opacity: 0; transform: scale(1.08) translateY(-4%); }
 }
 
 .nuke-chrome-wrap {
-  position: absolute;
+  position: relative;
   z-index: 6;
-  left: 50%;
-  bottom: 6%;
-  transform: translateX(-50%);
-  width: min(92vw, 720px);
+  left: auto;
+  bottom: auto;
+  top: auto;
+  transform: none;
+  width: min(100%, 440px);
+  flex-shrink: 0;
   pointer-events: none;
   display: grid;
   place-items: center;
@@ -3348,11 +3389,37 @@ input[type='search'] {
   background: transparent;
 }
 @keyframes nuke-chrome-life {
-  0% { opacity: 0; transform: translateX(-50%) scale(0.7) translateY(24px); }
-  10% { opacity: 1; transform: translateX(-50%) scale(1.08) translateY(0); }
-  18% { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
-  72% { opacity: 1; transform: translateX(-50%) scale(1.02) translateY(0); }
-  100% { opacity: 0; transform: translateX(-50%) scale(1.05) translateY(-8px); }
+  0% { opacity: 0; transform: scale(0.7) translateY(18px); }
+  10% { opacity: 1; transform: scale(1.06) translateY(0); }
+  18% { opacity: 1; transform: scale(1) translateY(0); }
+  72% { opacity: 1; transform: scale(1.02) translateY(0); }
+  100% { opacity: 0; transform: scale(1.04) translateY(-6px); }
+}
+
+/* Keep blast stack fully on-screen on short laptop heights */
+@media (max-height: 760px) {
+  .nuke-blast-compose {
+    top: 56%;
+    width: min(64vw, 420px);
+    gap: clamp(4px, 1vh, 10px);
+    max-height: min(68vh, 480px);
+  }
+  .nuke-skull-wrap {
+    max-height: min(32vh, 220px);
+  }
+  .nuke-chrome-wrap {
+    width: min(100%, 380px);
+  }
+}
+@media (max-height: 640px) {
+  .nuke-blast-compose {
+    top: 58%;
+    width: min(58vw, 360px);
+    max-height: min(64vh, 400px);
+  }
+  .nuke-skull-wrap {
+    max-height: min(28vh, 180px);
+  }
 }
 
 .nuke-legend {
@@ -3377,8 +3444,7 @@ input[type='search'] {
 }
 
 @keyframes nuke-overlay-life {
-  0% { opacity: 0; }
-  3% { opacity: 1; }
+  0% { opacity: 1; }
   82% { opacity: 1; }
   100% { opacity: 0; }
 }
