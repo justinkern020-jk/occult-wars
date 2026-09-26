@@ -327,4 +327,20 @@ export function applyJustinKernUnlock(p: Profile): Profile {
   return { ...p, collection, customDecks };
 }
 
+/** Unlock south_haven_dispatch into collection (+ legal custom decks). No username gate. */
+export function applySouthHavenDispatchUnlock(p: Profile): Profile {
+  const id = 'south_haven_dispatch';
+  const collection = p.collection.includes(id)
+    ? p.collection
+    : [...p.collection, id];
+  const card = cardById(id);
+  const customDecks = p.customDecks.map((d) => {
+    if (!card || d.cards.includes(id) || d.cards.length >= 40) return d;
+    const hero = CARDS.find((c) => c.id === d.heroId);
+    if (!hero || !isLegalForOrder(hero.faction, card.faction)) return d;
+    return { ...d, cards: [...d.cards, id] };
+  });
+  return { ...p, collection, customDecks };
+}
+
 export { FIRST_HOUR_ORDERS };

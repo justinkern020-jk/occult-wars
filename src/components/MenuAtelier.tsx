@@ -4,6 +4,7 @@ import {
   PACK_COST,
   applyJustinKernUnlock,
   applySethKernUnlock,
+  applySouthHavenDispatchUnlock,
   type Profile,
 } from '../game/profile';
 import {
@@ -15,10 +16,12 @@ import {
   isOppenheimerCode,
   isSecondHourCode,
   isSethKernCode,
+  isSouthHavenPdCode,
   writeForceSighting,
   writeHourOpen,
   writePendingJustinHand,
   writePendingSethHand,
+  writePendingSouthHavenHand,
 } from '../game/hourUnlock';
 import { cardById } from '../data/catalog';
 import type { Card } from '../game/types';
@@ -84,7 +87,8 @@ export function MenuAtelier({
     isSecondHourCode(profile.username) ||
       isBattleCountCode(profile.username) ||
       isAthensCode(profile.username) ||
-      isOppenheimerCode(profile.username)
+      isOppenheimerCode(profile.username) ||
+      isSouthHavenPdCode(profile.username)
       ? 'Adept'
       : profile.username,
   );
@@ -100,6 +104,7 @@ export function MenuAtelier({
       !isBattleCountCode(profile.username) &&
       !isAthensCode(profile.username) &&
       !isOppenheimerCode(profile.username) &&
+      !isSouthHavenPdCode(profile.username) &&
       !isCodePrefix(profile.username)
     ) {
       realNameRef.current = profile.username;
@@ -160,6 +165,24 @@ export function MenuAtelier({
       onUpdateProfile(unlocked);
       const sk = cardById('seth_kern');
       if (sk) setRevealUnlock({ card: sk, caption: 'The chief waits — Seth Kern' });
+      return;
+    }
+    if (isSouthHavenPdCode(next)) {
+      unlockAudio();
+      copSirenSfx();
+      writePendingSouthHavenHand();
+      const unlocked = applySouthHavenDispatchUnlock({
+        ...profile,
+        username: realNameRef.current,
+      });
+      setToast('The siren waits — South Haven Dispatch joins the next circle.');
+      onUpdateProfile(unlocked);
+      const sh = cardById('south_haven_dispatch');
+      if (sh)
+        setRevealUnlock({
+          card: sh,
+          caption: 'The siren answers — South Haven Dispatch',
+        });
       return;
     }
     if (!isCodePrefix(next)) {

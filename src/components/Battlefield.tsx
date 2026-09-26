@@ -64,6 +64,7 @@ import {
   clearForceSighting,
   clearPendingJustinHand,
   clearPendingSethHand,
+  clearPendingSouthHavenHand,
   isAthensCode,
   isBattleCountCode,
   isCodePrefix,
@@ -71,14 +72,17 @@ import {
   isOppenheimerCode,
   isSecondHourCode,
   isSethKernCode,
+  isSouthHavenPdCode,
   readForceSighting,
   readPendingJustinHand,
   readPendingSethHand,
+  readPendingSouthHavenHand,
   writeHourOpen,
 } from '../game/hourUnlock';
 import {
   applyJustinKernUnlock,
   applySethKernUnlock,
+  applySouthHavenDispatchUnlock,
   type Profile,
 } from '../game/profile';
 
@@ -334,6 +338,8 @@ export function Battlefield({
   const domToastTimer = useRef<number | null>(null);
   const slideTimerRef = useRef<number | null>(null);
   const [inspectCard, setInspectCard] = useState<Card | null>(null);
+  /** Code unlocks (South Haven): Close/Esc only — no backdrop dismiss. */
+  const [inspectSticky, setInspectSticky] = useState(false);
   const [inspectPower, setInspectPower] = useState<number | undefined>(undefined);
   /** Hand index being dragged to muster (units only). */
   const [dragHand, setDragHand] = useState<number | null>(null);
@@ -623,10 +629,24 @@ export function Battlefield({
           sethNote = "Seth Kern's hand is sealed — no room.";
         }
       }
+      // South Haven PD pending: drop Dispatch rite into Azure hand if space.
+      let southHavenNote: string | null = null;
+      if (readPendingSouthHavenHand()) {
+        clearPendingSouthHavenHand();
+        const sh = cardById('south_haven_dispatch');
+        if (sh && h.blue.length < HAND_CAP) {
+          h = { ...h, blue: [...h.blue, sh] };
+          setHand(h);
+          southHavenNote = 'South Haven Dispatch answers the circle.';
+        } else if (sh) {
+          southHavenNote = "South Haven Dispatch's hand is sealed — no room.";
+        }
+      }
       setLog([
         ...(veilNote ? [veilNote] : []),
         ...(justinNote ? [justinNote] : []),
         ...(sethNote ? [sethNote] : []),
+        ...(southHavenNote ? [southHavenNote] : []),
         `The leaden hour opens on ${m.name}. ${sideLabel('blue')} takes the first rite.`,
       ]);
 
@@ -888,7 +908,8 @@ export function Battlefield({
       applyEffectCtx(ctx);
       setSelectedHand(null);
       setAim(null);
-      if (hasKeyword(card, 'gas')) sirenSfx();
+      if (card.id === 'south_haven_dispatch') copSirenSfx();
+      else if (hasKeyword(card, 'gas')) sirenSfx();
       else brassClick();
       return true;
     },
@@ -1051,6 +1072,22 @@ export function Battlefield({
     return 'Seth Kern answers — the chief is in hand.';
   }
 
+  function dropSouthHavenIntoHand(seat: Side): string {
+    const sh = cardById('south_haven_dispatch');
+    if (!sh) return 'South Haven Dispatch is missing from the catalogue.';
+    const cur = liveRef.current.hand[seat];
+    if (cur.length >= HAND_CAP) {
+      return 'The hand is sealed — South Haven Dispatch cannot enter.';
+    }
+    const nextHand = { ...liveRef.current.hand, [seat]: [...cur, sh] };
+    setHand(nextHand);
+    liveRef.current = { ...liveRef.current, hand: nextHand };
+    if (profile && onUpdateProfile) {
+      onUpdateProfile(applySouthHavenDispatchUnlock(profile));
+    }
+    return 'South Haven Dispatch answers — the siren is in hand.';
+  }
+
   function forceSightingNow(): string {
     if (matchOver || phase === 'over') {
       return 'The night answers only while a circle is open.';
@@ -1113,6 +1150,7 @@ export function Battlefield({
       const jk = cardById('justin_kern');
       if (jk) {
         setInspectPower(undefined);
+        setInspectSticky(false);
         setInspectCard(jk);
       }
       return;
@@ -1126,7 +1164,22 @@ export function Battlefield({
       const sk = cardById('seth_kern');
       if (sk) {
         setInspectPower(undefined);
+        setInspectSticky(false);
         setInspectCard(sk);
+      }
+      return;
+    }
+    if (isSouthHavenPdCode(next)) {
+      setCodeDraft('');
+      unlockAudio();
+      copSirenSfx();
+      const seat: Side = mode === 'hotseat' ? side : 'blue';
+      setCodeToast(dropSouthHavenIntoHand(seat));
+      const sh = cardById('south_haven_dispatch');
+      if (sh) {
+        setInspectPower(undefined);
+        setInspectSticky(true);
+        setInspectCard(sh);
       }
       return;
     }
@@ -1142,6 +1195,7 @@ export function Battlefield({
         const jk = cardById('justin_kern');
         if (jk) {
           setInspectPower(undefined);
+          setInspectSticky(false);
           setInspectCard(jk);
         }
       }
@@ -2344,6 +2398,7 @@ export function Battlefield({
                           const def = cardById(unit.cardId);
                           if (def) {
                             setInspectPower(unit.power);
+                            setInspectSticky(false);
                             setInspectCard(def);
                           }
                         }}
@@ -2425,7 +2480,7 @@ export function Battlefield({
                   setSelectedUnit(null);
                   setAim(null);
                 }}
-                onInspect={() => { setInspectPower(undefined); setInspectCard(card); }}
+                onInspect={() => { setInspectPower(undefined); setInspectSticky(false); setInspectCard(card); }}
                 onDragDeployStart={
                   isUnit
                     ? (e) => startDragDeploy(i, e)
@@ -2522,9 +2577,11 @@ export function Battlefield({
         <TarotPop
           card={inspectCard}
           power={inspectPower}
+          closeOnBackdrop={!inspectSticky}
           onClose={() => {
             setInspectCard(null);
             setInspectPower(undefined);
+            setInspectSticky(false);
           }}
         />
       )}

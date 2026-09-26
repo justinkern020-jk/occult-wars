@@ -7,11 +7,13 @@ import {
   OPPENHEIMER_CODE,
   PENDING_JUSTIN_HAND_KEY,
   PENDING_SETH_HAND_KEY,
+  PENDING_SOUTH_HAVEN_HAND_KEY,
   SECOND_HOUR_CODE,
   bootHourOpen,
   clearForceSighting,
   clearPendingJustinHand,
   clearPendingSethHand,
+  clearPendingSouthHavenHand,
   isAthensCode,
   isBattleCountCode,
   isCodePrefix,
@@ -19,15 +21,18 @@ import {
   isOppenheimerCode,
   isSecondHourCode,
   isSethKernCode,
+  isSouthHavenPdCode,
   normalizeCode,
   readForceSighting,
   readHourOpen,
   readPendingJustinHand,
   readPendingSethHand,
+  readPendingSouthHavenHand,
   writeForceSighting,
   writeHourOpen,
   writePendingJustinHand,
   writePendingSethHand,
+  writePendingSouthHavenHand,
 } from './hourUnlock';
 
 const local = new Map<string, string>();
@@ -126,4 +131,26 @@ describe('hourUnlock / occultist codes', () => {
     clearPendingSethHand();
     expect(readPendingSethHand()).toBe(false);
   });
+
+  it('recognizes South Haven PD code ignoring case/spaces/punctuation', () => {
+    expect(isSouthHavenPdCode('SouthHavenPoliceDepartment')).toBe(true);
+    expect(isSouthHavenPdCode('south haven police department')).toBe(true);
+    expect(isSouthHavenPdCode('  SOUTH-HAVEN_POLICE.DEPARTMENT ')).toBe(true);
+    expect(isSouthHavenPdCode('SouthHaven')).toBe(false);
+  });
+
+  it('detects South Haven PD strict prefixes', () => {
+    expect(isCodePrefix('southhaven')).toBe(true);
+    expect(isCodePrefix('South Haven Police')).toBe(true);
+    expect(isCodePrefix('SouthHavenPoliceDepartment')).toBe(false);
+  });
+
+  it('pending south haven hand flag', () => {
+    expect(readPendingSouthHavenHand()).toBe(false);
+    writePendingSouthHavenHand();
+    expect(session.get(PENDING_SOUTH_HAVEN_HAND_KEY)).toBe('1');
+    clearPendingSouthHavenHand();
+    expect(readPendingSouthHavenHand()).toBe(false);
+  });
+
 });

@@ -4,6 +4,7 @@ export const HOUR_OPEN_KEY = 'occult-wars.hour-open';
 export const FORCE_SIGHTING_KEY = 'occult-wars.force-sighting';
 export const PENDING_JUSTIN_HAND_KEY = 'occult-wars.pending-justin-hand';
 export const PENDING_SETH_HAND_KEY = 'occult-wars.pending-seth-hand';
+export const PENDING_SOUTH_HAVEN_HAND_KEY = 'occult-wars.pending-south-haven-hand';
 
 export const SECOND_HOUR_CODE = 'the second hour';
 export const BATTLE_COUNT_CODE = 'battle count';
@@ -42,7 +43,11 @@ export function isOppenheimerCode(name: string): boolean {
 export function isCodePrefix(name: string): boolean {
   const t = normalizeCode(name);
   if (!t) return false;
-  return PHRASE_CODES.some((code) => code.startsWith(t) && t !== code);
+  if (PHRASE_CODES.some((code) => code.startsWith(t) && t !== code)) return true;
+  const stripped = stripCodeChars(name);
+  if (!stripped) return false;
+  const sh = 'southhavenpolicedepartment';
+  return sh.startsWith(stripped) && stripped !== sh;
 }
 
 /** Username trim === `911911` (exact digits). */
@@ -52,6 +57,16 @@ export function isHiddenAdeptCode(name: string): boolean {
 
 export function isSethKernCode(name: string): boolean {
   return name.trim().toLowerCase() === 'seth kern';
+}
+
+/** Strip to alphanumerics for codes that ignore spaces/punctuation. */
+export function stripCodeChars(name: string): string {
+  return name.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+/** SouthHavenPoliceDepartment — case-insensitive; ignore spaces/punctuation. */
+export function isSouthHavenPdCode(name: string): boolean {
+  return stripCodeChars(name) === 'southhavenpolicedepartment';
 }
 
 export function readHourOpen(): boolean {
@@ -158,4 +173,17 @@ export function writePendingSethHand(): void {
 
 export function clearPendingSethHand(): void {
   clearSessionFlag(PENDING_SETH_HAND_KEY);
+}
+
+/** Menu South Haven PD: drop Dispatch rite into Azure hand on next match boot. */
+export function readPendingSouthHavenHand(): boolean {
+  return sessionFlag(PENDING_SOUTH_HAVEN_HAND_KEY);
+}
+
+export function writePendingSouthHavenHand(): void {
+  writeSessionFlag(PENDING_SOUTH_HAVEN_HAND_KEY);
+}
+
+export function clearPendingSouthHavenHand(): void {
+  clearSessionFlag(PENDING_SOUTH_HAVEN_HAND_KEY);
 }
