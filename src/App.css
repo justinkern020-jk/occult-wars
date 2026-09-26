@@ -3311,7 +3311,7 @@ input[type='search'] {
   65% { opacity: 0.04; }
   100% { opacity: 0; }
 }
-/* Tight blast stack: skull + NUKE'M under the rising cloud, one viewport */
+/* Blast stack: NUKE'M sits right under the skull */
 .nuke-blast-compose {
   position: absolute;
   z-index: 5;
@@ -3322,7 +3322,7 @@ input[type='search'] {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(6px, 1.2vh, 16px);
+  gap: 0;
   width: min(70vw, 480px);
   max-height: min(72vh, 560px);
   pointer-events: none;
@@ -3336,19 +3336,22 @@ input[type='search'] {
   transform: none;
   width: 100%;
   height: auto;
-  aspect-ratio: 16 / 9;
-  max-height: min(38vh, 280px);
+  max-height: min(36vh, 260px);
+  margin: 0;
+  padding: 0;
+  line-height: 0;
   pointer-events: none;
-  display: grid;
-  place-items: center;
+  display: block;
   animation: nuke-skull-life 5.2s ease-in-out forwards;
   filter: drop-shadow(0 0 28px rgba(90, 255, 70, 0.75))
     drop-shadow(0 0 60px rgba(40, 200, 40, 0.45))
     drop-shadow(0 12px 28px rgba(0, 0, 0, 0.9));
 }
 .nuke-skull {
+  display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
+  max-height: min(36vh, 260px);
   object-fit: contain;
   opacity: 1;
   user-select: none;
@@ -3372,6 +3375,7 @@ input[type='search'] {
   transform: none;
   width: min(100%, 440px);
   flex-shrink: 0;
+  margin-top: -2px;
   pointer-events: none;
   display: grid;
   place-items: center;
@@ -3389,11 +3393,11 @@ input[type='search'] {
   background: transparent;
 }
 @keyframes nuke-chrome-life {
-  0% { opacity: 0; transform: scale(0.7) translateY(18px); }
-  10% { opacity: 1; transform: scale(1.06) translateY(0); }
+  0% { opacity: 0; transform: scale(0.85) translateY(6px); }
+  10% { opacity: 1; transform: scale(1.04) translateY(0); }
   18% { opacity: 1; transform: scale(1) translateY(0); }
   72% { opacity: 1; transform: scale(1.02) translateY(0); }
-  100% { opacity: 0; transform: scale(1.04) translateY(-6px); }
+  100% { opacity: 0; transform: scale(1.04) translateY(-4px); }
 }
 
 /* Keep blast stack fully on-screen on short laptop heights */
@@ -3401,14 +3405,16 @@ input[type='search'] {
   .nuke-blast-compose {
     top: 56%;
     width: min(64vw, 420px);
-    gap: clamp(4px, 1vh, 10px);
+    gap: 0;
     max-height: min(68vh, 480px);
   }
-  .nuke-skull-wrap {
+  .nuke-skull-wrap,
+  .nuke-skull {
     max-height: min(32vh, 220px);
   }
   .nuke-chrome-wrap {
     width: min(100%, 380px);
+    margin-top: -2px;
   }
 }
 @media (max-height: 640px) {
@@ -3417,7 +3423,8 @@ input[type='search'] {
     width: min(58vw, 360px);
     max-height: min(64vh, 400px);
   }
-  .nuke-skull-wrap {
+  .nuke-skull-wrap,
+  .nuke-skull {
     max-height: min(28vh, 180px);
   }
 }
