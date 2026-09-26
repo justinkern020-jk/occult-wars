@@ -3,7 +3,7 @@ type Props = {
 };
 
 const POINTS = [
-  'Each side owns one stronghold. It banks 2 loyalty every rite and is always a deployment square. It also counts as a circle.',
+  'Each side owns one stronghold. It banks 2 resources every rite and is always a deployment square. It also counts as a circle.',
   'Deployment gates you hold, and your stronghold, are the only muster squares. A conquered node stays painted in your color and banks its seals, but you do not deploy on it.',
   'At the end of your rite, score 1 domination for every circle you hold. First to 60 wins.',
   'A card costs the one number printed on it. If the bank can pay that number, you may play it.',

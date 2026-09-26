@@ -112,7 +112,7 @@ export function MenuAtelier({
           <h1 className="menu-title">Occult Wars</h1>
           <p className="menu-lede">
             Six orders. One leaden hour. Cabals dual-Power — vitality and damage
-            as one number. Loyalty banks the muster.
+            as one number. Resources bank the muster.
           </p>
 
           <label className="menu-occultist">

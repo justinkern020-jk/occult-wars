@@ -2,7 +2,7 @@ import { useRef, type PointerEvent as ReactPointerEvent } from 'react';
 import type { Card } from '../game/types';
 import { CardArt } from './CardArt';
 
-/** Compact hand strip card — Loyalty left, Power right (Cabals). */
+/** Compact hand strip card — Resources left, Power right (Cabals). */
 export function HandCard({
   card,
   selected,
@@ -91,9 +91,9 @@ export function HandCard({
         clearPress();
         startPos.current = null;
       }}
-      title={`${card.name} · Loyalty ${card.cost}${card.power != null ? ` · Power ${card.power}` : ''} · ${card.kind}${canDrag ? ' · drag to muster' : ''} · double-tap to inspect`}
+      title={`${card.name} · Resources ${card.cost}${card.power != null ? ` · Power ${card.power}` : ''} · ${card.kind}${canDrag ? ' · drag to muster' : ''} · double-tap to inspect`}
     >
-      <span className="hand-card-pip hand-card-loyalty" title="Loyalty">
+      <span className="hand-card-pip hand-card-loyalty" title="Resources">
         {card.cost}
       </span>
       <CardArt name={card.name} />

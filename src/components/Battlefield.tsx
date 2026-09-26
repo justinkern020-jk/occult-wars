@@ -744,7 +744,7 @@ export function Battlefield({
       const card = hand[acting][handIndex];
       if (!card || (card.kind !== 'rite' && card.kind !== 'device')) return false;
       if (loyalty[acting] < card.cost) {
-        pushLog(`Not enough loyalty (need ${card.cost}).`);
+        pushLog(`Not enough resources (need ${card.cost}).`);
         return false;
       }
       if (!card.effect) {
@@ -841,7 +841,7 @@ export function Battlefield({
         return false;
       }
       if (loyalty[acting] < card.cost) {
-        pushLog(`Not enough loyalty (need ${card.cost}).`);
+        pushLog(`Not enough resources (need ${card.cost}).`);
         return false;
       }
       const delayed = hasKeyword(card, 'delay');
@@ -1527,7 +1527,7 @@ export function Battlefield({
       const card = hand[inputSide][handIndex];
       if (!card || card.kind !== 'unit' || card.power == null) return;
       if (card.cost > loyalty[inputSide]) {
-        pushLog(`Not enough loyalty (need ${card.cost}).`);
+        pushLog(`Not enough resources (need ${card.cost}).`);
         return;
       }
       dragHandRef.current = handIndex;
@@ -1579,14 +1579,14 @@ export function Battlefield({
   return (
     <section className="battlefield" data-testid="battlefield" data-mode={mode} data-phase={phase}>
       <header className="bf-hud">
-        <div className="bf-scores" aria-label="Loyalty and Domination">
+        <div className="bf-scores" aria-label="Resources and Domination">
           <dl className="score-chip is-ally" data-testid="score-azure">
             <dt>Azure · {blueFaction.split(' ').slice(-1)[0]}</dt>
             <dd>
-              <strong className="score-loyalty" title="Loyalty bank — spend to muster">
+              <strong className="score-loyalty" title="Resources — spend to muster units and cast rites">
                 {loyalty.blue}
               </strong>
-              <span>loyalty</span>
+              <span>resources</span>
               <em title="Domination score">
                 {domination.blue}
                 <span className="score-cap"> / {DOMINATION_WIN}</span>
@@ -1617,10 +1617,10 @@ export function Battlefield({
           <dl className="score-chip is-enemy" data-testid="score-crimson">
             <dt>Crimson · {redFaction.split(' ').slice(-1)[0]}</dt>
             <dd>
-              <strong className="score-loyalty" title="Loyalty bank — spend to muster">
+              <strong className="score-loyalty" title="Resources — spend to muster units and cast rites">
                 {loyalty.red}
               </strong>
-              <span>loyalty</span>
+              <span>resources</span>
               <em title="Domination score">
                 {domination.red}
                 <span className="score-cap"> / {DOMINATION_WIN}</span>
@@ -1656,7 +1656,7 @@ export function Battlefield({
               title={activeHero.text}
             >
               {activeHero.name}
-              {leaderUsed[inputSide] ? ' · spent' : ` · L${activeHero.cost}`}
+              {leaderUsed[inputSide] ? ' · spent' : ` · R${activeHero.cost}`}
             </button>
           )}
           <button
@@ -1924,7 +1924,7 @@ export function Battlefield({
           <i className="legend-jewels" aria-hidden /> Resource +2
         </li>
         <li>
-          <span className="key-coin key-loyalty">L</span> Loyalty (cost)
+          <span className="key-coin key-loyalty">R</span> Resources (cost)
         </li>
         <li>
           <span className="key-coin key-power">P</span> Power (combat)
@@ -1951,7 +1951,7 @@ export function Battlefield({
                   if (inputLocked) return;
                   if (isSpell) {
                     if (tooCostly) {
-                      pushLog(`Not enough loyalty (need ${card.cost}).`);
+                      pushLog(`Not enough resources (need ${card.cost}).`);
                       return;
                     }
                     if (effectNeedsAim(card.effect, card.aim)) {

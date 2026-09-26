@@ -12,7 +12,7 @@ export interface BoardUnit {
   power: number;
   /** Printed Power (for hurt styling). */
   maxPower: number;
-  /** Loyalty / muster cost — NOT combat Power. */
+  /** Resources / muster cost — NOT combat Power. */
   loyalty: number;
   keywords: string[];
   moved?: boolean;
@@ -27,7 +27,7 @@ export interface BoardUnit {
 
 /**
  * Battlefield token.
- * Coins match tarot card layout (Loyalty left · Power right).
+ * Coins match tarot card layout (Resources left · Power right).
  * Rendered as a div (not a nested <button>) so tile taps work reliably.
  */
 export function UnitCoin({
@@ -78,11 +78,11 @@ export function UnitCoin({
         e.stopPropagation();
         onInspect();
       }}
-      title={`${unit.name} · Power ${unit.power} · Loyalty ${unit.loyalty}${veilTitle} · tap to move · double-tap to inspect`}
-      aria-label={`${unit.name}, Power ${unit.power}, Loyalty ${unit.loyalty}${veiled ? ', veiled and untargetable' : ''}`}
+      title={`${unit.name} · Power ${unit.power} · Resources ${unit.loyalty}${veilTitle} · tap to move · double-tap to inspect`}
+      aria-label={`${unit.name}, Power ${unit.power}, Resources ${unit.loyalty}${veiled ? ', veiled and untargetable' : ''}`}
     >
       <CardArt name={unit.name} className="stone-face" />
-      <span className="coin-stat coin-loyalty" title="Loyalty · muster cost">
+      <span className="coin-stat coin-loyalty" title="Resources · muster cost">
         <abbr>L</abbr>
         {unit.loyalty}
       </span>

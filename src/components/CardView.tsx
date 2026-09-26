@@ -28,7 +28,7 @@ export type CardViewProps = {
 
 /**
  * Rare trading-card / tarot face.
- * Left pip = Loyalty (muster). Right pip = Cabals Power for units.
+ * Left pip = Resources (muster). Right pip = Cabals Power for units.
  * Never show legacy ATK/HP on the pretty face.
  */
 export function CardView({
@@ -46,7 +46,7 @@ export function CardView({
   const body = (
     <>
       <header className="tarot-banner">
-        <span className="tarot-pip tarot-pip-l" title="Loyalty · muster cost">
+        <span className="tarot-pip tarot-pip-l" title="Resources · muster cost">
           <abbr>L</abbr>
           {card.cost}
         </span>
@@ -86,7 +86,7 @@ export function CardView({
             {KIND_LABEL[card.kind] ?? card.kind}
             {' · '}
             {RARITY_LABEL[card.rarity] ?? card.rarity}
-            {card.cost > 0 ? ` · Loyalty ${card.cost}` : ''}
+            {card.cost > 0 ? ` · Resources ${card.cost}` : ''}
           </p>
 
           {card.keywords.length > 0 && (
