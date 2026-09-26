@@ -573,8 +573,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Leader. Once in a sitting: pay 2. Return the last rite or device in your discard to your hand. If there is none, draw 1.",
-    "quote": "We now return you to the war, already in progress.",
-    "quoted": "The Night Announcer",
+    "quote": "War loves to come like a thief in the night; professions of eternal amity provide the night.",
+    "quoted": "Ambrose Bierce, The Devil's Dictionary",
     "leaderPower": {
       "op": "playback"
     }
@@ -609,8 +609,8 @@
       "canvass"
     ],
     "text": "Canvass. When it conquers a street, it also claims one adjacent neutral street.",
-    "quote": "Knock twice. The third knock is already inside.",
-    "quoted": "Precinct ghost",
+    "quote": "Once upon a midnight dreary, while I pondered, weak and weary.",
+    "quoted": "Edgar Allan Poe, The Raven",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -883,8 +883,8 @@
       "ranged"
     ],
     "text": "Cryptid. Ranged Strike. The shot is a voice. It reaches 2 tiles and is not answered.",
-    "quote": "Someone is broadcasting from inside the wall.",
-    "quoted": "Dead air",
+    "quote": "Deep into that darkness peering, long I stood there, wondering, fearing.",
+    "quoted": "Edgar Allan Poe, The Raven",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 2
@@ -1391,7 +1391,9 @@
       "op": "jab",
       "pay": 1,
       "aim": true
-    }
+    },
+    "quote": "The dreams are all right enough, but the art of interpreting is lost.",
+    "quoted": "Mark Twain"
   },
   {
     "id": "devoted_clerk",
@@ -1525,7 +1527,9 @@
     "text": "Untargetable. Does not conquer. Combat and ranged strikes pass over the penitent. When it steps onto an enemy, that enemy returns to its owner's hand.",
     "power": 3,
     "legacyAttack": 3,
-    "legacyHealth": 3
+    "legacyHealth": 3,
+    "quote": "For the love of God, Montresor!",
+    "quoted": "Edgar Allan Poe, The Cask of Amontillado"
   },
   {
     "id": "ridden_guard",
@@ -1646,7 +1650,9 @@
     "aim": true,
     "effect": {
       "op": "lock"
-    }
+    },
+    "quote": "Reality, n. The dream of a mad philosopher.",
+    "quoted": "Ambrose Bierce, The Devil's Dictionary"
   },
   {
     "id": "lapse_of_nerve",
@@ -1738,7 +1744,9 @@
     "text": "A detective who took the wrong green shortcut. One blow. One wound.",
     "power": 1,
     "legacyAttack": 1,
-    "legacyHealth": 1
+    "legacyHealth": 1,
+    "quote": "Existence, n. A transient, horrible, fantastic dream, wherein is nothing yet all things do seem.",
+    "quoted": "Ambrose Bierce, The Devil's Dictionary"
   },
   {
     "id": "thorn_sprig",
@@ -2153,7 +2161,9 @@
     "text": "When deployed, the opponent loses 2 loyalty.",
     "power": 2,
     "legacyAttack": 1,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "Cynic, n. A blackguard whose faulty vision sees things as they are, not as they ought to be.",
+    "quoted": "Ambrose Bierce, The Devil's Dictionary"
   },
   {
     "id": "duke_of_the_crucible",
@@ -2224,7 +2234,9 @@
       "aim": true,
       "once": true,
       "foe": true
-    }
+    },
+    "quote": "Don't part with your illusions. When they are gone you may still exist, but you have ceased to live.",
+    "quoted": "Mark Twain"
   },
   {
     "id": "athanor_adept",
@@ -2449,7 +2461,9 @@
     "aim": true,
     "effect": {
       "op": "trepan"
-    }
+    },
+    "quote": "Ghost, n. The outward and visible sign of an inward fear.",
+    "quoted": "Ambrose Bierce, The Devil's Dictionary"
   },
   {
     "id": "the_thirteenth_chair",
@@ -2539,7 +2553,9 @@
     "text": "Fast Attack. She strikes before the answering blade. If the other figure falls, it never touches her.",
     "power": 2,
     "legacyAttack": 2,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "The boundaries which divide Life from Death are at best shadowy and vague.",
+    "quoted": "Edgar Allan Poe, The Premature Burial"
   },
   {
     "id": "speakeasy_shade",
@@ -2571,7 +2587,9 @@
     "text": "While this unit stands, your bank yields +1 loyalty. She reads the till, not the future.",
     "power": 2,
     "legacyAttack": 1,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "The spirits of the dead hallow a house, for me.",
+    "quoted": "Mark Twain"
   },
   {
     "id": "tommy_wight",
@@ -2629,7 +2647,9 @@
     "text": "Cigar, TNT, and a funeral that has not happened yet. He closes.",
     "power": 4,
     "legacyAttack": 4,
-    "legacyHealth": 4
+    "legacyHealth": 4,
+    "quote": "From a proud tower in the town, Death looks gigantically down.",
+    "quoted": "Edgar Allan Poe, The City in the Sea"
   },
   {
     "id": "midnight_don",
@@ -2661,7 +2681,9 @@
     "effect": {
       "op": "smite",
       "n": 3
-    }
+    },
+    "quote": "Quoth the Raven, \"Nevermore.\"",
+    "quoted": "Edgar Allan Poe, The Raven"
   },
   {
     "id": "the_black_handshake",
@@ -2844,7 +2866,9 @@
     "text": "When another unit you control is destroyed, bank +1 loyalty. The spirit phone rings for the dead.",
     "power": 2,
     "legacyAttack": 1,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "I am the ghost of the Cardiff Giant. I can have no rest, no peace, till they have given that poor body burial again.",
+    "quoted": "Mark Twain, A Ghost Story"
   },
   {
     "id": "lily_dale_voice",
@@ -2954,7 +2978,9 @@
     "text": "Adjacent enemy units cannot move or attack. The Tennessee haunting sits on the tile and will not let them leave.",
     "power": 4,
     "legacyAttack": 3,
-    "legacyHealth": 4
+    "legacyHealth": 4,
+    "quote": "But who prays for Satan? Who, in eighteen centuries, has had the common humanity to pray for the one sinner that needed it most?",
+    "quoted": "Mark Twain"
   },
   {
     "id": "sleepy_hollow_rider",
@@ -2986,7 +3012,9 @@
     "text": "Ranged Strike. A shot reaches 2 tiles and is not answered. It does not have to shoot. Stepping into an adjacent enemy is an ordinary fight.",
     "power": 3,
     "legacyAttack": 3,
-    "legacyHealth": 3
+    "legacyHealth": 3,
+    "quote": "Birth, n. The first and direst of all disasters.",
+    "quoted": "Ambrose Bierce, The Devil's Dictionary"
   },
   {
     "id": "thunderbird",
@@ -3032,7 +3060,9 @@
     "effect": {
       "op": "smite",
       "n": 3
-    }
+    },
+    "quote": "Grave, n. A place in which the dead are laid to await the coming of the medical student.",
+    "quoted": "Ambrose Bierce, The Devil's Dictionary"
   },
   {
     "id": "hot_foot_powder",
@@ -3093,7 +3123,9 @@
     "effect": {
       "op": "draw",
       "n": 3
-    }
+    },
+    "quote": "I do not fear death. I had been dead for billions and billions of years before I was born, and had not suffered the slightest inconvenience from it.",
+    "quoted": "Mark Twain"
   },
   {
     "id": "mojo_hand",
@@ -3291,7 +3323,9 @@
     "text": "Cryptid. Fast Attack. He clears the roof and lands the blow before theirs.",
     "power": 3,
     "legacyAttack": 3,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "The fear of death follows from the fear of life. A man who lives fully is prepared to die at any time.",
+    "quoted": "Mark Twain"
   },
   {
     "id": "mirror_hag",
@@ -3308,7 +3342,9 @@
     "text": "Cryptid. Untargetable. Does not conquer. Combat and ranged strikes pass over her. If she steps onto an enemy, that enemy returns to hand.",
     "power": 3,
     "legacyAttack": 2,
-    "legacyHealth": 3
+    "legacyHealth": 3,
+    "quote": "All that we see or seem is but a dream within a dream.",
+    "quoted": "Edgar Allan Poe, A Dream Within a Dream"
   },
   {
     "id": "grave_ape",
@@ -3325,7 +3361,9 @@
     "text": "Cryptid. After it strikes and lives, it gains +2 power. The thing that walks the potter's field.",
     "power": 4,
     "legacyAttack": 4,
-    "legacyHealth": 4
+    "legacyHealth": 4,
+    "quote": "Death is a dignitary who when he comes announced is to be received with formal manifestations of respect, even by those most familiar with him.",
+    "quoted": "Ambrose Bierce, An Occurrence at Owl Creek Bridge"
   },
   {
     "id": "pale_passenger",
@@ -3372,7 +3410,7 @@
     "cost": 0,
     "oath": 0,
     "keywords": [],
-    "text": "Master of alchemy, esoterism, occultism, the supernatural, philosophy, science & the paranormal. If that is not impressive enough \u2014 he has a thermonuclear device. Once in a sitting: The gadget answers \u2014 every unit on the field is unmade.",
+    "text": "Master of alchemy, esoterism, occultism, the supernatural, philosophy, science & the paranormal. If that is not impressive enough — he has a thermonuclear device. Once in a sitting: The gadget answers — every unit on the field is unmade.",
     "quote": "What we understand about modern physics collapses into a realm of ghost & shadows on the quantum level... you are but children with a loaded gun.",
     "quoted": "Justin Kern, Life As I See It, 2029",
     "power": 4,
@@ -3394,7 +3432,7 @@
     "oath": 0,
     "keywords": [],
     "text": "Every unit you control gains +5 power. The South Haven siren answers.",
-    "quote": "All units \u2014 occult disturbance. Sirens up. Something older than the precinct is on the line.",
+    "quote": "All units — occult disturbance. Sirens up. Something older than the precinct is on the line.",
     "quoted": "South Haven PD, Channel 3",
     "effect": {
       "op": "empower_all",
