@@ -3098,6 +3098,38 @@ input[type='search'] {
   78% { opacity: 0.9; transform: translate(-50%, -46%) scale(1.06); }
   100% { opacity: 0; transform: translate(-50%, -44%) scale(1.1); }
 }
+
+.nuke-chrome-wrap {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  bottom: 6%;
+  transform: translateX(-50%);
+  width: min(92vw, 720px);
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  animation: nuke-chrome-life 5.2s ease-in-out forwards;
+  filter: drop-shadow(0 0 14px rgba(255, 180, 40, 0.55))
+    drop-shadow(0 8px 22px rgba(0, 0, 0, 0.85));
+}
+.nuke-chrome-header {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+  background: transparent;
+}
+@keyframes nuke-chrome-life {
+  0% { opacity: 0; transform: translateX(-50%) scale(0.7) translateY(24px); }
+  10% { opacity: 1; transform: translateX(-50%) scale(1.08) translateY(0); }
+  18% { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
+  72% { opacity: 1; transform: translateX(-50%) scale(1.02) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) scale(1.05) translateY(-8px); }
+}
+
 .nuke-legend {
   position: absolute;
   z-index: 5;

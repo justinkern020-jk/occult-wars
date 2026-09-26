@@ -612,7 +612,14 @@ export function MushroomCloud({ active, onDone }: Props) {
           draggable={false}
         />
       </div>
-      <p className="nuke-legend">The gadget answers</p>
+      <div className="nuke-chrome-wrap" data-testid="nuke-chrome-header">
+        <img
+          className="nuke-chrome-header"
+          src="/assets/vfx/nukem-chrome-header.png?v=1"
+          alt="NUKE'M"
+          draggable={false}
+        />
+      </div>
     </div>
   );
 }
