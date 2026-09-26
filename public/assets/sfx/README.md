@@ -12,8 +12,7 @@ Layered CC0 cinematic boom (all Creative Commons 0):
 - Plus a short generated sub-bass rumble (original)
 
 ## nukem.mp3
-Source: Microsoft Edge TTS `en-US-EricNeural` (synthetic), pitched down and slowed for a military cadence shout of “Nuke! Em!”, then ffmpeg grit/EQ/loudnorm. Not a human recording.
-
+Source: Edge TTS `en-US-GuyNeural` barked drill-sergeant “NUKE EM!” (pitched down, clipped radio grit). Synthetic.
 ## cop-siren.mp3
 - **Source:** [AMB_Siren_Police_Approach_001.wav](https://freesound.org/people/conleec/sounds/159738/) by [conleec](https://freesound.org/people/conleec/)
 - **License:** Creative Commons 0 (CC0) — real field recording of a police siren

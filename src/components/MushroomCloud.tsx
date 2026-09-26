@@ -607,7 +607,7 @@ export function MushroomCloud({ active, onDone }: Props) {
       <div className="nuke-skull-wrap" data-testid="nuke-skull">
         <img
           className="nuke-skull"
-          src="/assets/vfx/skull-crossbones.png?v=2"
+          src="/assets/vfx/skull-crossbones.png?v=3"
           alt=""
           draggable={false}
         />
