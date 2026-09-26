@@ -1,5 +1,3 @@
 battlefield-mystical.mp3 — Occult Wars match bed
-  Melancholy piano BGM (CC0) — https://opengameart.org/content/melancholy-piano-bgm
-  Soft darkened pad underlay from Ancient Mysteries (CC0) — Sperry Lion
-  https://opengameart.org/content/ancient-mysteries
-  Mixed quieter for combat; no theremin / lead siren.
+  Melancholy piano BGM (CC0) https://opengameart.org/content/melancholy-piano-bgm
+  Clean piano only (soft reverb). No underlays that fight the key.

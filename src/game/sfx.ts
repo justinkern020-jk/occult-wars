@@ -131,7 +131,7 @@ export function windChimeSfx(): Promise<void> {
   unlockAudio();
   return new Promise((resolve) => {
     const a = new Audio('/assets/audio/sfx/wind-chime.mp3');
-    a.volume = 0.65;
+    a.volume = 0.38;
     const done = () => resolve();
     a.addEventListener('ended', done, { once: true });
     a.addEventListener('error', done, { once: true });
@@ -310,7 +310,7 @@ function startMatchTheme(): { stop: () => void } {
     });
     // Gentle fade-in after chimes
     const fadeMs = 1600;
-    const target = 0.42;
+    const target = 0.34;
     const t0 = performance.now();
     const tick = () => {
       if (stopped) return;
