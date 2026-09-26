@@ -276,15 +276,15 @@ function loopPhrase(
 }
 
 /**
- * Match theme: looping mystical occult bed (drones, Phrygian organ, glass bells,
- * theremin lead) — not the old thin sine pulse. Modest volume so SFX cut through.
+ * Match theme: quiet mystical piano bed (+ soft pad). No theremin / siren lead.
+ * Modest volume so combat SFX stay clear.
  */
 function startMatchTheme(): { stop: () => void } {
   unlockAudio();
   let fallbackStop: (() => void) | null = null;
   const a = new Audio('/assets/audio/music/battlefield-mystical.mp3');
   a.loop = true;
-  a.volume = 0.38;
+  a.volume = 0.42;
   void a.play().catch(() => {
     fallbackStop = startMatchThemeFallback().stop;
   });
@@ -297,24 +297,20 @@ function startMatchTheme(): { stop: () => void } {
   };
 }
 
-/** Richer WebAudio fallback — Phrygian pad + bell + drone (not the old pulse). */
+/** Soft piano-like WebAudio fallback if the mp3 fails. */
 function startMatchThemeFallback(): { stop: () => void } {
   const c = getAC();
   if (!c) return { stop: () => {} };
-  const step = 2.2;
-  // C# Phrygian-ish melody
-  const melody = [61, 62, 64, 68, 66, 64, 61, 59];
-  const g = 0.022;
+  const step = 2.8;
+  const melody = [60, 63, 67, 65, 63, 60, 58, 55];
+  const g = 0.016;
   return loopPhrase((t0) => {
-    noteAt(c, t0, midiHz(37), step * 8 * 0.98, g * 1.4);
-    noteAt(c, t0, midiHz(44), step * 8 * 0.98, g);
-    noteAt(c, t0, midiHz(49), step * 4 * 0.98, g * 0.7);
-    noteAt(c, t0 + step * 4, midiHz(48), step * 4 * 0.98, g * 0.7);
-    // high glass
-    noteAt(c, t0 + step * 2, midiHz(73), step * 2.5, g * 0.45);
-    noteAt(c, t0 + step * 6, midiHz(80), step * 2.2, g * 0.35);
+    noteAt(c, t0, midiHz(36), step * 8 * 0.98, g);
+    noteAt(c, t0, midiHz(43), step * 8 * 0.98, g * 0.7);
+    noteAt(c, t0, midiHz(48), step * 4 * 0.98, g * 0.5);
+    noteAt(c, t0 + step * 4, midiHz(46), step * 4 * 0.98, g * 0.5);
     melody.forEach((m, i) => {
-      noteAt(c, t0 + i * step, midiHz(m), step * 0.95, g * 0.9);
+      noteAt(c, t0 + i * step, midiHz(m), step * 1.1, g * 0.75);
     });
     return step * 8;
   });
