@@ -231,7 +231,7 @@ export function metalRiffSfx() {
  */
 export function nukemVoiceSfx() {
   unlockAudio();
-  const a = new Audio('/assets/sfx/nukem.mp3?v=1');
+  const a = new Audio('/assets/sfx/nukem.mp3?v=2');
   a.volume = 0.92;
   void a.play().catch(() => {
     // Web Speech fallback if mp3 blocked

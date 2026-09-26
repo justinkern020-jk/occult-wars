@@ -12,9 +12,7 @@ Layered CC0 cinematic boom (all Creative Commons 0):
 - Plus a short generated sub-bass rumble (original)
 
 ## nukem.mp3
-- **Source:** Synthetic TTS — Microsoft Edge neural voice `en-US-GuyNeural` via edge-tts saying "Nuke em!"
-- **License:** Original synthesis for this project (not a third-party sample pack)
-- **Processing:** Silence trim, EQ, compression, soft-clip grit, loudness-normalize (ffmpeg). Cache `?v=1`.
+Source: Microsoft Edge TTS `en-US-EricNeural` (synthetic), pitched down and slowed for a military cadence shout of “Nuke! Em!”, then ffmpeg grit/EQ/loudnorm. Not a human recording.
 
 ## cop-siren.mp3
 - **Source:** [AMB_Siren_Police_Approach_001.wav](https://freesound.org/people/conleec/sounds/159738/) by [conleec](https://freesound.org/people/conleec/)
