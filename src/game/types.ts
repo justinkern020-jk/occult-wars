@@ -4,6 +4,19 @@ export type CardKind = 'unit' | 'rite' | 'device' | 'hero';
 
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'patron';
 
+
+/** On-board unit activated ability (from cards.json `act`). */
+export type ActSpec = {
+  op: string;
+  n?: number;
+  pay?: number;
+  aim?: boolean;
+  /** Once in a sitting (not once per rite). */
+  once?: boolean;
+  /** Copy must name a foe. */
+  foe?: boolean;
+};
+
 export interface Card {
   id: string;
   name: string;
@@ -23,7 +36,8 @@ export interface Card {
   legacyHealth?: number;
   aim?: boolean;
   effect?: { op: string; n?: number };
-  act?: Record<string, unknown>;
+  /** On-board activated ability (Sacrifice / Exhaust / Once each rite / Once in a sitting). */
+  act?: ActSpec;
   leaderPower?: { op: string; n?: number };
   death?: number;
   deathBank?: number;

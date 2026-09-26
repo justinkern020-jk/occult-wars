@@ -4,10 +4,11 @@
  */
 
 import { applyDamage, isDestroyed } from './combat';
-import { hasKeyword } from './keywords';
+import { hasKeyword, manhattan } from './keywords';
+import { cardById } from '../data/catalog';
 import { LOYALTY_CAP, HAND_CAP, applyBank } from './scoring';
 import type { Side } from './maps';
-import type { Card } from './types';
+import type { ActSpec, Card } from './types';
 
 export type EffectUnit = {
   uid: string;
@@ -27,11 +28,16 @@ export type EffectUnit = {
   shutter?: boolean;
   silenced?: boolean;
   powder?: boolean;
+  /** Once-each-rite activated ability already called. */
+  used?: boolean;
+  /** Once-in-a-sitting activated ability already called. */
+  once?: boolean;
 };
 
 export type EffectCtx = {
   side: Side;
   loyalty: { blue: number; red: number };
+  domination: { blue: number; red: number };
   hand: { blue: Card[]; red: Card[] };
   deck: { blue: Card[]; red: Card[] };
   discard: { blue: Card[]; red: Card[] };
@@ -424,7 +430,7 @@ export function resolveLeaderPower(
   if (!power) return 'This leader has no working.';
   const side = ctx.side;
   const cost = leader.cost ?? 0;
-  if (ctx.loyalty[side] < cost) return `Not enough loyalty (need ${cost}).`;
+  if (ctx.loyalty[side] < cost) return `Not enough resources (need ${cost}).`;
 
   const target = targetUid ? ctx.units[targetUid] : undefined;
   const op = power.op;
@@ -575,6 +581,246 @@ export function effectNeedsAim(effect?: EffectSpec | null, aim?: boolean): boole
     'destroy_refund',
     'trepan',
   ].includes(effect.op);
+}
+
+
+/** True if this act needs the player to name a unit (or tile) target. */
+export function actNeedsAim(act?: ActSpec | null): boolean {
+  if (!act) return false;
+  if (act.aim) return true;
+  return [
+    'jab',
+    'once-nick',
+    'once-sting',
+    'sacrifice-hit',
+    'bolster',
+    'once-power',
+    'tap-mend',
+    'once-tough',
+    'sacrifice-fast',
+    'recall',
+    'copy',
+  ].includes(act.op);
+}
+
+/**
+ * Resolve an on-board unit activated ability (Sacrifice / Exhaust / Once…).
+ * Mutates ctx. Returns error string or null on success.
+ * Port of grok `It()`, adapted to Cabals dual-Power.
+ */
+export function resolveActivatedAbility(
+  ctx: EffectCtx,
+  sourceUid: string,
+  targetUid?: string | null,
+): string | null {
+  const source = ctx.units[sourceUid];
+  if (!source) return 'That unit is not on the field.';
+  const card = cardById(source.cardId);
+  const act = card?.act;
+  if (!card || !act) return 'That unit has no power to call.';
+  if (source.side !== ctx.side) return 'That unit will not heed you.';
+  if (source.sick) return 'That unit cannot call a power.';
+  if (act.once ? source.once : source.used) {
+    return 'That power has already been called.';
+  }
+  const pay = act.pay ?? 0;
+  if (pay > ctx.loyalty[ctx.side]) {
+    return `Not enough resources (need ${pay}).`;
+  }
+  const target = targetUid ? ctx.units[targetUid] : undefined;
+  if (actNeedsAim(act) && !target) return 'Name a unit.';
+  if (target && hasKeyword(target, 'veiled') && target.uid !== source.uid) {
+    return 'That unit cannot be named.';
+  }
+  const srcPos = findPos(ctx, source.uid);
+  if (!srcPos) return 'The unit is not on the field.';
+
+  if ((act.op === 'jab' || act.op === 'sacrifice-hit') && target) {
+    const tPos = findPos(ctx, target.uid);
+    if (!tPos || manhattan(srcPos.r, srcPos.c, tPos.r, tPos.c) !== 1) {
+      return 'Name an adjacent unit.';
+    }
+  }
+  if (act.op === 'once-sting' && target && target.power < 2) {
+    return 'Name a unit with power 2 or greater.';
+  }
+  if (act.op === 'recall' && target && target.side !== source.side) {
+    return 'Name a unit you own.';
+  }
+  if (
+    act.op === 'sacrifice-fast' &&
+    (!target || target.side !== source.side || target.uid === source.uid)
+  ) {
+    return 'Name another unit you own.';
+  }
+  if (act.op === 'copy' && act.foe && target && target.side === source.side) {
+    return 'Name an enemy unit.';
+  }
+  if (act.op === 'copy' && !act.foe && target?.uid === source.uid) {
+    return 'Name another unit.';
+  }
+
+  ctx.loyalty[ctx.side] -= pay;
+
+  const markUsed = () => {
+    const u = ctx.units[source.uid];
+    if (!u) return;
+    if (act.once) u.once = true;
+    else u.used = true;
+  };
+
+  if (act.op === 'wail') {
+    const adj = neighborsOf(ctx, srcPos.r, srcPos.c).map((u) => u.uid);
+    for (const uid of adj) {
+      if (ctx.units[uid]) destroyUnit(ctx, uid);
+    }
+    pushLog(ctx, `${card.name} screams. The adjacent circles are emptied.`);
+    markUsed();
+    return null;
+  }
+
+  if (
+    act.op === 'jab' ||
+    act.op === 'once-nick' ||
+    act.op === 'once-sting' ||
+    act.op === 'sacrifice-hit'
+  ) {
+    if (!target) return 'Name a unit.';
+    const raw = act.op === 'sacrifice-hit' ? (act.n ?? 3) : 1;
+    const dmg = dealTo(ctx, target, raw);
+    pushLog(ctx, `${card.name} deals ${dmg} to ${target.name}.`);
+    if (target.power <= 0) destroyUnit(ctx, target.uid);
+    if (act.op === 'once-sting') {
+      source.moved = true;
+      source.attacked = true;
+    }
+    if (act.op === 'sacrifice-hit') destroyUnit(ctx, source.uid);
+    markUsed();
+    return null;
+  }
+
+  if (act.op === 'bolster' || act.op === 'once-power' || act.op === 'self-power') {
+    const who = act.op === 'self-power' ? source : target;
+    if (!who) return 'Name a unit.';
+    const gain = act.n ?? 1;
+    who.power += gain;
+    who.maxPower += gain;
+    pushLog(ctx, `${who.name} gains +${gain} power.`);
+    markUsed();
+    return null;
+  }
+
+  if (act.op === 'tap-bank') {
+    source.moved = true;
+    source.attacked = true;
+    const n = act.n ?? 1;
+    bankLoyalty(ctx, source.side, n);
+    pushLog(ctx, `${card.name} exhausts and banks ${n}.`);
+    markUsed();
+    return null;
+  }
+
+  if (act.op === 'tap-crown') {
+    source.moved = true;
+    source.attacked = true;
+    ctx.domination[source.side] += 1;
+    pushLog(
+      ctx,
+      `${card.name} exhausts. Domination ${ctx.domination[source.side]}.`,
+    );
+    markUsed();
+    return null;
+  }
+
+  if (act.op === 'tap-mend') {
+    if (!target) return 'Name a unit.';
+    source.moved = true;
+    source.attacked = true;
+    target.power += 1;
+    target.maxPower += 1;
+    pushLog(ctx, `${target.name} gains 1 health.`);
+    markUsed();
+    return null;
+  }
+
+  if (act.op === 'tap-draw') {
+    source.moved = true;
+    source.attacked = true;
+    drawCards(ctx, source.side, 1);
+    pushLog(ctx, `${card.name} exhausts and draws.`);
+    markUsed();
+    return null;
+  }
+
+  if (act.op === 'once-tough') {
+    if (!target) return 'Name a unit.';
+    target.tough = true;
+    if (!target.keywords.includes('tough')) {
+      target.keywords = [...target.keywords, 'tough'];
+    }
+    pushLog(ctx, `${target.name} gains Toughness.`);
+    markUsed();
+    return null;
+  }
+
+  if (act.op === 'sacrifice-bank') {
+    const n = act.n ?? 3;
+    const name = source.name;
+    destroyUnit(ctx, source.uid);
+    bankLoyalty(ctx, ctx.side, n);
+    pushLog(ctx, `${name} is sacrificed. ${n} resources are banked.`);
+    return null;
+  }
+
+  if (act.op === 'sacrifice-fast') {
+    if (!target) return 'Name a unit.';
+    target.fast = true;
+    if (!target.keywords.includes('fast')) {
+      target.keywords = [...target.keywords, 'fast'];
+    }
+    destroyUnit(ctx, source.uid);
+    pushLog(ctx, `${target.name} gains Fast Attack.`);
+    return null;
+  }
+
+  if (act.op === 'recall') {
+    if (!target) return 'Name a unit.';
+    const owner = target.side;
+    const name = target.name;
+    const def = cardById(target.cardId);
+    const pos = findPos(ctx, target.uid);
+    if (pos) ctx.board[pos.r][pos.c] = null;
+    delete ctx.units[target.uid];
+    const bounced: Card = def
+      ? { ...def }
+      : {
+          id: target.cardId,
+          name,
+          faction: '',
+          kind: 'unit',
+          rarity: 'common',
+          cost: 0,
+          oath: 0,
+          keywords: [],
+          text: '',
+        };
+    if (ctx.hand[owner].length < HAND_CAP) ctx.hand[owner].push(bounced);
+    else ctx.discard[owner].push(bounced);
+    pushLog(ctx, `${name} is returned to hand.`);
+    markUsed();
+    return null;
+  }
+
+  if (act.op === 'copy') {
+    if (!target) return 'Name a unit.';
+    source.power = target.power;
+    source.maxPower = target.power;
+    pushLog(ctx, `${card.name} takes on the power of ${target.name}.`);
+    markUsed();
+    return null;
+  }
+
+  return 'That power does not answer.';
 }
 
 export function leaderNeedsAim(leader: Card): boolean {

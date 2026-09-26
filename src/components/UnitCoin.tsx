@@ -23,6 +23,10 @@ export interface BoardUnit {
   shutter?: boolean;
   silenced?: boolean;
   powder?: boolean;
+  /** Once-each-rite activated ability already called. */
+  used?: boolean;
+  /** Once-in-a-sitting activated ability already called. */
+  once?: boolean;
 }
 
 /**

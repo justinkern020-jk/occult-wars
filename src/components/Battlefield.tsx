@@ -19,8 +19,10 @@ import {
   heroForFaction,
 } from '../game/deck';
 import {
+  actNeedsAim,
   effectNeedsAim,
   leaderNeedsAim,
+  resolveActivatedAbility,
   resolveEffect,
   resolveLeaderPower,
   type EffectCtx,
@@ -121,7 +123,8 @@ type MatchOver = { winner: Side; kind: VictoryKind };
 type AimMode =
   | null
   | { kind: 'cast'; handIndex: number; card: Card }
-  | { kind: 'leader' };
+  | { kind: 'leader' }
+  | { kind: 'act'; uid: string };
 
 function deckFor(
   faction: string,
@@ -362,6 +365,8 @@ export function Battlefield({
   >(() => null);
   const aiTimersRef = useRef<number[]>([]);
   const revealTimerRef = useRef<number | null>(null);
+  /** Resume AI (or other) after the player finishes reading a muster reveal. */
+  const revealResumeRef = useRef<(() => void) | null>(null);
   const [aim, setAim] = useState<AimMode>(null);
   const [leaderUsed, setLeaderUsed] = useState({ blue: false, red: false });
   const [passPrompt, setPassPrompt] = useState(false);
@@ -400,6 +405,7 @@ export function Battlefield({
             moved: false,
             attacked: false,
             powder: false,
+            used: false,
           };
           if (u.powder) {
             // was locked by foe — stays sick one rite then clears
@@ -642,12 +648,15 @@ export function Battlefield({
               shutter: u.shutter,
               silenced: u.silenced,
               powder: u.powder,
+              used: u.used,
+              once: u.once,
             };
           }
         }
       return {
         side: acting,
         loyalty: { ...loyalty },
+        domination: { ...domination },
         hand: {
           blue: [...hand.blue],
           red: [...hand.red],
@@ -666,7 +675,7 @@ export function Battlefield({
         log: [],
       };
     },
-    [board, loyalty, hand, deck, discard, control],
+    [board, loyalty, domination, hand, deck, discard, control],
   );
 
   const applyEffectCtx = useCallback(
@@ -695,10 +704,13 @@ export function Battlefield({
             shutter: u.shutter,
             silenced: u.silenced,
             powder: u.powder,
+            used: u.used,
+            once: u.once,
           };
         }
       setBoard(nextBoard);
       setLoyalty(ctx.loyalty);
+      setDomination(ctx.domination);
       setHand(ctx.hand);
       setDeck(ctx.deck);
       setDiscard(ctx.discard);
@@ -707,6 +719,7 @@ export function Battlefield({
         ...liveRef.current,
         board: nextBoard,
         loyalty: { ...ctx.loyalty },
+        domination: { ...ctx.domination },
         hand: {
           blue: [...ctx.hand.blue],
           red: [...ctx.hand.red],
@@ -827,6 +840,56 @@ export function Battlefield({
       pushLog,
     ],
   );
+
+  const callPower = useCallback(
+    (acting: Side, sourceUid: string, targetUid?: string): boolean => {
+      const found = findUnit(sourceUid);
+      if (!found) {
+        pushLog('That unit is not on the field.');
+        return false;
+      }
+      const def = cardById(found.unit.cardId);
+      const act = def?.act;
+      if (!def || !act) {
+        pushLog('That unit has no power to call.');
+        return false;
+      }
+      if (actNeedsAim(act) && !targetUid) {
+        setAim({ kind: 'act', uid: sourceUid });
+        setSelectedUnit(sourceUid);
+        setAttacker(null);
+        setSelectedHand(null);
+        pushLog(`Name a target for ${def.name}.`);
+        return false;
+      }
+      const ctx = buildEffectCtx(acting);
+      const err = resolveActivatedAbility(ctx, sourceUid, targetUid);
+      if (err) {
+        pushLog(err);
+        return false;
+      }
+      applyEffectCtx(ctx);
+      setAim(null);
+      setSelectedUnit(null);
+      setAttacker(null);
+      brassClick();
+      // Mid-rite domination from tap-crown etc.
+      if (ctx.domination[acting] >= DOMINATION_WIN) {
+        finishMatch(
+          acting,
+          'dominance',
+          `${sideLabel(acting)} reaches ${DOMINATION_WIN} domination.`,
+        );
+      }
+      return true;
+    },
+    [findUnit, buildEffectCtx, applyEffectCtx, pushLog, finishMatch],
+  );
+
+  const callPowerRef = useRef<
+    (acting: Side, sourceUid: string, targetUid?: string) => boolean
+  >(() => false);
+  callPowerRef.current = callPower;
 
   const deployTo = useCallback(
     (r: number, c: number, handIndex: number, acting: Side) => {
@@ -1251,23 +1314,30 @@ export function Battlefield({
         }
         return;
       }
+      if (aim.kind === 'act') {
+        if (here) {
+          callPower(inputSide, aim.uid, here.uid);
+        } else {
+          pushLog('Name a unit.');
+        }
+        return;
+      }
     }
 
     const here = unitAt(r, c);
 
-    // Tap own ready coin → select for move/strike (wins over hand deploy).
-    if (
-      !attacker &&
-      here &&
-      here.side === inputSide &&
-      !here.sick &&
-      !here.moved &&
-      !here.attacked
-    ) {
-      setSelectedUnit(here.uid);
-      setAttacker(here.uid);
-      setSelectedHand(null);
-      return;
+    // Tap own coin → select for move/strike and/or Call power.
+    if (!attacker && here && here.side === inputSide) {
+      const def = cardById(here.cardId);
+      const hasAct = !!def?.act;
+      const ready = !here.sick && !here.moved && !here.attacked;
+      if (ready || hasAct) {
+        setSelectedUnit(here.uid);
+        setAttacker(ready ? here.uid : null);
+        setSelectedHand(null);
+        setAim(null);
+        return;
+      }
     }
 
     if (selectedHand != null) {
@@ -1294,19 +1364,31 @@ export function Battlefield({
         strike(attacker, r, c);
         return;
       }
-      // Same-side coin: switch selection (or clear if already acted).
-      if (!here.sick && !here.moved && !here.attacked) {
-        setSelectedUnit(here.uid);
-        setAttacker(here.uid);
-      } else {
-        setAttacker(null);
-        setSelectedUnit(null);
-        pushLog(`${here.name} has already acted this rite.`);
+      // Same-side coin: switch selection (move-ready or Call power).
+      {
+        const def = cardById(here.cardId);
+        const hasAct = !!def?.act;
+        const ready = !here.sick && !here.moved && !here.attacked;
+        if (ready || hasAct) {
+          setSelectedUnit(here.uid);
+          setAttacker(ready ? here.uid : null);
+        } else {
+          setAttacker(null);
+          setSelectedUnit(null);
+          pushLog(`${here.name} has already acted this rite.`);
+        }
       }
       return;
     }
 
     if (here && here.side === inputSide) {
+      const def = cardById(here.cardId);
+      if (def?.act) {
+        setSelectedUnit(here.uid);
+        setAttacker(null);
+        setSelectedHand(null);
+        return;
+      }
       if (here.sick || here.moved || here.attacked) {
         pushLog(`${here.name} has already acted this rite.`);
       }
@@ -1345,16 +1427,30 @@ export function Battlefield({
       aiTimersRef.current.push(id);
     };
 
-    const showAiReveal = (card: Card) => {
+    const clearRevealTimer = () => {
       if (revealTimerRef.current != null) {
         window.clearTimeout(revealTimerRef.current);
         revealTimerRef.current = null;
       }
+    };
+
+    const finishReveal = () => {
+      clearRevealTimer();
+      setRevealCard(null);
+      const resume = revealResumeRef.current;
+      revealResumeRef.current = null;
+      if (!cancelled && resume) resume();
+    };
+
+    /** Hold the enemy muster card until tap-to-dismiss (or a long safety timeout). */
+    const showAiReveal = (card: Card, onDone: () => void) => {
+      clearRevealTimer();
+      revealResumeRef.current = onDone;
       setRevealCard(card);
       revealTimerRef.current = window.setTimeout(() => {
         revealTimerRef.current = null;
-        setRevealCard(null);
-      }, 1100);
+        finishReveal();
+      }, 14000);
     };
 
     const run = () => {
@@ -1362,6 +1458,8 @@ export function Battlefield({
       steps += 1;
       if (steps > 14) {
         setAiBusy(false);
+        clearRevealTimer();
+        revealResumeRef.current = null;
         setRevealCard(null);
         endRiteRef.current();
         return;
@@ -1382,6 +1480,10 @@ export function Battlefield({
                   keywords: u.keywords,
                   moved: !!u.moved || !!u.sick,
                   attacked: !!u.attacked || !!u.sick,
+                  sick: !!u.sick,
+                  used: !!u.used,
+                  once: !!u.once,
+                  cardId: u.cardId,
                   r,
                   c,
                 }
@@ -1407,13 +1509,32 @@ export function Battlefield({
         return;
       }
 
+      if (action.type === 'act') {
+        const src = findUnitRef.current(action.uid);
+        const card = src ? cardById(src.unit.cardId) : undefined;
+        const ok = callPowerRef.current(
+          AI_SIDE,
+          action.uid,
+          action.targetUid,
+        );
+        if (ok) {
+          if (card) {
+            showAiReveal(card, () => later(run, 320));
+          } else {
+            later(run, 420);
+          }
+          return;
+        }
+        later(run, 120);
+        return;
+      }
+
       if (action.type === 'deploy') {
         const card = live.hand.red[action.index];
         if (card?.kind === 'unit') {
           const ok = deployToRef.current(action.r, action.c, action.index, AI_SIDE);
           if (ok) {
-            showAiReveal(card);
-            later(run, 520);
+            showAiReveal(card, () => later(run, 320));
             return;
           }
         }
@@ -1446,6 +1567,8 @@ export function Battlefield({
       }
       // end — call latest endRite so openRiteFor keeps AI-deployed coins
       setAiBusy(false);
+      clearRevealTimer();
+      revealResumeRef.current = null;
       setRevealCard(null);
       endRiteRef.current();
     };
@@ -1458,6 +1581,7 @@ export function Battlefield({
         window.clearTimeout(revealTimerRef.current);
         revealTimerRef.current = null;
       }
+      revealResumeRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [side, phase, matchOver, hotseat]);
@@ -1659,6 +1783,35 @@ export function Battlefield({
               {leaderUsed[inputSide] ? ' · spent' : ` · R${activeHero.cost}`}
             </button>
           )}
+          {(() => {
+            const uidSel = selectedUnit ?? (aim?.kind === 'act' ? aim.uid : null);
+            if (!uidSel) return null;
+            const found = findUnit(uidSel);
+            if (!found || found.unit.side !== inputSide) return null;
+            const def = cardById(found.unit.cardId);
+            const act = def?.act;
+            if (!act) return null;
+            const pay = act.pay ?? 0;
+            const spent = act.once ? !!found.unit.once : !!found.unit.used;
+            const blocked =
+              inputLocked ||
+              !!found.unit.sick ||
+              spent ||
+              loyalty[inputSide] < pay;
+            return (
+              <button
+                type="button"
+                className="brass-btn brass-btn-solid"
+                data-testid="call-power"
+                disabled={blocked}
+                onClick={() => callPower(inputSide, found.unit.uid)}
+                title={def?.text ?? 'Call power'}
+              >
+                Call power{pay ? ` · R${pay}` : ''}
+                {spent ? ' · spent' : ''}
+              </button>
+            );
+          })()}
           <button
             type="button"
             className="brass-btn brass-btn-solid"
@@ -1700,8 +1853,13 @@ export function Battlefield({
       <div className="bf-banner-slot" aria-live="polite">
       {aim ? (
         <p className="aim-banner" data-testid="aim-banner">
-          Aiming {aim.kind === 'cast' ? aim.card.name : activeHero?.name} — name a
-          target on the field.{' '}
+          Aiming{' '}
+          {aim.kind === 'cast'
+            ? aim.card.name
+            : aim.kind === 'act'
+              ? cardById(findUnit(aim.uid)?.unit.cardId ?? '')?.name ?? 'power'
+              : activeHero?.name}{' '}
+          — name a target on the field.{' '}
           <button type="button" className="dev-link" onClick={() => setAim(null)}>
             Cancel
           </button>
@@ -1933,7 +2091,7 @@ export function Battlefield({
 
       <div className="hand-rail">
         <p className="hand-kicker">
-          {sideLabel(inputSide)} hand · drag units to muster · tap coins to move · rites & devices speak
+          {sideLabel(inputSide)} hand · drag units to muster · tap coins to move · Call power on the coin · rites & devices speak
           {!hotseat && side === AI_SIDE ? ' · Crimson is working…' : ''}
         </p>
         <div className="hand-row">
@@ -2053,8 +2211,11 @@ export function Battlefield({
               revealTimerRef.current = null;
             }
             setRevealCard(null);
+            const resume = revealResumeRef.current;
+            revealResumeRef.current = null;
+            resume?.();
           }}
-          caption="Crimson plays"
+          caption="Crimson musters — tap when you've read it"
         />
       )}
 

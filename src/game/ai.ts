@@ -4,6 +4,7 @@
  */
 
 import type { Side, Tile } from './maps';
+import { cardById } from '../data/catalog';
 import type { Card } from './types';
 import type { ControlGrid } from './scoring';
 import { canDeployOn, isEnemyStronghold, isPaintable } from './control';
@@ -16,6 +17,10 @@ export type AiUnit = {
   keywords: string[];
   moved: boolean;
   attacked: boolean;
+  sick?: boolean;
+  used?: boolean;
+  once?: boolean;
+  cardId?: string;
   r: number;
   c: number;
 };
@@ -33,6 +38,7 @@ export type AiAction =
   | { type: 'deploy'; index: number; r: number; c: number }
   | { type: 'move'; uid: string; r: number; c: number }
   | { type: 'attack'; uid: string; targetUid: string }
+  | { type: 'act'; uid: string; targetUid?: string }
   | { type: 'end' };
 
 function neighbors(r: number, c: number): { r: number; c: number }[] {
@@ -116,9 +122,83 @@ function unitValue(card: Card): number {
   return v;
 }
 
+
+function adjacentUnits(snap: AiSnapshot, r: number, c: number): AiUnit[] {
+  const out: AiUnit[] = [];
+  for (const p of neighbors(r, c)) {
+    const u = snap.board[p.r][p.c];
+    if (u) out.push(u);
+  }
+  return out;
+}
+
+/** Heuristic on-board activations (sacrifice / wail / exhaust draws). */
+function pickActivatedAbility(snap: AiSnapshot): AiAction | null {
+  const side = snap.side;
+  for (const unit of listUnits(snap, side)) {
+    if (unit.sick) continue;
+    const def = unit.cardId ? cardById(unit.cardId) : undefined;
+    const act = def?.act;
+    if (!act) continue;
+    if (act.once ? unit.once : unit.used) continue;
+    const pay = act.pay ?? 0;
+    if (pay > snap.loyalty) continue;
+
+    if (act.op === 'wail') {
+      const adj = adjacentUnits(snap, unit.r, unit.c);
+      const foes = adj.filter((u) => u.side !== side);
+      const allies = adj.filter((u) => u.side === side);
+      if (foes.length > 0 && allies.length === 0) {
+        return { type: 'act', uid: unit.uid };
+      }
+    }
+
+    if (act.op === 'sacrifice-bank') {
+      // Spend a weak body for resources when the bank is thin
+      if (snap.loyalty < 4 || unit.power <= 2) {
+        return { type: 'act', uid: unit.uid };
+      }
+    }
+
+    if (act.op === 'sacrifice-hit') {
+      const adj = adjacentUnits(snap, unit.r, unit.c).filter(
+        (u) => u.side !== side && !hasKeyword(u, 'veiled'),
+      );
+      // Prefer killing or heavily wounding a foe
+      const prey = adj
+        .filter((u) => u.power <= (act.n ?? 3))
+        .sort((a, b) => b.power - a.power)[0];
+      if (prey) return { type: 'act', uid: unit.uid, targetUid: prey.uid };
+    }
+
+    if (act.op === 'tap-draw' && snap.hand.length < 5) {
+      return { type: 'act', uid: unit.uid };
+    }
+
+    if (act.op === 'tap-crown') {
+      return { type: 'act', uid: unit.uid };
+    }
+
+    if (act.op === 'jab') {
+      const adj = adjacentUnits(snap, unit.r, unit.c).filter(
+        (u) => u.side !== side && !hasKeyword(u, 'veiled'),
+      );
+      const prey = adj.sort((a, b) => a.power - b.power)[0];
+      if (prey && pay <= snap.loyalty) {
+        return { type: 'act', uid: unit.uid, targetUid: prey.uid };
+      }
+    }
+  }
+  return null;
+}
+
 /** Pick one heuristic action for the current side. */
 export function pickTrainingAction(snap: AiSnapshot): AiAction {
   const side = snap.side;
+
+  // 0. Simple activated abilities (wail / sacrifice / exhaust) when clearly good
+  const actPick = pickActivatedAbility(snap);
+  if (actPick) return actPick;
 
   // 1. Deploy best affordable unit to best spot
   const playable = snap.hand

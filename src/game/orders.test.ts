@@ -83,6 +83,7 @@ describe('effects', () => {
     return {
       side,
       loyalty: { blue: 5, red: 5 },
+      domination: { blue: 0, red: 0 },
       hand: { blue: [], red: [] },
       deck: {
         blue: [
