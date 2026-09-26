@@ -49,9 +49,23 @@ describe('recordMatchVisit', () => {
 });
 
 describe('cryptid pools', () => {
-  it('locks cryptids out of First Hour', () => {
-    expect(cryptidPoolFor('The Vril Syndicate', 'first')).toEqual([]);
-    expect(pickCryptid('The Vril Syndicate', 'first', () => 0)).toBeNull();
+  it('picks First Hour order cryptids for sightings (not Second Hour beasts)', () => {
+    const pool = cryptidPoolFor('The Vril Syndicate', 'first');
+    expect(pool.length).toBeGreaterThan(0);
+    expect(pool.every((c) => c.faction === 'The Vril Syndicate')).toBe(true);
+    expect(pool.every((c) => !c.faction.includes('Blackout'))).toBe(true);
+    const card = pickCryptid('The Vril Syndicate', 'first', () => 0);
+    expect(card?.keywords).toContain('cryptid');
+    expect(card?.id).toMatch(/foo_fighter|vril_wyrm/);
+  });
+
+  it('keeps Second Hour cryptids out of First Hour pools', () => {
+    const first = cryptidPoolFor('The Vril Syndicate', 'first');
+    expect(first.some((c) => c.id === 'blackout_hound')).toBe(false);
+    const second = cryptidPoolFor('The Blackout Wardens', 'second');
+    expect(second.some((c) => c.id === 'blackout_hound' || c.id === 'roof_moth')).toBe(
+      true,
+    );
   });
 
   it('picks second-hour society cryptids', () => {

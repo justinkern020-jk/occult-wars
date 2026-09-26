@@ -461,9 +461,8 @@ export function Battlefield({
       );
       pushLog(`${sideLabel(nextSide)} opens the rite.`);
 
-      // Cryptid visit (Second Hour only): inject into both hands on the scheduled turn.
+      // Cryptid sighting: inject era-correct cryptid into hands (never from the deck).
       if (
-        eraRef.current === 'second' &&
         visitTurnRef.current != null &&
         turnNum === visitTurnRef.current &&
         !sightingFiredRef.current
@@ -535,8 +534,8 @@ export function Battlefield({
         mode === 'second' || m.era === 'second' ? 'second' : 'first';
       eraRef.current = era;
       sightingFiredRef.current = false;
-      // Cryptids are locked to Second Hour — never inject into First Hour hands.
-      if (era === 'second' && recordMatchVisit(era)) {
+      // Rare cryptid sighting every 15th match of this era (hand drop, not deck).
+      if (recordMatchVisit(era)) {
         visitTurnRef.current = rollVisitTurn();
       } else {
         visitTurnRef.current = null;
