@@ -120,3 +120,74 @@ describe('AI deploy + rite-open loyalty', () => {
     }
   });
 });
+
+
+describe('AI activated abilities', () => {
+  const map = mapById('leaden-court');
+  const control = initialControl(map.tiles);
+
+  it('picks sacrifice-bank when bank is thin', () => {
+    const board = emptyBoard();
+    board[2][2] = {
+      uid: 'coil',
+      side: 'red',
+      power: 2,
+      keywords: [],
+      moved: false,
+      attacked: false,
+      cardId: 'faustian_coilwright',
+      r: 2,
+      c: 2,
+    };
+    const snap: AiSnapshot = {
+      side: 'red',
+      tiles: map.tiles,
+      control,
+      board,
+      hand: [],
+      loyalty: 2,
+    };
+    const action = pickTrainingAction(snap);
+    expect(action.type).toBe('act');
+    if (action.type === 'act') {
+      expect(action.uid).toBe('coil');
+    }
+  });
+
+  it('picks wail when only foes are adjacent', () => {
+    const board = emptyBoard();
+    board[2][2] = {
+      uid: 'wail',
+      side: 'red',
+      power: 2,
+      keywords: [],
+      moved: false,
+      attacked: false,
+      cardId: 'green_wail',
+      r: 2,
+      c: 2,
+    };
+    board[2][3] = {
+      uid: 'foe',
+      side: 'blue',
+      power: 4,
+      keywords: [],
+      moved: false,
+      attacked: false,
+      cardId: 'x',
+      r: 2,
+      c: 3,
+    };
+    const snap: AiSnapshot = {
+      side: 'red',
+      tiles: map.tiles,
+      control,
+      board,
+      hand: [],
+      loyalty: 4,
+    };
+    const action = pickTrainingAction(snap);
+    expect(action.type).toBe('act');
+    if (action.type === 'act') expect(action.uid).toBe('wail');
+  });
+});
