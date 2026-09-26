@@ -215,10 +215,14 @@ export function MenuAtelier({
             as one number. Resources bank the muster.
           </p>
 
-          <div className="menu-occultist-inlay">
-            <span className="menu-occultist-skull" aria-hidden>
-              <img src="/assets/icons/brass-skull.svg" alt="" />
-            </span>
+          <div className="menu-occultist-socket">
+            <img
+              className="menu-occultist-socket-frame"
+              src="/assets/images/occultist_socket.png"
+              alt=""
+              draggable={false}
+              aria-hidden
+            />
             <label className="menu-occultist">
               <span className="menu-occultist-label">Occultist</span>
               <input
@@ -227,11 +231,9 @@ export function MenuAtelier({
                 aria-label="Occultist name"
                 maxLength={32}
                 onChange={(e) => onOccultistChange(e.target.value)}
+                placeholder="Name the adept…"
               />
             </label>
-            <span className="menu-occultist-skull" aria-hidden>
-              <img src="/assets/icons/brass-skull.svg" alt="" />
-            </span>
           </div>
           {(isHiddenAdeptCode(profile.username) || isSethKernCode(profile.username)) && (
             <div className="menu-occultist-badges">

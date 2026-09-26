@@ -560,398 +560,6 @@ input[type='search'] {
   opacity: 0.95;
 }
 .drag-ghost .hand-card {
-  width: 5.2rem;
-  pointer-events: none;
-}
-.hand-card.is-draggable {
-  touch-action: none;
-  cursor: grab;
-}
-.hand-card.is-draggable:active {
-  cursor: grabbing;
-}
-.stone.drag-target {
-  outline: 2px solid #fff6d8;
-  outline-offset: 5px;
-  animation: 1.2s ease-in-out infinite legal-pulse;
-}
-.stone.legal-tile {
-  outline-offset: 4px;
-  outline: 2px solid #f3e2b8;
-  animation: 1.5s ease-in-out infinite legal-pulse;
-}
-.stone.has-unit {
-  /* Above empty circles so coins stay tappable; below legal targets. */
-  z-index: 4;
-}
-.stone.legal-move {
-  /* Above the selected origin — DOM order alone hides west/north arrows under the coin. */
-  z-index: 7;
-  outline-offset: 4px;
-  outline: 2px solid #9ec8ff;
-  animation: 1.5s ease-in-out infinite move-pulse;
-  box-shadow:
-    0 0 0 1px #1a120c,
-    0 0 0 3px #7eb0e8,
-    0 0 0 5px #2a1e12,
-    0 0 0 6px #e7d7a4,
-    inset 0 0 0 7px #0c090747,
-    0 0 18px #4a7ec080,
-    0 8px 14px #0006;
-}
-.stone.legal-strike {
-  z-index: 7;
-  outline-offset: 3px;
-  outline: 2px solid #c6a15b;
-  animation: 1.4s ease-in-out infinite strike-pulse;
-}
-.stone.stone-origin {
-  /* Keep glow under legal move/strike neighbors so W/N chevrons stay visible. */
-  z-index: 3;
-  box-shadow:
-    0 0 0 1px #1a120c,
-    0 0 0 3px #9ec8ff,
-    0 0 0 5px #2a1e12,
-    0 0 0 6px #cfe0ffaa,
-    inset 0 0 0 7px #0c090747,
-    0 0 22px #6a9fd899,
-    0 8px 14px #0006;
-  animation: 1.8s ease-in-out infinite origin-glow;
-}
-@keyframes move-pulse {
-  0%, 100% { outline-color: #9ec8ff73; }
-  50% { outline-color: #cfe0ff; }
-}
-@keyframes strike-pulse {
-  0%, 100% { outline-color: #c6a15b66; }
-  50% { outline-color: #f3e2b8; }
-}
-@keyframes origin-glow {
-  0%, 100% { box-shadow:
-    0 0 0 1px #1a120c,
-    0 0 0 3px #9ec8ff,
-    0 0 0 5px #2a1e12,
-    0 0 0 6px #cfe0ff88,
-    inset 0 0 0 7px #0c090747,
-    0 0 14px #6a9fd866,
-    0 8px 14px #0006; }
-  50% { box-shadow:
-    0 0 0 1px #1a120c,
-    0 0 0 3px #b8d8ff,
-    0 0 0 5px #2a1e12,
-    0 0 0 6px #e8f2ffcc,
-    inset 0 0 0 7px #0c090747,
-    0 0 22px #6a9fd899,
-    0 8px 14px #0006; }
-}
-@keyframes legal-pulse {
-  0%, 100% { outline-color: #f3e2b873; }
-  50% { outline-color: #fff6d8; }
-}
-
-/* Directional move chevrons (brass / parchment) */
-.move-way {
-  position: absolute;
-  inset: 22%;
-  z-index: 5;
-  pointer-events: none;
-  filter: drop-shadow(0 2px 3px #000a);
-  animation: 1.35s ease-in-out infinite chevron-bob;
-}
-.move-n { transform: rotate(0deg); }
-.move-s { transform: rotate(180deg); }
-.move-e { transform: rotate(90deg); }
-.move-w { transform: rotate(-90deg); }
-@keyframes chevron-bob {
-  0%, 100% { opacity: 0.75; }
-  50% { opacity: 1; }
-}
-.move-s, .move-e, .move-w { animation-name: chevron-bob; }
-
-/* Gold strike reticle on legal foe coins */
-.strike-way {
-  position: absolute;
-  inset: 6%;
-  z-index: 6;
-  pointer-events: none;
-  filter: drop-shadow(0 0 6px #c6a15b88);
-  animation: 1.5s ease-in-out infinite reticle-pulse;
-}
-@keyframes reticle-pulse {
-  0%, 100% { opacity: 0.78; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.04); }
-}
-
-/* Fixed-height slot so select/aim banners never shove the board. */
-.bf-banner-slot {
-  min-height: 2.55rem;
-  margin: 0.25rem 0 0.1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.move-banner,
-.aim-banner {
-  width: 100%;
-  margin: 0 !important;
-}
-.move-banner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem 0.55rem;
-  background: linear-gradient(#3a2a12ee, #1a140ccc);
-  border: 1px solid #c6a15b;
-  color: #f0e6c8;
-  padding: 0.45rem 0.85rem;
-  border-radius: 6px;
-  font-family: Cinzel, Georgia, serif;
-  font-size: 0.86rem;
-  box-shadow: inset 0 1px #ffecc833, 0 6px 14px #0006;
-}
-.move-banner strong {
-  color: #f3e2b8;
-  font-weight: 700;
-}
-.move-banner-sep {
-  color: #8c6d32;
-  opacity: 0.85;
-}
-.move-banner-chevron {
-  width: 0.95rem;
-  height: 0.95rem;
-  vertical-align: -0.12rem;
-  display: inline-block;
-  filter: drop-shadow(0 0 4px #9ec8ff88);
-}
-.move-banner-chip {
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-size: 0.62rem;
-  color: #1a120c;
-  background: linear-gradient(#f3e2b8, #c6a15b);
-  border: 1px solid #8c6d32;
-  border-radius: 999px;
-  padding: 0.12rem 0.45rem;
-  box-shadow: inset 0 1px #ffffff88;
-}
-
-.foot {
-  border-top: 1px solid #3a3428;
-  padding-top: 1rem;
-  color: #7a7164;
-  font-size: 0.85rem;
-}
-.foot code {
-  color: #b8a46a;
-}
-
-/* ——— Battlefield ——— */
-.bf {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-  margin-bottom: 2rem;
-}
-.bf-top {
-  display: grid;
-  gap: 0.85rem;
-}
-@media (min-width: 900px) {
-  .bf-top {
-    grid-template-columns: 1fr auto auto;
-    align-items: end;
-  }
-}
-.bf-sub {
-  margin: 0.2rem 0 0;
-  color: var(--color-muted);
-  font-size: 0.85rem;
-}
-.bf-scores {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.55rem;
-  align-items: stretch;
-  justify-content: center;
-}
-.score-chip {
-  background: linear-gradient(#c6a15b29, #100c09b8);
-  border: 1px solid #8c6d32;
-  border-radius: 0.7rem;
-  min-width: 7.2rem;
-  margin: 0;
-  padding: 0.4rem 0.7rem 0.45rem;
-  box-shadow: inset 0 1px #ffecc833, 0 8px 16px #00000047;
-}
-.score-chip dt {
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  font-family: var(--font-display);
-  font-size: 0.62rem;
-  margin: 0 0 0.15rem;
-}
-.score-chip.is-ally dt {
-  color: #8eb6b0;
-}
-.score-chip.is-enemy dt {
-  color: #e0a0a0;
-}
-.score-chip dd {
-  align-items: baseline;
-  gap: 0.35rem;
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  line-height: 1.1;
-  display: flex;
-  margin: 0;
-  flex-wrap: wrap;
-}
-.score-chip dd span {
-  letter-spacing: 0.06em;
-  color: var(--color-muted);
-  font-size: 0.62rem;
-  text-transform: uppercase;
-}
-.score-chip dd em {
-  font-style: normal;
-  margin-left: 0.35rem;
-  color: var(--color-parchment);
-}
-.score-chip .score-loyalty {
-  font-size: 1.55rem;
-  font-weight: 700;
-  color: #f3e2b8;
-  font-style: normal;
-  margin: 0;
-  letter-spacing: 0.02em;
-  text-shadow: 0 0 12px #c6a15b55;
-}
-.score-chip .score-cap {
-  font-size: 0.72rem;
-  color: var(--color-muted);
-  font-weight: 400;
-}
-.score-chip .bf-hold {
-  display: block;
-  margin: 0.35rem 0 0;
-  padding: 0;
-  font-size: 0.58rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #b9a98a;
-  opacity: 0.95;
-}
-.score-chip .bf-hold b {
-  color: #f3e2b8;
-  font-weight: 600;
-}
-.bf-hud .bf-scores {
-  flex: 1 1 auto;
-}
-
-.bf-turn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-width: 5.5rem;
-  padding: 0.35rem 0.7rem;
-  border-radius: 0.7rem;
-  border: 1px solid #8c6d328c;
-  background: #100c09cc;
-  font-family: var(--font-display);
-}
-.bf-turn-label {
-  font-size: 0.58rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--color-muted);
-}
-.bf-turn strong {
-  font-size: 1.4rem;
-  line-height: 1;
-  color: var(--color-parchment);
-}
-.bf-side {
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-.bf-side.is-blue {
-  color: #8eb6e0;
-}
-.bf-side.is-red {
-  color: #e07070;
-}
-.bf-phase {
-  font-size: 0.58rem;
-  color: var(--color-brass);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-.bf-tools {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  align-items: end;
-  justify-content: flex-end;
-}
-.bf-map-pick span {
-  display: block;
-  font-size: 0.62rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--color-muted);
-  margin-bottom: 0.25rem;
-  font-family: var(--font-display);
-}
-.bf-map-pick select {
-  min-width: 10rem;
-}
-
-/* Hand rails */
-.hand-rail {
-  background: linear-gradient(#c6a15b14, #0c0907b8);
-  border: 1px solid #8c6d328c;
-  border-radius: 1rem;
-  padding: 0.7rem 0.75rem 0.8rem;
-  box-shadow: inset 0 1px #ffecc81f, 0 10px 24px #0005;
-}
-.hand-rail.is-foe .hand-kicker {
-  color: var(--color-muted);
-}
-.hand-kicker {
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--color-brass);
-  margin: 0 0 0.5rem;
-  font-family: var(--font-display);
-  font-size: 0.68rem;
-}
-.hand-row {
-  gap: 0.55rem;
-  padding-bottom: 0.15rem;
-  display: flex;
-  overflow-x: auto;
-  scrollbar-width: thin;
-}
-.hand-row-backs {
-  justify-content: center;
-}
-.hand-back {
-  width: 3.2rem;
-  height: 4.4rem;
-  border-radius: 0.45rem;
-  flex: none;
-  background:
-    radial-gradient(circle at 30% 25%, #c6a15b33, transparent 50%),
-    linear-gradient(160deg, #2a1e14, #120e0b);
-  border: 1px solid #8c6d32;
-  box-shadow: 0 4px 10px #0007;
-}
-.hand-card {
   position: relative;
   width: 5.6rem;
   height: 7.6rem;
@@ -960,21 +568,10 @@ input[type='search'] {
   border-radius: 0.55rem;
   overflow: hidden;
   border: 1px solid #c6a15b;
-  background: #0a0806;
+  background: #140f0c;
   cursor: pointer;
   box-shadow: 0 6px 14px #0007, inset 0 0 0 1px #0c0907;
   transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
-}
-.hand-card-back {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-  pointer-events: none;
 }
 .hand-card img {
   width: 100%;
@@ -984,23 +581,21 @@ input[type='search'] {
 }
 .hand-card-name {
   position: absolute;
-  z-index: 3;
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 1.35rem 0.3rem 0.35rem;
-  background: linear-gradient(transparent, #0a0806e8 42%, #0a0806f5 78%);
+  padding: 1.1rem 0.25rem 0.3rem;
+  background: linear-gradient(transparent, #0c0907f2 55%);
   font-family: var(--font-display);
   font-size: 0.55rem;
   letter-spacing: 0.04em;
   text-align: center;
-  color: #f3e6c8;
-  text-shadow: 0 1px 2px #000e;
+  color: var(--color-parchment);
   line-height: 1.15;
 }
 .hand-card-pip {
   position: absolute;
-  z-index: 3;
+  z-index: 2;
   top: 0.28rem;
   width: 1.35rem;
   height: 1.35rem;
@@ -2200,110 +1795,77 @@ input[type='search'] {
   color: #d4b56a;
   font-size: 0.95rem;
 }
-/* Brass skull inlay around the Occultist name prompt */
-.menu-occultist-inlay {
+/* Gold jewel-socket frame around the Occultist name prompt */
+.menu-occultist-socket {
   position: relative;
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  margin: 0.65rem auto 0.35rem;
-  max-width: 22rem;
-  padding: 0.45rem 0.55rem 0.5rem;
-  border-radius: 0.55rem;
-  background:
-    radial-gradient(ellipse at 50% 0%, #c6a15b33 0%, transparent 55%),
-    linear-gradient(180deg, #1c1510ee, #0e0a08f2);
-  border: 1px solid #8c6d32;
-  box-shadow:
-    0 0 0 1px #2a1e12,
-    0 0 0 2px #c6a15b99,
-    0 0 0 3px #3a2a14,
-    inset 0 1px #e7d7a455,
-    inset 0 -1px #0008,
-    0 8px 18px #0007;
-}
-.menu-occultist-inlay::before,
-.menu-occultist-inlay::after {
-  content: '';
-  position: absolute;
-  left: 12%;
-  right: 12%;
-  height: 1px;
-  pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    #c6a15b88 20%,
-    #f3e2b8cc 50%,
-    #c6a15b88 80%,
-    transparent
-  );
-}
-.menu-occultist-inlay::before {
-  top: 0.2rem;
-}
-.menu-occultist-inlay::after {
-  bottom: 0.2rem;
-}
-.menu-occultist-skull {
-  flex: none;
-  width: 1.55rem;
-  height: 1.55rem;
   display: grid;
   place-items: center;
-  filter: drop-shadow(0 1px 1px #000a) drop-shadow(0 0 4px #c6a15b55);
+  margin: 0.55rem auto 0.35rem;
+  width: min(100%, 22rem);
+  aspect-ratio: 16 / 9;
+  max-height: 7.25rem;
 }
-.menu-occultist-skull img {
+.menu-occultist-socket-frame {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  display: block;
   object-fit: contain;
+  object-position: center;
+  pointer-events: none;
+  z-index: 0;
+  filter: drop-shadow(0 6px 14px #000a);
 }
 .menu-occultist {
+  position: relative;
+  z-index: 1;
   display: flex;
-  flex: 1 1 auto;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.28rem 0.45rem;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0.2rem;
   margin: 0;
-  min-width: 0;
+  width: 58%;
+  max-width: 13.5rem;
   font-family: Cinzel, Georgia, serif;
-  font-size: 0.58rem;
-  letter-spacing: 0.18em;
+  font-size: 0.52rem;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #c6a15b;
+  color: #e4c56a;
+  text-shadow: 0 1px 2px #000c;
 }
 .menu-occultist-label {
-  flex: none;
-  opacity: 0.92;
-}
-.ledger-input {
-  min-height: 2.75rem;
-  color: #f3ead7;
-  background: linear-gradient(#1a140e, #100c09);
-  border: 1px solid #c6a15b;
-  box-shadow: inset 0 0 0 1px #0c0907cc, inset 0 1px #c6a15b40;
-  border-radius: 4px;
-  padding: 0.35rem 0.75rem;
-  font-family: 'Libre Baskerville', Georgia, serif;
-  letter-spacing: normal;
-  text-transform: none;
-  font-size: 0.95rem;
+  text-align: center;
+  opacity: 0.95;
+  line-height: 1;
 }
 .menu-occultist-input {
-  flex: 1 1 8rem;
-  min-width: 0;
-  max-width: 14rem;
-  min-height: 1.65rem;
-  padding: 0.18rem 0.45rem;
-  font-size: 0.72rem;
-  border-radius: 3px;
-  border-color: #8c6d32;
-  background: linear-gradient(#14100c, #0a0806);
+  width: 100%;
+  min-height: 1.55rem;
+  padding: 0.28rem 0.55rem;
+  font-size: 0.78rem;
+  text-align: center;
+  border-radius: 999px;
+  border: 1px solid #000;
+  color: #f0e2b8;
+  caret-color: #e4c56a;
+  background: #050403;
   box-shadow:
-    inset 0 0 0 1px #0c0907cc,
-    inset 0 1px #c6a15b33,
-    0 0 0 1px #2a1e1280;
+    inset 0 2px 6px #000e,
+    inset 0 0 0 1px #1a120c,
+    0 0 0 1px #c6a15b33;
+}
+.menu-occultist-input::placeholder {
+  color: #6a5a40;
+  opacity: 0.85;
+}
+.menu-occultist-input:focus {
+  outline: none;
+  border-color: #c6a15b88;
+  box-shadow:
+    inset 0 2px 6px #000e,
+    0 0 0 1px #e4c56a66,
+    0 0 12px #c6a15b44;
 }
 .menu-toast {
   margin: 0.75rem 0 0;
@@ -2649,8 +2211,6 @@ input[type='search'] {
   text-shadow: 0 0 18px #5a1020;
 }
 .hand-card-kind {
-  position: relative;
-  z-index: 3;
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
