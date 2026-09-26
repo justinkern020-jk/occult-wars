@@ -788,6 +788,38 @@ input[type='search'] {
   margin-left: 0.35rem;
   color: var(--color-parchment);
 }
+.score-chip .score-loyalty {
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #f3e2b8;
+  font-style: normal;
+  margin: 0;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 12px #c6a15b55;
+}
+.score-chip .score-cap {
+  font-size: 0.72rem;
+  color: var(--color-muted);
+  font-weight: 400;
+}
+.score-chip .bf-hold {
+  display: block;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b9a98a;
+  opacity: 0.95;
+}
+.score-chip .bf-hold b {
+  color: #f3e2b8;
+  font-weight: 600;
+}
+.bf-hud .bf-scores {
+  flex: 1 1 auto;
+}
+
 .bf-turn {
   display: flex;
   flex-direction: column;

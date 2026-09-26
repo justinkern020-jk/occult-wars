@@ -1579,31 +1579,67 @@ export function Battlefield({
   return (
     <section className="battlefield" data-testid="battlefield" data-mode={mode} data-phase={phase}>
       <header className="bf-hud">
-        <div className="bf-score">
-          <span className="bf-side is-blue">
-            Azure · {blueFaction.split(' ').slice(-1)[0]}
-            <strong title="Domination score">
-              Dom {domination.blue}/{DOMINATION_WIN}
-            </strong>
-            <em>L{loyalty.blue}</em>
-            <span className="bf-hold">
-              Holding <b>{countHoldings(gameMap.tiles, control, 'blue')}</b> circles
+        <div className="bf-scores" aria-label="Loyalty and Domination">
+          <dl className="score-chip is-ally" data-testid="score-azure">
+            <dt>Azure · {blueFaction.split(' ').slice(-1)[0]}</dt>
+            <dd>
+              <strong className="score-loyalty" title="Loyalty bank — spend to muster">
+                {loyalty.blue}
+              </strong>
+              <span>loyalty</span>
+              <em title="Domination score">
+                {domination.blue}
+                <span className="score-cap"> / {DOMINATION_WIN}</span>
+              </em>
+              <span>dom</span>
+            </dd>
+            <p className="bf-hold">
+              Holding <b>{countHoldings(gameMap.tiles, control, 'blue')}</b>
+              {' · next bank +'}
+              <b>
+                {bankFromHoldings(
+                  gameMap.tiles,
+                  control,
+                  'blue',
+                  bankUnits(board),
+                )}
+              </b>
+            </p>
+          </dl>
+          <div className="bf-turn">
+            <span className="bf-turn-label">Rite</span>
+            <strong>{turn}</strong>
+            <span className={`bf-side is-${side}`}>
+              {sideLabel(side)}
+              {hotseat ? ' · Pass the Grimoire' : ''}
             </span>
-          </span>
-          <span className="bf-turn">
-            Rite {turn} · {sideLabel(side)}
-            {hotseat ? ' · Pass the Grimoire' : ''}
-          </span>
-          <span className="bf-side is-red">
-            Crimson · {redFaction.split(' ').slice(-1)[0]}
-            <strong title="Domination score">
-              Dom {domination.red}/{DOMINATION_WIN}
-            </strong>
-            <em>L{loyalty.red}</em>
-            <span className="bf-hold">
-              Holding <b>{countHoldings(gameMap.tiles, control, 'red')}</b> circles
-            </span>
-          </span>
+          </div>
+          <dl className="score-chip is-enemy" data-testid="score-crimson">
+            <dt>Crimson · {redFaction.split(' ').slice(-1)[0]}</dt>
+            <dd>
+              <strong className="score-loyalty" title="Loyalty bank — spend to muster">
+                {loyalty.red}
+              </strong>
+              <span>loyalty</span>
+              <em title="Domination score">
+                {domination.red}
+                <span className="score-cap"> / {DOMINATION_WIN}</span>
+              </em>
+              <span>dom</span>
+            </dd>
+            <p className="bf-hold">
+              Holding <b>{countHoldings(gameMap.tiles, control, 'red')}</b>
+              {' · next bank +'}
+              <b>
+                {bankFromHoldings(
+                  gameMap.tiles,
+                  control,
+                  'red',
+                  bankUnits(board),
+                )}
+              </b>
+            </p>
+          </dl>
         </div>
         <div className="bf-actions">
           {activeHero && (
