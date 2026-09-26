@@ -1,4 +1,4 @@
-/** Cryptid sighting cadence — every 15th match visit (localStorage), like grok.me. */
+/** Cryptid sighting cadence — every Nth match visit (localStorage), like grok.me. */
 
 import { CARDS } from '../data/catalog';
 import type { Card } from './types';
@@ -9,19 +9,42 @@ import {
 
 export type Era = 'first' | 'second';
 
+/** Matches between rare cryptid sightings (First and Second Hour). */
+export const SIGHTING_EVERY = 15;
+
 const VISIT_KEYS: Record<Era, string> = {
   first: 'occult-wars.visits',
   second: 'the-second-hour.visits',
 };
 
-/** Increment era visit counter; return true on every 15th visit. */
+const GATE_KEYS: Record<Era, string> = {
+  first: 'occult-wars.visit-gate',
+  second: 'the-second-hour.visit-gate',
+};
+
+/** Ignore remounts within this window (React Strict Mode boots twice). */
+const BOOT_DEDUPE_MS = 4000;
+
+/**
+ * Increment era visit counter; return true on every SIGHTING_EVERY-th visit.
+ * Dedupes Rapid remounts so one Training start cannot burn two visits.
+ */
 export function recordMatchVisit(era: Era): boolean {
   if (typeof localStorage === 'undefined') return false;
+  const now = Date.now();
+  if (typeof sessionStorage !== 'undefined') {
+    const gate = GATE_KEYS[era];
+    const last = Number(sessionStorage.getItem(gate) ?? '0');
+    if (Number.isFinite(last) && last > 0 && now - last < BOOT_DEDUPE_MS) {
+      return false;
+    }
+    sessionStorage.setItem(gate, String(now));
+  }
   const key = VISIT_KEYS[era];
   const raw = Number(localStorage.getItem(key) ?? '0') + 1;
   const n = Number.isFinite(raw) && raw > 0 ? Math.floor(raw) : 1;
   localStorage.setItem(key, String(n));
-  return n % 15 === 0;
+  return n % SIGHTING_EVERY === 0;
 }
 
 export function readVisitCount(era: Era): number {
@@ -33,14 +56,17 @@ export function readVisitCount(era: Era): number {
 /** Test helper: set visits so the *next* recordMatchVisit is a sighting. */
 export function setVisitsForNextSighting(era: Era): void {
   if (typeof localStorage === 'undefined') return;
-  localStorage.setItem(VISIT_KEYS[era], '14');
+  localStorage.setItem(VISIT_KEYS[era], String(SIGHTING_EVERY - 1));
+  if (typeof sessionStorage !== 'undefined') {
+    sessionStorage.removeItem(GATE_KEYS[era]);
+  }
 }
 
 /**
- * Cryptid pools by era (card data).
- * Battlefield hand drops: Second Hour only. First Hour order cryptids
- * (Vril Wyrm, Foo Fighter, …) stay out of First Hour hands for now.
- * Never treated as ordinary deck plates.
+ * Cryptid pools by era.
+ * First Hour: order cryptids (Vril Wyrm, Foo Fighter, Mothman, …) as rare sightings.
+ * Second Hour: society cryptids on Second Hour matches.
+ * Never ordinary deck plates.
  */
 function cryptidsInEra(era: Era): Card[] {
   return CARDS.filter((c) => {

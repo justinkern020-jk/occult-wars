@@ -461,9 +461,8 @@ export function Battlefield({
       );
       pushLog(`${sideLabel(nextSide)} opens the rite.`);
 
-      // Second Hour cryptid sighting: inject into hands on the scheduled turn.
+      // Rare cryptid sighting (era pool): one hand drop, not both sides in Training.
       if (
-        eraRef.current === 'second' &&
         visitTurnRef.current != null &&
         turnNum === visitTurnRef.current &&
         !sightingFiredRef.current
@@ -472,7 +471,10 @@ export function Battlefield({
         const era = eraRef.current;
         const names: string[] = [];
         let handAfter = { ...nextHand };
-        for (const s of ['blue', 'red'] as const) {
+        // Hotseat: both seats may see a sighting. Vs AI: only Azure (the player).
+        const recipients: Array<'blue' | 'red'> =
+          mode === 'hotseat' ? ['blue', 'red'] : ['blue'];
+        for (const s of recipients) {
           if (handAfter[s].length >= HAND_CAP) continue;
           const faction = s === 'blue' ? blueFaction : redFaction;
           const card = pickCryptid(faction, era);
@@ -494,7 +496,7 @@ export function Battlefield({
 
       return { nextDeck, nextHand, cleared };
     },
-    [bankUnits, pushLog, blueFaction, redFaction],
+    [bankUnits, pushLog, blueFaction, redFaction, mode],
   );
 
   const bootMatch = useCallback(
@@ -535,14 +537,16 @@ export function Battlefield({
         mode === 'second' || m.era === 'second' ? 'second' : 'first';
       eraRef.current = era;
       sightingFiredRef.current = false;
-      // Hand cryptid drops are Second Hour only (Justin). First Hour keeps
-      // cryptids out of the working and never injects them mid-match.
-      if (era === 'second' && recordMatchVisit(era)) {
+      // Rare sighting every 15th real match boot (Strict Mode remounts deduped).
+      let veilNote: string | null = null;
+      if (recordMatchVisit(era)) {
         visitTurnRef.current = rollVisitTurn();
+        veilNote = 'The veil thins — a cryptid may visit this sitting.';
       } else {
         visitTurnRef.current = null;
       }
       setLog([
+        ...(veilNote ? [veilNote] : []),
         `The leaden hour opens on ${m.name}. ${sideLabel('blue')} takes the first rite.`,
       ]);
 
