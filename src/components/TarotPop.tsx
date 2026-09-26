@@ -1,7 +1,8 @@
+import { useEffect } from 'react';
 import type { Card } from '../game/types';
 import { CardView } from './CardView';
 
-/** Full-screen inspect veil — tap backdrop or the card to dismiss. */
+/** Full-screen inspect / unlock reveal — tap backdrop, Close, or Esc to dismiss. */
 export function TarotPop({
   card,
   power,
@@ -13,6 +14,17 @@ export function TarotPop({
   onClose: () => void;
   caption?: string;
 }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
   return (
     <div
       className="tarot-pop"
@@ -24,14 +36,19 @@ export function TarotPop({
     >
       <article
         className="tarot-pop-card"
-        onClick={(e) => {
-          e.stopPropagation();
-          onClose();
-        }}
+        onClick={(e) => e.stopPropagation()}
       >
         <CardView card={card} power={power} />
         {caption && <p className="tarot-pop-caption">{caption}</p>}
-        <p className="tarot-pop-hint">Tap to dismiss</p>
+        <button
+          type="button"
+          className="tarot-pop-close"
+          data-testid="tarot-pop-close"
+          onClick={onClose}
+        >
+          Close
+        </button>
+        <p className="tarot-pop-hint">Tap outside or press Esc</p>
       </article>
     </div>
   );

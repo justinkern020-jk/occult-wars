@@ -19,8 +19,11 @@ import {
   writeHourOpen,
   writePendingJustinHand,
 } from '../game/hourUnlock';
+import { cardById } from '../data/catalog';
+import type { Card } from '../game/types';
 import { BattleCountModal } from './BattleCountModal';
-import { brassClick, metalRiffSfx, setMusicBed, unlockAudio } from '../game/sfx';
+import { TarotPop } from './TarotPop';
+import { brassClick, copSirenSfx, metalRiffSfx, setMusicBed, unlockAudio } from '../game/sfx';
 
 type Props = {
   profile: Profile;
@@ -87,6 +90,7 @@ export function MenuAtelier({
   const [hourOpen, setHourOpen] = useState(() => bootHourOpen(profile.username));
   const [toast, setToast] = useState<string | null>(null);
   const [battleCountOpen, setBattleCountOpen] = useState(false);
+  const [revealUnlock, setRevealUnlock] = useState<{ card: Card; caption: string } | null>(null);
   const firstMaps = mapsForEra('first');
 
   useEffect(() => {
@@ -142,6 +146,8 @@ export function MenuAtelier({
       const unlocked = applyJustinKernUnlock({ ...profile, username: realNameRef.current });
       setToast('The gadget waits — Justin Kern joins the next circle.');
       onUpdateProfile(unlocked);
+      const jk = cardById('justin_kern');
+      if (jk) setRevealUnlock({ card: jk, caption: 'The gadget waits — Justin Kern' });
       return;
     }
     if (!isCodePrefix(next)) {
@@ -149,14 +155,26 @@ export function MenuAtelier({
     }
     let nextProfile = { ...profile, username: next };
     if (isSethKernCode(next)) {
+      unlockAudio();
+      copSirenSfx();
       const before = nextProfile.collection.includes('seth_kern');
       nextProfile = applySethKernUnlock(nextProfile);
       if (!before && nextProfile.collection.includes('seth_kern')) {
         setToast('Seth Kern has joined the working.');
+        const sk = cardById('seth_kern');
+        if (sk) setRevealUnlock({ card: sk, caption: 'Seth Kern has joined the working' });
+      } else {
+        setToast('The chief has taken a seat.');
       }
     }
     if (isHiddenAdeptCode(next)) {
+      const beforeJk = nextProfile.collection.includes('justin_kern');
       nextProfile = applyJustinKernUnlock(nextProfile);
+      if (!beforeJk && nextProfile.collection.includes('justin_kern')) {
+        const jk = cardById('justin_kern');
+        if (jk) setRevealUnlock({ card: jk, caption: 'A hidden adept has answered' });
+        setToast('A hidden adept has answered.');
+      }
     }
     onUpdateProfile(nextProfile);
   }
@@ -419,6 +437,13 @@ export function MenuAtelier({
         <span aria-hidden> · </span>
         <span>{MAPS.length} maps loaded</span>
       </p>
+      {revealUnlock && (
+        <TarotPop
+          card={revealUnlock.card}
+          caption={revealUnlock.caption}
+          onClose={() => setRevealUnlock(null)}
+        />
+      )}
       {battleCountOpen && (
         <BattleCountModal onClose={() => setBattleCountOpen(false)} />
       )}

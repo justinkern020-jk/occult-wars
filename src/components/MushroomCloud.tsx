@@ -6,36 +6,30 @@ type Props = {
   onDone?: () => void;
 };
 
-const DURATION_MS = 4200;
+/** Full cinematic arc — flash → fireball → stem/cap → ash settle. */
+const DURATION_MS = 5200;
 
-type Ember = {
+type Smoke = {
   x: number;
   y: number;
   vx: number;
   vy: number;
   r: number;
+  grow: number;
   life: number;
   maxLife: number;
-  hue: number;
-  kind: 'ember' | 'ash';
-};
-
-type Puff = {
-  x: number;
-  y: number;
-  rx: number;
-  ry: number;
-  vx: number;
-  vy: number;
-  grow: number;
-  alpha: number;
-  layer: 'stem' | 'cap' | 'skirt' | 'billow';
-  phase: number;
+  spin: number;
+  spinV: number;
+  /** 0 fireball / 1 stem / 2 cap bright / 3 cap ash / 4 skirt / 5 ember */
+  kind: number;
+  seed: number;
+  turb: number;
 };
 
 /**
- * Cinematic gadget detonation — film grain, flash, shockwaves, volumetric
- * stem/cap (canvas smoke), heat shimmer, ash fall. Brass/ink palette (~4.2s).
+ * Photoreal gadget detonation — volumetric smoke sprites, fireball core,
+ * cauliflower cap, debris skirt, lens bloom, chromatic flash, grain, vignette.
+ * Keeps data-testid="mushroom-cloud" and onDone contract with Battlefield.
  */
 export function MushroomCloud({ active, onDone }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -55,7 +49,7 @@ export function MushroomCloud({ active, onDone }: Props) {
     if (!active) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
     let w = 0;
@@ -74,124 +68,190 @@ export function MushroomCloud({ active, onDone }: Props) {
     resize();
     window.addEventListener('resize', resize);
 
-    const embers: Ember[] = [];
-    for (let i = 0; i < 72; i++) {
-      const kind: Ember['kind'] = i % 3 === 0 ? 'ash' : 'ember';
-      embers.push({
-        x: w * (0.2 + Math.random() * 0.6),
-        y: h * (0.35 + Math.random() * 0.45),
-        vx: (Math.random() - 0.5) * 0.55,
-        vy: -(0.35 + Math.random() * 1.4),
-        r: kind === 'ash' ? 1 + Math.random() * 2.2 : 1.2 + Math.random() * 2.8,
-        life: 0,
-        maxLife: 1.6 + Math.random() * 2.4,
-        hue: Math.random(),
-        kind,
-      });
-    }
+    // Soft volumetric sprite atlas (radial falloff, no hard edges)
+    const SPR = 96;
+    const makeSprite = (
+      stops: Array<[number, string]>,
+    ): HTMLCanvasElement => {
+      const c = document.createElement('canvas');
+      c.width = SPR;
+      c.height = SPR;
+      const g = c.getContext('2d')!;
+      const grd = g.createRadialGradient(
+        SPR / 2,
+        SPR / 2,
+        0,
+        SPR / 2,
+        SPR / 2,
+        SPR / 2,
+      );
+      for (const [u, col] of stops) grd.addColorStop(u, col);
+      g.fillStyle = grd;
+      g.fillRect(0, 0, SPR, SPR);
+      return c;
+    };
 
-    const puffs: Puff[] = [];
+    const sprFire = makeSprite([
+      [0, 'rgba(255,255,255,1)'],
+      [0.12, 'rgba(255,244,200,0.95)'],
+      [0.28, 'rgba(255,170,60,0.75)'],
+      [0.5, 'rgba(220,80,20,0.4)'],
+      [0.75, 'rgba(80,30,10,0.12)'],
+      [1, 'rgba(0,0,0,0)'],
+    ]);
+    const sprOrange = makeSprite([
+      [0, 'rgba(255,210,120,0.9)'],
+      [0.25, 'rgba(230,120,40,0.65)'],
+      [0.55, 'rgba(90,45,20,0.35)'],
+      [1, 'rgba(0,0,0,0)'],
+    ]);
+    const sprAsh = makeSprite([
+      [0, 'rgba(70,58,48,0.75)'],
+      [0.35, 'rgba(40,32,26,0.55)'],
+      [0.7, 'rgba(18,14,12,0.28)'],
+      [1, 'rgba(0,0,0,0)'],
+    ]);
+    const sprDark = makeSprite([
+      [0, 'rgba(28,22,18,0.85)'],
+      [0.4, 'rgba(12,10,8,0.55)'],
+      [0.75, 'rgba(5,4,3,0.2)'],
+      [1, 'rgba(0,0,0,0)'],
+    ]);
+    const sprDust = makeSprite([
+      [0, 'rgba(160,130,90,0.55)'],
+      [0.35, 'rgba(90,70,45,0.35)'],
+      [0.7, 'rgba(40,30,20,0.12)'],
+      [1, 'rgba(0,0,0,0)'],
+    ]);
+    const sprEmber = makeSprite([
+      [0, 'rgba(255,240,180,1)'],
+      [0.3, 'rgba(255,140,40,0.8)'],
+      [0.7, 'rgba(180,40,10,0.25)'],
+      [1, 'rgba(0,0,0,0)'],
+    ]);
+
+    const sprites = [sprFire, sprOrange, sprAsh, sprDark, sprDust, sprEmber];
+
+    const smokes: Smoke[] = [];
+    const rand = (a = 0, b = 1) => a + Math.random() * (b - a);
     const cx = () => w * 0.5;
-    const groundY = () => h * 0.72;
+    const groundY = () => h * 0.74;
 
-    // Stem volumetric layers
-    for (let i = 0; i < 18; i++) {
-      const t = i / 17;
-      puffs.push({
+    const spawn = (partial: Partial<Smoke> & { kind: number }) => {
+      smokes.push({
         x: 0,
-        y: t,
-        rx: 10 + t * 8 + Math.random() * 6,
-        ry: 14 + Math.random() * 10,
-        vx: (Math.random() - 0.5) * 0.15,
-        vy: -0.08 - Math.random() * 0.06,
-        grow: 0.04 + Math.random() * 0.05,
-        alpha: 0.35 + Math.random() * 0.35,
-        layer: 'stem',
-        phase: Math.random() * Math.PI * 2,
-      });
-    }
-    // Cap cauliflower lobes
-    for (let i = 0; i < 22; i++) {
-      const ang = (i / 22) * Math.PI * 2;
-      puffs.push({
-        x: Math.cos(ang) * (0.35 + Math.random() * 0.4),
-        y: Math.sin(ang) * 0.25 - 0.1,
-        rx: 28 + Math.random() * 36,
-        ry: 18 + Math.random() * 22,
-        vx: Math.cos(ang) * 0.12,
-        vy: -0.05 + Math.random() * 0.04,
-        grow: 0.08 + Math.random() * 0.1,
-        alpha: 0.4 + Math.random() * 0.4,
-        layer: 'cap',
-        phase: Math.random() * Math.PI * 2,
-      });
-    }
-    // Secondary billows under cap
-    for (let i = 0; i < 10; i++) {
-      puffs.push({
-        x: (Math.random() - 0.5) * 1.2,
-        y: 0.15 + Math.random() * 0.25,
-        rx: 20 + Math.random() * 28,
-        ry: 12 + Math.random() * 16,
-        vx: (Math.random() - 0.5) * 0.1,
-        vy: 0.02,
-        grow: 0.06,
-        alpha: 0.3 + Math.random() * 0.25,
-        layer: 'billow',
-        phase: Math.random() * Math.PI * 2,
-      });
-    }
-    // Ground dust skirt
-    for (let i = 0; i < 14; i++) {
-      puffs.push({
-        x: (Math.random() - 0.5) * 2.4,
         y: 0,
-        rx: 40 + Math.random() * 50,
-        ry: 8 + Math.random() * 10,
-        vx: (Math.random() - 0.5) * 0.35,
-        vy: -0.02,
-        grow: 0.12 + Math.random() * 0.1,
-        alpha: 0.35 + Math.random() * 0.3,
-        layer: 'skirt',
-        phase: Math.random() * Math.PI * 2,
+        vx: 0,
+        vy: 0,
+        r: 20,
+        grow: 8,
+        life: 0,
+        maxLife: 2.5,
+        spin: rand(0, Math.PI * 2),
+        spinV: rand(-0.4, 0.4),
+        seed: rand(0, 1000),
+        turb: rand(0.6, 1.4),
+        ...partial,
+      });
+    };
+
+    // Seed initial fireball / stem / cap / skirt volumes
+    for (let i = 0; i < 48; i++) {
+      const a = rand(0, Math.PI * 2);
+      const d = rand(0, 1) ** 0.5;
+      spawn({
+        kind: 0,
+        x: Math.cos(a) * d * 28,
+        y: Math.sin(a) * d * 18 - 10,
+        vx: Math.cos(a) * rand(10, 40),
+        vy: -rand(40, 120),
+        r: rand(18, 42),
+        grow: rand(30, 70),
+        maxLife: rand(1.2, 2.2),
+        life: rand(0, 0.05),
       });
     }
+    for (let i = 0; i < 90; i++) {
+      spawn({
+        kind: 1,
+        x: rand(-18, 18),
+        y: rand(0, 8),
+        vx: rand(-8, 8),
+        vy: -rand(50, 140),
+        r: rand(14, 32),
+        grow: rand(12, 28),
+        maxLife: rand(2.0, 3.8),
+        life: -rand(0, 0.6),
+      });
+    }
+    for (let i = 0; i < 120; i++) {
+      const a = rand(0, Math.PI * 2);
+      const lobe = rand(0.3, 1);
+      spawn({
+        kind: i % 3 === 0 ? 3 : 2,
+        x: Math.cos(a) * lobe * 40,
+        y: Math.sin(a) * lobe * 22 - 20,
+        vx: Math.cos(a) * rand(15, 55),
+        vy: -rand(10, 50) + rand(-10, 20),
+        r: rand(28, 64),
+        grow: rand(40, 95),
+        maxLife: rand(2.4, 4.2),
+        life: -rand(0.4, 1.2),
+      });
+    }
+    for (let i = 0; i < 70; i++) {
+      spawn({
+        kind: 4,
+        x: rand(-30, 30),
+        y: rand(-4, 6),
+        vx: rand(-90, 90),
+        vy: -rand(5, 35),
+        r: rand(30, 70),
+        grow: rand(50, 120),
+        maxLife: rand(1.8, 3.5),
+        life: -rand(0, 0.25),
+      });
+    }
+    for (let i = 0; i < 80; i++) {
+      spawn({
+        kind: 5,
+        x: rand(-20, 20),
+        y: rand(-10, 10),
+        vx: rand(-40, 40),
+        vy: -rand(60, 200),
+        r: rand(2, 6),
+        grow: rand(-1, 2),
+        maxLife: rand(1.0, 2.8),
+        life: -rand(0.2, 1.0),
+      });
+    }
+
+    // Offscreen for bloom / CA
+    const bloom = document.createElement('canvas');
+    const bloomCtx = bloom.getContext('2d')!;
+    const grain = document.createElement('canvas');
+    const grainCtx = grain.getContext('2d')!;
+    const GRAIN = 128;
+    grain.width = GRAIN;
+    grain.height = GRAIN;
+    const gdata = grainCtx.createImageData(GRAIN, GRAIN);
+    for (let i = 0; i < gdata.data.length; i += 4) {
+      const v = (Math.random() * 255) | 0;
+      gdata.data[i] = v;
+      gdata.data[i + 1] = v;
+      gdata.data[i + 2] = v;
+      gdata.data[i + 3] = 255;
+    }
+    grainCtx.putImageData(gdata, 0, 0);
 
     const t0 = performance.now();
     let last = t0;
 
-    const colorFor = (u: number, hot: number): string => {
-      // orange → brass → ash over life; hot near flash
-      const brass = { r: 198, g: 161, b: 91 };
-      const parchment = { r: 243, g: 234, b: 215 };
-      const ember = { r: 255, g: 170, b: 70 };
-      const ash = { r: 52, g: 40, b: 28 };
-      const ink = { r: 20, g: 15, b: 12 };
-      let a = parchment;
-      let b = brass;
-      let t = u;
-      if (u < 0.25) {
-        a = ember;
-        b = parchment;
-        t = u / 0.25;
-      } else if (u < 0.55) {
-        a = parchment;
-        b = brass;
-        t = (u - 0.25) / 0.3;
-      } else {
-        a = brass;
-        b = ash;
-        t = (u - 0.55) / 0.45;
-      }
-      const lean = hot * 0.35;
-      const r = Math.round(a.r + (b.r - a.r) * t + lean * (ember.r - a.r));
-      const g = Math.round(a.g + (b.g - a.g) * t + lean * (ember.g - a.g) * 0.5);
-      const bl = Math.round(a.b + (b.b - a.b) * t);
-      const towardInk = Math.max(0, (u - 0.7) / 0.3);
-      const rr = Math.round(r + (ink.r - r) * towardInk * 0.45);
-      const gg = Math.round(g + (ink.g - g) * towardInk * 0.45);
-      const bb = Math.round(bl + (ink.b - bl) * towardInk * 0.45);
-      return `${rr},${gg},${bb}`;
+    const noise = (x: number, y: number, t: number) => {
+      return (
+        Math.sin(x * 0.031 + t * 1.7) * Math.cos(y * 0.027 - t * 1.3) +
+        Math.sin((x + y) * 0.019 + t * 0.9) * 0.5
+      );
     };
 
     const frame = (now: number) => {
@@ -200,171 +260,329 @@ export function MushroomCloud({ active, onDone }: Props) {
       last = now;
       const u = Math.min(1, elapsed / (DURATION_MS / 1000));
 
-      ctx.clearRect(0, 0, w, h);
-
-      // Volumetric cloud progress
-      const stemH = Math.min(1, Math.max(0, (elapsed - 0.18) / 1.1));
-      const capBloom = Math.min(1, Math.max(0, (elapsed - 0.45) / 1.35));
-      const skirtSpread = Math.min(1, Math.max(0, (elapsed - 0.12) / 1.0));
-      const hot = Math.max(0, 1 - elapsed / 0.9);
-      const fadeOut = u > 0.82 ? 1 - (u - 0.82) / 0.18 : 1;
-
       const baseX = cx();
       const baseY = groundY();
-      const stemTop = baseY - h * 0.38 * stemH;
-      const capY = stemTop - h * 0.02;
 
-      ctx.save();
-      ctx.globalAlpha = fadeOut;
+      // Phase envelopes
+      const flash = elapsed < 0.28 ? 1 - elapsed / 0.28 : Math.max(0, 1 - (elapsed - 0.28) / 0.5) * 0.15;
+      const fireball = Math.min(1, Math.max(0, (elapsed - 0.05) / 0.9));
+      const stemRise = Math.min(1, Math.max(0, (elapsed - 0.25) / 1.4));
+      const capBloom = Math.min(1, Math.max(0, (elapsed - 0.7) / 1.8));
+      const skirt = Math.min(1, Math.max(0, (elapsed - 0.1) / 1.1));
+      const ashSettle = Math.min(1, Math.max(0, (elapsed - 2.8) / 2.2));
+      const fadeOut = u > 0.82 ? 1 - (u - 0.82) / 0.18 : 1;
+      const stemTop = baseY - h * (0.12 + 0.36 * stemRise);
+      const capCy = stemTop - h * 0.02 * capBloom;
 
-      // Ground glow skirt wash
-      if (skirtSpread > 0) {
-        const grd = ctx.createRadialGradient(baseX, baseY, 4, baseX, baseY, w * 0.55 * skirtSpread);
-        grd.addColorStop(0, `rgba(255, 200, 100, ${0.35 * hot + 0.12})`);
-        grd.addColorStop(0.35, `rgba(198, 161, 91, ${0.22 * skirtSpread})`);
-        grd.addColorStop(1, 'rgba(20, 15, 12, 0)');
-        ctx.fillStyle = grd;
-        ctx.beginPath();
-        ctx.ellipse(baseX, baseY, w * 0.5 * skirtSpread, h * 0.06 * skirtSpread + 8, 0, 0, Math.PI * 2);
-        ctx.fill();
-      }
+      bloom.width = canvas.width;
+      bloom.height = canvas.height;
+      bloomCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      bloomCtx.clearRect(0, 0, w, h);
 
-      // Draw puffs back-to-front: skirt → stem → billow → cap
-      const order: Puff['layer'][] = ['skirt', 'stem', 'billow', 'cap'];
-      for (const layer of order) {
-        for (const p of puffs) {
-          if (p.layer !== layer) continue;
-          let px = baseX;
-          let py = baseY;
-          let scale = 1;
-          let appear = 1;
-          if (layer === 'stem') {
-            appear = stemH;
-            py = baseY - (baseY - stemTop) * p.y * stemH;
-            px = baseX + Math.sin(elapsed * 2.2 + p.phase) * (6 + p.y * 10) * stemH;
-            scale = 0.35 + stemH * (0.65 + p.y * 0.5);
-          } else if (layer === 'cap') {
-            appear = capBloom;
-            const spread = 0.4 + capBloom * 0.9;
-            px = baseX + p.x * w * 0.16 * spread;
-            py = capY + p.y * h * 0.1 * spread;
-            scale = 0.2 + capBloom * 1.15;
-          } else if (layer === 'billow') {
-            appear = Math.min(1, Math.max(0, (elapsed - 0.7) / 1.0));
-            px = baseX + p.x * w * 0.14 * (0.5 + appear);
-            py = stemTop + p.y * h * 0.08;
-            scale = 0.3 + appear * 0.9;
-          } else {
-            appear = skirtSpread;
-            px = baseX + p.x * w * 0.22 * skirtSpread;
-            py = baseY + 4;
-            scale = 0.3 + skirtSpread * 1.1;
-          }
-          if (appear <= 0.01) continue;
+      // Sky wash — ink / dirty brown photographic grade
+      const sky = bloomCtx.createLinearGradient(0, 0, 0, h);
+      sky.addColorStop(0, `rgba(4, 3, 6, ${0.92 * fadeOut})`);
+      sky.addColorStop(0.45, `rgba(18, 10, 6, ${0.88 * fadeOut})`);
+      sky.addColorStop(0.75, `rgba(42, 24, 12, ${0.55 * fadeOut})`);
+      sky.addColorStop(1, `rgba(12, 8, 5, ${0.95 * fadeOut})`);
+      bloomCtx.fillStyle = sky;
+      bloomCtx.fillRect(0, 0, w, h);
 
-          // Drift
-          p.x += p.vx * dt * 0.15;
-          p.phase += dt * 1.5;
-
-          const rx = p.rx * scale * (1 + Math.sin(elapsed * 1.8 + p.phase) * 0.06);
-          const ry = p.ry * scale * (1 + Math.cos(elapsed * 1.5 + p.phase) * 0.08);
-          const rgb = colorFor(Math.min(1, u * 0.85 + (layer === 'cap' ? 0 : 0.1)), hot);
-          const a = p.alpha * appear * (0.55 + 0.45 * (1 - u * 0.35));
-
-          ctx.save();
-          ctx.translate(px, py);
-          ctx.rotate(Math.sin(p.phase) * 0.08);
-          ctx.filter = 'blur(6px)';
-          const g = ctx.createRadialGradient(0, 0, 0, 0, 0, Math.max(rx, ry));
-          g.addColorStop(0, `rgba(${rgb}, ${a})`);
-          g.addColorStop(0.45, `rgba(${rgb}, ${a * 0.55})`);
-          g.addColorStop(1, `rgba(${rgb}, 0)`);
-          ctx.fillStyle = g;
-          ctx.beginPath();
-          ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
-          ctx.fill();
-          // Inner hot core for cap/stem early
-          if ((layer === 'cap' || layer === 'stem') && hot > 0.05) {
-            ctx.filter = 'blur(3px)';
-            const core = ctx.createRadialGradient(0, -ry * 0.2, 0, 0, 0, rx * 0.45);
-            core.addColorStop(0, `rgba(255, 244, 200, ${0.35 * hot * appear})`);
-            core.addColorStop(1, 'rgba(255, 200, 100, 0)');
-            ctx.fillStyle = core;
-            ctx.beginPath();
-            ctx.ellipse(0, -ry * 0.15, rx * 0.4, ry * 0.35, 0, 0, Math.PI * 2);
-            ctx.fill();
-          }
-          ctx.restore();
-        }
-      }
-
-      // Stem highlight core (sharper)
-      if (stemH > 0.05) {
-        ctx.filter = 'blur(4px)';
-        const stemGrad = ctx.createLinearGradient(baseX, baseY, baseX, stemTop);
-        stemGrad.addColorStop(0, `rgba(60, 40, 24, ${0.55 * stemH})`);
-        stemGrad.addColorStop(0.4, `rgba(198, 161, 91, ${0.35 * stemH})`);
-        stemGrad.addColorStop(0.75, `rgba(243, 234, 215, ${0.4 * stemH * (0.4 + hot)})`);
-        stemGrad.addColorStop(1, `rgba(255, 230, 160, ${0.25 * stemH})`);
-        ctx.fillStyle = stemGrad;
-        const stemW = 14 + 10 * stemH;
-        ctx.beginPath();
-        ctx.moveTo(baseX - stemW * 0.7, baseY);
-        ctx.bezierCurveTo(
-          baseX - stemW * 0.55,
-          (baseY + stemTop) / 2,
-          baseX - stemW * 0.45,
-          stemTop + 20,
-          baseX - stemW * 0.35,
-          stemTop,
-        );
-        ctx.lineTo(baseX + stemW * 0.35, stemTop);
-        ctx.bezierCurveTo(
-          baseX + stemW * 0.45,
-          stemTop + 20,
-          baseX + stemW * 0.55,
-          (baseY + stemTop) / 2,
-          baseX + stemW * 0.7,
+      // Ground flash / heat plate
+      if (flash > 0.01 || fireball > 0) {
+        const hg = bloomCtx.createRadialGradient(
+          baseX,
           baseY,
+          2,
+          baseX,
+          baseY,
+          w * (0.25 + 0.45 * Math.max(flash, fireball * 0.4)),
         );
-        ctx.closePath();
-        ctx.fill();
-        ctx.filter = 'none';
+        hg.addColorStop(0, `rgba(255,255,255,${0.95 * flash})`);
+        hg.addColorStop(0.15, `rgba(255,230,160,${0.7 * flash + 0.25 * fireball})`);
+        hg.addColorStop(0.4, `rgba(255,120,30,${0.35 * fireball})`);
+        hg.addColorStop(1, 'rgba(0,0,0,0)');
+        bloomCtx.globalCompositeOperation = 'screen';
+        bloomCtx.fillStyle = hg;
+        bloomCtx.fillRect(0, 0, w, h);
+        bloomCtx.globalCompositeOperation = 'source-over';
       }
 
-      // Embers / ash
-      for (const e of embers) {
-        if (elapsed < 0.35) continue;
-        e.life += dt;
-        if (e.life > e.maxLife) {
-          e.life = 0;
-          e.x = baseX + (Math.random() - 0.5) * w * 0.45;
-          e.y = stemTop + Math.random() * (baseY - stemTop) * 0.6;
-          e.vy = -(0.4 + Math.random() * 1.5);
-          e.vx = (Math.random() - 0.5) * 0.7;
+      // Spawn continuous stem/cap/skirt during bloom
+      if (elapsed < 3.2 && Math.random() < 0.65) {
+        if (stemRise > 0.1) {
+          spawn({
+            kind: Math.random() < 0.35 ? 3 : 1,
+            x: rand(-14, 14),
+            y: 0,
+            vx: rand(-12, 12),
+            vy: -rand(40, 110),
+            r: rand(16, 36),
+            grow: rand(10, 30),
+            maxLife: rand(1.5, 3),
+            life: 0,
+          });
         }
-        e.x += e.vx * 60 * dt;
-        e.y += e.vy * 60 * dt;
-        e.vy -= 0.15 * dt;
-        const lifeU = e.life / e.maxLife;
-        const a = (lifeU < 0.15 ? lifeU / 0.15 : 1 - (lifeU - 0.15) / 0.85) * fadeOut;
-        if (e.kind === 'ember') {
-          ctx.fillStyle = `rgba(${colorFor(lifeU * 0.5, hot)}, ${0.85 * a})`;
-          ctx.shadowColor = 'rgba(198, 161, 91, 0.8)';
-          ctx.shadowBlur = 6;
-        } else {
-          ctx.fillStyle = `rgba(90, 70, 50, ${0.55 * a})`;
-          ctx.shadowBlur = 0;
+        if (capBloom > 0.15 && Math.random() < 0.5) {
+          const a = rand(0, Math.PI * 2);
+          spawn({
+            kind: Math.random() < 0.4 ? 3 : 2,
+            x: Math.cos(a) * rand(10, 50),
+            y: -rand(5, 30),
+            vx: Math.cos(a) * rand(8, 40),
+            vy: rand(-30, 15),
+            r: rand(24, 55),
+            grow: rand(30, 80),
+            maxLife: rand(1.8, 3.5),
+            life: 0,
+          });
         }
-        ctx.beginPath();
-        ctx.ellipse(e.x, e.y, e.r * (e.kind === 'ash' ? 1.4 : 1), e.r, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
+        if (skirt > 0.1 && Math.random() < 0.4) {
+          spawn({
+            kind: 4,
+            x: rand(-20, 20),
+            y: 0,
+            vx: (Math.random() < 0.5 ? -1 : 1) * rand(40, 120),
+            vy: -rand(2, 20),
+            r: rand(28, 60),
+            grow: rand(40, 100),
+            maxLife: rand(1.2, 2.5),
+            life: 0,
+          });
+        }
       }
 
+      // Physics + draw back-to-front by kind order
+      const drawOrder = [4, 3, 1, 2, 0, 5];
+      for (const kind of drawOrder) {
+        for (const s of smokes) {
+          if (s.kind !== kind) continue;
+          s.life += dt;
+          if (s.life < 0) continue;
+          if (s.life > s.maxLife) continue;
+
+          const lifeU = s.life / s.maxLife;
+          const n = noise(s.x + s.seed, s.y, elapsed) * s.turb;
+
+          // Kind-specific motion
+          if (kind === 0) {
+            // Fireball rises then cools into stem
+            s.vy -= 30 * dt;
+            s.vx += n * 25 * dt;
+          } else if (kind === 1) {
+            s.vy -= 18 * dt;
+            s.x += n * 12 * dt;
+            // Converge toward stem axis slightly
+            s.vx += -s.x * 0.35 * dt;
+          } else if (kind === 2 || kind === 3) {
+            // Cap cauliflower — outward bloom then slow
+            const outward = (1 - lifeU) * capBloom;
+            s.vx *= 0.992;
+            s.vy = s.vy * 0.995 - 4 * dt;
+            s.x += n * 18 * dt * (0.5 + outward);
+          } else if (kind === 4) {
+            s.vy += 8 * dt; // settle
+            s.vx *= 0.985;
+            s.y += Math.abs(n) * 4 * dt;
+          } else {
+            s.vy += 25 * dt; // embers fall after rise
+            s.vx += n * 30 * dt;
+          }
+
+          s.x += s.vx * dt;
+          s.y += s.vy * dt;
+          s.spin += s.spinV * dt;
+          const radius = s.r + s.grow * Math.min(1, lifeU * 1.4);
+
+          // World position
+          let wx = baseX;
+          let wy = baseY;
+          let appear = 1;
+          if (kind === 0) {
+            appear = fireball;
+            wx = baseX + s.x * (0.6 + fireball * 0.5);
+            wy = baseY - 20 * fireball + s.y * (0.5 + fireball * 0.6);
+          } else if (kind === 1) {
+            appear = stemRise;
+            const rise = Math.min(1, Math.max(0, -s.y / (h * 0.4)));
+            wx = baseX + s.x * (0.8 + rise * 0.4);
+            wy = baseY + s.y * stemRise;
+            if (wy < stemTop - 10) wy = stemTop + (wy - stemTop) * 0.3;
+          } else if (kind === 2 || kind === 3) {
+            appear = capBloom;
+            wx = baseX + s.x * (0.7 + capBloom * 0.9);
+            wy = capCy + s.y * (0.5 + capBloom * 0.7);
+          } else if (kind === 4) {
+            appear = skirt;
+            wx = baseX + s.x * (0.9 + skirt * 1.4);
+            wy = baseY + 6 + s.y * 0.4;
+          } else {
+            appear = Math.min(1, Math.max(0, (elapsed - 0.4) / 0.8));
+            wx = baseX + s.x;
+            wy = baseY + s.y;
+          }
+
+          if (appear < 0.02) continue;
+
+          const alphaLife =
+            lifeU < 0.12
+              ? lifeU / 0.12
+              : lifeU > 0.65
+                ? Math.max(0, 1 - (lifeU - 0.65) / 0.35)
+                : 1;
+          let alpha = alphaLife * appear * fadeOut;
+          // Cap ash underside denser; fireball additive hot
+          if (kind === 3) alpha *= 0.85 + ashSettle * 0.2;
+          if (kind === 0) alpha *= 0.9;
+          if (kind === 5) alpha *= 0.95;
+
+          const spr =
+            kind === 0
+              ? sprites[lifeU < 0.35 ? 0 : 1]
+              : kind === 1
+                ? sprites[lifeU < 0.4 ? 1 : 2]
+                : kind === 2
+                  ? sprites[lifeU < 0.45 ? 1 : 2]
+                  : kind === 3
+                    ? sprites[3]
+                    : kind === 4
+                      ? sprites[4]
+                      : sprites[5];
+
+          bloomCtx.save();
+          bloomCtx.translate(wx, wy);
+          bloomCtx.rotate(s.spin * 0.15);
+          if (kind === 0 || kind === 5) {
+            bloomCtx.globalCompositeOperation = 'screen';
+            bloomCtx.globalAlpha = alpha * (kind === 0 ? 0.85 : 0.9);
+          } else if (kind === 3) {
+            bloomCtx.globalCompositeOperation = 'source-over';
+            bloomCtx.globalAlpha = alpha * 0.75;
+          } else {
+            bloomCtx.globalCompositeOperation = 'source-over';
+            bloomCtx.globalAlpha = alpha * (kind === 2 ? 0.55 : 0.5);
+          }
+          const rw = radius * (kind === 4 ? 2.2 : kind === 1 ? 1.1 : 1.35);
+          const rh = radius * (kind === 4 ? 0.55 : kind === 1 ? 1.35 : 1.05);
+          bloomCtx.drawImage(spr, -rw, -rh, rw * 2, rh * 2);
+          bloomCtx.restore();
+        }
+      }
+
+      // Bright fireball core (late additive lens)
+      if (fireball > 0.05 && elapsed < 2.2) {
+        const coreR = 18 + 55 * fireball * (1 - Math.max(0, elapsed - 1.2) / 1.0);
+        const coreY = baseY - h * 0.08 * fireball - h * 0.2 * stemRise * 0.35;
+        bloomCtx.globalCompositeOperation = 'screen';
+        const core = bloomCtx.createRadialGradient(baseX, coreY, 0, baseX, coreY, coreR * 3);
+        const hot = Math.max(0, 1 - elapsed / 1.6);
+        core.addColorStop(0, `rgba(255,255,255,${0.95 * hot})`);
+        core.addColorStop(0.2, `rgba(255,240,180,${0.75 * hot})`);
+        core.addColorStop(0.45, `rgba(255,140,40,${0.45 * hot})`);
+        core.addColorStop(1, 'rgba(80,20,0,0)');
+        bloomCtx.fillStyle = core;
+        bloomCtx.beginPath();
+        bloomCtx.arc(baseX, coreY, coreR * 3, 0, Math.PI * 2);
+        bloomCtx.fill();
+        bloomCtx.globalCompositeOperation = 'source-over';
+      }
+
+      // Shock rings (soft photographic, not cartoon strokes)
+      if (elapsed < 2.5) {
+        for (let i = 0; i < 3; i++) {
+          const age = elapsed - i * 0.18;
+          if (age < 0 || age > 2.2) continue;
+          const r = 20 + age * age * 280;
+          const a = Math.max(0, 0.35 - age * 0.16) * fadeOut;
+          bloomCtx.strokeStyle = `rgba(255,220,160,${a})`;
+          bloomCtx.lineWidth = 2.5 - i * 0.5;
+          bloomCtx.beginPath();
+          bloomCtx.ellipse(baseX, baseY, r, r * 0.28, 0, 0, Math.PI * 2);
+          bloomCtx.stroke();
+        }
+      }
+
+      // Composite bloom canvas → main with lens effects
+      ctx.clearRect(0, 0, w, h);
+
+      // Chromatic aberration on flash
+      const ca = flash * 4.5;
+      if (ca > 0.3) {
+        ctx.globalCompositeOperation = 'screen';
+        ctx.globalAlpha = 0.45 * flash;
+        ctx.drawImage(bloom, -ca, 0, w, h);
+        ctx.globalAlpha = 0.35 * flash;
+        ctx.drawImage(bloom, ca, 0, w, h);
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'source-over';
+      }
+      ctx.globalAlpha = 1;
+      ctx.drawImage(bloom, 0, 0, w, h);
+
+      // Soft bloom pass (cheap downsample)
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      ctx.globalAlpha = 0.28 * Math.max(flash, fireball * 0.5) * fadeOut;
+      ctx.filter = 'blur(12px)';
+      ctx.drawImage(bloom, 0, 0, w, h);
+      ctx.filter = 'none';
       ctx.restore();
 
-      if (elapsed < DURATION_MS / 1000 + 0.1) {
+      // Heavy vignette
+      const vig = ctx.createRadialGradient(
+        w * 0.5,
+        h * 0.45,
+        h * 0.15,
+        w * 0.5,
+        h * 0.5,
+        h * 0.85,
+      );
+      vig.addColorStop(0, 'rgba(0,0,0,0)');
+      vig.addColorStop(0.55, `rgba(0,0,0,${0.25 * fadeOut})`);
+      vig.addColorStop(1, `rgba(0,0,0,${0.88 * fadeOut})`);
+      ctx.fillStyle = vig;
+      ctx.fillRect(0, 0, w, h);
+
+      // Film grain
+      ctx.save();
+      ctx.globalAlpha = 0.12 * fadeOut;
+      ctx.globalCompositeOperation = 'overlay';
+      const gx = ((elapsed * 37) % 20) - 10;
+      const gy = ((elapsed * 53) % 20) - 10;
+      ctx.drawImage(grain, gx, gy, w + 40, h + 40);
+      ctx.restore();
+
+      // Heat distortion shimmer (horizontal wobble bands near stem)
+      if (elapsed > 0.3 && elapsed < 4.0) {
+        const bands = 14;
+        const bandH = Math.floor(h / bands);
+        ctx.save();
+        ctx.globalAlpha = 0.35 * fadeOut * (1 - ashSettle * 0.7);
+        for (let i = 0; i < bands; i++) {
+          const sy = i * bandH;
+          const dx = Math.sin(elapsed * 9 + i * 0.7) * (1.5 + flash * 3);
+          ctx.drawImage(
+            canvas,
+            0,
+            sy * dpr,
+            w * dpr,
+            bandH * dpr,
+            dx,
+            sy,
+            w,
+            bandH,
+          );
+        }
+        ctx.restore();
+      }
+
+      // White-out flash overlay first frames
+      if (flash > 0.4) {
+        ctx.fillStyle = `rgba(255,255,248,${(flash - 0.4) * 1.2})`;
+        ctx.fillRect(0, 0, w, h);
+      }
+
+      if (elapsed < DURATION_MS / 1000 + 0.15) {
         rafRef.current = requestAnimationFrame(frame);
       }
     };
@@ -380,47 +598,12 @@ export function MushroomCloud({ active, onDone }: Props) {
 
   return (
     <div
-      className="nuke-overlay"
+      className="nuke-overlay nuke-overlay-v3"
       data-testid="mushroom-cloud"
       role="presentation"
       aria-hidden
     >
-      <div className="nuke-fade" />
-      <div className="nuke-vignette" />
-      <div className="nuke-grain" />
-      <div className="nuke-flash" />
-      <div className="nuke-afterimage" />
-
-      <div className="nuke-shockwave" />
-      <div className="nuke-shockwave nuke-shockwave-2" />
-      <div className="nuke-shockwave nuke-shockwave-3" />
-      <div className="nuke-dust-skirt" />
-
       <canvas ref={canvasRef} className="nuke-canvas" />
-
-      <svg className="nuke-heat" aria-hidden>
-        <defs>
-          <filter id="nukeTurbulence" x="-10%" y="-10%" width="120%" height="120%">
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency="0.018"
-              numOctaves="2"
-              seed="7"
-              result="noise"
-            >
-              <animate
-                attributeName="baseFrequency"
-                values="0.016;0.022;0.016"
-                dur="2.8s"
-                repeatCount="indefinite"
-              />
-            </feTurbulence>
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="14" xChannelSelector="R" yChannelSelector="G" />
-          </filter>
-        </defs>
-        <rect width="100%" height="100%" filter="url(#nukeTurbulence)" opacity="0.35" className="nuke-heat-rect" />
-      </svg>
-
       <p className="nuke-legend">The gadget answers</p>
     </div>
   );

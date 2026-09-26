@@ -41,7 +41,7 @@ import {
   victoryReason,
   type VictoryKind,
 } from '../game/scoring';
-import { clashSfx, gunshotSfx, defeatStinger, victoryStinger, brassClick, setMusicBed, unlockAudio, sirenSfx, metalRiffSfx, nukeBoomSfx } from '../game/sfx';
+import { clashSfx, gunshotSfx, defeatStinger, victoryStinger, brassClick, setMusicBed, unlockAudio, sirenSfx, metalRiffSfx, nukeBoomSfx, copSirenSfx } from '../game/sfx';
 import {
   recordMatchVisit,
   rollVisitTurn,
@@ -1071,22 +1071,45 @@ export function Battlefield({
       metalRiffSfx();
       const seat: Side = mode === 'hotseat' ? side : 'blue';
       setCodeToast(dropJustinIntoHand(seat));
+      const jk = cardById('justin_kern');
+      if (jk) {
+        setInspectPower(undefined);
+        setInspectCard(jk);
+      }
       return;
     }
     if (!isCodePrefix(next)) {
       codeRealNameRef.current = next || codeRealNameRef.current;
     }
     if (isSethKernCode(next) && profile && onUpdateProfile) {
+      unlockAudio();
+      copSirenSfx();
       const before = profile.collection.includes('seth_kern');
       const unlocked = applySethKernUnlock({ ...profile, username: next });
       onUpdateProfile(unlocked);
       if (!before && unlocked.collection.includes('seth_kern')) {
         setCodeToast('Seth Kern has joined the working.');
+        const sk = cardById('seth_kern');
+        if (sk) {
+          setInspectPower(undefined);
+          setInspectCard(sk);
+        }
+      } else {
+        setCodeToast('The chief has taken a seat.');
       }
     }
     if (isHiddenAdeptCode(next) && profile && onUpdateProfile) {
-      onUpdateProfile(applyJustinKernUnlock({ ...profile, username: next }));
+      const beforeJk = profile.collection.includes('justin_kern');
+      const unlocked = applyJustinKernUnlock({ ...profile, username: next });
+      onUpdateProfile(unlocked);
       setCodeToast('A hidden adept has answered.');
+      if (!beforeJk && unlocked.collection.includes('justin_kern')) {
+        const jk = cardById('justin_kern');
+        if (jk) {
+          setInspectPower(undefined);
+          setInspectCard(jk);
+        }
+      }
     }
   }
 

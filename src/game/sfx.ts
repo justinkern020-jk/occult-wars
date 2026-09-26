@@ -171,10 +171,15 @@ export function sirenSfx(dur = 1.5) {
   o.stop(t0 + dur + 0.05);
 }
 
-/** Short distorted metal power-chord sting for Oppenheimer. */
+/** Short distorted metal power-chord sting for Oppenheimer.
+ * Sample: Freesound 417158 "A G Riff.wav" by aceinet — Creative Commons 0.
+ * https://freesound.org/people/aceinet/sounds/417158/
+ * See public/assets/sfx/README.md
+ */
+
 export function metalRiffSfx() {
   unlockAudio();
-  const a = new Audio('/assets/sfx/metal-riff.mp3?v=2');
+  const a = new Audio('/assets/sfx/metal-riff.mp3?v=3');
   a.volume = 0.78;
   void a.play().catch(() => {
     // WebAudio fallback: stacked saw power chords
@@ -214,10 +219,14 @@ export function metalRiffSfx() {
   });
 }
 
-/** Deep boom / rumble when the gadget answers. */
+/** Deep boom / rumble when the gadget answers.
+ * Layered CC0: qubodup Explosive (162265) + rhapsodize Cinematic Boom (255111) + sub rumble.
+ * See public/assets/sfx/README.md
+ */
+
 export function nukeBoomSfx() {
   unlockAudio();
-  const a = new Audio('/assets/sfx/nuke-boom.mp3?v=2');
+  const a = new Audio('/assets/sfx/nuke-boom.mp3?v=3');
   a.volume = 0.88;
   void a.play().catch(() => {
     const c = getAC();
@@ -254,6 +263,21 @@ export function nukeBoomSfx() {
     f.connect(ng);
     ng.connect(c.destination);
     src.start(t0);
+  });
+}
+
+
+/** Recorded police siren for Seth Kern unlock (field recording, not synth).
+ * Sample: Freesound 159738 AMB_Siren_Police_Approach_001 by conleec — CC0.
+ * https://freesound.org/people/conleec/sounds/159738/
+ * See public/assets/sfx/README.md
+ */
+export function copSirenSfx() {
+  unlockAudio();
+  const a = new Audio('/assets/sfx/cop-siren.mp3?v=1');
+  a.volume = 0.72;
+  void a.play().catch(() => {
+    // Soft fallback only if mp3 blocked — prefer silence over fake wail
   });
 }
 
