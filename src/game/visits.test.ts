@@ -49,12 +49,9 @@ describe('recordMatchVisit', () => {
 });
 
 describe('cryptid pools', () => {
-  it('picks faction cryptids for first-hour orders', () => {
-    const pool = cryptidPoolFor('The Vril Syndicate', 'first');
-    expect(pool.length).toBeGreaterThan(0);
-    expect(pool.every((c) => c.faction === 'The Vril Syndicate')).toBe(true);
-    const card = pickCryptid('The Vril Syndicate', 'first', () => 0);
-    expect(card?.keywords).toContain('cryptid');
+  it('locks cryptids out of First Hour', () => {
+    expect(cryptidPoolFor('The Vril Syndicate', 'first')).toEqual([]);
+    expect(pickCryptid('The Vril Syndicate', 'first', () => 0)).toBeNull();
   });
 
   it('picks second-hour society cryptids', () => {

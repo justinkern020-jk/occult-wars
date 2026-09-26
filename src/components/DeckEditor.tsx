@@ -43,6 +43,7 @@ export function DeckEditor({ profile, onSave, onBack }: Props) {
     return CARDS.filter(
       (c) =>
         c.kind !== 'hero' &&
+        !c.keywords.includes('cryptid') &&
         isLegalForOrder(order, c.faction) &&
         (owned[c.id] ?? 0) > 0,
     ).filter((c) => {

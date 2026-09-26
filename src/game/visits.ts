@@ -3,7 +3,6 @@
 import { CARDS } from '../data/catalog';
 import type { Card } from './types';
 import {
-  isFirstHourOrder,
   isSecondHourSociety,
 } from './orders';
 
@@ -36,12 +35,12 @@ export function setVisitsForNextSighting(era: Era): void {
   localStorage.setItem(VISIT_KEYS[era], '14');
 }
 
+/** Cryptids are Second Hour only — First Hour has no sighting pool. */
 function cryptidsInEra(era: Era): Card[] {
-  return CARDS.filter((c) => {
-    if (!c.keywords.includes('cryptid')) return false;
-    if (era === 'second') return isSecondHourSociety(c.faction);
-    return isFirstHourOrder(c.faction);
-  });
+  if (era !== 'second') return [];
+  return CARDS.filter(
+    (c) => c.keywords.includes('cryptid') && isSecondHourSociety(c.faction),
+  );
 }
 
 /** Faction cryptid pool for a side; falls back to any era cryptid. */

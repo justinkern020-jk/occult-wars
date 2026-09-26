@@ -130,13 +130,17 @@ function deckFor(
   faction: string,
   ids?: string[],
 ): Card[] {
+  // Cryptids are Second Hour sightings — never shuffle into First Hour workings.
+  const stripCryptids = (cards: Card[]) =>
+    cards.filter((c) => !c.keywords.includes('cryptid'));
   if (ids && ids.length >= 30) {
-    return shuffleInPlace(cardsFromIds(ids));
+    const cleaned = stripCryptids(cardsFromIds(ids));
+    if (cleaned.length >= 30) return shuffleInPlace(cleaned);
   }
   try {
-    return buildShuffledOrderWorking(faction);
+    return stripCryptids(buildShuffledOrderWorking(faction));
   } catch {
-    return buildShuffledWorking(faction);
+    return stripCryptids(buildShuffledWorking(faction));
   }
 }
 
@@ -457,8 +461,9 @@ export function Battlefield({
       );
       pushLog(`${sideLabel(nextSide)} opens the rite.`);
 
-      // Cryptid visit: inject into both hands on the scheduled turn.
+      // Cryptid visit (Second Hour only): inject into both hands on the scheduled turn.
       if (
+        eraRef.current === 'second' &&
         visitTurnRef.current != null &&
         turnNum === visitTurnRef.current &&
         !sightingFiredRef.current
@@ -530,9 +535,9 @@ export function Battlefield({
         mode === 'second' || m.era === 'second' ? 'second' : 'first';
       eraRef.current = era;
       sightingFiredRef.current = false;
-      if (recordMatchVisit(era)) {
+      // Cryptids are locked to Second Hour — never inject into First Hour hands.
+      if (era === 'second' && recordMatchVisit(era)) {
         visitTurnRef.current = rollVisitTurn();
-        // sighting fires when that turn opens
       } else {
         visitTurnRef.current = null;
       }

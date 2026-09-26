@@ -8,7 +8,10 @@ import { allyOf, isLegalForOrder } from './orders';
 /** Grok Oe(): cycle faction non-hero cards up to 3 copies until 30. */
 export function buildWorkingIds(faction: string, size = 30): string[] {
   const pool = CARDS.filter(
-    (c) => c.faction === faction && c.kind !== 'hero',
+    (c) =>
+      c.faction === faction &&
+      c.kind !== 'hero' &&
+      !c.keywords.includes('cryptid'),
   );
   if (pool.length === 0) {
     const units = CARDS.filter((c) => c.kind === 'unit' && c.power != null);
@@ -114,6 +117,12 @@ export function validateDeck(
   for (const id of cardIds) {
     const card = CARDS.find((c) => c.id === id);
     if (!card) return { ok: false, error: `Unknown plate: ${id}` };
+    if (card.keywords.includes('cryptid')) {
+      return {
+        ok: false,
+        error: `${card.name} is a Second Hour sighting — not a First Hour plate.`,
+      };
+    }
     if (!legalCardForHero(heroId, card)) {
       return {
         ok: false,
