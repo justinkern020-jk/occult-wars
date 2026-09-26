@@ -35,3 +35,46 @@ export function unitsByFaction(faction: string): Card[] {
 export function convertLegacyPower(attack: number, health: number): number {
   return Math.max(attack, health);
 }
+
+/** Effect ops that bank or steal Resources for the player. */
+const RESOURCE_EFFECT_OPS = new Set([
+  'bank',
+  'bank_draw',
+  'leech',
+  'sacrifice_bank',
+  'destroy_refund',
+]);
+
+/** Activated abilities that bank Resources. */
+const RESOURCE_ACT_OPS = new Set(['tap-bank', 'sacrifice-bank']);
+
+/** Keywords that generate Resources (income / node double / salvage / conquer toll). */
+const RESOURCE_KEYWORDS = new Set([
+  'tithe',
+  'tithe2',
+  'hearth',
+  'salvage',
+  'toll',
+]);
+
+/** Leader powers that bank Resources. */
+const RESOURCE_LEADER_OPS = new Set(['master']);
+
+/**
+ * True when the card generates Resources (banks, tithes, steals, refunds).
+ * Muster cost alone does not count — spending is not generating.
+ */
+export function cardGeneratesResources(card: Card): boolean {
+  if (card.effect && RESOURCE_EFFECT_OPS.has(card.effect.op)) return true;
+  if ((card.alsoBank ?? 0) > 0) return true;
+  if ((card.deathBank ?? 0) > 0) return true;
+  if (card.act && RESOURCE_ACT_OPS.has(card.act.op)) return true;
+  if (card.leaderPower && RESOURCE_LEADER_OPS.has(card.leaderPower.op)) return true;
+  if (card.keywords.some((k) => RESOURCE_KEYWORDS.has(k))) return true;
+  const t = card.text.toLowerCase();
+  if (/\bbank(?:s|ed)?\b/.test(t) && /\bresources?\b/.test(t)) return true;
+  if (/yields?\s+\+?\d*\s*resources?/.test(t)) return true;
+  if (/resource node/.test(t)) return true;
+  if (/takes?\s+up\s+to\s+\d+\s+resources?/.test(t)) return true;
+  return false;
+}

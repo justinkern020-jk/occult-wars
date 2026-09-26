@@ -1,5 +1,6 @@
 import type { Card, Rarity } from '../game/types';
 import { KEYWORDS } from '../game/keywords';
+import { cardGeneratesResources } from '../data/catalog';
 import { CardArt } from './CardArt';
 
 const KIND_LABEL: Record<string, string> = {
@@ -69,6 +70,14 @@ export function CardView({
       <div className="tarot-window">
         <CardArt name={card.name} className="tarot-art" alt="" />
         <span className="tarot-foil" aria-hidden />
+        {cardGeneratesResources(card) && (
+          <span
+            className="tarot-resource-jewel"
+            role="img"
+            aria-label="Generates Resources"
+            title="Generates Resources"
+          />
+        )}
       </div>
 
       <footer className="tarot-foot">

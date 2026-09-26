@@ -2384,6 +2384,7 @@ export function Battlefield({
           <dl className="score-chip is-ally" data-testid="score-azure">
             <dt>Azure · {blueFaction.split(' ').slice(-1)[0]}</dt>
             <dd>
+              <span className="score-resource-jewel" role="img" aria-label="Resources" title="Resources" />
               <strong className="score-loyalty" title="Resources — spend to muster units and cast rites">
                 {loyalty.blue}
               </strong>
@@ -2418,6 +2419,7 @@ export function Battlefield({
           <dl className="score-chip is-enemy" data-testid="score-crimson">
             <dt>Crimson · {redFaction.split(' ').slice(-1)[0]}</dt>
             <dd>
+              <span className="score-resource-jewel" role="img" aria-label="Resources" title="Resources" />
               <strong className="score-loyalty" title="Resources — spend to muster units and cast rites">
                 {loyalty.red}
               </strong>

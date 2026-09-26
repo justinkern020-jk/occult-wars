@@ -246,7 +246,7 @@ export function resolveEffect(
       const take = Math.min(5, ctx.loyalty[other]);
       ctx.loyalty[other] -= take;
       bankLoyalty(ctx, side, take);
-      pushLog(ctx, `${card.name} takes ${take} loyalty.`);
+      pushLog(ctx, `${card.name} takes ${take} resources.`);
       break;
     }
     case 'empty':
@@ -326,7 +326,7 @@ export function resolveEffect(
       const name = target!.name;
       destroyUnit(ctx, target!.uid);
       bankLoyalty(ctx, side, gain);
-      pushLog(ctx, `${name} is spent. ${gain} loyalty is banked.`);
+      pushLog(ctx, `${name} is spent. ${gain} resources are banked.`);
       break;
     }
     case 'shove': {
@@ -349,7 +349,7 @@ export function resolveEffect(
       const name = target!.name;
       destroyUnit(ctx, target!.uid);
       bankLoyalty(ctx, owner, refund);
-      pushLog(ctx, `${name} returns ${refund} loyalty.`);
+      pushLog(ctx, `${name} returns ${refund} resources.`);
       break;
     }
     case 'trepan': {

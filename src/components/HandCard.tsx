@@ -1,5 +1,6 @@
 import { useRef, type PointerEvent as ReactPointerEvent } from 'react';
 import type { Card } from '../game/types';
+import { cardGeneratesResources } from '../data/catalog';
 import { CardArt } from './CardArt';
 
 /** Compact hand strip card — Resources left, Power right (Cabals). */
@@ -97,6 +98,14 @@ export function HandCard({
         {card.cost}
       </span>
       <CardArt name={card.name} />
+      {cardGeneratesResources(card) && (
+        <span
+          className="hand-card-resource-jewel"
+          role="img"
+          aria-label="Generates Resources"
+          title="Generates Resources"
+        />
+      )}
       <span className="hand-card-name">{card.name}</span>
       <span className="hand-card-kind">{card.kind}</span>
       {card.kind === 'unit' && card.power != null && (

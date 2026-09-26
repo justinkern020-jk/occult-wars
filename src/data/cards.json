@@ -168,7 +168,7 @@
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Device. Bank 1 loyalty and draw 1 card.",
+    "text": "Device. Bank 1 resources and draw 1 card.",
     "quote": "There is always one lamp left in the cupboard.",
     "quoted": "Quarter inventory",
     "effect": {
@@ -556,7 +556,7 @@
     "cost": 1,
     "oath": 0,
     "keywords": [],
-    "text": "Device. Bank 1 loyalty and draw 1 card.",
+    "text": "Device. Bank 1 resources and draw 1 card.",
     "quote": "Leave it on. Someone is always listening.",
     "quoted": "Open mic",
     "effect": {
@@ -713,7 +713,7 @@
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Device. Bank 2 loyalty and draw 1 card.",
+    "text": "Device. Bank 2 resources and draw 1 card.",
     "quote": "A precinct can live in a coat if the coat is loyal.",
     "quoted": "Pocket ward",
     "effect": {
@@ -748,7 +748,7 @@
     "cost": 3,
     "oath": 0,
     "keywords": [],
-    "text": "Bank 3 loyalty. The ayes have it, whether or not anyone spoke.",
+    "text": "Bank 3 resources. The ayes have it, whether or not anyone spoke.",
     "quote": "All in favor. The silence counted too.",
     "quoted": "Voice vote",
     "effect": {
@@ -939,7 +939,9 @@
     "text": "The first lamp is lit in a human chest. Cheap, and it still stands after a single blow.",
     "power": 2,
     "legacyAttack": 1,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "The fear of the Lord is the beginning of wisdom.",
+    "quoted": "Proverbs 9:10"
   },
   {
     "id": "gyro_rocketeer",
@@ -955,7 +957,9 @@
     "text": "Fast Attack. When it steps into an enemy, it strikes first. If that blow unmakes them, they deal nothing back.",
     "power": 2,
     "legacyAttack": 2,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "Give me a place to stand, and I shall move the earth.",
+    "quoted": "Archimedes"
   },
   {
     "id": "trench_revenants",
@@ -971,7 +975,9 @@
     "text": "Does not conquer. Dead infantry in coil-braced coats. They fight, and they leave the ground unclaimed.",
     "power": 3,
     "legacyAttack": 3,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "They shall not grow old, as we that are left grow old.",
+    "quoted": "Laurence Binyon, For the Fallen"
   },
   {
     "id": "brass_count",
@@ -984,10 +990,12 @@
     "keywords": [
       "tithe"
     ],
-    "text": "While this unit stands, your bank yields +1 loyalty at the start of your rite.",
+    "text": "While this unit stands, your bank yields +1 resources at the start of your rite.",
     "power": 2,
     "legacyAttack": 1,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "Wealth unused might as well not exist.",
+    "quoted": "Aesop"
   },
   {
     "id": "charged_fusilier",
@@ -1002,7 +1010,9 @@
     "power": 2,
     "legacyAttack": 1,
     "legacyHealth": 2,
-    "death": 2
+    "death": 2,
+    "quote": "The blast of war blows in our ears.",
+    "quoted": "William Shakespeare, Henry V"
   },
   {
     "id": "rune_smith",
@@ -1015,10 +1025,12 @@
     "keywords": [
       "salvage"
     ],
-    "text": "When another unit you control is destroyed, bank +1 loyalty.",
+    "text": "When another unit you control is destroyed, bank +1 resources.",
     "power": 2,
     "legacyAttack": 1,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "In the beginning was the Word, and the Word was with God.",
+    "quoted": "John 1:1"
   },
   {
     "id": "faustian_coilwright",
@@ -1029,14 +1041,16 @@
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Sacrifice: bank 3 loyalty. The coilwright's last equation is a receipt.",
+    "text": "Sacrifice: bank 3 resources. The coilwright's last equation is a receipt.",
     "power": 2,
     "legacyAttack": 1,
     "legacyHealth": 2,
     "act": {
       "op": "sacrifice-bank",
       "n": 3
-    }
+    },
+    "quote": "Two souls, alas, dwell in my breast.",
+    "quoted": "Johann Wolfgang von Goethe, Faust"
   },
   {
     "id": "pit_mechanic",
@@ -1055,7 +1069,9 @@
       "op": "sacrifice-hit",
       "n": 3,
       "aim": true
-    }
+    },
+    "quote": "The hand of the diligent shall bear rule.",
+    "quoted": "Proverbs 12:24"
   },
   {
     "id": "hex_banner",
@@ -1074,7 +1090,9 @@
       "op": "jab",
       "pay": 1,
       "aim": true
-    }
+    },
+    "quote": "In this sign thou shalt conquer.",
+    "quoted": "Constantine's vision (In hoc signo vinces)"
   },
   {
     "id": "blitz_fusilier",
@@ -1093,7 +1111,9 @@
       "op": "sacrifice-fast",
       "pay": 1,
       "aim": true
-    }
+    },
+    "quote": "Speed is the essence of war.",
+    "quoted": "Sun Tzu, The Art of War"
   },
   {
     "id": "initiate_of_the_coil",
@@ -1111,7 +1131,9 @@
     "act": {
       "op": "self-power",
       "pay": 2
-    }
+    },
+    "quote": "As above, so below.",
+    "quoted": "The Emerald Tablet of Hermes"
   },
   {
     "id": "vault_engineer",
@@ -1124,10 +1146,12 @@
     "keywords": [
       "tithe2"
     ],
-    "text": "While this unit stands, your bank yields +2 loyalty at the start of your rite.",
+    "text": "While this unit stands, your bank yields +2 resources at the start of your rite.",
     "power": 2,
     "legacyAttack": 2,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "Order is Heaven's first law.",
+    "quoted": "Alexander Pope"
   },
   {
     "id": "night_zeppelin",
@@ -1144,7 +1168,9 @@
     "text": "Airship. Does not conquer. It has no ranged strike, and a diagonal is out of reach. It fights only by stepping into an adjacent enemy. Loses 1 health at the start of your rite. You may muster a unit on an empty circle beside it. The envelope crosses the circle and leaves the ground unclaimed.",
     "power": 4,
     "legacyAttack": 3,
-    "legacyHealth": 4
+    "legacyHealth": 4,
+    "quote": "I am the master of my fate: I am the captain of my soul.",
+    "quoted": "William Ernest Henley, Invictus"
   },
   {
     "id": "coil_undersider",
@@ -1158,7 +1184,9 @@
     "text": "A man who lives in the service tunnels. He closes, and he hits like a rivet gun.",
     "power": 4,
     "legacyAttack": 3,
-    "legacyHealth": 4
+    "legacyHealth": 4,
+    "quote": "Look within. Within is the fountain of good.",
+    "quoted": "Marcus Aurelius, Meditations"
   },
   {
     "id": "coil_berserk",
@@ -1174,7 +1202,9 @@
     "text": "When deployed, discard a random card from your hand. Then it is simply enormous.",
     "power": 4,
     "legacyAttack": 4,
-    "legacyHealth": 4
+    "legacyHealth": 4,
+    "quote": "Anger is a short madness.",
+    "quoted": "Horace"
   },
   {
     "id": "night_aviator",
@@ -1190,7 +1220,9 @@
     "text": "Ranged Strike. A shot reaches 2 tiles and is not answered. The shot is a choice. It may instead step into an adjacent enemy, and that blow is an ordinary fight.",
     "power": 3,
     "legacyAttack": 3,
-    "legacyHealth": 3
+    "legacyHealth": 3,
+    "quote": "No bird soars too high, if he soars with his own wings.",
+    "quoted": "William Blake"
   },
   {
     "id": "runed_myrmidon",
@@ -1206,7 +1238,9 @@
     "text": "At the start of your rite, pay 2 or it cannot act. Plate etched with a working alphabet.",
     "power": 6,
     "legacyAttack": 5,
-    "legacyHealth": 6
+    "legacyHealth": 6,
+    "quote": "Character is destiny.",
+    "quoted": "Heraclitus"
   },
   {
     "id": "champion_of_the_inner_earth",
@@ -1220,7 +1254,9 @@
     "text": "The hollow-earth champion. It costs a fortune and ends arguments.",
     "power": 8,
     "legacyAttack": 6,
-    "legacyHealth": 8
+    "legacyHealth": 8,
+    "quote": "The kingdom of God is within you.",
+    "quoted": "Luke 17:21"
   },
   {
     "id": "amulet_of_the_coil",
@@ -1236,7 +1272,9 @@
     "effect": {
       "op": "sacrifice_splash",
       "n": 3
-    }
+    },
+    "quote": "The dose makes the poison.",
+    "quoted": "Paracelsus"
   },
   {
     "id": "waking_the_sleeper",
@@ -1251,7 +1289,9 @@
     "aim": true,
     "effect": {
       "op": "destroy"
-    }
+    },
+    "quote": "Awake, thou that sleepest, and arise from the dead.",
+    "quoted": "Ephesians 5:14"
   },
   {
     "id": "industrial_rite",
@@ -1262,11 +1302,13 @@
     "cost": 1,
     "oath": 3,
     "keywords": [],
-    "text": "Sacrifice a unit you own. Bank loyalty equal to twice its printed cost.",
+    "text": "Sacrifice a unit you own. Bank resources equal to twice its printed cost.",
     "aim": true,
     "effect": {
       "op": "sacrifice_bank"
-    }
+    },
+    "quote": "Labor omnia vincit — work conquers all.",
+    "quoted": "Virgil"
   },
   {
     "id": "chlorine_psalm",
@@ -1283,7 +1325,9 @@
     "effect": {
       "op": "smite_all",
       "n": 1
-    }
+    },
+    "quote": "I am become Death, the destroyer of worlds.",
+    "quoted": "Bhagavad Gita 11:32"
   },
   {
     "id": "runaway_mint",
@@ -1298,7 +1342,9 @@
     "effect": {
       "op": "empty"
     },
-    "alsoDraw": 1
+    "alsoDraw": 1,
+    "quote": "The love of money is the root of all evil.",
+    "quoted": "1 Timothy 6:10"
   },
   {
     "id": "the_rune_colonel",
@@ -1312,7 +1358,9 @@
     "text": "Leader. Once in a sitting: pay 4, unmake a unit you own, and deal 2 to every unit beside it.",
     "leaderPower": {
       "op": "martyr"
-    }
+    },
+    "quote": "To lead the people, walk behind them.",
+    "quoted": "Laozi, Tao Te Ching"
   },
   {
     "id": "the_iron_saint",
@@ -1326,7 +1374,9 @@
     "text": "Leader. Once in a sitting: pay 3. A unit gains Fast Attack and may act at once.",
     "leaderPower": {
       "op": "haste"
-    }
+    },
+    "quote": "Iron sharpeneth iron; so a man sharpeneth the countenance of his friend.",
+    "quoted": "Proverbs 27:17"
   },
   {
     "id": "ash_lice",
@@ -1340,7 +1390,9 @@
     "text": "A handful of grave-lice in a lead snuffbox. They bite, and they stay.",
     "power": 2,
     "legacyAttack": 1,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "Behold, how great a matter a little fire kindleth!",
+    "quoted": "James 3:5"
   },
   {
     "id": "parish_tithe_lord",
@@ -1353,10 +1405,12 @@
     "keywords": [
       "tithe"
     ],
-    "text": "While this unit stands, your bank yields +1 loyalty at the start of your rite.",
+    "text": "While this unit stands, your bank yields +1 resources at the start of your rite.",
     "power": 2,
     "legacyAttack": 1,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "Render therefore unto Caesar the things which are Caesar's.",
+    "quoted": "Matthew 22:21"
   },
   {
     "id": "candle_warden",
@@ -1372,7 +1426,9 @@
     "text": "Adjacent enemy units cannot move or attack. The candle does the watching.",
     "power": 3,
     "legacyAttack": 1,
-    "legacyHealth": 3
+    "legacyHealth": 3,
+    "quote": "Neither do men light a candle, and put it under a bushel.",
+    "quoted": "Matthew 5:15"
   },
   {
     "id": "saturn_medium",
@@ -1407,7 +1463,9 @@
     "text": "Stamina. The clerk has four wounds in him before the stamp slips.",
     "power": 4,
     "legacyAttack": 1,
-    "legacyHealth": 4
+    "legacyHealth": 4,
+    "quote": "Whatsoever thy hand findeth to do, do it with thy might.",
+    "quoted": "Ecclesiastes 9:10"
   },
   {
     "id": "cellar_informant",
@@ -1424,7 +1482,9 @@
     "legacyHealth": 2,
     "act": {
       "op": "tap-crown"
-    }
+    },
+    "quote": "A secret between more than two is no secret.",
+    "quoted": "Spanish proverb"
   },
   {
     "id": "ancestral_cinder",
@@ -1444,7 +1504,9 @@
       "pay": 1,
       "aim": true,
       "once": true
-    }
+    },
+    "quote": "Honor thy father and thy mother: that thy days may be long upon the land.",
+    "quoted": "Exodus 20:12"
   },
   {
     "id": "guided_confessor",
@@ -1460,7 +1522,9 @@
     "text": "Toughness. The first point of damage from any strike is refused.",
     "power": 3,
     "legacyAttack": 2,
-    "legacyHealth": 3
+    "legacyHealth": 3,
+    "quote": "Confess your faults one to another, and pray one for another.",
+    "quoted": "James 5:16"
   },
   {
     "id": "strix_widow",
@@ -1477,7 +1541,9 @@
     "text": "After this unit strikes and survives, it gains +2 power. When it destroys a unit, you score 2 domination.",
     "power": 2,
     "legacyAttack": 2,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "Hell hath no fury like a woman scorned.",
+    "quoted": "William Congreve"
   },
   {
     "id": "feral_cantor",
@@ -1495,7 +1561,9 @@
     "act": {
       "op": "tap-mend",
       "aim": true
-    }
+    },
+    "quote": "O sing unto the Lord a new song.",
+    "quoted": "Psalm 96:1"
   },
   {
     "id": "hearth_imp",
@@ -1511,7 +1579,9 @@
     "text": "A resource node this imp stands on banks twice.",
     "power": 2,
     "legacyAttack": 1,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "Keep the fire burning; when the hearth goes cold, the house forgets itself.",
+    "quoted": "Welsh proverb"
   },
   {
     "id": "unblinking_penitent",
@@ -1543,7 +1613,9 @@
     "text": "The estate guard, with something older wearing his coat. He closes the distance.",
     "power": 3,
     "legacyAttack": 3,
-    "legacyHealth": 3
+    "legacyHealth": 3,
+    "quote": "What is bred in the bone will not come out of the flesh.",
+    "quoted": "English proverb"
   },
   {
     "id": "river_bride",
@@ -1559,7 +1631,9 @@
     "text": "Does not conquer. She may be mustered, and she leaves the tile's ownership alone.",
     "power": 3,
     "legacyAttack": 3,
-    "legacyHealth": 3
+    "legacyHealth": 3,
+    "quote": "You cannot step twice into the same river.",
+    "quoted": "Heraclitus"
   },
   {
     "id": "hoarfrost_saint",
@@ -1575,7 +1649,9 @@
     "text": "Enemy units are deployed exhausted, even those with Fast Attack, while the saint stands.",
     "power": 3,
     "legacyAttack": 1,
-    "legacyHealth": 3
+    "legacyHealth": 3,
+    "quote": "Like as the cold of snow in the time of harvest, so is a faithful messenger.",
+    "quoted": "Proverbs 25:13"
   },
   {
     "id": "the_lead_bear",
@@ -1591,7 +1667,9 @@
     "text": "Toughness. A parish bear cast in saturnine metal. The first point of any strike is refused.",
     "power": 6,
     "legacyAttack": 5,
-    "legacyHealth": 6
+    "legacyHealth": 6,
+    "quote": "The bear is wise; he sleeps through the hard season and wakes when the earth is ready.",
+    "quoted": "Anishinaabe teaching"
   },
   {
     "id": "the_birch_king",
@@ -1605,7 +1683,9 @@
     "text": "The wood that walked into the city. No sermon. Five wounds, four blows.",
     "power": 5,
     "legacyAttack": 4,
-    "legacyHealth": 5
+    "legacyHealth": 5,
+    "quote": "I think that I shall never see a poem lovely as a tree.",
+    "quoted": "Joyce Kilmer, Trees"
   },
   {
     "id": "pallid_aurora",
@@ -1620,7 +1700,9 @@
     "effect": {
       "op": "smite_all",
       "n": 1
-    }
+    },
+    "quote": "The light shineth in darkness; and the darkness comprehended it not.",
+    "quoted": "John 1:5"
   },
   {
     "id": "the_sunk_stroke",
@@ -1635,7 +1717,9 @@
     "aim": true,
     "effect": {
       "op": "lock"
-    }
+    },
+    "quote": "Be still, and know that I am God.",
+    "quoted": "Psalm 46:10"
   },
   {
     "id": "mind_mildew",
@@ -1667,7 +1751,9 @@
     "aim": true,
     "effect": {
       "op": "shove"
-    }
+    },
+    "quote": "Courage is resistance to fear, mastery of fear — not absence of fear.",
+    "quoted": "Mark Twain"
   },
   {
     "id": "birch_doll",
@@ -1686,7 +1772,9 @@
     },
     "alsoDraw": 1,
     "alsoHealth": 1,
-    "alsoTough": true
+    "alsoTough": true,
+    "quote": "Out of small acorns grow mighty oaks.",
+    "quoted": "English proverb"
   },
   {
     "id": "leaden_egg",
@@ -1697,12 +1785,14 @@
     "cost": 5,
     "oath": 3,
     "keywords": [],
-    "text": "Device. Draw 2 cards and bank 2 loyalty.",
+    "text": "Device. Draw 2 cards and bank 2 resources.",
     "effect": {
       "op": "draw",
       "n": 2
     },
-    "alsoBank": 2
+    "alsoBank": 2,
+    "quote": "Patience is a bitter plant, but it has sweet fruit.",
+    "quoted": "Persian proverb"
   },
   {
     "id": "the_leaden_stare",
@@ -1716,7 +1806,9 @@
     "text": "Leader. Once in a sitting: pay 2. A unit gains +2 health and +1 power.",
     "leaderPower": {
       "op": "bulwark"
-    }
+    },
+    "quote": "The eye is the lamp of the body.",
+    "quoted": "Matthew 6:22"
   },
   {
     "id": "the_birch_crone",
@@ -1730,7 +1822,9 @@
     "text": "Leader. Once in a sitting: pay 3 and slide an exhausted unit onto an empty adjacent circle that is not a stronghold.",
     "leaderPower": {
       "op": "slide"
-    }
+    },
+    "quote": "When an elder dies, a library burns.",
+    "quoted": "African proverb"
   },
   {
     "id": "alley_inquiry",
@@ -1762,7 +1856,9 @@
     "text": "If it survives a battle, it gains 1 health. A cutting that learned to walk. It grows only if you keep it.",
     "power": 1,
     "legacyAttack": 1,
-    "legacyHealth": 1
+    "legacyHealth": 1,
+    "quote": "That which does not kill us makes us stronger.",
+    "quoted": "Friedrich Nietzsche"
   },
   {
     "id": "heath_tithe_maid",
@@ -1775,10 +1871,12 @@
     "keywords": [
       "tithe"
     ],
-    "text": "While this unit stands, your bank yields +1 loyalty at the start of your rite.",
+    "text": "While this unit stands, your bank yields +1 resources at the start of your rite.",
     "power": 2,
     "legacyAttack": 1,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "Whatsoever a man soweth, that shall he also reap.",
+    "quoted": "Galatians 6:7"
   },
   {
     "id": "thieving_pollen",
@@ -1797,7 +1895,9 @@
       "op": "once-sting",
       "aim": true,
       "once": true
-    }
+    },
+    "quote": "The bee is little among such as fly; but her fruit is the chief of sweet things.",
+    "quoted": "Ecclesiasticus 11:3"
   },
   {
     "id": "pollen_orator",
@@ -1817,7 +1917,9 @@
       "n": 1,
       "aim": true,
       "once": true
-    }
+    },
+    "quote": "Speech is silver, silence is golden.",
+    "quoted": "Swiss proverb"
   },
   {
     "id": "lion_initiate",
@@ -1833,7 +1935,9 @@
     "text": "When this unit conquers a tile, it gains +1 power. Green fire in both fists.",
     "power": 3,
     "legacyAttack": 1,
-    "legacyHealth": 3
+    "legacyHealth": 3,
+    "quote": "The righteous are bold as a lion.",
+    "quoted": "Proverbs 28:1"
   },
   {
     "id": "sotted_greenhand",
@@ -1847,7 +1951,9 @@
     "text": "Stamina. Drunk on sap, and it takes four wounds to put him in the hedge.",
     "power": 4,
     "legacyAttack": 2,
-    "legacyHealth": 4
+    "legacyHealth": 4,
+    "quote": "Wine is a mocker, strong drink is raging.",
+    "quoted": "Proverbs 20:1"
   },
   {
     "id": "the_grazing_seven",
@@ -1863,7 +1969,9 @@
     "text": "When it moves, every adjacent tile the enemy owns becomes neutral. Strongholds are spared. It claims only the square it stands on. Seven pale pigs eat a claim down to dirt.",
     "power": 2,
     "legacyAttack": 2,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "The earth is the Lord's, and the fulness thereof.",
+    "quoted": "Psalm 24:1"
   },
   {
     "id": "hedgerow_driver",
@@ -1876,10 +1984,12 @@
     "keywords": [
       "toll"
     ],
-    "text": "When this unit conquers a tile, bank +1 loyalty.",
+    "text": "When this unit conquers a tile, bank +1 resources.",
     "power": 2,
     "legacyAttack": 2,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "Nature does not hurry, yet everything is accomplished.",
+    "quoted": "Laozi"
   },
   {
     "id": "orchard_landlord",
@@ -1895,7 +2005,9 @@
     "text": "When this unit conquers a tile, you score 1 domination. He owns the rows between the gaslights. The deed is already in his pocket.",
     "power": 2,
     "legacyAttack": 2,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "He that planteth a tree is a servant of God.",
+    "quoted": "Thomas Fuller"
   },
   {
     "id": "heath_maiden",
@@ -1914,7 +2026,9 @@
       "op": "bolster",
       "pay": 2,
       "aim": true
-    }
+    },
+    "quote": "The earth laughs in flowers.",
+    "quoted": "Ralph Waldo Emerson"
   },
   {
     "id": "bog_charger",
@@ -1928,7 +2042,9 @@
     "text": "A black horse that is not a horse, bridled in wet gold. It closes, hard.",
     "power": 3,
     "legacyAttack": 3,
-    "legacyHealth": 3
+    "legacyHealth": 3,
+    "quote": "Though I walk through the valley of the shadow of death, I will fear no evil.",
+    "quoted": "Psalm 23:4"
   },
   {
     "id": "briar_party",
@@ -1944,7 +2060,9 @@
     "text": "When deployed, this unit gains +1 power for each other unit you already control.",
     "power": 1,
     "legacyAttack": 1,
-    "legacyHealth": 1
+    "legacyHealth": 1,
+    "quote": "Among thorns grow the roses.",
+    "quoted": "Latin proverb"
   },
   {
     "id": "green_wail",
@@ -1962,7 +2080,9 @@
     "act": {
       "op": "wail",
       "pay": 4
-    }
+    },
+    "quote": "The land is our mother; when she cries, her children should listen.",
+    "quoted": "Haudenosaunee teaching"
   },
   {
     "id": "cursed_verdant",
@@ -1978,7 +2098,9 @@
     "text": "When she conquers a tile, she gains 1 health. A duchess who married the hedge, and the ground feeds her.",
     "power": 4,
     "legacyAttack": 4,
-    "legacyHealth": 4
+    "legacyHealth": 4,
+    "quote": "Nature, red in tooth and claw.",
+    "quoted": "Alfred, Lord Tennyson, In Memoriam"
   },
   {
     "id": "peat_brute",
@@ -1992,7 +2114,9 @@
     "text": "Five wounds. Five blows. The bog made a man and then regretted the size.",
     "power": 5,
     "legacyAttack": 5,
-    "legacyHealth": 5
+    "legacyHealth": 5,
+    "quote": "What the bog takes, the bog keeps.",
+    "quoted": "Irish proverb"
   },
   {
     "id": "the_green_kiss",
@@ -2008,7 +2132,9 @@
     "effect": {
       "op": "empower",
       "n": 2
-    }
+    },
+    "quote": "One is nearer God's heart in a garden than anywhere else on earth.",
+    "quoted": "Dorothy Frances Gurney"
   },
   {
     "id": "opened_barrow",
@@ -2019,11 +2145,13 @@
     "cost": 4,
     "oath": 2,
     "keywords": [],
-    "text": "Bank 2 loyalty. A door in the mound pays its toll in coin, not in land.",
+    "text": "Bank 2 resources. A door in the mound pays its toll in coin, not in land.",
     "effect": {
       "op": "bank",
       "n": 2
-    }
+    },
+    "quote": "Speak not against the dead; they have no answer but silence.",
+    "quoted": "Ancient Egyptian teaching"
   },
   {
     "id": "lion_s_vigil",
@@ -2038,7 +2166,9 @@
     "effect": {
       "op": "empower_all",
       "n": 1
-    }
+    },
+    "quote": "The lion does not turn around when small dogs bark.",
+    "quoted": "African proverb"
   },
   {
     "id": "return_to_loam",
@@ -2049,11 +2179,13 @@
     "cost": 4,
     "oath": 2,
     "keywords": [],
-    "text": "Name a unit and unmake it. Its owner banks loyalty equal to that unit's printed cost.",
+    "text": "Name a unit and unmake it. Its owner banks resources equal to that unit's printed cost.",
     "aim": true,
     "effect": {
       "op": "destroy_refund"
-    }
+    },
+    "quote": "Dust thou art, and unto dust shalt thou return.",
+    "quoted": "Genesis 3:19"
   },
   {
     "id": "lion_s_mask",
@@ -2069,7 +2201,9 @@
     "effect": {
       "op": "set_power",
       "n": 4
-    }
+    },
+    "quote": "We wear the mask that grins and lies, it hides our cheeks and shades our eyes.",
+    "quoted": "Paul Laurence Dunbar, We Wear the Mask"
   },
   {
     "id": "cup_of_the_lion",
@@ -2086,7 +2220,9 @@
       "op": "empower",
       "n": 1
     },
-    "alsoDraw": 1
+    "alsoDraw": 1,
+    "quote": "My cup runneth over.",
+    "quoted": "Psalm 23:5"
   },
   {
     "id": "false_vintage",
@@ -2102,7 +2238,9 @@
     "effect": {
       "op": "set_power",
       "n": 1
-    }
+    },
+    "quote": "Woe unto them that call evil good, and good evil.",
+    "quoted": "Isaiah 5:20"
   },
   {
     "id": "the_green_sovereign",
@@ -2117,7 +2255,9 @@
     "leaderPower": {
       "op": "empower_draw",
       "n": 1
-    }
+    },
+    "quote": "The forest is the poor man's overcoat.",
+    "quoted": "New England proverb"
   },
   {
     "id": "queen_of_the_hedgerow",
@@ -2131,7 +2271,9 @@
     "text": "Leader. Once in a sitting: pay 4 and claim an empty circle that is not a stronghold.",
     "leaderPower": {
       "op": "claim"
-    }
+    },
+    "quote": "A queen among thorns is still a queen.",
+    "quoted": "Irish proverb"
   },
   {
     "id": "gutter_theorist",
@@ -2145,7 +2287,9 @@
     "text": "A beggar with a correct equation. One stab, then he is gone.",
     "power": 1,
     "legacyAttack": 1,
-    "legacyHealth": 1
+    "legacyHealth": 1,
+    "quote": "I think, therefore I am.",
+    "quoted": "René Descartes"
   },
   {
     "id": "ruined_patron",
@@ -2158,7 +2302,7 @@
     "keywords": [
       "scandal"
     ],
-    "text": "When deployed, the opponent loses 2 loyalty.",
+    "text": "When deployed, the opponent loses 2 resources.",
     "power": 2,
     "legacyAttack": 1,
     "legacyHealth": 2,
@@ -2176,10 +2320,12 @@
     "keywords": [
       "tithe"
     ],
-    "text": "While this unit stands, your bank yields +1 loyalty at the start of your rite.",
+    "text": "While this unit stands, your bank yields +1 resources at the start of your rite.",
     "power": 2,
     "legacyAttack": 1,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "Separate the earth from the fire, the subtle from the gross, gently and with great ingenuity.",
+    "quoted": "The Emerald Tablet of Hermes"
   },
   {
     "id": "glass_homunculus",
@@ -2195,7 +2341,9 @@
     "text": "Slow muster. It cannot move or attack the rite it arrives. A little man grown in a retort.",
     "power": 2,
     "legacyAttack": 2,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "Man is a microcosm of the universe.",
+    "quoted": "Paracelsus"
   },
   {
     "id": "street_magus",
@@ -2213,7 +2361,9 @@
     "act": {
       "op": "recall",
       "aim": true
-    }
+    },
+    "quote": "Whatever you can do, or dream you can, begin it. Boldness has genius, power and magic in it.",
+    "quoted": "Johann Wolfgang von Goethe"
   },
   {
     "id": "mirror_solvent",
@@ -2253,7 +2403,9 @@
     "legacyHealth": 3,
     "act": {
       "op": "tap-draw"
-    }
+    },
+    "quote": "Solve et coagula.",
+    "quoted": "Alchemical maxim"
   },
   {
     "id": "athanor_guard",
@@ -2270,7 +2422,9 @@
     "text": "Slow muster. It cannot act the rite it arrives. While this unit stands, your bank yields +1.",
     "power": 3,
     "legacyAttack": 2,
-    "legacyHealth": 3
+    "legacyHealth": 3,
+    "quote": "Watch ye therefore: for ye know not when the master of the house cometh.",
+    "quoted": "Mark 13:35"
   },
   {
     "id": "serpent_adept",
@@ -2286,7 +2440,9 @@
     "text": "When deployed, the opponent discards a random card.",
     "power": 2,
     "legacyAttack": 2,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "Be ye therefore wise as serpents, and harmless as doves.",
+    "quoted": "Matthew 10:16"
   },
   {
     "id": "third_eye_disciple",
@@ -2302,7 +2458,9 @@
     "text": "When this unit attacks, the defender is returned to its owner's hand instead of being struck.",
     "power": 2,
     "legacyAttack": 2,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "If therefore thine eye be single, thy whole body shall be full of light.",
+    "quoted": "Matthew 6:22"
   },
   {
     "id": "azoth_twin",
@@ -2322,7 +2480,9 @@
       "pay": 2,
       "aim": true,
       "once": true
-    }
+    },
+    "quote": "That which is born of the Spirit is spirit.",
+    "quoted": "John 3:6"
   },
   {
     "id": "sealed_assassin",
@@ -2341,7 +2501,9 @@
       "op": "once-nick",
       "aim": true,
       "once": true
-    }
+    },
+    "quote": "Silence is a friend who will never betray.",
+    "quoted": "Confucius"
   },
   {
     "id": "back_alley_vitriol",
@@ -2355,7 +2517,9 @@
     "text": "Acid in a perfume bottle. Three wounds either way.",
     "power": 3,
     "legacyAttack": 3,
-    "legacyHealth": 3
+    "legacyHealth": 3,
+    "quote": "Visit the interior of the earth, and by rectifying you will find the hidden stone.",
+    "quoted": "Alchemical maxim (V.I.T.R.I.O.L.)"
   },
   {
     "id": "jeweled_homage",
@@ -2371,7 +2535,9 @@
     "text": "When an enemy unit is destroyed, draw 1 card. An idol that perspires gold when the other side falls.",
     "power": 4,
     "legacyAttack": 3,
-    "legacyHealth": 4
+    "legacyHealth": 4,
+    "quote": "A pearl of great price.",
+    "quoted": "Matthew 13:46"
   },
   {
     "id": "quicksilver_valet",
@@ -2385,7 +2551,9 @@
     "text": "A servant poured, not born. Four and four, and no small talk.",
     "power": 4,
     "legacyAttack": 4,
-    "legacyHealth": 4
+    "legacyHealth": 4,
+    "quote": "Mercury is spirit, sulphur is soul, and salt is body.",
+    "quoted": "Paracelsus"
   },
   {
     "id": "the_open_retort",
@@ -2401,7 +2569,9 @@
     "text": "A unit that meets it in combat is destroyed. That unit's owner discards a card. The glass is thinner than it looks.",
     "power": 4,
     "legacyAttack": 3,
-    "legacyHealth": 4
+    "legacyHealth": 4,
+    "quote": "Nothing is so firmly believed as that which is least known.",
+    "quoted": "Michel de Montaigne"
   },
   {
     "id": "lead_golem",
@@ -2417,7 +2587,9 @@
     "text": "Slow muster. Six blows, six wounds, and it cannot act the rite it is poured onto the field.",
     "power": 6,
     "legacyAttack": 6,
-    "legacyHealth": 6
+    "legacyHealth": 6,
+    "quote": "Then the Lord God formed man of dust from the ground.",
+    "quoted": "Genesis 2:7"
   },
   {
     "id": "cranial_engine",
@@ -2428,10 +2600,12 @@
     "cost": 1,
     "oath": 0,
     "keywords": [],
-    "text": "Device. Bank 1 loyalty and draw 1 card.",
+    "text": "Device. Bank 1 resources and draw 1 card.",
     "effect": {
       "op": "bank_draw"
-    }
+    },
+    "quote": "The mind is everything. What you think, you become.",
+    "quoted": "The Buddha"
   },
   {
     "id": "lamp_of_the_work",
@@ -2446,7 +2620,9 @@
     "effect": {
       "op": "draw",
       "n": 3
-    }
+    },
+    "quote": "Knowledge is a light which God casts into the heart.",
+    "quoted": "Al-Ghazali"
   },
   {
     "id": "trepan_rite",
@@ -2478,7 +2654,9 @@
     "aim": true,
     "effect": {
       "op": "bounce"
-    }
+    },
+    "quote": "Where two or three are gathered together in my name, there am I in the midst of them.",
+    "quoted": "Matthew 18:20"
   },
   {
     "id": "rose_of_the_shut_garden",
@@ -2489,10 +2667,12 @@
     "cost": 5,
     "oath": 2,
     "keywords": [],
-    "text": "Device. Take up to 5 loyalty from the opponent's bank.",
+    "text": "Device. Take up to 5 resources from the opponent's bank.",
     "effect": {
       "op": "leech"
-    }
+    },
+    "quote": "A garden enclosed is my sister, my spouse; a spring shut up, a fountain sealed.",
+    "quoted": "Song of Solomon 4:12"
   },
   {
     "id": "carve_the_seal",
@@ -2508,7 +2688,9 @@
     "effect": {
       "op": "empower",
       "n": 2
-    }
+    },
+    "quote": "Set me as a seal upon thine heart, as a seal upon thine arm.",
+    "quoted": "Song of Solomon 8:6"
   },
   {
     "id": "the_mute_alchemist",
@@ -2522,7 +2704,9 @@
     "text": "Leader. Once in a sitting: pay 4 and return a unit to its owner's hand.",
     "leaderPower": {
       "op": "bounce"
-    }
+    },
+    "quote": "Silence is the language of God; all else is poor translation.",
+    "quoted": "Rumi"
   },
   {
     "id": "the_gold_fraud",
@@ -2537,7 +2721,9 @@
     "leaderPower": {
       "op": "draw",
       "n": 2
-    }
+    },
+    "quote": "All that glisters is not gold.",
+    "quoted": "William Shakespeare, The Merchant of Venice"
   },
   {
     "id": "velvet_revenant",
@@ -2571,7 +2757,9 @@
     "text": "Ranged Strike. A shot from the back booth reaches 2 tiles and takes no counterblow.",
     "power": 2,
     "legacyAttack": 2,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "It is always darkest just before the day dawneth.",
+    "quoted": "Thomas Fuller"
   },
   {
     "id": "alley_medium",
@@ -2584,7 +2772,7 @@
     "keywords": [
       "tithe"
     ],
-    "text": "While this unit stands, your bank yields +1 loyalty. She reads the till, not the future.",
+    "text": "While this unit stands, your bank yields +1 resources. She reads the till, not the future.",
     "power": 2,
     "legacyAttack": 1,
     "legacyHealth": 2,
@@ -2603,7 +2791,9 @@
     "text": "Both strike together. A drum magazine and a dead man's grin. He does not land the first blow.",
     "power": 3,
     "legacyAttack": 3,
-    "legacyHealth": 3
+    "legacyHealth": 3,
+    "quote": "All they that take the sword shall perish with the sword.",
+    "quoted": "Matthew 26:52"
   },
   {
     "id": "bone_consigliere",
@@ -2617,7 +2807,9 @@
     "text": "He advises with a syringe of green light. Power 3, and he does not sit down.",
     "power": 3,
     "legacyAttack": 3,
-    "legacyHealth": 3
+    "legacyHealth": 3,
+    "quote": "In the multitude of counsellors there is safety.",
+    "quoted": "Proverbs 11:14"
   },
   {
     "id": "concrete_angel",
@@ -2633,7 +2825,9 @@
     "text": "Toughness. Wings of rebar. The first point of any strike is refused.",
     "power": 4,
     "legacyAttack": 2,
-    "legacyHealth": 4
+    "legacyHealth": 4,
+    "quote": "For he shall give his angels charge over thee, to keep thee in all thy ways.",
+    "quoted": "Psalm 91:11"
   },
   {
     "id": "grave_capo",
@@ -2665,7 +2859,9 @@
     "text": "Ranged Strike. The don does not stand up. The order travels 2 tiles and is not answered.",
     "power": 5,
     "legacyAttack": 4,
-    "legacyHealth": 5
+    "legacyHealth": 5,
+    "quote": "Uneasy lies the head that wears a crown.",
+    "quoted": "William Shakespeare, Henry IV"
   },
   {
     "id": "last_call",
@@ -2699,7 +2895,9 @@
     "effect": {
       "op": "empower",
       "n": 2
-    }
+    },
+    "quote": "Let your yea be yea; and your nay, nay.",
+    "quoted": "James 5:12"
   },
   {
     "id": "funeral_march",
@@ -2714,7 +2912,9 @@
     "effect": {
       "op": "smite_all",
       "n": 1
-    }
+    },
+    "quote": "Man that is born of a woman is of few days, and full of trouble.",
+    "quoted": "Job 14:1"
   },
   {
     "id": "lead_violin",
@@ -2729,7 +2929,9 @@
     "effect": {
       "op": "draw",
       "n": 2
-    }
+    },
+    "quote": "Music is a higher revelation than all wisdom and philosophy.",
+    "quoted": "Ludwig van Beethoven"
   },
   {
     "id": "cement_shoes",
@@ -2744,7 +2946,9 @@
     "aim": true,
     "effect": {
       "op": "lock"
-    }
+    },
+    "quote": "The mills of God grind slowly, yet they grind exceeding small.",
+    "quoted": "Friedrich von Logau, tr. Longfellow"
   },
   {
     "id": "the_widowed_saint",
@@ -2758,7 +2962,9 @@
     "text": "Leader. Once in a sitting: pay 2. A unit stands back up at full health with +1 power.",
     "leaderPower": {
       "op": "mend"
-    }
+    },
+    "quote": "Blessed are they that mourn: for they shall be comforted.",
+    "quoted": "Matthew 5:4"
   },
   {
     "id": "the_laughing_coroner",
@@ -2772,7 +2978,9 @@
     "text": "Leader. Once in a sitting: pay 3. Return the top card of your discard to your hand, then draw 1.",
     "leaderPower": {
       "op": "grave"
-    }
+    },
+    "quote": "Death smiles at us all; all we can do is smile back.",
+    "quoted": "Marcus Aurelius"
   },
   {
     "id": "hydesville_rapper",
@@ -2786,7 +2994,9 @@
     "text": "A Fox sister's knock in a dark farmhouse. One rap, and she stays for the answer.",
     "power": 2,
     "legacyAttack": 1,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "Knock, and it shall be opened unto you.",
+    "quoted": "Matthew 7:7"
   },
   {
     "id": "franklin_s_key",
@@ -2799,10 +3009,12 @@
     "keywords": [
       "tithe"
     ],
-    "text": "While this unit stands, your bank yields +1 loyalty. The key still draws the storm into the jar.",
+    "text": "While this unit stands, your bank yields +1 resources. The key still draws the storm into the jar.",
     "power": 2,
     "legacyAttack": 1,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "Well done is better than well said.",
+    "quoted": "Benjamin Franklin"
   },
   {
     "id": "high_john",
@@ -2818,7 +3030,9 @@
     "text": "Fast Attack. The root strikes first when he steps into a foe. A killing blow is not answered.",
     "power": 2,
     "legacyAttack": 2,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "If ye have faith as a grain of mustard seed, ye shall say unto this mountain, Remove hence.",
+    "quoted": "Matthew 17:20"
   },
   {
     "id": "appleseed_walker",
@@ -2834,7 +3048,9 @@
     "text": "A resource node this walker stands on banks twice. He sows, and the ground pays double.",
     "power": 3,
     "legacyAttack": 1,
-    "legacyHealth": 3
+    "legacyHealth": 3,
+    "quote": "He who plants a tree plants a hope.",
+    "quoted": "Lucy Larcom"
   },
   {
     "id": "coyote_s_laugh",
@@ -2850,7 +3066,9 @@
     "text": "When deployed, the opponent discards a random card. The trick is the arrival.",
     "power": 2,
     "legacyAttack": 1,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "Coyote was going along — and wherever Coyote goes, trouble follows laughing.",
+    "quoted": "Plateau Indian storytelling tradition"
   },
   {
     "id": "menlo_spirit_wright",
@@ -2863,7 +3081,7 @@
     "keywords": [
       "salvage"
     ],
-    "text": "When another unit you control is destroyed, bank +1 loyalty. The spirit phone rings for the dead.",
+    "text": "When another unit you control is destroyed, bank +1 resources. The spirit phone rings for the dead.",
     "power": 2,
     "legacyAttack": 1,
     "legacyHealth": 2,
@@ -2881,10 +3099,12 @@
     "keywords": [
       "toll"
     ],
-    "text": "When this unit conquers a tile, bank +1 loyalty. The camp medium makes the ground pay for the sitting.",
+    "text": "When this unit conquers a tile, bank +1 resources. The camp medium makes the ground pay for the sitting.",
     "power": 3,
     "legacyAttack": 2,
-    "legacyHealth": 3
+    "legacyHealth": 3,
+    "quote": "We are spirits clad in veils; Man by man was never seen.",
+    "quoted": "Christopher Pearse Cranch"
   },
   {
     "id": "randolph_glass",
@@ -2900,7 +3120,9 @@
     "text": "Untargetable. Does not conquer. Combat and ranged strikes pass over the glass. When it steps onto an enemy, that enemy returns to its owner's hand.",
     "power": 2,
     "legacyAttack": 2,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "For now we see through a glass, darkly; but then face to face.",
+    "quoted": "1 Corinthians 13:12"
   },
   {
     "id": "powwow_doctor",
@@ -2916,7 +3138,9 @@
     "text": "Toughness. A Pennsylvania hexenmeister with Hohman's book. The first point of any strike is refused.",
     "power": 4,
     "legacyAttack": 2,
-    "legacyHealth": 4
+    "legacyHealth": 4,
+    "quote": "Physician, heal thyself.",
+    "quoted": "Luke 4:23"
   },
   {
     "id": "wardenclyffe_adept",
@@ -2932,7 +3156,9 @@
     "text": "Ranged Strike. The tower's arc reaches 2 tiles and takes no counterblow.",
     "power": 3,
     "legacyAttack": 2,
-    "legacyHealth": 3
+    "legacyHealth": 3,
+    "quote": "If you want to find the secrets of the universe, think in terms of energy, frequency and vibration.",
+    "quoted": "Nikola Tesla"
   },
   {
     "id": "rocket_chemist",
@@ -2948,7 +3174,9 @@
     "text": "Fast Attack. He lands the blow before the reply. If they are unmade, they deal nothing.",
     "power": 3,
     "legacyAttack": 3,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "Imagination is more important than knowledge.",
+    "quoted": "Albert Einstein"
   },
   {
     "id": "poughkeepsie_seer",
@@ -2962,7 +3190,9 @@
     "text": "Andrew Jackson Davis's heir in a lecture hall. He sees the blow coming and still only hits for 2.",
     "power": 3,
     "legacyAttack": 2,
-    "legacyHealth": 3
+    "legacyHealth": 3,
+    "quote": "The pure and simple truth is rarely pure and never simple.",
+    "quoted": "Oscar Wilde"
   },
   {
     "id": "the_bell_witch",
@@ -2996,7 +3226,9 @@
     "text": "After this unit strikes and survives, it gains +2 power. The Hessian does not need a head to swing.",
     "power": 4,
     "legacyAttack": 4,
-    "legacyHealth": 4
+    "legacyHealth": 4,
+    "quote": "The apparition of a figure on horseback without a head.",
+    "quoted": "Washington Irving, The Legend of Sleepy Hollow"
   },
   {
     "id": "leeds_devil",
@@ -3030,7 +3262,9 @@
     "text": "Ranged Strike. A storm spirit of the plains and woodlands. The lightning reaches 2 tiles and is not answered in kind.",
     "power": 5,
     "legacyAttack": 4,
-    "legacyHealth": 5
+    "legacyHealth": 5,
+    "quote": "The Thunder Beings speak in lightning; the earth answers in rain.",
+    "quoted": "Lakota teaching"
   },
   {
     "id": "john_henry",
@@ -3044,7 +3278,9 @@
     "text": "He races the steam drill and does not lose. Five blows, five wounds.",
     "power": 5,
     "legacyAttack": 5,
-    "legacyHealth": 5
+    "legacyHealth": 5,
+    "quote": "A man's a man for a' that.",
+    "quoted": "Robert Burns"
   },
   {
     "id": "goofer_dust",
@@ -3077,7 +3313,9 @@
     "aim": true,
     "effect": {
       "op": "lock"
-    }
+    },
+    "quote": "The wicked flee when no man pursueth: but the righteous are bold as a lion.",
+    "quoted": "Proverbs 28:1"
   },
   {
     "id": "liberty_lightning",
@@ -3092,7 +3330,9 @@
     "effect": {
       "op": "smite_all",
       "n": 1
-    }
+    },
+    "quote": "Those who would give up essential Liberty, to purchase a little temporary Safety, deserve neither.",
+    "quoted": "Benjamin Franklin"
   },
   {
     "id": "the_hydesville_knock",
@@ -3103,12 +3343,14 @@
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Draw 2 cards and bank 1 loyalty. Three knocks means yes.",
+    "text": "Draw 2 cards and bank 1 resources. Three knocks means yes.",
     "effect": {
       "op": "draw",
       "n": 2
     },
-    "alsoBank": 1
+    "alsoBank": 1,
+    "quote": "Ask, and it shall be given you; seek, and ye shall find.",
+    "quoted": "Matthew 7:7"
   },
   {
     "id": "spirit_phone",
@@ -3141,7 +3383,9 @@
     "effect": {
       "op": "empower",
       "n": 2
-    }
+    },
+    "quote": "Faith without works is dead.",
+    "quoted": "James 2:26"
   },
   {
     "id": "edgar_cayce",
@@ -3156,7 +3400,9 @@
     "leaderPower": {
       "op": "draw",
       "n": 2
-    }
+    },
+    "quote": "Mind is the builder.",
+    "quoted": "Edgar Cayce"
   },
   {
     "id": "edgar_allan_poe",
@@ -3170,7 +3416,9 @@
     "text": "Leader. Once in a sitting: pay 3 and return any unit to its owner's hand. Nevermore.",
     "leaderPower": {
       "op": "bounce"
-    }
+    },
+    "quote": "Quoth the Raven, \"Nevermore.\"",
+    "quoted": "Edgar Allan Poe, The Raven"
   },
   {
     "id": "mothman",
@@ -3187,7 +3435,9 @@
     "text": "Cryptid. Ranged Strike. The red eyes over the river reach 2 tiles and are not answered.",
     "power": 3,
     "legacyAttack": 3,
-    "legacyHealth": 3
+    "legacyHealth": 3,
+    "quote": "When omens gather, the wise prepare.",
+    "quoted": "Cherokee proverb"
   },
   {
     "id": "sasquatch",
@@ -3204,7 +3454,9 @@
     "text": "Cryptid. Toughness. The wild man of the firs. The first wound does not count.",
     "power": 6,
     "legacyAttack": 4,
-    "legacyHealth": 6
+    "legacyHealth": 6,
+    "quote": "Walk lightly in the forest; you are never alone.",
+    "quoted": "Coast Salish teaching"
   },
   {
     "id": "vril_wyrm",
@@ -3221,7 +3473,9 @@
     "text": "Cryptid. Toughness. A coil-lit serpent come up from the inner earth.",
     "power": 5,
     "legacyAttack": 3,
-    "legacyHealth": 5
+    "legacyHealth": 5,
+    "quote": "The dragon is not slain by fear, but by courage that looks it in the eye.",
+    "quoted": "Chinese proverb"
   },
   {
     "id": "foo_fighter",
@@ -3238,7 +3492,9 @@
     "text": "Cryptid. Fast Attack. A ball of weld-light. It strikes first.",
     "power": 3,
     "legacyAttack": 3,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "Fiat lux — let there be light.",
+    "quoted": "Genesis 1:3"
   },
   {
     "id": "black_shuck",
@@ -3255,7 +3511,9 @@
     "text": "Cryptid. Fast Attack. The churchyard hound strikes before the bell can answer.",
     "power": 3,
     "legacyAttack": 3,
-    "legacyHealth": 3
+    "legacyHealth": 3,
+    "quote": "The dog is a gentleman; I hope to go to his heaven, not man's.",
+    "quoted": "Mark Twain"
   },
   {
     "id": "lead_toad",
@@ -3272,7 +3530,9 @@
     "text": "Cryptid. Tithe +1. The toad that sweats the stone feeds the bank while it stands.",
     "power": 4,
     "legacyAttack": 2,
-    "legacyHealth": 4
+    "legacyHealth": 4,
+    "quote": "Ugly is only skin deep; the toad may hold a gem.",
+    "quoted": "English folk saying"
   },
   {
     "id": "green_man",
@@ -3289,7 +3549,9 @@
     "text": "Cryptid. Tithe +1. The face in the oak. Where he stands, the rite grows richer.",
     "power": 5,
     "legacyAttack": 3,
-    "legacyHealth": 5
+    "legacyHealth": 5,
+    "quote": "I am the vine, ye are the branches.",
+    "quoted": "John 15:5"
   },
   {
     "id": "afanc",
@@ -3306,7 +3568,9 @@
     "text": "Cryptid. Toughness. The lake-beast of the drowned hall. The first wound does not count.",
     "power": 5,
     "legacyAttack": 5,
-    "legacyHealth": 5
+    "legacyHealth": 5,
+    "quote": "Still waters run deep.",
+    "quoted": "Latin proverb"
   },
   {
     "id": "spring_heeled_jack",
@@ -3380,7 +3644,9 @@
     "text": "Cryptid. Fast Attack. A fare that never pays, and strikes first.",
     "power": 2,
     "legacyAttack": 2,
-    "legacyHealth": 2
+    "legacyHealth": 2,
+    "quote": "One must pay Charon his fare to cross the Styx.",
+    "quoted": "Greek funerary custom"
   },
   {
     "id": "seth_kern",
