@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ENDINGS,
+  FULCANELLI_WARNING,
   JUSTIN_EPILOGUE,
   LEADEN_STAGES,
   pickEnding,
@@ -30,8 +31,8 @@ type Props = {
   onConsumeOutcome?: () => void;
 };
 
-/** nuke → epilogue → justin card → variant plate */
-type CloserPhase = 'nuke' | 'epilogue' | 'reveal' | 'plate';
+/** nuke → epilogue → justin card → plate → Fulcanelli warning (final) */
+type CloserPhase = 'nuke' | 'epilogue' | 'reveal' | 'plate' | 'warning';
 
 export function CampaignHour({
   profile,
@@ -90,8 +91,8 @@ export function CampaignHour({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastOutcome]);
 
-  // If player returns to a finished campaign (stage already maxed), show plate
-  // without replaying nuke unless we just finished via lastOutcome.
+  // If player returns to a finished campaign (stage already maxed), land on
+  // Fulcanelli warning — the final curtain — without replaying nuke.
   useEffect(() => {
     if (
       progress.stage >= LEADEN_STAGES.length &&
@@ -105,7 +106,7 @@ export function CampaignHour({
           .sort((a, b) => a - b)
           .map((k) => progress.choices[String(k)] as StageOutcome),
       ));
-      setCloser('plate');
+      setCloser('warning');
     }
   }, [progress.stage, progress.choices, endingId, closer, lastOutcome]);
 
@@ -197,13 +198,47 @@ export function CampaignHour({
           />
         )}
 
-        {(closer === 'plate' || closer === null) && (
-          <>
+        {closer === 'plate' && (
+          <div className="campaign-epilogue" data-testid="campaign-plate">
             <p className="plate-kicker">The Leaden Hour · Lodge memory</p>
             <h2>{end.title}</h2>
             <p className="lede">{end.text}</p>
             <p className="campaign-justin-footnote">
               Then the gadget answered. Justin Kern rules the ash.
+            </p>
+            <button
+              type="button"
+              className="brass-btn brass-btn-solid"
+              data-testid="campaign-plate-continue"
+              onClick={() => {
+                brassClick();
+                setCloser('warning');
+              }}
+            >
+              Continue
+            </button>
+          </div>
+        )}
+
+        {(closer === 'warning' || closer === null) && (
+          <div
+            className="campaign-fulcanelli campaign-epilogue"
+            data-testid="campaign-fulcanelli"
+          >
+            <p className="plate-kicker">The Occult Wars · Final curtain</p>
+            <h2>{FULCANELLI_WARNING.title}</h2>
+            <p className="campaign-fulcanelli-attr">
+              {FULCANELLI_WARNING.attribution}
+            </p>
+            <div className="deco-rule" />
+            <p className="campaign-fulcanelli-memory">
+              Lodge memory · {end.title}
+            </p>
+            <blockquote className="campaign-fulcanelli-quote">
+              {FULCANELLI_WARNING.quote}
+            </blockquote>
+            <p className="campaign-justin-footnote">
+              {FULCANELLI_WARNING.footnote}
             </p>
             <button
               type="button"
@@ -219,7 +254,7 @@ export function CampaignHour({
             >
               Return
             </button>
-          </>
+          </div>
         )}
       </section>
     );

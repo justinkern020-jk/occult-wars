@@ -2998,6 +2998,47 @@ input[type='search'] {
   color: var(--color-muted, #a89878);
   font-size: 0.92rem;
 }
+
+/* Fulcanelli final curtain */
+.campaign-fulcanelli {
+  max-width: 42rem;
+}
+.campaign-fulcanelli-attr {
+  margin: 0.35rem 0 0.15rem;
+  font-family: Cinzel, Georgia, serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  color: var(--color-brass, #c6a15b);
+  text-shadow: 0 0 14px #c6a15b44;
+}
+.campaign-fulcanelli-memory {
+  margin: 0.6rem 0 0.9rem;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--color-muted, #a89878);
+  opacity: 0.9;
+}
+.campaign-fulcanelli-quote {
+  margin: 1rem auto 1.25rem;
+  padding: 1.1rem 1.25rem 1.15rem;
+  max-width: 38rem;
+  text-align: left;
+  font-size: clamp(0.92rem, 1.7vw, 1.05rem);
+  line-height: 1.65;
+  color: var(--color-parchment, #f3ead7);
+  background: linear-gradient(160deg, #1a1510ee, #0e0b08f2);
+  border: 1px solid #c6a15b55;
+  border-left: 3px solid var(--color-brass, #c6a15b);
+  border-radius: 2px 8px 8px 2px;
+  box-shadow: 0 8px 28px #0008, inset 0 1px 0 #c6a15b22;
+  text-shadow: 0 1px 6px #000a;
+  white-space: pre-wrap;
+}
+.campaign-fulcanelli .brass-btn {
+  margin: 0.35rem 0.4rem;
+}
+
 @keyframes campaign-epilogue-in {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }

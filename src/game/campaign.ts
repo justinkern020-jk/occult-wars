@@ -190,3 +190,13 @@ export function pickEnding(
   if (storms >= 4) return 'leaden-crown';
   return 'sealed-hour';
 }
+
+/** Final curtain after Justin Kern — Fulcanelli's June 1937 warning to Bergier. */
+export const FULCANELLI_WARNING = {
+  title: 'A Warning in Paris',
+  attribution: 'Fulcanelli · to Jacques Bergier · Paris, June 1937',
+  quote:
+    "You're on the brink of success, as indeed are several others of our scientists today. Please, allow me. Be very very careful. I warn you... The liberation of nuclear power is easier than you think and the radioactivity artificially produced can poison the atmosphere of our planet in a very short time: a few years. Moreover, atomic explosives can be produced from a few grains of metal powerful enough to destroy whole cities. I'm telling you this for a fact: the alchemists have known it for a very long time... I shall not attempt to prove to you what I'm now going to say but I ask you to repeat it to Mr. Helbronner: certain geometrical arrangements of highly purified materials are enough to release atomic forces without having recourse to either electricity or vacuum techniques... The secret of alchemy is this: there is a way of manipulating matter and energy so as to produce what modern scientists call 'a field of force'. The field acts on the observer and puts him in a privileged position vis-à-vis the universe. From this position he has access to the realities which are ordinarily hidden from us by time and space, matter and energy. This is what we call the Great Work.",
+  footnote:
+    'Attributed in The Morning of the Magicians / Alchemy, the Ancient Science — the same nuclear warning Justin Kern answered when the gadget spoke.',
+} as const;
