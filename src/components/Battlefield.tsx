@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { UNITS } from '../data/catalog';
 import { combatantFrom, resolveMelee } from '../game/combat';
 import {
@@ -53,8 +53,19 @@ function neighbors(r: number, c: number): Pos[] {
   ].filter((p) => p.r >= 0 && p.r < 5 && p.c >= 0 && p.c < 5);
 }
 
-export function Battlefield() {
-  const [mapId, setMapId] = useState('ashen-cross');
+type BattlefieldProps = {
+  initialMapId?: string;
+  onLeave?: () => void;
+};
+
+export function Battlefield({
+  initialMapId = 'ashen-cross',
+  onLeave,
+}: BattlefieldProps = {}) {
+  const [mapId, setMapId] = useState(initialMapId);
+  useEffect(() => {
+    setMapId(initialMapId);
+  }, [initialMapId]);
   const gameMap = useMemo(() => mapById(mapId), [mapId]);
 
   const azureFaction = 'The Blackout Wardens';
@@ -336,6 +347,11 @@ export function Battlefield() {
           </dl>
         </div>
         <div className="bf-tools">
+          {onLeave && (
+            <button type="button" className="brass-btn brass-btn-ghost" onClick={onLeave}>
+              Atelier
+            </button>
+          )}
           <label className="bf-map-pick">
             <span>Map</span>
             <select value={mapId} onChange={(e) => { setMapId(e.target.value); resetMatch(); }}>
@@ -415,16 +431,7 @@ export function Battlefield() {
                       <span
                         className={`tile-mark resource-mark resource-${tile.symbols === 2 ? 'double' : 'single'}${unit ? ' mark-under' : ''}`}
                         aria-hidden
-                      >
-                        {tile.symbols === 2 ? (
-                          <>
-                            <i className="resource-jewel" />
-                            <i className="resource-jewel" />
-                          </>
-                        ) : (
-                          <i className="resource-jewel" />
-                        )}
-                      </span>
+                      />
                     )}
                     {unit ? (
                       <UnitCoin
@@ -461,11 +468,7 @@ export function Battlefield() {
           <i className="legend-mark legend-resource" aria-hidden /> Resource
         </li>
         <li>
-          <span className="legend-jewels" aria-hidden>
-            <i className="resource-jewel" />
-            <i className="resource-jewel" />
-          </span>{' '}
-          Resource +2
+          <i className="legend-jewels" aria-hidden /> Resource +2
         </li>
         <li>
           <span className="key-coin key-loyalty">L</span> Loyalty (cost)

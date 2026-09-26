@@ -24,7 +24,8 @@ export function Catalog() {
 
   return (
     <section className="catalog">
-      <h2>Card catalog</h2>
+      <h2>The Collection</h2>
+      <p className="lede">Archive of every plate drawn for this working. Cabals dual-Power.</p>
       <div className="catalog-filters">
         <input
           type="search"

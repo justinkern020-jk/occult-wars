@@ -663,10 +663,10 @@ input[type='search'] {
   background: radial-gradient(circle at 50% 42%, #48968466, #0c100e29 70%);
 }
 .tile-resource {
-  background: radial-gradient(circle at 50% 45%, #c6a15b47, #100c0814 72%);
+  background: radial-gradient(circle at 50% 45%, #1ecf6a38, #0a181214 72%);
 }
 .tile-resource-2 {
-  background: radial-gradient(circle at 50% 40%, #f3dc9680, #281c0a29 70%);
+  background: radial-gradient(circle at 50% 40%, #5dffb055, #0c201829 70%);
 }
 .tile-street {
   background: radial-gradient(circle, #f3ead70f, #08060447 72%);
@@ -764,53 +764,41 @@ input[type='search'] {
   background-image: url(/assets/maps/stronghold-mark.svg);
 }
 
-/* Resource jewels — faceted gem in brass bezel */
+/* Resource jewels — lush emerald in gold inlay, fills the tile */
 .resource-mark {
-  inset: 16%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6%;
+  inset: 4%;
+  display: block;
   background: none;
-  filter: drop-shadow(0 2px 3px #0009);
+  filter: drop-shadow(0 2px 4px #000a);
+}
+.resource-mark.resource-single {
+  background: url(/assets/maps/resource-jewel.svg) center / contain no-repeat;
 }
 .resource-mark.resource-double {
-  inset: 18% 10%;
-  gap: 4%;
+  inset: 3%;
+  background: url(/assets/maps/resource-jewel-double.svg) center / contain no-repeat;
 }
 .resource-mark.mark-under {
-  inset: 22%;
-  opacity: 0.3;
-  gap: 4%;
+  inset: 8%;
+  opacity: 0.38;
+  filter: drop-shadow(0 1px 2px #0006) saturate(0.85) brightness(0.9);
 }
 .resource-mark.resource-double.mark-under {
-  inset: 24% 14%;
-  opacity: 0.28;
+  inset: 7%;
+  opacity: 0.34;
 }
+/* legacy pip children unused — keep harmless */
 .resource-jewel {
-  display: block;
-  width: 55%;
-  height: 55%;
-  max-width: 2.4rem;
-  max-height: 2.4rem;
-  background: url(/assets/maps/resource-jewel.svg) center / contain no-repeat;
-  flex: none;
-  filter: drop-shadow(0 1px 2px #0007);
-}
-.resource-mark.resource-single .resource-jewel {
-  width: 72%;
-  height: 72%;
-}
-.resource-mark.resource-double .resource-jewel {
-  width: 48%;
-  height: 48%;
+  display: none;
 }
 .stone-tag.resource-tag {
   z-index: 3;
   position: relative;
   margin-top: auto;
-  margin-bottom: 12%;
+  margin-bottom: 8%;
   font-size: clamp(0.4rem, 1.4vw, 0.55rem);
+  background: #0c0907b8;
+  border-color: #7dffb066;
 }
 .gate-blue,
 .stronghold-blue {
@@ -967,7 +955,7 @@ input[type='search'] {
   display: inline-block;
 }
 .swatch.tile-resource {
-  background: #e7d7a4;
+  background: #1ecf6a;
 }
 .legend-mark {
   width: 1.15rem;
@@ -988,13 +976,14 @@ input[type='search'] {
   background-image: url(/assets/maps/resource-jewel.svg);
 }
 .legend-jewels {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.1rem;
+  display: inline-block;
+  width: 1.35rem;
+  height: 1.35rem;
+  background: url(/assets/maps/resource-jewel-double.svg) center / contain no-repeat;
+  flex: none;
 }
 .legend-jewels .resource-jewel {
-  width: 0.95rem;
-  height: 0.95rem;
+  display: none;
 }
 .key-coin {
   width: 1.05rem;
@@ -1108,4 +1097,342 @@ input[type='search'] {
   .bf-tools .brass-btn {
     flex: 1;
   }
+}
+
+
+/* ——— Title boot screen (grok.me port) ——— */
+.title-screen {
+  background-color: #070605;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  justify-content: center;
+  align-items: flex-end;
+  min-height: 100dvh;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+.title-screen::before {
+  content: '';
+  pointer-events: none;
+  background:
+    linear-gradient(#07060514 0%, #07060500 28%, #07060559 62%, #070605e6 100%),
+    radial-gradient(at 50% 30%, #0000 0%, #07060547 72%);
+  position: absolute;
+  inset: 0;
+}
+.title-plate {
+  z-index: 1;
+  text-align: center;
+  width: min(100%, 46rem);
+  padding: 2.5rem 1.5rem 3.25rem;
+  position: relative;
+}
+.title-presents {
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--color-brass);
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  margin: 0;
+}
+.title-word {
+  color: var(--color-parchment);
+  text-shadow: 0 10px 40px #000000a6;
+  margin: 0.35rem 0 0;
+  font-family: 'Cinzel Decorative', var(--font-display);
+  font-size: clamp(3.2rem, 9vw, 6.4rem);
+  font-weight: 700;
+  line-height: 0.95;
+}
+.title-rule {
+  background: linear-gradient(90deg, transparent, var(--color-brass), transparent);
+  width: min(16rem, 60%);
+  height: 1px;
+  margin: 1rem auto 0;
+}
+.title-epithet {
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin: 0.8rem 0 0;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+}
+.title-enter {
+  margin-top: 1.5rem;
+  letter-spacing: 0.22em;
+  font-size: 0.75rem;
+  padding: 0.7rem 1.4rem;
+}
+
+/* ——— Menu atelier ——— */
+.menu-root {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  color: var(--color-parchment);
+}
+.menu-stage {
+  background-color: #100c09;
+  background-position: top center;
+  background-size: cover;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  box-shadow: inset 0 0 90px #0806048c, 0 22px 40px #00000073;
+}
+.menu-veil {
+  background: linear-gradient(#0c090733 0%, #0c09079e 42%, #0c0907eb 100%);
+  padding: 2.75rem 1.25rem 1.75rem;
+}
+.menu-presents {
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--color-brass);
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  margin: 0;
+}
+.menu-title {
+  margin: 0.5rem 0 0;
+  max-width: 36rem;
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 5vw, 3.1rem);
+  font-weight: 600;
+  color: var(--color-parchment);
+  letter-spacing: 0.04em;
+  text-shadow: 0 4px 18px #000a;
+}
+.menu-lede {
+  margin: 0.65rem 0 0;
+  max-width: 36rem;
+  font-size: 0.9rem;
+  color: #f3ead7cc;
+  line-height: 1.5;
+}
+.menu-doors {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+@media (min-width: 720px) {
+  .menu-doors-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.mt-door-hero {
+  margin-top: 1.75rem;
+  width: 100%;
+}
+.menu-door {
+  text-align: left;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  min-height: 5.2rem;
+  padding: 0.95rem 1.1rem;
+  display: flex;
+  box-shadow:
+    inset 4px 0 #c6a15b,
+    inset 0 0 0 1px #0c0907cc,
+    inset 0 0 0 3px #c6a15b47,
+    inset 0 1px #ffecc866,
+    0 8px #120e0b,
+    0 14px 22px #0006;
+}
+.menu-door-glyph {
+  font-size: 1.15rem;
+  color: var(--color-brass);
+  flex: none;
+  width: 1.5rem;
+  text-align: center;
+}
+.brass-btn-solid .menu-door-glyph {
+  color: #3d2c16;
+}
+.menu-door-copy {
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  display: flex;
+}
+.menu-door-title {
+  letter-spacing: 0.16em;
+  font-size: 0.95rem;
+}
+.menu-door-sub {
+  font-family: var(--font-body);
+  letter-spacing: 0;
+  text-transform: none;
+  text-shadow: none;
+  color: #f3ead7c7;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+.brass-btn-solid .menu-door-sub {
+  color: #3d2c16;
+}
+
+.plate {
+  background: linear-gradient(#c6a15b12, #0c0907e0);
+  border: 1px solid #8c6d328c;
+  border-radius: 1rem;
+  padding: 1.15rem 1.2rem 1.35rem;
+  box-shadow: inset 0 1px #ffecc814, 0 12px 28px #0006;
+}
+.plate-kicker {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--color-brass);
+}
+.field-picker .map-grid {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 560px) {
+  .field-picker .map-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (min-width: 960px) {
+  .field-picker .map-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+.map-card {
+  flex-direction: column;
+  align-items: stretch;
+  text-align: left;
+  padding: 0.65rem 0.7rem 0.85rem;
+  min-height: auto;
+  gap: 0;
+}
+.map-thumb {
+  display: block;
+  border-radius: 0.45rem;
+  overflow: hidden;
+  aspect-ratio: 5 / 4;
+  background: #100c09 center / cover no-repeat;
+  border: 1px solid #3a2e22;
+  position: relative;
+}
+.map-mini {
+  position: absolute;
+  right: 0.35rem;
+  bottom: 0.35rem;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1px;
+  background: #0c0907cc;
+  padding: 3px;
+  border-radius: 3px;
+  width: 2.6rem;
+}
+.mini-cell {
+  aspect-ratio: 1;
+  border-radius: 1px;
+  background: #3a3428;
+}
+.mini-void { background: #0c0907; }
+.mini-street { background: #4a4335; }
+.mini-gate { background: #2f6f62; }
+.mini-stronghold { background: #c6a15b; }
+.mini-res { background: #1ecf6a; }
+.mini-res-2 { background: #7dffb0; box-shadow: inset 0 0 0 1px #f0d78a88; }
+.map-card-name {
+  display: block;
+  margin-top: 0.55rem;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.map-card-sub {
+  display: block;
+  margin-top: 0.25rem;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  letter-spacing: 0;
+  text-transform: none;
+  text-shadow: none;
+  opacity: 0.85;
+}
+.brass-btn-solid .map-card-sub {
+  color: #3d2c16;
+  opacity: 0.9;
+}
+.enter-field-btn {
+  margin-top: 1.1rem;
+  width: 100%;
+  letter-spacing: 0.22em;
+}
+.menu-dev {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  margin: 0;
+}
+.menu-dev a,
+.dev-link {
+  color: var(--color-brass);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.menu-dev a:hover,
+.dev-link:hover {
+  border-bottom-color: var(--color-brass-2);
+}
+
+/* ——— In-game shell bar ——— */
+.app-shell {
+  padding-top: 0.75rem;
+}
+.shell-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid #3a3428;
+}
+.shell-back {
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  min-height: 2.3rem;
+  padding: 0.4rem 0.8rem;
+}
+.shell-brand {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  font-family: var(--font-display);
+}
+.shell-brand span {
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  color: var(--color-brass);
+}
+.shell-brand em {
+  font-style: normal;
+  font-size: 1.15rem;
+  color: var(--color-parchment);
+  letter-spacing: 0.06em;
 }

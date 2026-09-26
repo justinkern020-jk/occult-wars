@@ -48,6 +48,14 @@ npm run build
 - **Loyalty** (left coin) = muster cost paid from the loyalty bank — never the combat stat.
 - Board coins match tarot/hand layout so deployed units never look "backwards."
 
+## App shell (boot flow)
+
+1. **Title** — `app-cover.jpg`, “Enter the circle”
+2. **Atelier menu** — `menu-atelier.jpg`, Training Rite / Collection / map picker
+3. **The Field** — polished Battlefield (Cabals dual-Power)
+4. **The Collection** — card archive/codex
+5. **Rites desk** — combat sandbox (dev link at menu foot)
+
 ## Layout
 
 | Path | Role |
@@ -56,9 +64,12 @@ npm run build
 | `src/game/combat.test.ts` | Vitest coverage for combat |
 | `src/game/keywords.ts` | Keyword glossary |
 | `src/data/cards.json` | Extracted catalog (204 cards, dual Power) |
+| `src/components/TitleScreen.tsx` | Boot / title plate |
+| `src/components/MenuAtelier.tsx` | Main menu + field picker |
 | `src/components/*` | Battlefield, catalog, combat sandbox |
-| `public/assets/maps/*` | Map art + gate/stronghold SVG marks |
-| `public/assets/*` | Original minified Grok bundles (reference) |
+| `public/assets/titles/*` | Cover + atelier art |
+| `public/assets/maps/*` | Map art, gate/stronghold, emerald jewels |
+| `public/assets/*` | Original minified Grok bundles (reference only) |
 
 ## Sample resolution
 
