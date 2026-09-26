@@ -596,8 +596,22 @@ input[type='search'] {
   50% { outline-color: #f3e2b8; }
 }
 @keyframes origin-glow {
-  0%, 100% { filter: brightness(1); }
-  50% { filter: brightness(1.08); }
+  0%, 100% { box-shadow:
+    0 0 0 1px #1a120c,
+    0 0 0 3px #9ec8ff,
+    0 0 0 5px #2a1e12,
+    0 0 0 6px #cfe0ff88,
+    inset 0 0 0 7px #0c090747,
+    0 0 14px #6a9fd866,
+    0 8px 14px #0006; }
+  50% { box-shadow:
+    0 0 0 1px #1a120c,
+    0 0 0 3px #b8d8ff,
+    0 0 0 5px #2a1e12,
+    0 0 0 6px #e8f2ffcc,
+    inset 0 0 0 7px #0c090747,
+    0 0 22px #6a9fd899,
+    0 8px 14px #0006; }
 }
 @keyframes legal-pulse {
   0%, 100% { outline-color: #f3e2b873; }
@@ -651,16 +665,29 @@ input[type='search'] {
   50% { opacity: 1; transform: scale(1.04); }
 }
 
+/* Fixed-height slot so select/aim banners never shove the board. */
+.bf-banner-slot {
+  min-height: 2.55rem;
+  margin: 0.25rem 0 0.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.move-banner,
+.aim-banner {
+  width: 100%;
+  margin: 0 !important;
+}
 .move-banner {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem 0.55rem;
   background: linear-gradient(#3a2a12ee, #1a140ccc);
   border: 1px solid #c6a15b;
   color: #f0e6c8;
   padding: 0.45rem 0.85rem;
-  margin: 0.35rem 1rem 0.15rem;
   border-radius: 6px;
   font-family: Cinzel, Georgia, serif;
   font-size: 0.86rem;
@@ -987,6 +1014,7 @@ input[type='search'] {
   min-height: 0;
 }
 .stone {
+  touch-action: manipulation;
   z-index: 1;
   aspect-ratio: 1;
   background-color: #0c090733;
@@ -2489,13 +2517,9 @@ input[type='search'] {
   background: linear-gradient(135deg, #2a2010, #120e08);
   min-height: 4rem;
 }
-@keyframes unit-step {
-  0% { transform: scale(1); }
-  40% { transform: scale(1.08); }
-  100% { transform: scale(1); }
-}
+/* Select uses outline only — no scale bounce on tap-to-move. */
 .stone-coin.stone-picked {
-  animation: unit-step 0.28s ease;
+  animation: none;
 }
 @keyframes melee-flash {
   0%, 100% { filter: none; }

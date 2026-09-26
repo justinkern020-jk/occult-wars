@@ -1425,7 +1425,8 @@ export function Battlefield({
         </div>
       </header>
 
-      {aim && (
+      <div className="bf-banner-slot" aria-live="polite">
+      {aim ? (
         <p className="aim-banner" data-testid="aim-banner">
           Aiming {aim.kind === 'cast' ? aim.card.name : activeHero?.name} — name a
           target on the field.{' '}
@@ -1433,9 +1434,7 @@ export function Battlefield({
             Cancel
           </button>
         </p>
-      )}
-
-      {selectedHint && !aim && (
+      ) : selectedHint ? (
         <p className="move-banner" data-testid="move-banner">
           <strong>{selectedHint.name}</strong>
           <span className="move-banner-sep">·</span>
@@ -1457,7 +1456,8 @@ export function Battlefield({
             </span>
           ))}
         </p>
-      )}
+      ) : null}
+      </div>
 
       <div className="bf-stage">
         <div
@@ -1500,7 +1500,10 @@ export function Battlefield({
                     } ${unit ? 'has-unit' : ''}`.trim()}
                     data-tile-r={r}
                     data-tile-c={c}
-                    onClick={() => onTileClick(r, c)}
+                    onClick={(e) => {
+                      onTileClick(r, c);
+                      (e.currentTarget as HTMLButtonElement).blur();
+                    }}
                   >
                     {tile.kind === 'gate' && (
                       <span
