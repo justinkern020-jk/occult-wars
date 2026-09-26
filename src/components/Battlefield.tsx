@@ -1929,7 +1929,7 @@ export function Battlefield({
   const activeHero = inputSide === 'blue' ? blueHero : redHero;
 
   return (
-    <section className="battlefield" data-testid="battlefield" data-mode={mode} data-phase={phase}>
+    <section className={`battlefield${nukeActive ? ' nuke-shake' : ''}`} data-testid="battlefield" data-mode={mode} data-phase={phase}>
       <header className="bf-hud">
         <div className="bf-scores" aria-label="Resources and Domination">
           <dl className="score-chip is-ally" data-testid="score-azure">

@@ -174,7 +174,7 @@ export function sirenSfx(dur = 1.5) {
 /** Short distorted metal power-chord sting for Oppenheimer. */
 export function metalRiffSfx() {
   unlockAudio();
-  const a = new Audio('/assets/sfx/metal-riff.mp3');
+  const a = new Audio('/assets/sfx/metal-riff.mp3?v=2');
   a.volume = 0.78;
   void a.play().catch(() => {
     // WebAudio fallback: stacked saw power chords
@@ -217,7 +217,7 @@ export function metalRiffSfx() {
 /** Deep boom / rumble when the gadget answers. */
 export function nukeBoomSfx() {
   unlockAudio();
-  const a = new Audio('/assets/sfx/nuke-boom.mp3');
+  const a = new Audio('/assets/sfx/nuke-boom.mp3?v=2');
   a.volume = 0.88;
   void a.play().catch(() => {
     const c = getAC();
