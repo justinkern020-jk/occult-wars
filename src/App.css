@@ -558,6 +558,15 @@ input[type='search'] {
   outline: 2px solid #f3e2b8;
   animation: 1.5s ease-in-out infinite legal-pulse;
 }
+.stone.legal-move {
+  outline-offset: 4px;
+  outline: 2px solid #9ec8ff;
+  animation: 1.5s ease-in-out infinite move-pulse;
+}
+@keyframes move-pulse {
+  0%, 100% { outline-color: #9ec8ff73; }
+  50% { outline-color: #cfe0ff; }
+}
 @keyframes legal-pulse {
   0%, 100% { outline-color: #f3e2b873; }
   50% { outline-color: #fff6d8; }

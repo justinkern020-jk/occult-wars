@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from 'react';
 import type { Side } from '../game/maps';
 import { CardArt } from './CardArt';
 
@@ -26,6 +27,7 @@ export interface BoardUnit {
 /**
  * Battlefield token.
  * Coins match tarot card layout (Loyalty left · Power right).
+ * Rendered as a div (not a nested <button>) so tile taps work reliably.
  */
 export function UnitCoin({
   unit,
@@ -41,11 +43,23 @@ export function UnitCoin({
   onInspect?: () => void;
 }) {
   const hurt = unit.power < unit.maxPower;
+  const onKey = (e: KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      e.stopPropagation();
+      onClick?.();
+    }
+  };
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       className={`stone-coin is-${unit.side} ${foe ? 'coin-foe' : 'coin-mine'} ${selected ? 'stone-picked' : ''} ${unit.sick ? 'is-sick' : ''}`}
-      onClick={onClick}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick?.();
+      }}
+      onKeyDown={onKey}
       onContextMenu={(e) => {
         if (!onInspect) return;
         e.preventDefault();
@@ -58,7 +72,7 @@ export function UnitCoin({
         e.stopPropagation();
         onInspect();
       }}
-      title={`${unit.name} · Power ${unit.power} · Loyalty ${unit.loyalty} · double-tap to inspect`}
+      title={`${unit.name} · Power ${unit.power} · Loyalty ${unit.loyalty} · tap to move · double-tap to inspect`}
       aria-label={`${unit.name}, Power ${unit.power}, Loyalty ${unit.loyalty}`}
     >
       <CardArt name={unit.name} className="stone-face" />
@@ -73,6 +87,6 @@ export function UnitCoin({
         <abbr>P</abbr>
         {unit.power}
       </span>
-    </button>
+    </div>
   );
 }

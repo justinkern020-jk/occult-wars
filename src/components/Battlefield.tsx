@@ -1021,15 +1021,33 @@ export function Battlefield({
       }
     }
 
+    const here = unitAt(r, c);
+
+    // Tap own ready coin → select for move/strike (wins over hand deploy).
+    if (
+      !attacker &&
+      here &&
+      here.side === inputSide &&
+      !here.sick &&
+      !here.moved &&
+      !here.attacked
+    ) {
+      setSelectedUnit(here.uid);
+      setAttacker(here.uid);
+      setSelectedHand(null);
+      return;
+    }
+
     if (selectedHand != null) {
       const card = hand[inputSide][selectedHand];
       if (card?.kind === 'unit') {
         deployTo(r, c, selectedHand, inputSide);
+      } else if (card && (card.kind === 'rite' || card.kind === 'device')) {
+        // keep aim flow elsewhere; bare tap with rite selected does nothing here
       }
       return;
     }
 
-    const here = unitAt(r, c);
     if (attacker) {
       const atk = findUnit(attacker);
       if (!atk) {
@@ -1044,19 +1062,22 @@ export function Battlefield({
         strike(attacker, r, c);
         return;
       }
-      setAttacker(null);
-      setSelectedUnit(null);
+      // Same-side coin: switch selection (or clear if already acted).
+      if (!here.sick && !here.moved && !here.attacked) {
+        setSelectedUnit(here.uid);
+        setAttacker(here.uid);
+      } else {
+        setAttacker(null);
+        setSelectedUnit(null);
+        pushLog(`${here.name} has already acted this rite.`);
+      }
       return;
     }
 
     if (here && here.side === inputSide) {
       if (here.sick || here.moved || here.attacked) {
         pushLog(`${here.name} has already acted this rite.`);
-        return;
       }
-      setSelectedUnit(here.uid);
-      setAttacker(here.uid);
-      setSelectedHand(null);
       return;
     }
   }
@@ -1150,6 +1171,20 @@ export function Battlefield({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [side, phase, matchOver, hotseat]);
+
+  const legalMove = useMemo(() => {
+    if (!attacker || inputLocked) return new Set<string>();
+    const atk = findUnit(attacker);
+    if (!atk) return new Set<string>();
+    const out = new Set<string>();
+    for (const p of neighbors(atk.r, atk.c)) {
+      const tile = gameMap.tiles[p.r][p.c];
+      if (tile.kind === 'void') continue;
+      if (board[p.r][p.c]) continue;
+      out.add(`${p.r},${p.c}`);
+    }
+    return out;
+  }, [attacker, inputLocked, findUnit, gameMap, board]);
 
   const legalDeploy = useMemo(() => {
     const idx = dragHand ?? selectedHand;
@@ -1319,6 +1354,7 @@ export function Battlefield({
                 const here = board[r][c];
                 const owned = control[r][c];
                 const deployOk = legalDeploy.has(`${r},${c}`);
+                const moveOk = legalMove.has(`${r},${c}`);
                 const unit = here;
                 return (
                   <button
@@ -1330,7 +1366,9 @@ export function Battlefield({
                         : ''
                     } ${owned ? `owned-${owned}` : ''} ${
                       deployOk ? 'legal-tile' : ''
-                    } ${dragHand != null && deployOk ? 'drag-target' : ''} ${unit ? 'has-unit' : ''}`.trim()}
+                    } ${moveOk ? 'legal-move' : ''} ${
+                      dragHand != null && deployOk ? 'drag-target' : ''
+                    } ${unit ? 'has-unit' : ''}`.trim()}
                     data-tile-r={r}
                     data-tile-c={c}
                     onClick={() => onTileClick(r, c)}
@@ -1401,7 +1439,7 @@ export function Battlefield({
 
       <div className="hand-rail">
         <p className="hand-kicker">
-          {sideLabel(inputSide)} hand · drag units to muster · rites & devices speak
+          {sideLabel(inputSide)} hand · drag units to muster · tap coins to move · rites & devices speak
           {!hotseat && side === AI_SIDE ? ' · Crimson is working…' : ''}
         </p>
         <div className="hand-row">
