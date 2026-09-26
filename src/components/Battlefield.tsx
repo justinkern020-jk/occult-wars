@@ -75,8 +75,8 @@ export type BattlefieldProps = {
   }) => void;
 };
 
-const DEFAULT_BLUE = 'The Blackout Wardens';
-const DEFAULT_RED = 'The Drowned Parish';
+const DEFAULT_BLUE = 'The Vril Syndicate';
+const DEFAULT_RED = 'The Hermetic Circle';
 
 function uid() {
   return `u_${Math.random().toString(36).slice(2, 9)}`;

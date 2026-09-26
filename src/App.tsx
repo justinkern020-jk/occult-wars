@@ -16,8 +16,10 @@ import {
   swearAllegiance,
   type CustomDeck,
 } from './game/profile';
-import { FIRST_HOUR_ORDERS, allyOf, type FirstHourOrder } from './game/orders';
+import { FIRST_HOUR_ORDERS, allyOf, isFirstHourOrder, type FirstHourOrder } from './game/orders';
+import { readHourOpen } from './game/hourUnlock';
 import type { StageOutcome } from './game/campaign';
+import { mapsForEra } from './game/maps';
 import './App.css';
 
 type Screen =
@@ -35,7 +37,7 @@ type Screen =
 
 /** Pick a rival order for training (not self / not ally preferred). */
 function trainingFoe(order: string | null): string {
-  if (!order) return 'The Drowned Parish';
+  if (!order) return 'Order of the Lead Dawn';
   const pool = FIRST_HOUR_ORDERS.filter(
     (o) => o !== order && o !== allyOf(order),
   );
@@ -47,8 +49,8 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>('title');
   const [mapId, setMapId] = useState('ashen-cross');
   const [matchMode, setMatchMode] = useState<MatchMode>('training');
-  const [blueFaction, setBlueFaction] = useState('The Blackout Wardens');
-  const [redFaction, setRedFaction] = useState('The Drowned Parish');
+  const [blueFaction, setBlueFaction] = useState('The Vril Syndicate');
+  const [redFaction, setRedFaction] = useState('The Hermetic Circle');
   const [blueHeroId, setBlueHeroId] = useState<string | undefined>();
   const [redHeroId, setRedHeroId] = useState<string | undefined>();
   const [blueDeckIds, setBlueDeckIds] = useState<string[] | undefined>();
@@ -90,8 +92,18 @@ export default function App() {
     }
   }, [screen, matchMode]);
 
+  function firstHourAllegiance(): FirstHourOrder | null {
+    const a = profile.allegiance;
+    if (a && isFirstHourOrder(a)) return a;
+    return null;
+  }
+
   function ensureSworn(next: () => void) {
-    if (!profile.allegiance) {
+    if (!firstHourAllegiance()) {
+      if (profile.allegiance) {
+        // Second-hour (or unknown) society stuck as primary — force re-swear.
+        update({ ...profile, allegiance: null });
+      }
       setScreen('allegiance');
       return;
     }
@@ -100,7 +112,7 @@ export default function App() {
 
   function startTraining() {
     ensureSworn(() => {
-      const order = profile.allegiance!;
+      const order = firstHourAllegiance()!;
       const foe = trainingFoe(order);
       setBlueFaction(order);
       setRedFaction(foe);
@@ -109,13 +121,16 @@ export default function App() {
       setRedHeroId(undefined);
       setRedDeckIds(undefined);
       setMatchMode('training');
+      setMapId((prev) =>
+        mapsForEra('first').some((m) => m.id === prev) ? prev : 'ashen-cross',
+      );
       setScreen('field');
     });
   }
 
   function startHotseat() {
     ensureSworn(() => {
-      const order = profile.allegiance!;
+      const order = firstHourAllegiance()!;
       const foe = trainingFoe(order);
       setBlueFaction(order);
       setRedFaction(foe);
@@ -124,13 +139,16 @@ export default function App() {
       setRedHeroId(undefined);
       setRedDeckIds(undefined);
       setMatchMode('hotseat');
+      setMapId((prev) =>
+        mapsForEra('first').some((m) => m.id === prev) ? prev : 'ashen-cross',
+      );
       setScreen('field');
     });
   }
 
   function startFriend(_room: string, asHost: boolean) {
     ensureSworn(() => {
-      const order = profile.allegiance!;
+      const order = firstHourAllegiance()!;
       const foe = trainingFoe(order);
       setBlueFaction(asHost ? order : foe);
       setRedFaction(asHost ? foe : order);
@@ -147,8 +165,10 @@ export default function App() {
         dailyGranted={dailyGranted}
         onEnter={() => {
           clearDailyNotice();
-          if (!profile.allegiance) setScreen('allegiance');
-          else setScreen('menu');
+          if (!firstHourAllegiance()) {
+            if (profile.allegiance) update({ ...profile, allegiance: null });
+            setScreen('allegiance');
+          } else setScreen('menu');
         }}
       />
     );
@@ -162,7 +182,7 @@ export default function App() {
             update(swearAllegiance(profile, order));
             setScreen('menu');
           }}
-          onBack={profile.allegiance ? () => setScreen('menu') : undefined}
+          onBack={firstHourAllegiance() ? () => setScreen('menu') : undefined}
         />
       </div>
     );
@@ -172,6 +192,7 @@ export default function App() {
     return (
       <MenuAtelier
         profile={profile}
+        onUpdateProfile={update}
         selectedMapId={mapId}
         onSelectMap={setMapId}
         onTraining={startTraining}
@@ -181,7 +202,9 @@ export default function App() {
         onLeaden={() => ensureSworn(() => setScreen('campaign'))}
         onHotseat={startHotseat}
         onFriend={() => ensureSworn(() => setScreen('friend'))}
-        onSecond={() => setScreen('second')}
+        onSecond={() => {
+          if (readHourOpen()) setScreen('second');
+        }}
         onAllegiance={() => setScreen('allegiance')}
         onSandbox={() => setScreen('sandbox')}
       />
@@ -210,7 +233,7 @@ export default function App() {
           lastOutcome={campaignOutcome}
           onConsumeOutcome={() => setCampaignOutcome(null)}
           onPlayStage={(mid, foe, stageIndex) => {
-            const order = profile.allegiance!;
+            const order = firstHourAllegiance()!;
             setMapId(mid);
             setBlueFaction(order);
             setRedFaction(foe);

@@ -1,10 +1,16 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { MAPS, mapsForEra, type GameMap } from '../game/maps';
 import { PACK_COST, type Profile } from '../game/profile';
+import {
+  bootHourOpen,
+  isSecondHourCode,
+  writeHourOpen,
+} from '../game/hourUnlock';
 import { brassClick } from '../game/sfx';
 
 type Props = {
   profile: Profile;
+  onUpdateProfile: (next: Profile) => void;
   selectedMapId: string;
   onSelectMap: (id: string) => void;
   onTraining: () => void;
@@ -42,6 +48,7 @@ function MiniTile({ kind, symbols }: { kind: string; symbols?: number }) {
 
 export function MenuAtelier({
   profile,
+  onUpdateProfile,
   selectedMapId,
   onSelectMap,
   onTraining,
@@ -56,7 +63,18 @@ export function MenuAtelier({
   onSandbox,
 }: Props) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const realNameRef = useRef(
+    isSecondHourCode(profile.username) ? 'Adept' : profile.username,
+  );
+  const [hourOpen, setHourOpen] = useState(() => bootHourOpen(profile.username));
+  const [toast, setToast] = useState<string | null>(null);
   const firstMaps = mapsForEra('first');
+
+  useEffect(() => {
+    if (!isSecondHourCode(profile.username)) {
+      realNameRef.current = profile.username;
+    }
+  }, [profile.username]);
 
   useEffect(() => {
     const el = audioRef.current;
@@ -79,6 +97,19 @@ export function MenuAtelier({
     fn();
   };
 
+  function onOccultistChange(raw: string) {
+    const next = raw.slice(0, 24);
+    if (isSecondHourCode(next)) {
+      writeHourOpen();
+      setHourOpen(true);
+      setToast('The leaden hour answers.');
+      onUpdateProfile({ ...profile, username: realNameRef.current });
+      return;
+    }
+    realNameRef.current = next;
+    onUpdateProfile({ ...profile, username: next });
+  }
+
   return (
     <div className="menu-root" data-testid="main-menu">
       <audio
@@ -99,6 +130,18 @@ export function MenuAtelier({
             Six orders. One leaden hour. Cabals dual-Power — vitality and damage
             as one number. Loyalty banks the muster.
           </p>
+
+          <label className="menu-occultist">
+            <span className="menu-occultist-label">Occultist</span>
+            <input
+              className="ledger-input menu-occultist-input"
+              value={profile.username}
+              aria-label="Occultist name"
+              maxLength={24}
+              onChange={(e) => onOccultistChange(e.target.value)}
+            />
+          </label>
+
           <p className="menu-shards" data-testid="shard-count">
             {profile.username} · {profile.alchemicalShards} shards
             {profile.allegiance ? ` · ${profile.allegiance}` : ' · unswear'}
@@ -172,25 +215,6 @@ export function MenuAtelier({
             <button
               type="button"
               className="menu-door brass-btn"
-              data-testid="open-second"
-              onClick={click(onSecond)}
-            >
-              <span className="menu-door-glyph" aria-hidden>
-                ◐
-              </span>
-              <span className="menu-door-copy">
-                <span className="menu-door-title">The hour after</span>
-                <span className="menu-door-sub">
-                  Four societies · blackout yards
-                </span>
-              </span>
-            </button>
-          </div>
-
-          <div className="menu-doors menu-doors-2">
-            <button
-              type="button"
-              className="menu-door brass-btn"
               data-testid="open-collection"
               onClick={click(onCollection)}
             >
@@ -204,6 +228,9 @@ export function MenuAtelier({
                 </span>
               </span>
             </button>
+          </div>
+
+          <div className="menu-doors menu-doors-2">
             <button
               type="button"
               className="menu-door brass-btn"
@@ -218,9 +245,6 @@ export function MenuAtelier({
                 <span className="menu-door-sub">1 leader · 30–40 plates</span>
               </span>
             </button>
-          </div>
-
-          <div className="menu-doors menu-doors-2">
             <button
               type="button"
               className="menu-door brass-btn brass-btn-solid"
@@ -237,6 +261,9 @@ export function MenuAtelier({
                 </span>
               </span>
             </button>
+          </div>
+
+          <div className="menu-doors menu-doors-2">
             <button
               type="button"
               className="menu-door brass-btn"
@@ -253,7 +280,33 @@ export function MenuAtelier({
                 <span className="menu-door-sub">Primary + ally jewel</span>
               </span>
             </button>
+            {hourOpen ? (
+              <button
+                type="button"
+                className="menu-door brass-btn"
+                data-testid="open-second"
+                onClick={click(onSecond)}
+              >
+                <span className="menu-door-glyph" aria-hidden>
+                  ◐
+                </span>
+                <span className="menu-door-copy">
+                  <span className="menu-door-title">The hour after</span>
+                  <span className="menu-door-sub">
+                    Four societies took what the six left.
+                  </span>
+                </span>
+              </button>
+            ) : (
+              <span className="menu-door-spacer" aria-hidden />
+            )}
           </div>
+
+          {toast && (
+            <p className="menu-toast" data-testid="hour-toast" role="status">
+              {toast}
+            </p>
+          )}
         </div>
       </section>
 
