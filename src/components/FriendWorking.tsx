@@ -11,9 +11,12 @@ import {
   type QuickMatchHandle,
 } from '../net/friendSession';
 import {
+  loadoutFromWorking,
   sanitizeFriendLoadout,
   type FriendLoadout,
 } from '../net/friendLoadout';
+import { cardById } from '../data/catalog';
+import type { CustomDeck } from '../game/profile';
 
 export type FriendReadyPayload = {
   room: string;
@@ -24,8 +27,10 @@ export type FriendReadyPayload = {
 };
 
 type Props = {
-  /** Local Deck Editor working (customDecks[0]) + allegiance. */
-  localLoadout: FriendLoadout;
+  /** Player's saved Deck Editor lists. */
+  customDecks: CustomDeck[];
+  /** Sworn first-hour order for loadout faction. */
+  allegiance: string | null;
   onReady: (payload: FriendReadyPayload) => void;
   onBack: () => void;
 };
@@ -37,12 +42,22 @@ const LOADOUT_MAX_ATTEMPTS = 40;
  * Friend Working lobby: Quick Match + 4-letter room Host/Join.
  * Exchanges loadouts over PeerJS before entering the field.
  */
-export function FriendWorking({ localLoadout, onReady, onBack }: Props) {
+export function FriendWorking({
+  customDecks,
+  allegiance,
+  onReady,
+  onBack,
+}: Props) {
+  const [deckId, setDeckId] = useState(() => customDecks[0]?.id ?? '');
+  const selectedDeck =
+    customDecks.find((d) => d.id === deckId) ?? customDecks[0];
+  const localLoadout = loadoutFromWorking(selectedDeck, allegiance);
+
   const [room, setRoom] = useState(randomRoomCode);
   const [role, setRole] = useState<FriendRole | null>(null);
-  const [status, setStatus] = useState(
-    'Find a match automatically, or host/join with a 4-letter room code. Each player brings their Deck Editor working deck.',
-  );
+  const defaultStatus =
+    'Choose which Deck Editor list to bring, then find a match or host/join with a 4-letter room code.';
+  const [status, setStatus] = useState(defaultStatus);
   const [busy, setBusy] = useState(false);
   const [searching, setSearching] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -208,7 +223,7 @@ export function FriendWorking({ localLoadout, onReady, onBack }: Props) {
     setRole(null);
     setFailed(false);
     setStatus(
-      'Find a match automatically, or host/join with a 4-letter room code. Each player brings their Deck Editor working deck.',
+      defaultStatus,
     );
   }
 
@@ -314,16 +329,40 @@ export function FriendWorking({ localLoadout, onReady, onBack }: Props) {
       <p className="lede">
         Quick Match pairs you with anyone searching. Or share a 4-letter room
         for a private sitting. Host plays Azure; guest plays Crimson. Each
-        player brings their Deck Editor working deck (the first saved custom
-        deck).
+        player chooses which Deck Editor list to bring before matching.
       </p>
+
+      {customDecks.length === 0 ? (
+        <p className="friend-deck-empty" data-testid="friend-deck-empty">
+          Save a working in the Deck Editor before Friend Working.
+        </p>
+      ) : (
+        <label className="friend-deck-picker">
+          Your working
+          <select
+            data-testid="friend-deck-select"
+            value={selectedDeck?.id ?? ''}
+            disabled={busy || linked}
+            onChange={(e) => setDeckId(e.target.value)}
+          >
+            {customDecks.map((d) => {
+              const hero = cardById(d.heroId)?.name ?? 'Hero';
+              return (
+                <option key={d.id} value={d.id}>
+                  {d.name} — {hero}
+                </option>
+              );
+            })}
+          </select>
+        </label>
+      )}
 
       <div className="friend-roles friend-roles-quick">
         <button
           type="button"
           className="brass-btn brass-btn-solid"
           data-testid="friend-quick"
-          disabled={busy || linked}
+          disabled={busy || linked || customDecks.length === 0}
           onClick={beginQuickMatch}
         >
           Find a match
@@ -365,7 +404,7 @@ export function FriendWorking({ localLoadout, onReady, onBack }: Props) {
           type="button"
           className="brass-btn brass-btn-solid"
           data-testid="friend-host"
-          disabled={busy || linked}
+          disabled={busy || linked || customDecks.length === 0}
           onClick={beginHost}
         >
           Host the field
@@ -374,7 +413,7 @@ export function FriendWorking({ localLoadout, onReady, onBack }: Props) {
           type="button"
           className="brass-btn"
           data-testid="friend-guest"
-          disabled={busy || linked}
+          disabled={busy || linked || customDecks.length === 0}
           onClick={beginGuest}
         >
           Join as guest
@@ -405,7 +444,7 @@ export function FriendWorking({ localLoadout, onReady, onBack }: Props) {
             setFailed(false);
             setLinked(false);
             setStatus(
-              'Find a match automatically, or host/join with a 4-letter room code. Each player brings their Deck Editor working deck.',
+              defaultStatus,
             );
           }}
         >

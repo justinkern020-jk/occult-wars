@@ -1,13 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { MAPS, tileLabel, type Tile } from './maps';
+import { MAPS, tileLabel, tileLogName, type Tile } from './maps';
 
 describe('tile labels (map UI)', () => {
-  it('neutral gate is Gate, never Deployment', () => {
-    expect(tileLabel({ kind: 'gate' })).toBe('Gate');
-  });
-  it('sided gates keep Azure/Crimson', () => {
-    expect(tileLabel({ kind: 'gate', home: 'blue' })).toBe('Azure Gate');
-    expect(tileLabel({ kind: 'gate', home: 'red' })).toBe('Crimson Gate');
+  it('gates have no board text overlay', () => {
+    expect(tileLabel({ kind: 'gate' })).toBe('');
+    expect(tileLabel({ kind: 'gate', home: 'blue' })).toBe('');
+    expect(tileLabel({ kind: 'gate', home: 'red' })).toBe('');
   });
   it('walkable field never says Street', () => {
     expect(tileLabel({ kind: 'street' })).toBe('');
@@ -16,23 +14,32 @@ describe('tile labels (map UI)', () => {
     expect(tileLabel({ kind: 'stronghold', home: 'blue' })).toBe('');
     expect(tileLabel({ kind: 'resource', symbols: 1 })).toBe('');
   });
-  it('Outer Seal center is a neutral Gate', () => {
+  it('Outer Seal center gate has no overlay text', () => {
     const m = MAPS.find((x) => x.id === 'outer-seal')!;
-    // `.sRs.` / `r1d1r` / `s2s2s` — row1 col2 is `d`
     const center = m.tiles[1][2];
     expect(center.kind).toBe('gate');
     expect(center.home).toBeUndefined();
-    expect(tileLabel(center)).toBe('Gate');
+    expect(tileLabel(center)).toBe('');
   });
-  it('no map tile label contains Street or Deployment', () => {
+  it('no map tile overlay contains Gate, Stronghold, Street, or Deployment', () => {
     for (const m of MAPS) {
       for (const row of m.tiles) {
         for (const t of row) {
           const label = tileLabel(t as Tile);
+          expect(label).toBe('');
           expect(label.includes('Street')).toBe(false);
           expect(label.includes('Deployment')).toBe(false);
+          expect(label.includes('Gate')).toBe(false);
+          expect(label.includes('Stronghold')).toBe(false);
         }
       }
     }
+  });
+  it('tileLogName still names gates for combat logs', () => {
+    expect(tileLogName({ kind: 'gate' })).toBe('Gate');
+    expect(tileLogName({ kind: 'gate', home: 'blue' })).toBe('Azure Gate');
+    expect(tileLogName({ kind: 'stronghold', home: 'red' })).toBe(
+      'Crimson stronghold',
+    );
   });
 });

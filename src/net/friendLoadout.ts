@@ -47,7 +47,7 @@ export function sanitizeFriendLoadout(raw: {
   return { heroId, cards, faction };
 }
 
-/** Local working deck (customDecks[0]) + sworn order → wire payload. */
+/** Selected Deck Editor working + sworn order → wire payload. */
 export function loadoutFromWorking(
   working: CustomDeck | undefined,
   allegiance: string | null | undefined,

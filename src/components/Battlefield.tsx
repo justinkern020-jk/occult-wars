@@ -29,7 +29,13 @@ import {
   type EffectUnit,
 } from '../game/effects';
 import { canBeStruck, crownBonus, hasKeyword, manhattan } from '../game/keywords';
-import { MAPS, mapById, tileLabel, type Side } from '../game/maps';
+import { MAPS, mapById, tileLabel, tileLogName, type Side } from '../game/maps';
+import {
+  legalEmptySteps,
+  orderedLegalDirs,
+  orthoNeighbors,
+  type MoveDir,
+} from '../game/moves';
 import {
   DOMINATION_WIN,
   HAND_CAP,
@@ -131,12 +137,7 @@ function uid() {
 }
 
 function neighbors(r: number, c: number): Pos[] {
-  return [
-    { r: r - 1, c },
-    { r: r + 1, c },
-    { r, c: c - 1 },
-    { r, c: c + 1 },
-  ].filter((p) => p.r >= 0 && p.r < 5 && p.c >= 0 && p.c < 5);
+  return orthoNeighbors(r, c);
 }
 
 function listUnits(board: (BoardUnit | null)[][]): (BoardUnit & Pos)[] {
@@ -1514,7 +1515,7 @@ export function Battlefield({
           return next;
         });
         if (prevOwner !== atk.unit.side) {
-          const label = tileLabel(tile) || 'circle';
+          const label = tileLogName(tile);
           pushLog(`${atk.unit.name} conquers the ${label}.`);
           flashClaim(r, c, 'Conquered');
         } else {
@@ -2272,25 +2273,17 @@ export function Battlefield({
 
   const legalMove = useMemo(() => {
     const empty = new Set<string>();
-    const dirs = new Map<string, 'n' | 's' | 'e' | 'w'>();
+    const dirs = new Map<string, MoveDir>();
     if (!attacker || inputLocked) return { empty, dirs };
     const atk = findUnit(attacker);
     if (!atk) return { empty, dirs };
-    for (const p of neighbors(atk.r, atk.c)) {
-      const tile = gameMap.tiles[p.r][p.c];
-      if (tile.kind === 'void') continue;
-      if (board[p.r][p.c]) continue;
-      const key = `${p.r},${p.c}`;
-      empty.add(key);
-      let dir: 'n' | 's' | 'e' | 'w';
-      if (p.r < atk.r) dir = 'n';
-      else if (p.r > atk.r) dir = 's';
-      else if (p.c < atk.c) dir = 'w';
-      else dir = 'e';
-      dirs.set(key, dir);
-    }
-    return { empty, dirs };
+    return legalEmptySteps(atk.r, atk.c, gameMap.tiles, (r, c) => !!board[r][c]);
   }, [attacker, inputLocked, findUnit, gameMap, board]);
+
+  const legalMoveDirs = useMemo(
+    () => orderedLegalDirs(legalMove.dirs),
+    [legalMove],
+  );
 
   const legalStrike = useMemo(() => {
     const out = new Set<string>();
@@ -2552,16 +2545,32 @@ export function Battlefield({
         <p className="move-banner" data-testid="move-banner">
           <strong>{selectedHint.name}</strong>
           <span className="move-banner-sep">·</span>
-          Step to{' '}
-          <svg className="move-banner-chevron" viewBox="0 0 24 24" aria-hidden>
-            <path
-              d="M12 4.2 L18.6 13.2 H15.2 V19.2 H8.8 V13.2 H5.4 Z"
-              fill="#9ec8ff"
-              stroke="#5a7aa8"
-              strokeWidth="1"
-              strokeLinejoin="round"
-            />
-          </svg>
+          {legalMoveDirs.length > 0 ? (
+            <>
+              Step to{' '}
+              <span className="move-banner-dirs" data-testid="move-banner-dirs">
+                {legalMoveDirs.map((dir) => (
+                  <svg
+                    key={dir}
+                    className={`move-banner-chevron move-banner-${dir}`}
+                    data-dir={dir}
+                    viewBox="0 0 24 24"
+                    aria-hidden
+                  >
+                    <path
+                      d="M12 4.2 L18.6 13.2 H15.2 V19.2 H8.8 V13.2 H5.4 Z"
+                      fill="#9ec8ff"
+                      stroke="#5a7aa8"
+                      strokeWidth="1"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                ))}
+              </span>
+            </>
+          ) : (
+            <span>No empty step</span>
+          )}
           <span className="move-banner-sep">·</span>
           strike ({selectedHint.strikeLabel})
           {selectedHint.chips.map((chip) => (
@@ -2597,7 +2606,7 @@ export function Battlefield({
             {gameMap.tiles.map((row, r) =>
               row.map((tile, c) => {
                 if (tile.kind === 'void') {
-                  return <div key={`${r}-${c}`} className="stone tile-void" />;
+                  return <div key={`${r}-${c}`} className="tile-void" aria-hidden />;
                 }
                 const here = board[r][c];
                 const owned = control[r][c];

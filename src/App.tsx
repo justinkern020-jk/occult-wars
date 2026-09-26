@@ -11,7 +11,6 @@ import { CampaignHour } from './components/CampaignHour';
 import { FriendWorking } from './components/FriendWorking';
 import type { FriendRole, FriendSession } from './net/friendSession';
 import {
-  loadoutFromWorking,
   resolveFriendMatchLoadouts,
   type FriendLoadout,
 } from './net/friendLoadout';
@@ -296,10 +295,8 @@ export default function App() {
           </p>
         </nav>
         <FriendWorking
-          localLoadout={loadoutFromWorking(
-            working,
-            firstHourAllegiance(),
-          )}
+          customDecks={profile.customDecks}
+          allegiance={firstHourAllegiance()}
           onReady={({ room, role, session, hostLoadout, guestLoadout }) =>
             startFriend(room, role, session, hostLoadout, guestLoadout)
           }

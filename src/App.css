@@ -585,8 +585,8 @@ input[type='search'] {
   z-index: 4;
 }
 .stone.legal-move {
-  /* Above the selected origin — DOM order alone hides west/north arrows under the coin. */
-  z-index: 7;
+  /* Above origin AND neighboring coins in every ortho dir (N/E/S/W equally). */
+  z-index: 8;
   outline-offset: 4px;
   outline: 2px solid #9ec8ff;
   animation: 1.5s ease-in-out infinite move-pulse;
@@ -600,13 +600,13 @@ input[type='search'] {
     0 8px 14px #0006;
 }
 .stone.legal-strike {
-  z-index: 7;
+  z-index: 8;
   outline-offset: 3px;
   outline: 2px solid #c6a15b;
   animation: 1.4s ease-in-out infinite strike-pulse;
 }
 .stone.stone-origin {
-  /* Keep glow under legal move/strike neighbors so W/N chevrons stay visible. */
+  /* Keep selected coin under legal move/strike neighbors in all four dirs. */
   z-index: 3;
   box-shadow:
     0 0 0 1px #1a120c,
@@ -649,13 +649,13 @@ input[type='search'] {
   50% { outline-color: #fff6d8; }
 }
 
-/* Directional move chevrons (brass / parchment) */
+/* Directional move chevrons (brass / parchment) — above marks & coins */
 .move-way {
   position: absolute;
-  inset: 22%;
-  z-index: 5;
+  inset: 18%;
+  z-index: 9;
   pointer-events: none;
-  filter: drop-shadow(0 2px 3px #000a);
+  filter: drop-shadow(0 2px 4px #000c);
   animation: 1.35s ease-in-out infinite chevron-bob;
 }
 .move-n { transform: rotate(0deg); }
@@ -663,10 +663,35 @@ input[type='search'] {
 .move-e { transform: rotate(90deg); }
 .move-w { transform: rotate(-90deg); }
 @keyframes chevron-bob {
-  0%, 100% { opacity: 0.75; }
+  0%, 100% { opacity: 0.82; }
   50% { opacity: 1; }
 }
 .move-s, .move-e, .move-w { animation-name: chevron-bob; }
+
+/* Never paint leftover Gate/Stronghold text on tiles */
+.cell-label {
+  display: none !important;
+}
+
+/* Void corners: not a fake playable gold-ring circle */
+.tile-void {
+  aspect-ratio: 1;
+  width: 92%;
+  height: auto;
+  min-height: 0;
+  place-self: center;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  pointer-events: none;
+  cursor: default;
+  z-index: 0;
+  position: relative;
+}
+.tile-void:after {
+  display: none;
+}
 
 /* Gold strike reticle on legal foe coins */
 .strike-way {
@@ -718,6 +743,12 @@ input[type='search'] {
   color: #8c6d32;
   opacity: 0.85;
 }
+.move-banner-dirs {
+  display: inline-flex;
+  gap: 0.18rem;
+  align-items: center;
+  vertical-align: middle;
+}
 .move-banner-chevron {
   width: 0.95rem;
   height: 0.95rem;
@@ -725,6 +756,10 @@ input[type='search'] {
   display: inline-block;
   filter: drop-shadow(0 0 4px #9ec8ff88);
 }
+.move-banner-n { transform: rotate(0deg); }
+.move-banner-e { transform: rotate(90deg); }
+.move-banner-s { transform: rotate(180deg); }
+.move-banner-w { transform: rotate(-90deg); }
 .move-banner-chip {
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -2599,6 +2634,33 @@ input[type='search'] {
 }
 .friend-roles-quick {
   margin-top: 1.25rem;
+}
+.friend-deck-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 28rem;
+  margin: 1rem 0 0.25rem;
+  color: #b9a98a;
+  font-size: 0.85rem;
+}
+.friend-deck-picker select {
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.95rem;
+  background: #1a1510;
+  border: 1px solid #c9a227;
+  color: #f0e6c8;
+  padding: 0.45rem 0.6rem;
+  border-radius: 4px;
+}
+.friend-deck-picker option {
+  background: #1a1510;
+  color: #f0e6c8;
+}
+.friend-deck-empty {
+  color: #c9a98a;
+  font-size: 0.9rem;
+  margin: 0.75rem 0;
 }
 .friend-divider {
   color: #8a7a5a;

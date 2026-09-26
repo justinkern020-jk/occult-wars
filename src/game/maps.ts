@@ -112,17 +112,29 @@ export function mapsForEra(era: 'first' | 'second'): GameMap[] {
   return MAPS.filter((m) => (m.era ?? 'first') === era);
 }
 
-/** User-facing tile name. Stronghold/resource use full-tile art — no text overlay. */
+/** Board overlay label. Art speaks — never paint Gate/Stronghold/Resource text on tiles. */
 export function tileLabel(t: Tile): string {
-  if (t.kind === 'void') return '';
-  // Strongholds & resources: graphics only (no "Stronghold" / "Resource" text).
-  if (t.kind === 'stronghold' || t.kind === 'resource') return '';
+  void t;
+  return '';
+}
+
+/** Internal name for logs (not rendered on the board). */
+export function tileLogName(t: Tile): string {
+  if (t.kind === 'void') return 'void';
+  if (t.kind === 'stronghold') {
+    if (t.home === 'blue') return 'Azure stronghold';
+    if (t.home === 'red') return 'Crimson stronghold';
+    return 'stronghold';
+  }
+  if (t.kind === 'resource') {
+    return t.symbols === 2 ? 'double seal' : 'seal';
+  }
   if (t.kind === 'gate') {
     if (t.home === 'blue') return 'Azure Gate';
     if (t.home === 'red') return 'Crimson Gate';
     return 'Gate';
   }
-  return '';
+  return 'circle';
 }
 
 /** Prefer local mirrored art; fall back to grok CDN. */
