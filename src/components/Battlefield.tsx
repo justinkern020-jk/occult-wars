@@ -1170,18 +1170,55 @@ export function Battlefield({
   }, [side, phase, matchOver, hotseat]);
 
   const legalMove = useMemo(() => {
-    if (!attacker || inputLocked) return new Set<string>();
+    const empty = new Set<string>();
+    const dirs = new Map<string, 'n' | 's' | 'e' | 'w'>();
+    if (!attacker || inputLocked) return { empty, dirs };
     const atk = findUnit(attacker);
-    if (!atk) return new Set<string>();
-    const out = new Set<string>();
+    if (!atk) return { empty, dirs };
     for (const p of neighbors(atk.r, atk.c)) {
       const tile = gameMap.tiles[p.r][p.c];
       if (tile.kind === 'void') continue;
       if (board[p.r][p.c]) continue;
-      out.add(`${p.r},${p.c}`);
+      const key = `${p.r},${p.c}`;
+      empty.add(key);
+      let dir: 'n' | 's' | 'e' | 'w';
+      if (p.r < atk.r) dir = 'n';
+      else if (p.r > atk.r) dir = 's';
+      else if (p.c < atk.c) dir = 'w';
+      else dir = 'e';
+      dirs.set(key, dir);
+    }
+    return { empty, dirs };
+  }, [attacker, inputLocked, findUnit, gameMap, board]);
+
+  const legalStrike = useMemo(() => {
+    const out = new Set<string>();
+    if (!attacker || inputLocked) return out;
+    const atk = findUnit(attacker);
+    if (!atk) return out;
+    const atkPos = { ...atk.unit, r: atk.r, c: atk.c };
+    for (const foe of listUnits(board)) {
+      if (foe.side === atk.unit.side) continue;
+      if (canStrikeTarget(atkPos, foe)) out.add(`${foe.r},${foe.c}`);
     }
     return out;
-  }, [attacker, inputLocked, findUnit, gameMap, board]);
+  }, [attacker, inputLocked, findUnit, board, canStrikeTarget]);
+
+  const selectedHint = useMemo(() => {
+    if (!attacker || inputLocked) return null;
+    const atk = findUnit(attacker);
+    if (!atk) return null;
+    const ranged = hasKeyword(atk.unit, 'ranged');
+    const chips: string[] = [];
+    if (hasKeyword(atk.unit, 'fast')) chips.push('Fast');
+    if (hasKeyword(atk.unit, 'slow')) chips.push('Slow');
+    if (ranged) chips.push('Ranged');
+    return {
+      name: atk.unit.name,
+      strikeLabel: ranged ? 'ranged within 2' : 'melee adjacent',
+      chips,
+    };
+  }, [attacker, inputLocked, findUnit]);
 
   const legalDeploy = useMemo(() => {
     const idx = dragHand ?? selectedHand;
@@ -1335,6 +1372,30 @@ export function Battlefield({
         </p>
       )}
 
+      {selectedHint && !aim && (
+        <p className="move-banner" data-testid="move-banner">
+          <strong>{selectedHint.name}</strong>
+          <span className="move-banner-sep">·</span>
+          Step to{' '}
+          <svg className="move-banner-chevron" viewBox="0 0 24 24" aria-hidden>
+            <path
+              d="M12 4.2 L18.6 13.2 H15.2 V19.2 H8.8 V13.2 H5.4 Z"
+              fill="#9ec8ff"
+              stroke="#5a7aa8"
+              strokeWidth="1"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <span className="move-banner-sep">·</span>
+          strike ({selectedHint.strikeLabel})
+          {selectedHint.chips.map((chip) => (
+            <span key={chip} className="move-banner-chip">
+              {chip}
+            </span>
+          ))}
+        </p>
+      )}
+
       <div className="bf-stage">
         <div
           className="board-wrap"
@@ -1350,8 +1411,14 @@ export function Battlefield({
                 }
                 const here = board[r][c];
                 const owned = control[r][c];
-                const deployOk = legalDeploy.has(`${r},${c}`);
-                const moveOk = legalMove.has(`${r},${c}`);
+                const key = `${r},${c}`;
+                const deployOk = legalDeploy.has(key);
+                const moveOk = legalMove.empty.has(key);
+                const moveDir = legalMove.dirs.get(key);
+                const strikeOk = legalStrike.has(key);
+                const isOrigin =
+                  !!here &&
+                  (selectedUnit === here.uid || attacker === here.uid);
                 const unit = here;
                 return (
                   <button
@@ -1364,6 +1431,8 @@ export function Battlefield({
                     } ${owned ? `owned-${owned}` : ''} ${
                       deployOk ? 'legal-tile' : ''
                     } ${moveOk ? 'legal-move' : ''} ${
+                      strikeOk ? 'legal-strike' : ''
+                    } ${isOrigin ? 'stone-origin' : ''} ${
                       dragHand != null && deployOk ? 'drag-target' : ''
                     } ${unit ? 'has-unit' : ''}`.trim()}
                     data-tile-r={r}
@@ -1389,6 +1458,66 @@ export function Battlefield({
                       />
                     )}
                     <span className="cell-label">{tileLabel(tile)}</span>
+                    {moveOk && moveDir && (
+                      <svg
+                        className={`move-way move-${moveDir}`}
+                        viewBox="0 0 24 24"
+                        aria-hidden
+                      >
+                        <path
+                          d="M12 4.2 L18.6 13.2 H15.2 V19.2 H8.8 V13.2 H5.4 Z"
+                          fill="#e7d7a4"
+                          stroke="#8c6d32"
+                          strokeWidth="1.1"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M12 6.4 L16.4 12.6 H14 V17.2 H10 V12.6 H7.6 Z"
+                          fill="#c6a15b"
+                          opacity="0.85"
+                        />
+                      </svg>
+                    )}
+                    {strikeOk && (
+                      <svg
+                        className="strike-way"
+                        viewBox="0 0 48 48"
+                        aria-hidden
+                      >
+                        <circle
+                          cx="24"
+                          cy="24"
+                          r="18"
+                          fill="none"
+                          stroke="#c6a15b"
+                          strokeWidth="1.6"
+                          opacity="0.95"
+                        />
+                        <circle
+                          cx="24"
+                          cy="24"
+                          r="11"
+                          fill="none"
+                          stroke="#f3e2b8"
+                          strokeWidth="1.1"
+                          opacity="0.75"
+                        />
+                        <circle
+                          cx="24"
+                          cy="24"
+                          r="3.2"
+                          fill="#e8c870"
+                          opacity="0.9"
+                        />
+                        <path
+                          d="M24 4 V10 M24 38 V44 M4 24 H10 M38 24 H44"
+                          fill="none"
+                          stroke="#c6a15b"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    )}
                     {unit && (
                       <UnitCoin
                         unit={unit}
