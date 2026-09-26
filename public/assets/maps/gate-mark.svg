@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+  <!-- occult ledger gate: arched brass portal with keystone & lamplight -->
+  <defs>
+    <linearGradient id="brass" x1="12" y1="8" x2="52" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff4d6"/>
+      <stop offset=".35" stop-color="#e7d7a4"/>
+      <stop offset=".7" stop-color="#c6a15b"/>
+      <stop offset="1" stop-color="#8c6d32"/>
+    </linearGradient>
+    <linearGradient id="ink" x1="32" y1="14" x2="32" y2="54" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2a1e12" stop-opacity=".15"/>
+      <stop offset="1" stop-color="#0c0907" stop-opacity=".85"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#0c0907" flood-opacity=".55"/>
+    </filter>
+  </defs>
+  <!-- outer seal ring -->
+  <circle cx="32" cy="32" r="29" stroke="url(#brass)" stroke-width="1.5" opacity=".55"/>
+  <circle cx="32" cy="32" r="26.5" stroke="#e7d7a4" stroke-width=".6" opacity=".35" stroke-dasharray="2 3"/>
+  <!-- arch body -->
+  <g filter="url(#soft)">
+    <path d="M18 48 V30 C18 18 24 12 32 12 C40 12 46 18 46 30 V48"
+          stroke="url(#brass)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M22 48 V31 C22 21 26 16 32 16 C38 16 42 21 42 31 V48"
+          stroke="#fff4d6" stroke-width="1" opacity=".45"/>
+    <!-- keystone -->
+    <path d="M28 12.5 L32 9 L36 12.5 L34.2 16 H29.8 Z" fill="url(#brass)" stroke="#3a2a16" stroke-width=".5"/>
+    <!-- threshold bar -->
+    <path d="M16 48 H48" stroke="url(#brass)" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M18 51 H46" stroke="#8c6d32" stroke-width="1" opacity=".7" stroke-linecap="round"/>
+    <!-- lamp / eye in the arch -->
+    <circle cx="32" cy="28" r="3.2" fill="#fff4d6" opacity=".9"/>
+    <circle cx="32" cy="28" r="1.5" fill="#3a2a16"/>
+    <path d="M32 22 V24.5 M28.5 28 H26 M38 28 H35.5" stroke="#e7d7a4" stroke-width="1" stroke-linecap="round" opacity=".8"/>
+  </g>
+  <!-- ledger ticks -->
+  <path d="M20 40 H24 M40 40 H44" stroke="#c6a15b" stroke-width="1" opacity=".5" stroke-linecap="round"/>
+</svg>

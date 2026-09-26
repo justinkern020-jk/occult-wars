@@ -1,6 +1,18 @@
 :root {
   color-scheme: dark;
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --color-ink: #140f0c;
+  --color-ink-2: #221910;
+  --color-line: #3a2e22;
+  --color-parchment: #f3ead7;
+  --color-muted: #b3a48c;
+  --color-brass: #c6a15b;
+  --color-brass-2: #8c6d32;
+  --color-ally: #2f6f62;
+  --color-enemy: #8e2f2f;
+  --font-display: 'Cinzel', Palatino, serif;
+  --font-body: 'Libre Baskerville', Georgia, serif;
+  --font-ui: 'Cinzel', Palatino, serif;
+  font-family: var(--font-body);
   line-height: 1.5;
   font-weight: 400;
   background: #0c0b09;
@@ -19,7 +31,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    radial-gradient(ellipse at top, #1a1710 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 0%, #1a1710 0%, transparent 55%),
     #0c0b09;
 }
 
@@ -29,4 +41,10 @@ a {
 
 #root {
   min-height: 100vh;
+}
+
+button,
+select,
+input {
+  font: inherit;
 }

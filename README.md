@@ -42,6 +42,12 @@ npm run build
 
 `vercel.json` sets Vite build output to `dist` and SPA rewrites.
 
+## Power vs Loyalty (UI)
+
+- **Power** (combat coin, right) = dual vitality + damage; damaged units show reduced Power.
+- **Loyalty** (left coin) = muster cost paid from the loyalty bank — never the combat stat.
+- Board coins match tarot/hand layout so deployed units never look "backwards."
+
 ## Layout
 
 | Path | Role |
@@ -50,7 +56,8 @@ npm run build
 | `src/game/combat.test.ts` | Vitest coverage for combat |
 | `src/game/keywords.ts` | Keyword glossary |
 | `src/data/cards.json` | Extracted catalog (204 cards, dual Power) |
-| `src/components/*` | Catalog + combat sandbox UI |
+| `src/components/*` | Battlefield, catalog, combat sandbox |
+| `public/assets/maps/*` | Map art + gate/stronghold SVG marks |
 | `public/assets/*` | Original minified Grok bundles (reference) |
 
 ## Sample resolution

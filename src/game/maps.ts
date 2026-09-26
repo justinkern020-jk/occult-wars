@@ -1,0 +1,112 @@
+/** 5×5 occult field maps (Cabals / Grok lander encodings). */
+
+export type Side = 'blue' | 'red';
+
+export type TileKind =
+  | 'void'
+  | 'street' /* walkable field — never show "Street" in UI */
+  | 'stronghold'
+  | 'gate'
+  | 'resource';
+
+export interface Tile {
+  kind: TileKind;
+  home?: Side;
+  symbols?: 1 | 2;
+}
+
+export interface GameMap {
+  id: string;
+  name: string;
+  epithet: string;
+  tiles: Tile[][];
+}
+
+function Me(ch: string): Tile {
+  switch (ch) {
+    case '.':
+      return { kind: 'void' };
+    case 's':
+      return { kind: 'street' };
+    case 'B':
+      return { kind: 'stronghold', home: 'blue' };
+    case 'R':
+      return { kind: 'stronghold', home: 'red' };
+    case 'b':
+      return { kind: 'gate', home: 'blue' };
+    case 'r':
+      return { kind: 'gate', home: 'red' };
+    case 'd':
+      return { kind: 'gate' };
+    case '1':
+      return { kind: 'resource', symbols: 1 };
+    case '2':
+      return { kind: 'resource', symbols: 2 };
+    default:
+      throw new Error(`Unknown tile glyph: ${ch}`);
+  }
+}
+
+function R(id: string, name: string, epithet: string, rows: string[]): GameMap {
+  const tiles = rows.map((row) => [...row].map(Me));
+  return { id, name, epithet, tiles };
+}
+
+export const MAPS: GameMap[] = [
+  R('leaden-court', 'The Leaden Court', 'Facing strongholds and single-yield nodes.', [
+    '.rRr.',
+    's1s1s',
+    'sdsds',
+    's1s1s',
+    '.bBb.',
+  ]),
+  R('ashen-cross', 'The Ashen Cross', 'A cross, not a square. Side-arm +2 seals.', [
+    '.rRr.',
+    '.s1s.',
+    '2dsd2',
+    '.s1s.',
+    '.bBb.',
+  ]),
+  R('twin-vaults', 'The Twin Vaults', 'Double-yield vaults sit off the lane.', [
+    'srRrs',
+    '1sds1',
+    '2sss2',
+    '1sds1',
+    'sbBbs',
+  ]),
+  R('outer-seal', 'The Outer Seal', 'Peripheral +2 nodes; center deployment gate.', [
+    '.sRs.',
+    'r1d1r',
+    's2s2s',
+    'b1d1b',
+    '.sBs.',
+  ]),
+];
+
+export function mapById(id: string): GameMap {
+  return MAPS.find((m) => m.id === id) ?? MAPS[0];
+}
+
+/** User-facing tile name. Walkable field tiles return '' — never "Street". */
+export function tileLabel(t: Tile): string {
+  if (t.kind === 'void') return '';
+  if (t.kind === 'stronghold')
+    return t.home === 'blue' ? 'Azure Stronghold' : 'Crimson Stronghold';
+  if (t.kind === 'gate') {
+    if (t.home === 'blue') return 'Azure Gate';
+    if (t.home === 'red') return 'Crimson Gate';
+    return 'Gate';
+  }
+  if (t.kind === 'resource')
+    return t.symbols === 2 ? 'Resource +2' : 'Resource +1';
+  // walkable field (glyph s) — no label on the board
+  return '';
+}
+
+export function cardImageUrl(name: string): string {
+  const slug = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_|_$/g, '');
+  return `https://occultwar.grok.me/assets/images/${slug}.jpg`;
+}
