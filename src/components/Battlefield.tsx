@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
 import { cardById } from '../data/catalog';
 import { pickTrainingAction, type AiSnapshot } from '../game/ai';
 import { applyDamage, combatantFrom, isDestroyed, resolveMelee } from '../game/combat';
@@ -137,6 +137,90 @@ function deckFor(
   }
 }
 
+/** Absolute ghost that glides from one circle to the next. */
+function CoinSlideLayer({
+  slide,
+  gridRef,
+}: {
+  slide: {
+    unit: BoardUnit;
+    fromR: number;
+    fromC: number;
+    toR: number;
+    toC: number;
+    key: number;
+  };
+  gridRef: RefObject<HTMLDivElement | null>;
+}) {
+  const [box, setBox] = useState<{
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    tx: number;
+    ty: number;
+    run: boolean;
+  } | null>(null);
+
+  useLayoutEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const from = grid.querySelector(
+      `[data-tile-r="${slide.fromR}"][data-tile-c="${slide.fromC}"]`,
+    ) as HTMLElement | null;
+    const to = grid.querySelector(
+      `[data-tile-r="${slide.toR}"][data-tile-c="${slide.toC}"]`,
+    ) as HTMLElement | null;
+    if (!from || !to) return;
+    const g = grid.getBoundingClientRect();
+    const a = from.getBoundingClientRect();
+    const b = to.getBoundingClientRect();
+    setBox({
+      left: a.left - g.left,
+      top: a.top - g.top,
+      width: a.width,
+      height: a.height,
+      tx: 0,
+      ty: 0,
+      run: false,
+    });
+    const id = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setBox({
+          left: a.left - g.left,
+          top: a.top - g.top,
+          width: a.width,
+          height: a.height,
+          tx: b.left - a.left,
+          ty: b.top - a.top,
+          run: true,
+        });
+      });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [slide.key, slide.fromR, slide.fromC, slide.toR, slide.toC, gridRef]);
+
+  if (!box) return null;
+  return (
+    <div
+      className="coin-slide-ghost"
+      style={{
+        left: box.left,
+        top: box.top,
+        width: box.width,
+        height: box.height,
+        transform: `translate(${box.tx}px, ${box.ty}px)`,
+        transition: box.run
+          ? 'transform 0.28s cubic-bezier(0.22, 1, 0.36, 1)'
+          : 'none',
+      }}
+      aria-hidden
+    >
+      <UnitCoin unit={slide.unit} />
+    </div>
+  );
+}
+
 export function Battlefield({
   initialMapId = 'ashen-cross',
   mode = 'training',
@@ -199,6 +283,17 @@ export function Battlefield({
   const [selectedUnit, setSelectedUnit] = useState<string | null>(null);
   const [attacker, setAttacker] = useState<string | null>(null);
   const [revealCard, setRevealCard] = useState<Card | null>(null);
+  /** Brief glide overlay when a coin steps to an adjacent circle. */
+  const [coinSlide, setCoinSlide] = useState<null | {
+    unit: BoardUnit;
+    fromR: number;
+    fromC: number;
+    toR: number;
+    toC: number;
+    key: number;
+  }>(null);
+  const boardGridRef = useRef<HTMLDivElement | null>(null);
+  const slideTimerRef = useRef<number | null>(null);
   const [inspectCard, setInspectCard] = useState<Card | null>(null);
   const [inspectPower, setInspectPower] = useState<number | undefined>(undefined);
   /** Hand index being dragged to muster (units only). */
@@ -748,6 +843,28 @@ export function Battlefield({
     [],
   );
 
+  const kickCoinSlide = useCallback(
+    (unit: BoardUnit, fromR: number, fromC: number, toR: number, toC: number) => {
+      if (slideTimerRef.current != null) {
+        window.clearTimeout(slideTimerRef.current);
+        slideTimerRef.current = null;
+      }
+      setCoinSlide({
+        unit,
+        fromR,
+        fromC,
+        toR,
+        toC,
+        key: Date.now(),
+      });
+      slideTimerRef.current = window.setTimeout(() => {
+        slideTimerRef.current = null;
+        setCoinSlide(null);
+      }, 320);
+    },
+    [],
+  );
+
   const moveUnit = useCallback(
     (uidStr: string, r: number, c: number): 'ok' | 'storm' | 'fail' => {
       const atk = findUnit(uidStr);
@@ -769,6 +886,7 @@ export function Battlefield({
       }
 
       if (isEnemyStronghold(tile, atk.unit.side)) {
+        kickCoinSlide(atk.unit, atk.r, atk.c, r, c);
         setBoard((b) => {
           const next = b.map((row) => [...row]);
           next[atk.r][atk.c] = null;
@@ -790,6 +908,7 @@ export function Battlefield({
 
       const prevOwner = control[r][c];
       const veiled = hasKeyword(atk.unit, 'veiled');
+      kickCoinSlide(atk.unit, atk.r, atk.c, r, c);
       setBoard((b) => {
         const next = b.map((row) => [...row]);
         next[atk.r][atk.c] = null;
@@ -814,7 +933,7 @@ export function Battlefield({
       setSelectedUnit(null);
       return 'ok';
     },
-    [findUnit, gameMap, board, control, pushLog, finishMatch],
+    [findUnit, gameMap, board, control, pushLog, finishMatch, kickCoinSlide],
   );
 
   const strike = useCallback(
@@ -1466,7 +1585,7 @@ export function Battlefield({
             backgroundImage: `url(/assets/maps/${gameMap.id}.jpg)`,
           }}
         >
-          <div className="board-grid" role="grid">
+          <div className="board-grid" role="grid" ref={boardGridRef}>
             {gameMap.tiles.map((row, r) =>
               row.map((tile, c) => {
                 if (tile.kind === 'void') {
@@ -1589,6 +1708,12 @@ export function Battlefield({
                         unit={unit}
                         selected={selectedUnit === unit.uid || attacker === unit.uid}
                         foe={unit.side !== inputSide}
+                        sliding={
+                          !!coinSlide &&
+                          coinSlide.unit.uid === unit.uid &&
+                          coinSlide.toR === r &&
+                          coinSlide.toC === c
+                        }
                         onClick={() => onTileClick(r, c)}
                         onInspect={() => {
                           const def = cardById(unit.cardId);
@@ -1602,6 +1727,9 @@ export function Battlefield({
                   </button>
                 );
               }),
+            )}
+            {coinSlide && (
+              <CoinSlideLayer slide={coinSlide} gridRef={boardGridRef} />
             )}
           </div>
         </div>

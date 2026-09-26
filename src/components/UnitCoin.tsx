@@ -34,12 +34,15 @@ export function UnitCoin({
   unit,
   selected,
   foe,
+  sliding,
   onClick,
   onInspect,
 }: {
   unit: BoardUnit;
   selected?: boolean;
   foe?: boolean;
+  /** Hidden while the glide ghost is traveling onto this tile. */
+  sliding?: boolean;
   onClick?: () => void;
   onInspect?: () => void;
 }) {
@@ -57,7 +60,7 @@ export function UnitCoin({
     <div
       role="button"
       tabIndex={0}
-      className={`stone-coin is-${unit.side} ${foe ? 'coin-foe' : 'coin-mine'} ${selected ? 'stone-picked' : ''} ${unit.sick ? 'is-sick' : ''} ${veiled ? 'is-veiled' : ''}`}
+      className={`stone-coin is-${unit.side} ${foe ? 'coin-foe' : 'coin-mine'} ${selected ? 'stone-picked' : ''} ${unit.sick ? 'is-sick' : ''} ${veiled ? 'is-veiled' : ''} ${sliding ? 'coin-slide-hide' : ''}`}
       onClick={(e) => {
         e.stopPropagation();
         onClick?.();
