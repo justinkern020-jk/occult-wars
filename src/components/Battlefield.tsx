@@ -411,6 +411,21 @@ export function Battlefield() {
                         aria-hidden
                       />
                     )}
+                    {tile.kind === 'resource' && (
+                      <span
+                        className={`tile-mark resource-mark resource-${tile.symbols === 2 ? 'double' : 'single'}${unit ? ' mark-under' : ''}`}
+                        aria-hidden
+                      >
+                        {tile.symbols === 2 ? (
+                          <>
+                            <i className="resource-jewel" />
+                            <i className="resource-jewel" />
+                          </>
+                        ) : (
+                          <i className="resource-jewel" />
+                        )}
+                      </span>
+                    )}
                     {unit ? (
                       <UnitCoin
                         unit={unit}
@@ -421,13 +436,9 @@ export function Battlefield() {
                     ) : (
                       <span className="stone-empty">
                         {tile.kind === 'resource' && (
-                          <>
-                            <span className="stone-tag">{tileLabel(tile)}</span>
-                            <span className="pip-row">
-                              <i className="pip" />
-                              {tile.symbols === 2 && <i className="pip" />}
-                            </span>
-                          </>
+                          <span className="stone-tag resource-tag">
+                            {tileLabel(tile)}
+                          </span>
                         )}
                       </span>
                     )}
@@ -447,7 +458,14 @@ export function Battlefield() {
           <i className="legend-mark legend-gate" aria-hidden /> Gate
         </li>
         <li>
-          <i className="swatch tile-resource" /> Resource
+          <i className="legend-mark legend-resource" aria-hidden /> Resource
+        </li>
+        <li>
+          <span className="legend-jewels" aria-hidden>
+            <i className="resource-jewel" />
+            <i className="resource-jewel" />
+          </span>{' '}
+          Resource +2
         </li>
         <li>
           <span className="key-coin key-loyalty">L</span> Loyalty (cost)

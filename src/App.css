@@ -763,6 +763,55 @@ input[type='search'] {
 .stronghold-mark {
   background-image: url(/assets/maps/stronghold-mark.svg);
 }
+
+/* Resource jewels — faceted gem in brass bezel */
+.resource-mark {
+  inset: 16%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6%;
+  background: none;
+  filter: drop-shadow(0 2px 3px #0009);
+}
+.resource-mark.resource-double {
+  inset: 18% 10%;
+  gap: 4%;
+}
+.resource-mark.mark-under {
+  inset: 22%;
+  opacity: 0.3;
+  gap: 4%;
+}
+.resource-mark.resource-double.mark-under {
+  inset: 24% 14%;
+  opacity: 0.28;
+}
+.resource-jewel {
+  display: block;
+  width: 55%;
+  height: 55%;
+  max-width: 2.4rem;
+  max-height: 2.4rem;
+  background: url(/assets/maps/resource-jewel.svg) center / contain no-repeat;
+  flex: none;
+  filter: drop-shadow(0 1px 2px #0007);
+}
+.resource-mark.resource-single .resource-jewel {
+  width: 72%;
+  height: 72%;
+}
+.resource-mark.resource-double .resource-jewel {
+  width: 48%;
+  height: 48%;
+}
+.stone-tag.resource-tag {
+  z-index: 3;
+  position: relative;
+  margin-top: auto;
+  margin-bottom: 12%;
+  font-size: clamp(0.4rem, 1.4vw, 0.55rem);
+}
 .gate-blue,
 .stronghold-blue {
   filter: drop-shadow(0 2px 3px #0009) sepia(0.25) hue-rotate(170deg) saturate(1.35);
@@ -934,6 +983,18 @@ input[type='search'] {
 }
 .legend-stronghold {
   background-image: url(/assets/maps/stronghold-mark.svg);
+}
+.legend-resource {
+  background-image: url(/assets/maps/resource-jewel.svg);
+}
+.legend-jewels {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+.legend-jewels .resource-jewel {
+  width: 0.95rem;
+  height: 0.95rem;
 }
 .key-coin {
   width: 1.05rem;
