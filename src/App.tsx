@@ -1,30 +1,295 @@
-import { useState } from 'react';
-import { Battlefield } from './components/Battlefield';
+import { useMemo, useState } from 'react';
+import { Battlefield, type MatchMode } from './components/Battlefield';
 import { CombatDemo } from './components/CombatDemo';
 import { Catalog } from './components/Catalog';
 import { TitleScreen } from './components/TitleScreen';
 import { MenuAtelier } from './components/MenuAtelier';
+import { AllegianceScreen } from './components/AllegianceScreen';
+import { DeckEditor } from './components/DeckEditor';
+import { PackBreak } from './components/PackBreak';
+import { CampaignHour } from './components/CampaignHour';
+import { FriendWorking } from './components/FriendWorking';
+import { SecondHour } from './components/SecondHour';
+import { useProfile } from './hooks/useProfile';
+import {
+  awardShards,
+  swearAllegiance,
+  type CustomDeck,
+} from './game/profile';
+import { FIRST_HOUR_ORDERS, allyOf, type FirstHourOrder } from './game/orders';
+import type { StageOutcome } from './game/campaign';
 import './App.css';
 
-type Screen = 'title' | 'menu' | 'field' | 'archive' | 'sandbox';
+type Screen =
+  | 'title'
+  | 'menu'
+  | 'allegiance'
+  | 'field'
+  | 'archive'
+  | 'deck'
+  | 'pack'
+  | 'campaign'
+  | 'friend'
+  | 'second'
+  | 'sandbox';
+
+/** Pick a rival order for training (not self / not ally preferred). */
+function trainingFoe(order: string | null): string {
+  if (!order) return 'The Drowned Parish';
+  const pool = FIRST_HOUR_ORDERS.filter(
+    (o) => o !== order && o !== allyOf(order),
+  );
+  return pool[Math.floor(Math.random() * pool.length)] ?? 'Order of the Lead Dawn';
+}
 
 export default function App() {
+  const { profile, update, dailyGranted, clearDailyNotice } = useProfile();
   const [screen, setScreen] = useState<Screen>('title');
   const [mapId, setMapId] = useState('ashen-cross');
+  const [matchMode, setMatchMode] = useState<MatchMode>('training');
+  const [blueFaction, setBlueFaction] = useState('The Blackout Wardens');
+  const [redFaction, setRedFaction] = useState('The Drowned Parish');
+  const [blueHeroId, setBlueHeroId] = useState<string | undefined>();
+  const [redHeroId, setRedHeroId] = useState<string | undefined>();
+  const [blueDeckIds, setBlueDeckIds] = useState<string[] | undefined>();
+  const [redDeckIds, setRedDeckIds] = useState<string[] | undefined>();
+  const [campaignOutcome, setCampaignOutcome] = useState<{
+    stageIndex: number;
+    outcome: StageOutcome;
+  } | null>(null);
+  const [campaignStage, setCampaignStage] = useState(0);
+
+  const working = profile.customDecks[0] as CustomDeck | undefined;
+
+  const shellTitle = useMemo(() => {
+    switch (screen) {
+      case 'field':
+        if (matchMode === 'campaign') return 'The Leaden Hour';
+        if (matchMode === 'hotseat') return 'Pass the Grimoire';
+        if (matchMode === 'friend') return 'Friend Working';
+        if (matchMode === 'second') return 'The Hour After';
+        return 'Training Rite';
+      case 'archive':
+        return 'The Collection';
+      case 'deck':
+        return 'Deck Editor';
+      case 'pack':
+        return 'Break a Seal';
+      case 'campaign':
+        return 'The Leaden Hour';
+      case 'friend':
+        return 'Friend Working';
+      case 'second':
+        return 'The Hour After';
+      case 'allegiance':
+        return 'Swear an Order';
+      case 'sandbox':
+        return 'Rites desk';
+      default:
+        return 'Atelier';
+    }
+  }, [screen, matchMode]);
+
+  function ensureSworn(next: () => void) {
+    if (!profile.allegiance) {
+      setScreen('allegiance');
+      return;
+    }
+    next();
+  }
+
+  function startTraining() {
+    ensureSworn(() => {
+      const order = profile.allegiance!;
+      const foe = trainingFoe(order);
+      setBlueFaction(order);
+      setRedFaction(foe);
+      setBlueHeroId(working?.heroId);
+      setBlueDeckIds(working?.cards);
+      setRedHeroId(undefined);
+      setRedDeckIds(undefined);
+      setMatchMode('training');
+      setScreen('field');
+    });
+  }
+
+  function startHotseat() {
+    ensureSworn(() => {
+      const order = profile.allegiance!;
+      const foe = trainingFoe(order);
+      setBlueFaction(order);
+      setRedFaction(foe);
+      setBlueHeroId(working?.heroId);
+      setBlueDeckIds(working?.cards);
+      setRedHeroId(undefined);
+      setRedDeckIds(undefined);
+      setMatchMode('hotseat');
+      setScreen('field');
+    });
+  }
+
+  function startFriend(_room: string, asHost: boolean) {
+    ensureSworn(() => {
+      const order = profile.allegiance!;
+      const foe = trainingFoe(order);
+      setBlueFaction(asHost ? order : foe);
+      setRedFaction(asHost ? foe : order);
+      setBlueHeroId(working?.heroId);
+      setBlueDeckIds(working?.cards);
+      setMatchMode('friend');
+      setScreen('field');
+    });
+  }
 
   if (screen === 'title') {
-    return <TitleScreen onEnter={() => setScreen('menu')} />;
+    return (
+      <TitleScreen
+        dailyGranted={dailyGranted}
+        onEnter={() => {
+          clearDailyNotice();
+          if (!profile.allegiance) setScreen('allegiance');
+          else setScreen('menu');
+        }}
+      />
+    );
+  }
+
+  if (screen === 'allegiance') {
+    return (
+      <div className="app app-shell">
+        <AllegianceScreen
+          onSwear={(order: FirstHourOrder) => {
+            update(swearAllegiance(profile, order));
+            setScreen('menu');
+          }}
+          onBack={profile.allegiance ? () => setScreen('menu') : undefined}
+        />
+      </div>
+    );
   }
 
   if (screen === 'menu') {
     return (
       <MenuAtelier
+        profile={profile}
         selectedMapId={mapId}
         onSelectMap={setMapId}
-        onTraining={() => setScreen('field')}
+        onTraining={startTraining}
         onCollection={() => setScreen('archive')}
+        onDeckEditor={() => ensureSworn(() => setScreen('deck'))}
+        onPack={() => ensureSworn(() => setScreen('pack'))}
+        onLeaden={() => ensureSworn(() => setScreen('campaign'))}
+        onHotseat={startHotseat}
+        onFriend={() => ensureSworn(() => setScreen('friend'))}
+        onSecond={() => setScreen('second')}
+        onAllegiance={() => setScreen('allegiance')}
         onSandbox={() => setScreen('sandbox')}
       />
+    );
+  }
+
+  if (screen === 'campaign') {
+    return (
+      <div className="app app-shell">
+        <nav className="shell-bar">
+          <button
+            type="button"
+            className="brass-btn brass-btn-ghost shell-back"
+            onClick={() => setScreen('menu')}
+          >
+            Return to the atelier
+          </button>
+          <p className="shell-brand">
+            <span>Occult Wars</span>
+            <em>The Leaden Hour</em>
+          </p>
+        </nav>
+        <CampaignHour
+          profile={profile}
+          onUpdate={update}
+          lastOutcome={campaignOutcome}
+          onConsumeOutcome={() => setCampaignOutcome(null)}
+          onPlayStage={(mid, foe, stageIndex) => {
+            const order = profile.allegiance!;
+            setMapId(mid);
+            setBlueFaction(order);
+            setRedFaction(foe);
+            setBlueHeroId(working?.heroId);
+            setBlueDeckIds(working?.cards);
+            setCampaignStage(stageIndex);
+            setMatchMode('campaign');
+            setScreen('field');
+          }}
+          onBack={() => setScreen('menu')}
+        />
+      </div>
+    );
+  }
+
+  if (screen === 'friend') {
+    return (
+      <div className="app app-shell">
+        <nav className="shell-bar">
+          <button
+            type="button"
+            className="brass-btn brass-btn-ghost shell-back"
+            onClick={() => setScreen('menu')}
+          >
+            Return to the atelier
+          </button>
+          <p className="shell-brand">
+            <span>Occult Wars</span>
+            <em>Friend Working</em>
+          </p>
+        </nav>
+        <FriendWorking
+          onStartAsHost={(room) => startFriend(room, true)}
+          onStartAsGuest={(room) => startFriend(room, false)}
+          onBack={() => setScreen('menu')}
+        />
+      </div>
+    );
+  }
+
+  if (screen === 'second') {
+    return (
+      <div className="app app-shell">
+        <nav className="shell-bar">
+          <button
+            type="button"
+            className="brass-btn brass-btn-ghost shell-back"
+            onClick={() => setScreen('menu')}
+          >
+            Return to the atelier
+          </button>
+          <p className="shell-brand">
+            <span>Occult Wars</span>
+            <em>The Hour After</em>
+          </p>
+        </nav>
+        <SecondHour
+          profile={profile}
+          onUpdate={update}
+          onEnterYard={(mid, order) => {
+            setMapId(mid);
+            setBlueFaction(order);
+            setRedFaction(
+              order === 'The Blackout Wardens'
+                ? 'The Numbers Station'
+                : order === 'The Drowned Parish'
+                  ? 'The Dust Ballot'
+                  : order === 'The Numbers Station'
+                    ? 'The Blackout Wardens'
+                    : 'The Drowned Parish',
+            );
+            setBlueHeroId(profile.secondHero ?? undefined);
+            setBlueDeckIds(profile.secondCards ?? undefined);
+            setMatchMode('second');
+            setScreen('field');
+          }}
+          onBack={() => setScreen('menu')}
+        />
+      </div>
     );
   }
 
@@ -34,29 +299,91 @@ export default function App() {
         <button
           type="button"
           className="brass-btn brass-btn-ghost shell-back"
-          onClick={() => setScreen('menu')}
+          onClick={() =>
+            setScreen(
+              matchMode === 'campaign'
+                ? 'campaign'
+                : matchMode === 'second'
+                  ? 'second'
+                  : 'menu',
+            )
+          }
         >
           Return to the atelier
         </button>
         <p className="shell-brand">
           <span>Occult Wars</span>
-          <em>
-            {screen === 'field'
-              ? 'The Field'
-              : screen === 'archive'
-                ? 'The Collection'
-                : 'Rites desk'}
-          </em>
+          <em>{shellTitle}</em>
         </p>
       </nav>
 
       {screen === 'field' && (
         <Battlefield
           initialMapId={mapId}
-          onLeave={() => setScreen('menu')}
+          mode={matchMode}
+          blueFaction={blueFaction}
+          redFaction={redFaction}
+          blueHeroId={blueHeroId}
+          redHeroId={redHeroId}
+          blueDeckIds={blueDeckIds}
+          redDeckIds={redDeckIds}
+          onLeave={() =>
+            setScreen(
+              matchMode === 'campaign'
+                ? 'campaign'
+                : matchMode === 'second'
+                  ? 'second'
+                  : 'menu',
+            )
+          }
+          onMatchEnd={({ playerWon, kind }) => {
+            const modeKey =
+              matchMode === 'campaign'
+                ? 'campaign'
+                : matchMode === 'hotseat'
+                  ? 'hotseat'
+                  : matchMode === 'friend'
+                    ? 'pvp'
+                    : 'training';
+            update(awardShards(profile, modeKey, playerWon));
+            if (matchMode === 'campaign') {
+              const outcome: StageOutcome = !playerWon
+                ? 'lost'
+                : kind === 'stronghold'
+                  ? 'storm'
+                  : 'hold';
+              setCampaignOutcome({ stageIndex: campaignStage, outcome });
+              setScreen('campaign');
+            }
+          }}
         />
       )}
-      {screen === 'archive' && <Catalog />}
+      {screen === 'archive' && (
+        <Catalog profile={profile} onUpdate={update} />
+      )}
+      {screen === 'deck' && (
+        <DeckEditor
+          profile={profile}
+          onSave={(deck) => {
+            update({
+              ...profile,
+              customDecks: [
+                deck,
+                ...profile.customDecks.filter((d) => d.id !== deck.id),
+              ],
+            });
+            setScreen('menu');
+          }}
+          onBack={() => setScreen('menu')}
+        />
+      )}
+      {screen === 'pack' && (
+        <PackBreak
+          profile={profile}
+          onUpdate={update}
+          onBack={() => setScreen('menu')}
+        />
+      )}
       {screen === 'sandbox' && <CombatDemo />}
     </div>
   );

@@ -1,11 +1,21 @@
 import { useEffect, useRef } from 'react';
-import { MAPS, type GameMap } from '../game/maps';
+import { MAPS, mapsForEra, type GameMap } from '../game/maps';
+import { PACK_COST, type Profile } from '../game/profile';
+import { brassClick } from '../game/sfx';
 
 type Props = {
+  profile: Profile;
   selectedMapId: string;
   onSelectMap: (id: string) => void;
   onTraining: () => void;
   onCollection: () => void;
+  onDeckEditor: () => void;
+  onPack: () => void;
+  onLeaden: () => void;
+  onHotseat: () => void;
+  onFriend: () => void;
+  onSecond: () => void;
+  onAllegiance: () => void;
   onSandbox: () => void;
 };
 
@@ -31,22 +41,29 @@ function MiniTile({ kind, symbols }: { kind: string; symbols?: number }) {
 }
 
 export function MenuAtelier({
+  profile,
   selectedMapId,
   onSelectMap,
   onTraining,
   onCollection,
+  onDeckEditor,
+  onPack,
+  onLeaden,
+  onHotseat,
+  onFriend,
+  onSecond,
+  onAllegiance,
   onSandbox,
 }: Props) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const firstMaps = mapsForEra('first');
 
   useEffect(() => {
     const el = audioRef.current;
     if (!el) return;
     el.volume = 0.22;
     const tryPlay = () => {
-      void el.play().catch(() => {
-        /* autoplay may be blocked until a gesture */
-      });
+      void el.play().catch(() => {});
     };
     tryPlay();
     const unlock = () => tryPlay();
@@ -56,6 +73,11 @@ export function MenuAtelier({
       el.pause();
     };
   }, []);
+
+  const click = (fn: () => void) => () => {
+    brassClick();
+    fn();
+  };
 
   return (
     <div className="menu-root" data-testid="main-menu">
@@ -77,12 +99,16 @@ export function MenuAtelier({
             Six orders. One leaden hour. Cabals dual-Power — vitality and damage
             as one number. Loyalty banks the muster.
           </p>
+          <p className="menu-shards" data-testid="shard-count">
+            {profile.username} · {profile.alchemicalShards} shards
+            {profile.allegiance ? ` · ${profile.allegiance}` : ' · unswear'}
+          </p>
 
           <button
             type="button"
             className="menu-door brass-btn brass-btn-solid mt-door-hero"
             data-testid="start-training"
-            onClick={onTraining}
+            onClick={click(onTraining)}
           >
             <span className="menu-door-glyph" aria-hidden>
               ✦
@@ -99,24 +125,8 @@ export function MenuAtelier({
             <button
               type="button"
               className="menu-door brass-btn"
-              data-testid="open-collection"
-              onClick={onCollection}
-            >
-              <span className="menu-door-glyph" aria-hidden>
-                ✹
-              </span>
-              <span className="menu-door-copy">
-                <span className="menu-door-title">The Collection</span>
-                <span className="menu-door-sub">
-                  Archive of every plate in this working
-                </span>
-              </span>
-            </button>
-            <button
-              type="button"
-              className="menu-door brass-btn"
               data-testid="open-leaden"
-              onClick={onTraining}
+              onClick={click(onLeaden)}
             >
               <span className="menu-door-glyph" aria-hidden>
                 ⬡
@@ -124,8 +134,123 @@ export function MenuAtelier({
               <span className="menu-door-copy">
                 <span className="menu-door-title">The Leaden Hour</span>
                 <span className="menu-door-sub">
-                  Enter the field. Close each circle.
+                  Six stages. Close each circle.
                 </span>
+              </span>
+            </button>
+            <button
+              type="button"
+              className="menu-door brass-btn"
+              data-testid="open-hotseat"
+              onClick={click(onHotseat)}
+            >
+              <span className="menu-door-glyph" aria-hidden>
+                ⧉
+              </span>
+              <span className="menu-door-copy">
+                <span className="menu-door-title">Pass the Grimoire</span>
+                <span className="menu-door-sub">Two chairs, one working</span>
+              </span>
+            </button>
+          </div>
+
+          <div className="menu-doors menu-doors-2">
+            <button
+              type="button"
+              className="menu-door brass-btn"
+              data-testid="open-friend"
+              onClick={click(onFriend)}
+            >
+              <span className="menu-door-glyph" aria-hidden>
+                ⟐
+              </span>
+              <span className="menu-door-copy">
+                <span className="menu-door-title">Friend Working</span>
+                <span className="menu-door-sub">4-letter room · WebRTC</span>
+              </span>
+            </button>
+            <button
+              type="button"
+              className="menu-door brass-btn"
+              data-testid="open-second"
+              onClick={click(onSecond)}
+            >
+              <span className="menu-door-glyph" aria-hidden>
+                ◐
+              </span>
+              <span className="menu-door-copy">
+                <span className="menu-door-title">The hour after</span>
+                <span className="menu-door-sub">
+                  Four societies · blackout yards
+                </span>
+              </span>
+            </button>
+          </div>
+
+          <div className="menu-doors menu-doors-2">
+            <button
+              type="button"
+              className="menu-door brass-btn"
+              data-testid="open-collection"
+              onClick={click(onCollection)}
+            >
+              <span className="menu-door-glyph" aria-hidden>
+                ✹
+              </span>
+              <span className="menu-door-copy">
+                <span className="menu-door-title">The Collection</span>
+                <span className="menu-door-sub">
+                  Owned plates · import / export
+                </span>
+              </span>
+            </button>
+            <button
+              type="button"
+              className="menu-door brass-btn"
+              data-testid="open-deck"
+              onClick={click(onDeckEditor)}
+            >
+              <span className="menu-door-glyph" aria-hidden>
+                ✎
+              </span>
+              <span className="menu-door-copy">
+                <span className="menu-door-title">Deck Editor</span>
+                <span className="menu-door-sub">1 leader · 30–40 plates</span>
+              </span>
+            </button>
+          </div>
+
+          <div className="menu-doors menu-doors-2">
+            <button
+              type="button"
+              className="menu-door brass-btn brass-btn-solid"
+              data-testid="open-pack"
+              onClick={click(onPack)}
+            >
+              <span className="menu-door-glyph" aria-hidden>
+                ✧
+              </span>
+              <span className="menu-door-copy">
+                <span className="menu-door-title">Break a Seal</span>
+                <span className="menu-door-sub">
+                  {PACK_COST} shards · five cards
+                </span>
+              </span>
+            </button>
+            <button
+              type="button"
+              className="menu-door brass-btn"
+              data-testid="open-allegiance"
+              onClick={click(onAllegiance)}
+            >
+              <span className="menu-door-glyph" aria-hidden>
+                ⚜
+              </span>
+              <span className="menu-door-copy">
+                <span className="menu-door-title">
+                  {profile.allegiance ? 'Re-swear' : 'Swear an order'}
+                </span>
+                <span className="menu-door-sub">Primary + ally jewel</span>
               </span>
             </button>
           </div>
@@ -133,9 +258,9 @@ export function MenuAtelier({
       </section>
 
       <section className="plate field-picker">
-        <p className="plate-kicker">Choose the field</p>
+        <p className="plate-kicker">Choose the field (Training)</p>
         <div className="map-grid">
-          {MAPS.map((m) => {
+          {firstMaps.map((m) => {
             const doubles = doubleNodeCount(m);
             const active = m.id === selectedMapId;
             return (
@@ -170,7 +295,7 @@ export function MenuAtelier({
         <button
           type="button"
           className="brass-btn brass-btn-solid enter-field-btn"
-          onClick={onTraining}
+          onClick={click(onTraining)}
         >
           Enter the field
         </button>
@@ -184,6 +309,8 @@ export function MenuAtelier({
         <a href="https://occultwar.grok.me" target="_blank" rel="noreferrer">
           Reference on grok.me
         </a>
+        <span aria-hidden> · </span>
+        <span>{MAPS.length} maps loaded</span>
       </p>
     </div>
   );

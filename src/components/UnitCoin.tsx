@@ -1,5 +1,5 @@
 import type { Side } from '../game/maps';
-import { cardImageUrl } from '../game/maps';
+import { CardArt } from './CardArt';
 
 export interface BoardUnit {
   uid: string;
@@ -13,15 +13,19 @@ export interface BoardUnit {
   /** Loyalty / muster cost — NOT combat Power. */
   loyalty: number;
   keywords: string[];
-  /** Acted this rite (one step). */
   moved?: boolean;
   attacked?: boolean;
+  sick?: boolean;
+  tough?: boolean;
+  fast?: boolean;
+  shutter?: boolean;
+  silenced?: boolean;
+  powder?: boolean;
 }
 
 /**
  * Battlefield token.
- * Coins match tarot card layout (Loyalty left · Power right) so board
- * and hand never look "backwards" relative to each other.
+ * Coins match tarot card layout (Loyalty left · Power right).
  */
 export function UnitCoin({
   unit,
@@ -38,26 +42,16 @@ export function UnitCoin({
   return (
     <button
       type="button"
-      className={`stone-coin is-${unit.side} ${foe ? 'coin-foe' : 'coin-mine'} ${selected ? 'stone-picked' : ''}`}
+      className={`stone-coin is-${unit.side} ${foe ? 'coin-foe' : 'coin-mine'} ${selected ? 'stone-picked' : ''} ${unit.sick ? 'is-sick' : ''}`}
       onClick={onClick}
       title={`${unit.name} · Power ${unit.power} · Loyalty ${unit.loyalty}`}
       aria-label={`${unit.name}, Power ${unit.power}, Loyalty ${unit.loyalty}`}
     >
-      <img
-        src={cardImageUrl(unit.name)}
-        alt=""
-        className="stone-face"
-        draggable={false}
-        onError={(e) => {
-          (e.target as HTMLImageElement).style.opacity = '0.25';
-        }}
-      />
-      {/* Loyalty (cost/oath bank) — left, matches card cost pip */}
+      <CardArt name={unit.name} className="stone-face" />
       <span className="coin-stat coin-loyalty" title="Loyalty · muster cost">
         <abbr>L</abbr>
         {unit.loyalty}
       </span>
-      {/* Power (dual combat) — right, matches card Power pip */}
       <span
         className={`coin-stat coin-power ${hurt ? 'coin-hurt' : ''}`}
         title="Power · vitality and damage"

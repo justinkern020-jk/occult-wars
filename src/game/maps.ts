@@ -20,6 +20,7 @@ export interface GameMap {
   name: string;
   epithet: string;
   tiles: Tile[][];
+  era?: 'first' | 'second';
 }
 
 function Me(ch: string): Tile {
@@ -47,9 +48,15 @@ function Me(ch: string): Tile {
   }
 }
 
-function R(id: string, name: string, epithet: string, rows: string[]): GameMap {
+function R(
+  id: string,
+  name: string,
+  epithet: string,
+  rows: string[],
+  era: 'first' | 'second' = 'first',
+): GameMap {
   const tiles = rows.map((row) => [...row].map(Me));
-  return { id, name, epithet, tiles };
+  return { id, name, epithet, tiles, era };
 }
 
 export const MAPS: GameMap[] = [
@@ -81,10 +88,28 @@ export const MAPS: GameMap[] = [
     'b1d1b',
     '.sBs.',
   ]),
+  R(
+    'blackout-yard',
+    'The Blackout Yard',
+    'The second hour. A yard of streets where the dark can walk.',
+    ['.rRr.', 's2s1s', 'sdsds', 's1s2s', '.bBb.'],
+    'second',
+  ),
+  R(
+    'culvert-court',
+    'The Culvert Court',
+    'The second hour. Water under the seals, and a long street for the vote.',
+    ['srRrs', '2sds1', 'sssss', '1sds2', 'sbBbs'],
+    'second',
+  ),
 ];
 
 export function mapById(id: string): GameMap {
   return MAPS.find((m) => m.id === id) ?? MAPS[0];
+}
+
+export function mapsForEra(era: 'first' | 'second'): GameMap[] {
+  return MAPS.filter((m) => (m.era ?? 'first') === era);
 }
 
 /** User-facing tile name. Walkable field tiles return '' — never "Street". */
@@ -99,11 +124,19 @@ export function tileLabel(t: Tile): string {
   }
   if (t.kind === 'resource')
     return t.symbols === 2 ? 'Resource +2' : 'Resource +1';
-  // walkable field (glyph s) — no label on the board
   return '';
 }
 
+/** Prefer local mirrored art; fall back to grok CDN. */
 export function cardImageUrl(name: string): string {
+  const slug = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_|_$/g, '');
+  return `/assets/images/${slug}.jpg`;
+}
+
+export function cardImageFallback(name: string): string {
   const slug = name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '_')

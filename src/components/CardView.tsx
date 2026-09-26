@@ -1,6 +1,6 @@
 import type { Card } from '../game/types';
 import { KEYWORDS } from '../game/keywords';
-import { cardImageUrl } from '../game/maps';
+import { CardArt } from './CardArt';
 
 const KIND_LABEL: Record<string, string> = {
   unit: 'Unit',
@@ -42,14 +42,7 @@ export function CardView({ card }: { card: Card }) {
         )}
       </header>
       <div className="card-art">
-        <img
-          src={cardImageUrl(card.name)}
-          alt=""
-          loading="lazy"
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = 'none';
-          }}
-        />
+        <CardArt name={card.name} />
       </div>
       {card.keywords.length > 0 && (
         <ul className="card-keywords">

@@ -1,4 +1,4 @@
-/** Keyword glossary (combat-relevant + common board keywords). */
+/** Keyword glossary (combat-relevant + board keywords from grok set). */
 
 export interface KeywordInfo {
   key: string;
@@ -36,7 +36,8 @@ export const KEYWORDS: Record<string, KeywordInfo> = {
   ranged: {
     key: 'ranged',
     glyph: 'R',
-    title: 'Ranged Strike. May strike at range instead of stepping into melee.',
+    title:
+      'Ranged Strike. May strike a foe within Manhattan distance 2 instead of stepping into melee.',
   },
   crown: {
     key: 'crown',
@@ -47,6 +48,41 @@ export const KEYWORDS: Record<string, KeywordInfo> = {
     key: 'shutter',
     glyph: 'H',
     title: 'Shutter. Ranged strikes cannot choose this unit.',
+  },
+  tithe: {
+    key: 'tithe',
+    glyph: '†',
+    title: 'Tithe. While this unit stands, your bank yields +1 at rite open.',
+  },
+  tithe2: {
+    key: 'tithe2',
+    glyph: '‡',
+    title: 'Greater Tithe. While this unit stands, your bank yields +2.',
+  },
+  hearth: {
+    key: 'hearth',
+    glyph: '⌂',
+    title: 'Hearth. A resource node this unit stands on banks twice.',
+  },
+  cryptid: {
+    key: 'cryptid',
+    glyph: '◊',
+    title: 'Cryptid. A sighting at the edge of the map.',
+  },
+  gills: {
+    key: 'gills',
+    glyph: '≈',
+    title: 'Gills. Immune to Tide; may heal 1 when Tide rises.',
+  },
+  relay: {
+    key: 'relay',
+    glyph: '⟳',
+    title: 'Relay. When you muster another unit, draw 1 card.',
+  },
+  veiled: {
+    key: 'veiled',
+    glyph: '◌',
+    title: 'Veiled. Cannot be named by rites or leaders.',
   },
 };
 
@@ -61,9 +97,39 @@ export function hasKeyword(
 }
 
 export function combatModeFor(
-  attacker: { keywords: string[] },
+  attacker: { keywords: string[]; fast?: boolean; slow?: boolean },
 ): 'normal' | 'fast' | 'slow' {
   if (hasKeyword(attacker, 'fast')) return 'fast';
   if (hasKeyword(attacker, 'slow')) return 'slow';
   return 'normal';
+}
+
+/** Manhattan distance on the 5×5 field. */
+export function manhattan(r1: number, c1: number, r2: number, c2: number): number {
+  return Math.abs(r1 - r2) + Math.abs(c1 - c2);
+}
+
+/** Ranged strike reach (Manhattan). Non-ranged melee is adjacent (1). */
+export function rangedReach(unit: { keywords: string[] }): number {
+  return hasKeyword(unit, 'ranged') ? 2 : 1;
+}
+
+/** Lamp (crown) bonus: +1 strike Power per adjacent allied crown unit. */
+export function crownBonus(
+  board: ({ side: string; keywords: string[] } | null)[][],
+  side: string,
+  r: number,
+  c: number,
+): number {
+  let bonus = 0;
+  for (const [dr, dc] of [
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1],
+  ] as const) {
+    const u = board[r + dr]?.[c + dc];
+    if (u && u.side === side && hasKeyword(u, 'crown')) bonus += 1;
+  }
+  return bonus;
 }

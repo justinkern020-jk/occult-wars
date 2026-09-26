@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { UNITS } from '../data/catalog';
+import { cardById } from '../data/catalog';
 import { pickTrainingAction, type AiSnapshot } from '../game/ai';
-import { combatantFrom, resolveMelee } from '../game/combat';
+import { applyDamage, combatantFrom, isDestroyed, resolveMelee } from '../game/combat';
 import {
   canDeployOn,
   initialControl,
@@ -10,13 +10,24 @@ import {
   paintTile,
   type ControlGrid,
 } from '../game/control';
-import { buildShuffledWorking, drawFromDeck } from '../game/deck';
 import {
-  MAPS,
-  mapById,
-  tileLabel,
-  type Side,
-} from '../game/maps';
+  buildShuffledOrderWorking,
+  buildShuffledWorking,
+  cardsFromIds,
+  drawFromDeck,
+  shuffleInPlace,
+  heroForFaction,
+} from '../game/deck';
+import {
+  effectNeedsAim,
+  leaderNeedsAim,
+  resolveEffect,
+  resolveLeaderPower,
+  type EffectCtx,
+  type EffectUnit,
+} from '../game/effects';
+import { crownBonus, hasKeyword, manhattan, rangedReach } from '../game/keywords';
+import { MAPS, mapById, tileLabel, type Side } from '../game/maps';
 import {
   DOMINATION_WIN,
   applyBank,
@@ -27,6 +38,7 @@ import {
   victoryReason,
   type VictoryKind,
 } from '../game/scoring';
+import { clashSfx, defeatStinger, victoryStinger, brassClick } from '../game/sfx';
 import type { Card } from '../game/types';
 import { CardView } from './CardView';
 import { HandCard } from './HandCard';
@@ -39,10 +51,32 @@ import { UnitCoin, type BoardUnit } from './UnitCoin';
 
 type Pos = { r: number; c: number };
 
-const AZURE_FACTION = 'The Blackout Wardens';
-const CRIMSON_FACTION = 'The Drowned Parish';
-const PLAYER: Side = 'blue';
-const AI_SIDE: Side = 'red';
+export type MatchMode =
+  | 'training'
+  | 'hotseat'
+  | 'campaign'
+  | 'friend'
+  | 'second';
+
+export type BattlefieldProps = {
+  initialMapId?: string;
+  mode?: MatchMode;
+  blueFaction?: string;
+  redFaction?: string;
+  blueHeroId?: string;
+  redHeroId?: string;
+  blueDeckIds?: string[];
+  redDeckIds?: string[];
+  onLeave?: () => void;
+  onMatchEnd?: (result: {
+    winner: Side;
+    kind: VictoryKind;
+    playerWon: boolean;
+  }) => void;
+};
+
+const DEFAULT_BLUE = 'The Blackout Wardens';
+const DEFAULT_RED = 'The Drowned Parish';
 
 function uid() {
   return `u_${Math.random().toString(36).slice(2, 9)}`;
@@ -57,9 +91,7 @@ function neighbors(r: number, c: number): Pos[] {
   ].filter((p) => p.r >= 0 && p.r < 5 && p.c >= 0 && p.c < 5);
 }
 
-function listUnits(
-  board: (BoardUnit | null)[][],
-): (BoardUnit & Pos)[] {
+function listUnits(board: (BoardUnit | null)[][]): (BoardUnit & Pos)[] {
   const out: (BoardUnit & Pos)[] = [];
   for (let r = 0; r < 5; r++)
     for (let c = 0; c < 5; c++) {
@@ -73,25 +105,67 @@ function emptyBoard(): (BoardUnit | null)[][] {
   return Array.from({ length: 5 }, () => Array(5).fill(null));
 }
 
-type MatchOver = {
-  winner: Side;
-  kind: VictoryKind;
-};
+function emptyDiscard(): { blue: Card[]; red: Card[] } {
+  return { blue: [], red: [] };
+}
 
-type BattlefieldProps = {
-  initialMapId?: string;
-  onLeave?: () => void;
-};
+type MatchOver = { winner: Side; kind: VictoryKind };
+
+type AimMode =
+  | null
+  | { kind: 'cast'; handIndex: number; card: Card }
+  | { kind: 'leader' };
+
+function deckFor(
+  faction: string,
+  ids?: string[],
+): Card[] {
+  if (ids && ids.length >= 30) {
+    return shuffleInPlace(cardsFromIds(ids));
+  }
+  try {
+    return buildShuffledOrderWorking(faction);
+  } catch {
+    return buildShuffledWorking(faction);
+  }
+}
 
 export function Battlefield({
   initialMapId = 'ashen-cross',
+  mode = 'training',
+  blueFaction = DEFAULT_BLUE,
+  redFaction = DEFAULT_RED,
+  blueHeroId,
+  redHeroId,
+  blueDeckIds,
+  redDeckIds,
   onLeave,
+  onMatchEnd,
 }: BattlefieldProps = {}) {
   const [mapId, setMapId] = useState(initialMapId);
   useEffect(() => {
     setMapId(initialMapId);
   }, [initialMapId]);
   const gameMap = useMemo(() => mapById(mapId), [mapId]);
+
+  const hotseat = mode === 'hotseat';
+  const PLAYER: Side = 'blue';
+  const AI_SIDE: Side = 'red';
+
+  const blueHero = useMemo(
+    () =>
+      (blueHeroId && cardById(blueHeroId)) ||
+      heroForFaction(blueFaction) ||
+      null,
+    [blueHeroId, blueFaction],
+  );
+  const redHero = useMemo(
+    () =>
+      (redHeroId && cardById(redHeroId)) ||
+      heroForFaction(redFaction) ||
+      null,
+    [redHeroId, redFaction],
+  );
 
   const [showPrimer, setShowPrimer] = useState(() => !hasSeenPrimer());
   const [loyalty, setLoyalty] = useState({ blue: 0, red: 0 });
@@ -101,29 +175,32 @@ export function Battlefield({
   const [phase, setPhase] = useState<'main' | 'melee' | 'over'>('main');
   const [matchOver, setMatchOver] = useState<MatchOver | null>(null);
   const [log, setLog] = useState<string[]>([]);
-
   const [deck, setDeck] = useState(() => ({
-    blue: buildShuffledWorking(AZURE_FACTION),
-    red: buildShuffledWorking(CRIMSON_FACTION),
+    blue: deckFor(blueFaction, blueDeckIds),
+    red: deckFor(redFaction, redDeckIds),
   }));
   const [hand, setHand] = useState<{ blue: Card[]; red: Card[] }>({
     blue: [],
     red: [],
   });
-
+  const [discard, setDiscard] = useState(emptyDiscard);
   const [board, setBoard] = useState<(BoardUnit | null)[][]>(emptyBoard);
   const [control, setControl] = useState<ControlGrid>(() =>
     initialControl(gameMap.tiles),
   );
-
   const [selectedHand, setSelectedHand] = useState<number | null>(null);
   const [selectedUnit, setSelectedUnit] = useState<string | null>(null);
   const [attacker, setAttacker] = useState<string | null>(null);
   const [revealCard, setRevealCard] = useState<Card | null>(null);
+  const [inspectCard, setInspectCard] = useState<Card | null>(null);
+  const [cryptidSight, setCryptidSight] = useState<string | null>(null);
   const [aiBusy, setAiBusy] = useState(false);
+  const [aim, setAim] = useState<AimMode>(null);
+  const [leaderUsed, setLeaderUsed] = useState({ blue: false, red: false });
+  const [passPrompt, setPassPrompt] = useState(false);
 
   const pushLog = useCallback((msg: string) => {
-    setLog((L) => [msg, ...L].slice(0, 10));
+    setLog((L) => [msg, ...L].slice(0, 12));
   }, []);
 
   const bankUnits = useCallback(
@@ -147,9 +224,22 @@ export function Battlefield({
       h: { blue: Card[]; red: Card[] },
       turnNum: number,
     ) => {
-      // Reset act flags
       const cleared = b.map((row) =>
-        row.map((u) => (u ? { ...u, moved: false, attacked: false } : null)),
+        row.map((u) => {
+          if (!u) return null;
+          // Clear lock from previous; keep sick only for delay muster this rite
+          const next = {
+            ...u,
+            moved: false,
+            attacked: false,
+            powder: false,
+          };
+          if (u.powder) {
+            // was locked by foe — stays sick one rite then clears
+            next.sick = false;
+          }
+          return next;
+        }),
       );
       setBoard(cleared);
 
@@ -170,7 +260,6 @@ export function Battlefield({
         nextSide,
         bankUnits(cleared),
       );
-      // Second seat crumb: red on global turn 2
       if (nextSide === 'red' && turnNum === 2) gain += 1;
       setLoyalty((L) => ({
         ...L,
@@ -191,8 +280,8 @@ export function Battlefield({
     (id: string) => {
       const m = mapById(id);
       const ctrl = initialControl(m.tiles);
-      let dBlue = buildShuffledWorking(AZURE_FACTION);
-      let dRed = buildShuffledWorking(CRIMSON_FACTION);
+      let dBlue = deckFor(blueFaction, blueDeckIds);
+      let dRed = deckFor(redFaction, redDeckIds);
       const blueDraw = drawFromDeck(dBlue, [], 5);
       const redDraw = drawFromDeck(dRed, [], 5);
       dBlue = blueDraw.deck;
@@ -205,6 +294,7 @@ export function Battlefield({
       setBoard(b);
       setDeck(d);
       setHand(h);
+      setDiscard(emptyDiscard());
       setLoyalty({ blue: 0, red: 0 });
       setDomination({ blue: 0, red: 0 });
       setTurn(1);
@@ -215,12 +305,15 @@ export function Battlefield({
       setSelectedUnit(null);
       setAttacker(null);
       setRevealCard(null);
+      setAim(null);
+      setLeaderUsed({ blue: false, red: false });
       setAiBusy(false);
+      setPassPrompt(false);
+      setCryptidSight(null);
       setLog([
-        `The leaden hour opens on ${m.name}. Azure takes the first rite.`,
+        `The leaden hour opens on ${m.name}. ${sideLabel('blue')} takes the first rite.`,
       ]);
 
-      // Opening bank for Azure (no draw — already drew 5)
       const gain = bankFromHoldings(m.tiles, ctrl, 'blue', []);
       setLoyalty({ blue: applyBank(0, gain), red: 0 });
       setLog((L) => [
@@ -228,16 +321,16 @@ export function Battlefield({
         ...L,
       ]);
     },
-    [],
+    [blueFaction, redFaction, blueDeckIds, redDeckIds],
   );
 
-  // Boot / remap
   const bootedFor = useRef<string | null>(null);
   useEffect(() => {
-    if (bootedFor.current === mapId) return;
-    bootedFor.current = mapId;
+    const key = `${mapId}|${blueFaction}|${redFaction}|${mode}`;
+    if (bootedFor.current === key) return;
+    bootedFor.current = key;
     bootMatch(mapId);
-  }, [mapId, bootMatch]);
+  }, [mapId, blueFaction, redFaction, mode, bootMatch]);
 
   const unitAt = useCallback(
     (r: number, c: number) => board[r][c],
@@ -282,10 +375,210 @@ export function Battlefield({
       setAttacker(null);
       setSelectedHand(null);
       setSelectedUnit(null);
+      setAim(null);
       setAiBusy(false);
       pushLog(msg);
+      const playerWon = hotseat ? winner === side : winner === PLAYER;
+      if (playerWon) victoryStinger();
+      else defeatStinger();
+      onMatchEnd?.({ winner, kind, playerWon: winner === PLAYER });
+    },
+    [pushLog, onMatchEnd, hotseat, side],
+  );
+
+  const buildEffectCtx = useCallback(
+    (acting: Side): EffectCtx => {
+      const units: Record<string, EffectUnit> = {};
+      const b: (string | null)[][] = Array.from({ length: 5 }, () =>
+        Array(5).fill(null),
+      );
+      for (let r = 0; r < 5; r++)
+        for (let c = 0; c < 5; c++) {
+          const u = board[r][c];
+          if (u) {
+            b[r][c] = u.uid;
+            units[u.uid] = {
+              uid: u.uid,
+              cardId: u.cardId,
+              name: u.name,
+              side: u.side,
+              power: u.power,
+              maxPower: u.maxPower,
+              loyalty: u.loyalty,
+              keywords: [...u.keywords],
+              moved: u.moved,
+              attacked: u.attacked,
+              sick: u.sick,
+              tough: u.tough,
+              fast: u.fast,
+              shutter: u.shutter,
+              silenced: u.silenced,
+              powder: u.powder,
+            };
+          }
+        }
+      return {
+        side: acting,
+        loyalty: { ...loyalty },
+        hand: {
+          blue: [...hand.blue],
+          red: [...hand.red],
+        },
+        deck: {
+          blue: [...deck.blue],
+          red: [...deck.red],
+        },
+        discard: {
+          blue: [...discard.blue],
+          red: [...discard.red],
+        },
+        units,
+        board: b,
+        control: control.map((row) => [...row]),
+        log: [],
+      };
+    },
+    [board, loyalty, hand, deck, discard, control],
+  );
+
+  const applyEffectCtx = useCallback(
+    (ctx: EffectCtx) => {
+      const nextBoard = emptyBoard();
+      for (let r = 0; r < 5; r++)
+        for (let c = 0; c < 5; c++) {
+          const id = ctx.board[r][c];
+          if (!id) continue;
+          const u = ctx.units[id];
+          if (!u) continue;
+          nextBoard[r][c] = {
+            uid: u.uid,
+            cardId: u.cardId,
+            name: u.name,
+            side: u.side,
+            power: u.power,
+            maxPower: u.maxPower,
+            loyalty: u.loyalty,
+            keywords: u.keywords,
+            moved: u.moved,
+            attacked: u.attacked,
+            sick: u.sick,
+            tough: u.tough,
+            fast: u.fast,
+            shutter: u.shutter,
+            silenced: u.silenced,
+            powder: u.powder,
+          };
+        }
+      setBoard(nextBoard);
+      setLoyalty(ctx.loyalty);
+      setHand(ctx.hand);
+      setDeck(ctx.deck);
+      setDiscard(ctx.discard);
+      setControl(ctx.control);
+      ctx.log.forEach((line) => pushLog(line));
+
+      for (const u of Object.values(ctx.units)) {
+        if (hasKeyword(u, 'cryptid')) {
+          setCryptidSight(u.name);
+          setTimeout(() => setCryptidSight(null), 2200);
+          break;
+        }
+      }
     },
     [pushLog],
+  );
+
+  const castCard = useCallback(
+    (
+      acting: Side,
+      handIndex: number,
+      targetUid?: string,
+      aimPos?: Pos,
+    ): boolean => {
+      const card = hand[acting][handIndex];
+      if (!card || (card.kind !== 'rite' && card.kind !== 'device')) return false;
+      if (loyalty[acting] < card.cost) {
+        pushLog(`Not enough loyalty (need ${card.cost}).`);
+        return false;
+      }
+      if (!card.effect) {
+        pushLog(`${card.name} has no working.`);
+        return false;
+      }
+      if (effectNeedsAim(card.effect, card.aim) && !targetUid && !aimPos) {
+        setAim({ kind: 'cast', handIndex, card });
+        pushLog(`Name a target for ${card.name}.`);
+        return false;
+      }
+      const ctx = buildEffectCtx(acting);
+      ctx.loyalty[acting] -= card.cost;
+      const err = resolveEffect(
+        ctx,
+        card.effect,
+        {
+          name: card.name,
+          alsoDraw: card.alsoDraw,
+          alsoBank: card.alsoBank,
+          alsoHealth: card.alsoHealth,
+          alsoTough: card.alsoTough,
+          aim: card.aim,
+        },
+        targetUid,
+        aimPos,
+      );
+      if (err) {
+        pushLog(err);
+        return false;
+      }
+      // spend card from hand into discard
+      const spent = ctx.hand[acting][handIndex];
+      ctx.hand[acting] = ctx.hand[acting].filter((_, i) => i !== handIndex);
+      if (spent) ctx.discard[acting].push(spent);
+      applyEffectCtx(ctx);
+      setSelectedHand(null);
+      setAim(null);
+      brassClick();
+      return true;
+    },
+    [hand, loyalty, buildEffectCtx, applyEffectCtx, pushLog],
+  );
+
+  const useLeader = useCallback(
+    (acting: Side, targetUid?: string, aimPos?: Pos): boolean => {
+      const hero = acting === 'blue' ? blueHero : redHero;
+      if (!hero) {
+        pushLog('No leader sworn for this chair.');
+        return false;
+      }
+      if (leaderUsed[acting]) {
+        pushLog(`${hero.name} has already spoken this sitting.`);
+        return false;
+      }
+      if (leaderNeedsAim(hero) && !targetUid && !(hero.leaderPower?.op === 'claim' && aimPos)) {
+        setAim({ kind: 'leader' });
+        pushLog(`Name a target for ${hero.name}.`);
+        return false;
+      }
+      const ctx = buildEffectCtx(acting);
+      const err = resolveLeaderPower(ctx, hero, targetUid, aimPos);
+      if (err) {
+        pushLog(err);
+        return false;
+      }
+      applyEffectCtx(ctx);
+      setLeaderUsed((L) => ({ ...L, [acting]: true }));
+      setAim(null);
+      brassClick();
+      return true;
+    },
+    [
+      blueHero,
+      redHero,
+      leaderUsed,
+      buildEffectCtx,
+      applyEffectCtx,
+      pushLog,
+    ],
   );
 
   const deployTo = useCallback(
@@ -304,6 +597,7 @@ export function Battlefield({
         pushLog(`Not enough loyalty (need ${card.cost}).`);
         return false;
       }
+      const delayed = hasKeyword(card, 'delay');
       const unit: BoardUnit = {
         uid: uid(),
         cardId: card.id,
@@ -312,10 +606,15 @@ export function Battlefield({
         power: card.power,
         maxPower: card.power,
         loyalty: card.cost,
-        keywords: card.keywords,
-        moved: false,
-        attacked: false,
+        keywords: [...card.keywords],
+        moved: delayed,
+        attacked: delayed,
+        sick: delayed,
       };
+      // Relay: draw when mustering another unit
+      const relays = listUnits(board).filter(
+        (u) => u.side === acting && hasKeyword(u, 'relay'),
+      );
       setBoard((b) => {
         const next = b.map((row) => [...row]);
         next[r][c] = unit;
@@ -328,19 +627,63 @@ export function Battlefield({
       }));
       setSelectedHand(null);
       pushLog(
-        `${sideLabel(acting)} deploys ${card.name} (P${card.power} · L${card.cost}).`,
+        `${sideLabel(acting)} deploys ${card.name} (P${card.power} · L${card.cost})${
+          delayed ? ' · slow muster' : ''
+        }.`,
       );
+      if (hasKeyword(card, 'cryptid')) {
+        setCryptidSight(card.name);
+        setTimeout(() => setCryptidSight(null), 2200);
+      }
+      if (relays.length > 0) {
+        setDeck((D) => {
+          setHand((H) => {
+            const drawn = drawFromDeck(D[acting], H[acting], relays.length);
+            if (drawn.drawn > 0) {
+              pushLog(`Relay: draw ${drawn.drawn}.`);
+            }
+            setTimeout(() => {
+              setDeck((prev) => ({ ...prev, [acting]: drawn.deck }));
+            }, 0);
+            return { ...H, [acting]: drawn.hand };
+          });
+          return D;
+        });
+      }
+      brassClick();
       return true;
     },
     [hand, board, control, gameMap, loyalty, pushLog],
+  );
+
+  const strikePower = useCallback(
+    (unit: BoardUnit, r: number, c: number) => {
+      return unit.power + crownBonus(board, unit.side, r, c);
+    },
+    [board],
+  );
+
+  const canStrikeTarget = useCallback(
+    (atk: BoardUnit & Pos, def: BoardUnit & Pos): boolean => {
+      if (def.side === atk.side) return false;
+      const reach = rangedReach(atk);
+      const dist = manhattan(atk.r, atk.c, def.r, def.c);
+      if (dist < 1 || dist > reach) return false;
+      if (reach > 1 && dist > 1) {
+        // ranged shot — shutter blocks
+        if (hasKeyword(def, 'shutter') || def.shutter) return false;
+      }
+      return true;
+    },
+    [],
   );
 
   const moveUnit = useCallback(
     (uidStr: string, r: number, c: number): 'ok' | 'storm' | 'fail' => {
       const atk = findUnit(uidStr);
       if (!atk) return 'fail';
-      if (atk.unit.moved || atk.unit.attacked) {
-        pushLog(`${atk.unit.name} has already acted this rite.`);
+      if (atk.unit.sick || atk.unit.moved || atk.unit.attacked) {
+        pushLog(`${atk.unit.name} cannot act.`);
         return 'fail';
       }
       const tile = gameMap.tiles[r][c];
@@ -406,32 +749,80 @@ export function Battlefield({
       const atk = findUnit(atkUid);
       const here = board[defR][defC];
       if (!atk || !here) return false;
-      if (here.side === atk.unit.side) return false;
-      if (atk.unit.moved || atk.unit.attacked) {
-        pushLog(`${atk.unit.name} has already acted this rite.`);
+      if (atk.unit.sick || atk.unit.moved || atk.unit.attacked) {
+        pushLog(`${atk.unit.name} cannot act.`);
         return false;
       }
-      const adj = neighbors(atk.r, atk.c).some(
-        (p) => p.r === defR && p.c === defC,
-      );
-      if (!adj) {
-        pushLog('Strike only an adjacent foe.');
+      if (
+        !canStrikeTarget(
+          { ...atk.unit, r: atk.r, c: atk.c },
+          { ...here, r: defR, c: defC },
+        )
+      ) {
+        pushLog('That foe is out of reach — or shuttered.');
         return false;
       }
+      const atkPow = strikePower(atk.unit, atk.r, atk.c);
+      const dist = manhattan(atk.r, atk.c, defR, defC);
+      const rangedShot = dist > 1 && hasKeyword(atk.unit, 'ranged');
+
+      if (rangedShot) {
+        // Ranged: attacker deals only, no counter
+        const resultAtk = combatantFrom({
+          id: atk.unit.uid,
+          name: atk.unit.name,
+          power: atkPow,
+          keywords: atk.unit.keywords,
+          tough: atk.unit.tough,
+        });
+        const resultDef = combatantFrom({
+          id: here.uid,
+          name: here.name,
+          power: here.power,
+          keywords: here.keywords,
+          tough: here.tough,
+        });
+        const dmg = applyDamage(resultDef, atkPow);
+        pushLog(
+          `Ranged: ${atk.unit.name} strikes ${here.name} for ${dmg} from ${dist} away.`,
+        );
+        clashSfx();
+        setPhase('melee');
+        setBoard((b) => {
+          const next = b.map((row) => [...row]);
+          next[atk.r][atk.c] = { ...atk.unit, attacked: true };
+          if (isDestroyed(resultDef)) next[defR][defC] = null;
+          else
+            next[defR][defC] = {
+              ...here,
+              power: resultDef.power,
+            };
+          return next;
+        });
+        setAttacker(null);
+        setSelectedUnit(null);
+        setTimeout(() => setPhase((p) => (p === 'over' ? p : 'main')), 350);
+        void resultAtk;
+        return true;
+      }
+
       const result = resolveMelee(
         combatantFrom({
           id: atk.unit.uid,
           name: atk.unit.name,
-          power: atk.unit.power,
+          power: atkPow,
           keywords: atk.unit.keywords,
+          tough: atk.unit.tough,
         }),
         combatantFrom({
           id: here.uid,
           name: here.name,
           power: here.power,
           keywords: here.keywords,
+          tough: here.tough,
         }),
       );
+      clashSfx();
       setPhase('melee');
       setBoard((b) => {
         const next = b.map((row) => [...row]);
@@ -458,7 +849,7 @@ export function Battlefield({
       }, 350);
       return true;
     },
-    [findUnit, board, pushLog],
+    [findUnit, board, pushLog, canStrikeTarget, strikePower],
   );
 
   const endRite = useCallback(() => {
@@ -487,7 +878,12 @@ export function Battlefield({
     setSelectedHand(null);
     setSelectedUnit(null);
     setAttacker(null);
+    setAim(null);
     setPhase('main');
+
+    if (hotseat) {
+      setPassPrompt(true);
+    }
 
     openRiteFor(
       next,
@@ -512,28 +908,58 @@ export function Battlefield({
     pushLog,
     finishMatch,
     openRiteFor,
+    hotseat,
   ]);
 
   const resign = useCallback(() => {
     if (phase === 'over' || matchOver) return;
-    if (side !== PLAYER) return;
-    finishMatch(
-      AI_SIDE,
-      'yield',
-      `${sideLabel(PLAYER)} yields the circle.`,
-    );
-  }, [phase, matchOver, side, finishMatch]);
+    const loser = hotseat ? side : PLAYER;
+    const winner: Side = loser === 'blue' ? 'red' : 'blue';
+    finishMatch(winner, 'yield', `${sideLabel(loser)} yields the circle.`);
+  }, [phase, matchOver, side, finishMatch, hotseat]);
 
+  const inputSide: Side = hotseat ? side : PLAYER;
   const inputLocked =
-    phase === 'over' || !!matchOver || side !== PLAYER || aiBusy;
+    phase === 'over' ||
+    !!matchOver ||
+    (!hotseat && (side !== PLAYER || aiBusy)) ||
+    (hotseat && passPrompt);
 
   function onTileClick(r: number, c: number) {
     if (inputLocked) return;
     const tile = gameMap.tiles[r][c];
     if (tile.kind === 'void') return;
 
+    if (aim) {
+      const here = unitAt(r, c);
+      if (aim.kind === 'cast') {
+        if (aim.card.effect?.op === 'shove' || aim.card.effect?.op === 'claim') {
+          castCard(inputSide, aim.handIndex, here?.uid, { r, c });
+        } else if (here) {
+          castCard(inputSide, aim.handIndex, here.uid);
+        } else {
+          pushLog('Name a unit.');
+        }
+        return;
+      }
+      if (aim.kind === 'leader') {
+        const hero = inputSide === 'blue' ? blueHero : redHero;
+        if (hero?.leaderPower?.op === 'claim') {
+          useLeader(inputSide, undefined, { r, c });
+        } else if (here) {
+          useLeader(inputSide, here.uid, { r, c });
+        } else {
+          pushLog('Name a unit.');
+        }
+        return;
+      }
+    }
+
     if (selectedHand != null) {
-      deployTo(r, c, selectedHand, PLAYER);
+      const card = hand[inputSide][selectedHand];
+      if (card?.kind === 'unit') {
+        deployTo(r, c, selectedHand, inputSide);
+      }
       return;
     }
 
@@ -548,53 +974,39 @@ export function Battlefield({
         moveUnit(attacker, r, c);
         return;
       }
-      if (here.side === atk.unit.side) {
-        setAttacker(here.uid);
-        setSelectedUnit(here.uid);
+      if (here.side !== atk.unit.side) {
+        strike(attacker, r, c);
         return;
       }
-      strike(attacker, r, c);
+      setAttacker(null);
+      setSelectedUnit(null);
       return;
     }
 
-    if (here) {
-      if (here.side !== PLAYER) {
-        pushLog(`Enemy ${here.name} — P${here.power} · L${here.loyalty}.`);
-        setSelectedUnit(here.uid);
-        const card =
-          UNITS.find((u) => u.id === here.cardId) ??
-          UNITS.find((u) => u.name === here.name) ??
-          null;
-        if (card) setRevealCard(card);
-        return;
-      }
-      if (here.moved || here.attacked) {
+    if (here && here.side === inputSide) {
+      if (here.sick || here.moved || here.attacked) {
         pushLog(`${here.name} has already acted this rite.`);
-        setSelectedUnit(here.uid);
         return;
       }
       setSelectedUnit(here.uid);
       setAttacker(here.uid);
-      pushLog(
-        `${here.name} ready. Click adjacent foe to strike, or empty tile to move.`,
-      );
-    } else {
-      setSelectedUnit(null);
+      setSelectedHand(null);
+      return;
     }
   }
 
-  // ——— Training AI (Crimson) ———
-  // Schedule on red main-phase snapshots. Do not gate on aiBusy state —
-  // toggling it would cancel the timer via effect cleanup.
+  // AI loop for training / campaign / second / friend-vs-ai
   useEffect(() => {
-    if (phase !== 'main' || matchOver) return;
+    if (hotseat) return;
+    if (phase === 'over' || matchOver) return;
     if (side !== AI_SIDE) return;
+    if (aiBusy) return;
 
     let cancelled = false;
-    const timer = window.setTimeout(() => {
-      if (cancelled) return;
-      setAiBusy(true);
+    setAiBusy(true);
 
+    const run = () => {
+      if (cancelled) return;
       const snap: AiSnapshot = {
         side: AI_SIDE,
         tiles: gameMap.tiles,
@@ -607,8 +1019,8 @@ export function Battlefield({
                   side: u.side,
                   power: u.power,
                   keywords: u.keywords,
-                  moved: !!u.moved,
-                  attacked: !!u.attacked,
+                  moved: !!u.moved || !!u.sick,
+                  attacked: !!u.attacked || !!u.sick,
                   r,
                   c,
                 }
@@ -620,124 +1032,115 @@ export function Battlefield({
       };
       const action = pickTrainingAction(snap);
 
+      // Prefer casting a cheap non-aim rite occasionally
+      const castIdx = hand.red.findIndex(
+        (c, i) =>
+          (c.kind === 'rite' || c.kind === 'device') &&
+          c.effect &&
+          !effectNeedsAim(c.effect, c.aim) &&
+          c.cost <= loyalty.red &&
+          i === hand.red.findIndex((x) => x.id === c.id),
+      );
+      if (castIdx >= 0 && Math.random() < 0.35) {
+        castCard(AI_SIDE, castIdx);
+        setTimeout(run, 420);
+        return;
+      }
+
       if (action.type === 'deploy') {
-        const ok = deployTo(action.r, action.c, action.index, AI_SIDE);
-        setAiBusy(false);
-        if (!ok) endRite();
+        const card = hand.red[action.index];
+        if (card?.kind === 'unit') {
+          setRevealCard(card);
+          setTimeout(() => setRevealCard(null), 900);
+          deployTo(action.r, action.c, action.index, AI_SIDE);
+        }
+        setTimeout(run, 480);
         return;
       }
       if (action.type === 'move') {
-        const result = moveUnit(action.uid, action.r, action.c);
-        setAiBusy(false);
-        if (result === 'fail') endRite();
+        const res = moveUnit(action.uid, action.r, action.c);
+        if (res === 'storm') {
+          setAiBusy(false);
+          return;
+        }
+        setTimeout(run, 420);
         return;
       }
       if (action.type === 'attack') {
-        const target = findUnit(action.targetUid);
-        const ok = target ? strike(action.uid, target.r, target.c) : false;
-        setAiBusy(false);
-        if (!ok) endRite();
+        const def = findUnit(action.targetUid);
+        if (def) strike(action.uid, def.r, def.c);
+        setTimeout(run, 500);
         return;
       }
+      // end
       setAiBusy(false);
       endRite();
-    }, 480);
+    };
 
+    const t = setTimeout(run, 550);
     return () => {
       cancelled = true;
-      window.clearTimeout(timer);
+      clearTimeout(t);
     };
-    // Re-run after each AI mutation (board/hand/loyalty/control) or side change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [side, phase, matchOver, board, hand.red, loyalty.red, control]);
+  }, [side, phase, matchOver, hotseat]);
 
   const legalDeploy = useMemo(() => {
     if (selectedHand == null || inputLocked) return new Set<string>();
+    const card = hand[inputSide][selectedHand];
+    if (!card || card.kind !== 'unit') return new Set<string>();
     return new Set(deploySpots.map((p) => `${p.r},${p.c}`));
-  }, [selectedHand, deploySpots, inputLocked]);
+  }, [selectedHand, deploySpots, inputLocked, hand, inputSide]);
 
-  const playerWon = matchOver?.winner === PLAYER;
+  const playerWon = matchOver ? matchOver.winner === PLAYER : false;
+  const activeHand = hand[inputSide];
+  const activeHero = inputSide === 'blue' ? blueHero : redHero;
 
   return (
-    <section className="bf">
-      <header className="bf-top">
-        <div className="bf-brand">
-          <p className="eyebrow">Cabals · dual-Power</p>
-          <h2>The Field</h2>
-          <p className="bf-sub">
-            {gameMap.name} — {gameMap.epithet}
-          </p>
+    <section className="battlefield" data-testid="battlefield" data-mode={mode} data-phase={phase}>
+      <header className="bf-hud">
+        <div className="bf-score">
+          <span className="bf-side is-blue">
+            Azure · {blueFaction.split(' ').slice(-1)[0]}
+            <strong>
+              {domination.blue}/{DOMINATION_WIN}
+            </strong>
+            <em>L{loyalty.blue}</em>
+          </span>
+          <span className="bf-turn">
+            Rite {turn} · {sideLabel(side)}
+            {hotseat ? ' · Pass the Grimoire' : ''}
+          </span>
+          <span className="bf-side is-red">
+            Crimson · {redFaction.split(' ').slice(-1)[0]}
+            <strong>
+              {domination.red}/{DOMINATION_WIN}
+            </strong>
+            <em>L{loyalty.red}</em>
+          </span>
         </div>
-        <div className="bf-scores" aria-label="Score rail">
-          <dl className="score-chip is-ally">
-            <dt>Azure</dt>
-            <dd>
-              {loyalty.blue}
-              <span>loyalty</span>
-              <em>
-                {domination.blue}
-                <span className="score-cap"> / {DOMINATION_WIN}</span>
-              </em>
-              <span>dom</span>
-            </dd>
-          </dl>
-          <div className="bf-turn">
-            <span className="bf-turn-label">Rite</span>
-            <strong>{turn}</strong>
-            <span className={`bf-side is-${side}`}>
-              {sideLabel(side)}
-              {side === AI_SIDE ? ' · AI' : ''}
-            </span>
-            <span className="bf-phase">
-              {phase === 'melee'
-                ? 'Melee'
-                : phase === 'over'
-                  ? 'Closed'
-                  : 'Main'}
-            </span>
-          </div>
-          <dl className="score-chip is-enemy">
-            <dt>Crimson</dt>
-            <dd>
-              {loyalty.red}
-              <span>loyalty</span>
-              <em>
-                {domination.red}
-                <span className="score-cap"> / {DOMINATION_WIN}</span>
-              </em>
-              <span>dom</span>
-            </dd>
-          </dl>
-        </div>
-        <div className="bf-tools">
-          {onLeave && (
+        <div className="bf-actions">
+          {activeHero && (
             <button
               type="button"
-              className="brass-btn brass-btn-ghost"
-              onClick={onLeave}
+              className="brass-btn"
+              data-testid="leader-power"
+              disabled={
+                inputLocked ||
+                leaderUsed[inputSide] ||
+                loyalty[inputSide] < (activeHero.cost ?? 0)
+              }
+              onClick={() => useLeader(inputSide)}
+              title={activeHero.text}
             >
-              Atelier
+              {activeHero.name}
+              {leaderUsed[inputSide] ? ' · spent' : ` · L${activeHero.cost}`}
             </button>
           )}
-          <label className="bf-map-pick">
-            <span>Map</span>
-            <select
-              value={mapId}
-              onChange={(e) => {
-                bootedFor.current = null;
-                setMapId(e.target.value);
-              }}
-            >
-              {MAPS.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
-          </label>
           <button
             type="button"
-            className="brass-btn"
+            className="brass-btn brass-btn-solid"
+            data-testid="end-rite"
             disabled={inputLocked}
             onClick={endRite}
           >
@@ -746,73 +1149,71 @@ export function Battlefield({
           <button
             type="button"
             className="brass-btn brass-btn-ghost"
-            disabled={phase === 'over' || side !== PLAYER}
+            disabled={inputLocked}
             onClick={resign}
-            title="Yield the circle"
           >
             Yield
           </button>
-          <button
-            type="button"
-            className="brass-btn brass-btn-ghost"
-            onClick={() => {
-              bootedFor.current = null;
-              bootMatch(mapId);
-            }}
-          >
-            New sitting
-          </button>
+          {MAPS.filter((m) => (m.era ?? 'first') === (gameMap.era ?? 'first'))
+            .length > 1 &&
+            mode === 'training' && (
+              <select
+                aria-label="Field"
+                value={mapId}
+                onChange={(e) => {
+                  bootedFor.current = null;
+                  setMapId(e.target.value);
+                }}
+              >
+                {MAPS.filter((m) => (m.era ?? 'first') === 'first').map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            )}
         </div>
       </header>
 
-      <div className="hand-rail is-foe">
-        <p className="hand-kicker">Crimson hand</p>
-        <div className="hand-row hand-row-backs">
-          {Array.from({ length: hand.red.length }).map((_, i) => (
-            <span key={i} className="hand-back" aria-hidden />
-          ))}
-        </div>
-      </div>
+      {aim && (
+        <p className="aim-banner" data-testid="aim-banner">
+          Aiming {aim.kind === 'cast' ? aim.card.name : activeHero?.name} — name a
+          target on the field.{' '}
+          <button type="button" className="dev-link" onClick={() => setAim(null)}>
+            Cancel
+          </button>
+        </p>
+      )}
 
-      <div
-        className="board-frame"
-        style={{
-          ['--map-url' as string]: `url(/assets/maps/${gameMap.id}.jpg)`,
-        }}
-      >
-        <div className="board-stage">
-          <div
-            className="board-grid"
-            role="grid"
-            aria-label={`${gameMap.name} battlefield`}
-          >
+      <div className="bf-stage">
+        <div
+          className="board-wrap"
+          style={{
+            backgroundImage: `url(/assets/maps/${gameMap.id}.jpg)`,
+          }}
+        >
+          <div className="board-grid" role="grid">
             {gameMap.tiles.map((row, r) =>
               row.map((tile, c) => {
                 if (tile.kind === 'void') {
-                  return <div key={`${r}-${c}`} className="stone-gap" />;
+                  return <div key={`${r}-${c}`} className="stone tile-void" />;
                 }
-                const unit = board[r][c];
-                const held =
-                  tile.kind === 'stronghold'
-                    ? tile.home
-                    : control[r][c] ?? undefined;
+                const here = board[r][c];
+                const owned = control[r][c];
                 const deployOk = legalDeploy.has(`${r},${c}`);
-                const selected = unit && unit.uid === selectedUnit;
+                const unit = here;
                 return (
                   <button
                     key={`${r}-${c}`}
                     type="button"
-                    role="gridcell"
                     className={`stone tile-${tile.kind} ${
                       tile.kind === 'resource' && tile.symbols === 2
                         ? 'tile-resource-2'
                         : ''
-                    } ${held === 'blue' ? 'held-blue' : held === 'red' ? 'held-red' : ''} ${
+                    } ${owned ? `owned-${owned}` : ''} ${
                       deployOk ? 'legal-tile' : ''
-                    } ${selected ? 'tile-selected' : ''}`}
+                    } ${unit ? 'has-unit' : ''}`.trim()}
                     onClick={() => onTileClick(r, c)}
-                    title={tileLabel(tile)}
-                    disabled={inputLocked && !unit}
                   >
                     {tile.kind === 'gate' && (
                       <span
@@ -832,21 +1233,14 @@ export function Battlefield({
                         aria-hidden
                       />
                     )}
-                    {unit ? (
+                    <span className="cell-label">{tileLabel(tile)}</span>
+                    {unit && (
                       <UnitCoin
                         unit={unit}
-                        selected={!!selected}
-                        foe={unit.side !== PLAYER}
+                        selected={selectedUnit === unit.uid || attacker === unit.uid}
+                        foe={unit.side !== inputSide}
                         onClick={() => onTileClick(r, c)}
                       />
-                    ) : (
-                      <span className="stone-empty">
-                        {tile.kind === 'resource' && (
-                          <span className="stone-tag resource-tag">
-                            {tileLabel(tile)}
-                          </span>
-                        )}
-                      </span>
                     )}
                   </button>
                 );
@@ -880,33 +1274,47 @@ export function Battlefield({
 
       <div className="hand-rail">
         <p className="hand-kicker">
-          Azure hand · select a unit, then a highlighted Gate or Stronghold
-          {side === AI_SIDE ? ' · Crimson is working…' : ''}
+          {sideLabel(inputSide)} hand · units deploy · rites & devices speak
+          {!hotseat && side === AI_SIDE ? ' · Crimson is working…' : ''}
         </p>
         <div className="hand-row">
-          {hand.blue.map((card, i) => (
-            <HandCard
-              key={`${card.id}-${i}`}
-              card={card}
-              selected={selectedHand === i}
-              disabled={
-                inputLocked ||
-                card.kind !== 'unit' ||
-                card.power == null ||
-                card.cost > loyalty.blue
-              }
-              onClick={() => {
-                if (inputLocked) return;
-                if (card.kind !== 'unit') {
-                  pushLog('Rites and devices wait for a later sitting.');
-                  return;
-                }
-                setSelectedHand(selectedHand === i ? null : i);
-                setAttacker(null);
-                setSelectedUnit(null);
-              }}
-            />
-          ))}
+          {activeHand.map((card, i) => {
+            const isUnit = card.kind === 'unit';
+            const isSpell = card.kind === 'rite' || card.kind === 'device';
+            const tooCostly = card.cost > loyalty[inputSide];
+            return (
+              <HandCard
+                key={`${card.id}-${i}`}
+                card={card}
+                selected={selectedHand === i}
+                disabled={inputLocked || tooCostly}
+                onClick={() => {
+                  if (inputLocked) return;
+                  if (isSpell) {
+                    if (tooCostly) {
+                      pushLog(`Not enough loyalty (need ${card.cost}).`);
+                      return;
+                    }
+                    if (effectNeedsAim(card.effect, card.aim)) {
+                      setSelectedHand(i);
+                      setAim({ kind: 'cast', handIndex: i, card });
+                      setAttacker(null);
+                      pushLog(`Name a target for ${card.name}.`);
+                    } else {
+                      castCard(inputSide, i);
+                    }
+                    return;
+                  }
+                  if (!isUnit || card.power == null) return;
+                  setSelectedHand(selectedHand === i ? null : i);
+                  setAttacker(null);
+                  setSelectedUnit(null);
+                  setAim(null);
+                }}
+                onInspect={() => setInspectCard(card)}
+              />
+            );
+          })}
         </div>
       </div>
 
@@ -919,30 +1327,58 @@ export function Battlefield({
         </ol>
       </aside>
 
+      {passPrompt && hotseat && (
+        <div className="pass-grimoire" data-testid="pass-grimoire">
+          <div className="match-plate">
+            <h2>Pass the Grimoire</h2>
+            <p>
+              {sideLabel(side)} sits next. Hand the working across the table.
+            </p>
+            <button
+              type="button"
+              className="brass-btn brass-btn-solid"
+              onClick={() => {
+                brassClick();
+                setPassPrompt(false);
+              }}
+            >
+              {sideLabel(side)} is ready
+            </button>
+          </div>
+        </div>
+      )}
+
+      {cryptidSight && (
+        <div className="cryptid-sight" data-testid="cryptid-sight">
+          <p className="cryptid-word">Sighting</p>
+          <p className="cryptid-name">{cryptidSight}</p>
+        </div>
+      )}
+
+      {inspectCard && (
+        <div className="tarot-pop" role="dialog" onClick={() => setInspectCard(null)}>
+          <div className="tarot-pop-inner" onClick={(e) => e.stopPropagation()}>
+            <CardView card={inspectCard} />
+            <button
+              type="button"
+              className="brass-btn"
+              onClick={() => setInspectCard(null)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
       {revealCard && (
         <div
           className="enemy-play"
           role="dialog"
-          aria-modal="true"
-          aria-label={`${revealCard.name} revealed. Tap to dismiss.`}
           onClick={() => setRevealCard(null)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              setRevealCard(null);
-            }
-          }}
-          tabIndex={0}
         >
-          <div
-            className="enemy-play-card"
-            onClick={(e) => {
-              e.stopPropagation();
-              setRevealCard(null);
-            }}
-          >
+          <div className="enemy-play-card">
             <CardView card={revealCard} />
-            <p className="enemy-play-hint">Tap card or backdrop to dismiss</p>
+            <p className="enemy-play-hint">Crimson plays</p>
           </div>
         </div>
       )}
@@ -951,8 +1387,6 @@ export function Battlefield({
         <div
           className={`match-veil ${playerWon ? 'is-victory' : 'is-defeat'}`}
           role="dialog"
-          aria-modal="true"
-          aria-labelledby="match-over-title"
           data-testid="match-over"
         >
           <div className="match-plate">
@@ -963,9 +1397,7 @@ export function Battlefield({
                   ? 'Stronghold'
                   : 'Yield'}
             </p>
-            <h2 id="match-over-title">
-              {victoryHeadline(matchOver.kind, playerWon)}
-            </h2>
+            <h2>{victoryHeadline(matchOver.kind, playerWon)}</h2>
             <p className="match-reason">
               {victoryReason(matchOver.kind, playerWon)}
             </p>
@@ -998,7 +1430,7 @@ export function Battlefield({
         </div>
       )}
 
-      {showPrimer && (
+      {showPrimer && mode === 'training' && (
         <RulesPrimer
           onDismiss={() => {
             markPrimerSeen();
