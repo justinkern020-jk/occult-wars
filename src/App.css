@@ -1012,7 +1012,8 @@ input[type='search'] {
   min-height: 0;
   padding: 0;
   position: relative;
-  overflow: hidden;
+  /* visible so coin ring/shadow is not clipped; marks use mark-under when occupied */
+  overflow: visible;
   cursor: pointer;
   color: inherit;
   box-shadow:
@@ -1234,8 +1235,8 @@ input[type='search'] {
 }
 .tile-mark.mark-under {
   inset: 22%;
-  opacity: 0.28;
-  z-index: 2;
+  opacity: 0.22;
+  z-index: 1;
   filter: drop-shadow(0 1px 2px #0006);
 }
 .gate-mark,
@@ -1333,7 +1334,7 @@ input[type='search'] {
 
 /* Unit coins — Loyalty left · Power right */
 .stone-coin {
-  z-index: 3;
+  z-index: 5;
   background:
     radial-gradient(circle at 32% 24%, #fff8e0f2 0%, #fff4d600 26%),
     radial-gradient(
@@ -1377,18 +1378,19 @@ input[type='search'] {
 }
 .stone-coin.coin-foe {
   background:
-    radial-gradient(circle at 32% 26%, #e8ecf0e6 0%, #e8ecf000 26%),
+    radial-gradient(circle at 32% 26%, #f0f3f6f0 0%, #e8ecf000 28%),
     radial-gradient(
       circle at 50% 58%,
-      #101114 0 54%,
-      #3e4650 56%,
-      #d5dbe2 63%,
-      #6a7380 71%,
-      #16181c 78%,
-      #b7c0c9 85%,
-      #2c3138 92%,
-      #8b949e 100%
+      #1a1c22 0 52%,
+      #4a5360 55%,
+      #e0e5eb 62%,
+      #7a8490 71%,
+      #1c1e24 78%,
+      #c5ced8 85%,
+      #363c46 92%,
+      #9aa3ae 100%
     );
+  filter: brightness(1.06);
 }
 .stone-face {
   object-fit: cover;

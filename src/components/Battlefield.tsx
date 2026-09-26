@@ -316,8 +316,50 @@ export function Battlefield({
     loyalty,
     control,
     gameMap,
+    deck,
+    discard,
+    side,
+    turn,
+    domination,
+    phase,
+    matchOver,
   });
-  liveRef.current = { board, hand, loyalty, control, gameMap };
+  liveRef.current = {
+    board,
+    hand,
+    loyalty,
+    control,
+    gameMap,
+    deck,
+    discard,
+    side,
+    turn,
+    domination,
+    phase,
+    matchOver,
+  };
+  /** Always-latest action fns so the AI timeout loop never closes over a stale board. */
+  const deployToRef = useRef<
+    (r: number, c: number, handIndex: number, acting: Side) => boolean
+  >(() => false);
+  const moveUnitRef = useRef<
+    (uidStr: string, r: number, c: number) => 'ok' | 'storm' | 'fail'
+  >(() => 'fail');
+  const strikeRef = useRef<(atkUid: string, defR: number, defC: number) => boolean>(
+    () => false,
+  );
+  const castCardRef = useRef<
+    (
+      acting: Side,
+      handIndex: number,
+      targetUid?: string,
+      aimPos?: Pos,
+    ) => boolean
+  >(() => false);
+  const endRiteRef = useRef<() => void>(() => {});
+  const findUnitRef = useRef<
+    (id: string) => { unit: BoardUnit; r: number; c: number } | null
+  >(() => null);
   const aiTimersRef = useRef<number[]>([]);
   const revealTimerRef = useRef<number | null>(null);
   const [aim, setAim] = useState<AimMode>(null);
@@ -373,6 +415,12 @@ export function Battlefield({
       let nextHand = { ...h, [nextSide]: drawn.hand };
       setDeck(nextDeck);
       setHand(nextHand);
+      liveRef.current = {
+        ...liveRef.current,
+        board: cleared,
+        deck: nextDeck,
+        hand: nextHand,
+      };
       if (drawn.sealed) {
         pushLog(`${sideLabel(nextSide)}'s hand is sealed.`);
       } else if (drawn.drawn > 0) {
@@ -386,10 +434,16 @@ export function Battlefield({
         bankUnits(cleared),
       );
       if (nextSide === 'red' && turnNum === 2) gain += 1;
-      setLoyalty((L) => ({
-        ...L,
-        [nextSide]: applyBank(L[nextSide], gain),
-      }));
+      setLoyalty((L) => {
+        const next = {
+          ...L,
+          [nextSide]: applyBank(L[nextSide], gain),
+        };
+        // Bank into liveRef immediately so an AI tick cannot see loyalty 0
+        // before React flushes this setState.
+        liveRef.current = { ...liveRef.current, loyalty: next };
+        return next;
+      });
       pushLog(
         nextSide === 'red' && turnNum === 2
           ? `${sideLabel(nextSide)} banks ${gain} (holdings, plus the second seat's crumb).`
@@ -649,6 +703,24 @@ export function Battlefield({
       setDeck(ctx.deck);
       setDiscard(ctx.discard);
       setControl(ctx.control);
+      liveRef.current = {
+        ...liveRef.current,
+        board: nextBoard,
+        loyalty: { ...ctx.loyalty },
+        hand: {
+          blue: [...ctx.hand.blue],
+          red: [...ctx.hand.red],
+        },
+        deck: {
+          blue: [...ctx.deck.blue],
+          red: [...ctx.deck.red],
+        },
+        discard: {
+          blue: [...ctx.discard.blue],
+          red: [...ctx.discard.red],
+        },
+        control: ctx.control.map((row) => [...row]),
+      };
       ctx.log.forEach((line) => pushLog(line));
 
       for (const u of Object.values(ctx.units)) {
@@ -793,13 +865,22 @@ export function Battlefield({
       setBoard((b) => {
         const next = b.map((row) => [...row]);
         next[r][c] = unit;
+        liveRef.current = { ...liveRef.current, board: next };
         return next;
       });
-      setLoyalty((L) => ({ ...L, [acting]: L[acting] - card.cost }));
-      setHand((H) => ({
-        ...H,
-        [acting]: H[acting].filter((_, i) => i !== handIndex),
-      }));
+      setLoyalty((L) => {
+        const next = { ...L, [acting]: L[acting] - card.cost };
+        liveRef.current = { ...liveRef.current, loyalty: next };
+        return next;
+      });
+      setHand((H) => {
+        const next = {
+          ...H,
+          [acting]: H[acting].filter((_, i) => i !== handIndex),
+        };
+        liveRef.current = { ...liveRef.current, hand: next };
+        return next;
+      });
       setSelectedHand(null);
       pushLog(
         `${sideLabel(acting)} deploys ${card.name} (P${card.power} · L${card.cost})${
@@ -904,11 +985,13 @@ export function Battlefield({
           const next = b.map((row) => [...row]);
           next[atk.r][atk.c] = null;
           next[r][c] = { ...atk.unit, moved: true };
+          liveRef.current = { ...liveRef.current, board: next };
           return next;
         });
         setControl((C) => {
           const next = C.map((row) => [...row]);
           next[r][c] = atk.unit.side;
+          liveRef.current = { ...liveRef.current, control: next };
           return next;
         });
         finishMatch(
@@ -926,12 +1009,17 @@ export function Battlefield({
         const next = b.map((row) => [...row]);
         next[atk.r][atk.c] = null;
         next[r][c] = { ...atk.unit, moved: true };
+        liveRef.current = { ...liveRef.current, board: next };
         return next;
       });
       if (veiled) {
         pushLog(`${atk.unit.name} advances without claiming (veiled).`);
       } else if (isPaintable(tile)) {
-        setControl((C) => paintTile(C, gameMap.tiles, r, c, atk.unit.side));
+        setControl((C) => {
+          const next = paintTile(C, gameMap.tiles, r, c, atk.unit.side);
+          liveRef.current = { ...liveRef.current, control: next };
+          return next;
+        });
         if (prevOwner !== atk.unit.side) {
           const label = tileLabel(tile) || 'circle';
           pushLog(`${atk.unit.name} conquers the ${label}.`);
@@ -1058,12 +1146,15 @@ export function Battlefield({
   );
 
   const endRite = useCallback(() => {
-    if (phase === 'over' || matchOver) return;
+    const live = liveRef.current;
+    if (live.phase === 'over' || live.matchOver) return;
     brassClick();
-    const acting = side;
-    const holdings = countHoldings(gameMap.tiles, control, acting);
-    const scored = domination[acting] + holdings;
-    setDomination((D) => ({ ...D, [acting]: scored }));
+    const acting = live.side;
+    const holdings = countHoldings(live.gameMap.tiles, live.control, acting);
+    const scored = live.domination[acting] + holdings;
+    const nextDom = { ...live.domination, [acting]: scored };
+    setDomination(nextDom);
+    liveRef.current = { ...liveRef.current, domination: nextDom };
     pushLog(
       `${sideLabel(acting)} holds ${holdings} circles (+${holdings} Domination → ${scored}/${DOMINATION_WIN}).`,
     );
@@ -1086,9 +1177,15 @@ export function Battlefield({
     }
 
     const next: Side = acting === 'blue' ? 'red' : 'blue';
-    const nextTurn = turn + 1;
+    const nextTurn = live.turn + 1;
     setTurn(nextTurn);
     setSide(next);
+    liveRef.current = {
+      ...liveRef.current,
+      side: next,
+      turn: nextTurn,
+      phase: 'main',
+    };
     setSelectedHand(null);
     setSelectedUnit(null);
     setAttacker(null);
@@ -1099,31 +1196,18 @@ export function Battlefield({
       setPassPrompt(true);
     }
 
+    // Read board/hand/deck/control from liveRef so AI-deployed coins survive the flip.
+    const snap = liveRef.current;
     openRiteFor(
       next,
-      gameMap.tiles,
-      control,
-      board,
-      deck,
-      hand,
+      snap.gameMap.tiles,
+      snap.control,
+      snap.board,
+      snap.deck,
+      snap.hand,
       nextTurn,
     );
-  }, [
-    phase,
-    matchOver,
-    side,
-    gameMap,
-    control,
-    domination,
-    turn,
-    board,
-    deck,
-    hand,
-    pushLog,
-    finishMatch,
-    openRiteFor,
-    hotseat,
-  ]);
+  }, [pushLog, finishMatch, openRiteFor, hotseat]);
 
   const resign = useCallback(() => {
     if (phase === 'over' || matchOver) return;
@@ -1230,12 +1314,18 @@ export function Battlefield({
     }
   }
 
+  deployToRef.current = deployTo;
+  moveUnitRef.current = moveUnit;
+  strikeRef.current = strike;
+  castCardRef.current = castCard;
+  endRiteRef.current = endRite;
+  findUnitRef.current = findUnit;
+
   // AI loop for training / campaign / second / friend-vs-ai
   useEffect(() => {
     if (hotseat) return;
     if (phase === 'over' || matchOver) return;
     if (side !== AI_SIDE) return;
-    if (aiBusy) return;
 
     let cancelled = false;
     let steps = 0;
@@ -1273,7 +1363,7 @@ export function Battlefield({
       if (steps > 14) {
         setAiBusy(false);
         setRevealCard(null);
-        endRite();
+        endRiteRef.current();
         return;
       }
 
@@ -1312,7 +1402,7 @@ export function Battlefield({
           i === live.hand.red.findIndex((x) => x.id === c.id),
       );
       if (castIdx >= 0 && Math.random() < 0.28) {
-        const ok = castCard(AI_SIDE, castIdx);
+        const ok = castCardRef.current(AI_SIDE, castIdx);
         later(run, ok ? 420 : 80);
         return;
       }
@@ -1320,7 +1410,7 @@ export function Battlefield({
       if (action.type === 'deploy') {
         const card = live.hand.red[action.index];
         if (card?.kind === 'unit') {
-          const ok = deployTo(action.r, action.c, action.index, AI_SIDE);
+          const ok = deployToRef.current(action.r, action.c, action.index, AI_SIDE);
           if (ok) {
             showAiReveal(card);
             later(run, 520);
@@ -1332,7 +1422,7 @@ export function Battlefield({
         return;
       }
       if (action.type === 'move') {
-        const res = moveUnit(action.uid, action.r, action.c);
+        const res = moveUnitRef.current(action.uid, action.r, action.c);
         if (res === 'storm') {
           setAiBusy(false);
           return;
@@ -1345,19 +1435,19 @@ export function Battlefield({
         return;
       }
       if (action.type === 'attack') {
-        const def = findUnit(action.targetUid);
+        const def = findUnitRef.current(action.targetUid);
         if (def) {
-          const ok = strike(action.uid, def.r, def.c);
+          const ok = strikeRef.current(action.uid, def.r, def.c);
           later(run, ok ? 500 : 120);
           return;
         }
         later(run, 120);
         return;
       }
-      // end
+      // end — call latest endRite so openRiteFor keeps AI-deployed coins
       setAiBusy(false);
       setRevealCard(null);
-      endRite();
+      endRiteRef.current();
     };
 
     later(run, 550);
