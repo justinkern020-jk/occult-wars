@@ -112,18 +112,16 @@ export function mapsForEra(era: 'first' | 'second'): GameMap[] {
   return MAPS.filter((m) => (m.era ?? 'first') === era);
 }
 
-/** User-facing tile name. Walkable field tiles return '' — never "Street". */
+/** User-facing tile name. Stronghold/resource use full-tile art — no text overlay. */
 export function tileLabel(t: Tile): string {
   if (t.kind === 'void') return '';
-  if (t.kind === 'stronghold')
-    return t.home === 'blue' ? 'Azure Stronghold' : 'Crimson Stronghold';
+  // Strongholds & resources: graphics only (no "Stronghold" / "Resource" text).
+  if (t.kind === 'stronghold' || t.kind === 'resource') return '';
   if (t.kind === 'gate') {
     if (t.home === 'blue') return 'Azure Gate';
     if (t.home === 'red') return 'Crimson Gate';
     return 'Gate';
   }
-  if (t.kind === 'resource')
-    return t.symbols === 2 ? 'Resource +2' : 'Resource +1';
   return '';
 }
 

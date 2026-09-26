@@ -2221,7 +2221,9 @@ export function Battlefield({
                         aria-hidden
                       />
                     )}
-                    <span className="cell-label">{tileLabel(tile)}</span>
+                    {tileLabel(tile) ? (
+                      <span className="cell-label">{tileLabel(tile)}</span>
+                    ) : null}
                     {justClaimed && claimLabel && (
                       <span className="claim-float" aria-hidden>
                         {claimLabel}
