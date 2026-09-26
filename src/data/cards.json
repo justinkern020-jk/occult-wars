@@ -3343,5 +3343,45 @@
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
+  },
+  {
+    "id": "seth_kern",
+    "name": "Seth Kern",
+    "faction": "Unaligned",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "ranged",
+      "arrest"
+    ],
+    "text": "Ranged Strike. Arrest. Chief of police of a southern Mississippi town. His shot reaches 2 tiles. A unit he wounds is arrested and cannot move for its next two turns.",
+    "quote": "Taxes are what we pay for civilized society.",
+    "quoted": "Oliver Wendell Holmes Jr., 1927",
+    "power": 5,
+    "legacyAttack": 4,
+    "legacyHealth": 5
+  },
+  {
+    "id": "justin_kern",
+    "name": "Justin Kern",
+    "faction": "Unaligned",
+    "kind": "unit",
+    "rarity": "patron",
+    "cost": 0,
+    "oath": 0,
+    "keywords": [],
+    "text": "Once in a sitting: The gadget answers \u2014 every unit on the field is unmade.",
+    "quote": "What we understand about modern physics collapses into a realm of ghost & shadows on the quantum level... you are but children with a loaded gun.",
+    "quoted": "Justin Kern, Life As I See It, 2029",
+    "power": 4,
+    "legacyAttack": 2,
+    "legacyHealth": 4,
+    "act": {
+      "op": "gadget",
+      "pay": 0,
+      "once": true
+    }
   }
 ]

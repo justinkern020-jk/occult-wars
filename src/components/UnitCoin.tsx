@@ -27,6 +27,8 @@ export interface BoardUnit {
   used?: boolean;
   /** Once-in-a-sitting activated ability already called. */
   once?: boolean;
+  /** Turns remaining this unit cannot move (Arrest). */
+  arrest?: number;
 }
 
 /**

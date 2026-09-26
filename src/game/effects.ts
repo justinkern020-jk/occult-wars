@@ -32,6 +32,7 @@ export type EffectUnit = {
   used?: boolean;
   /** Once-in-a-sitting activated ability already called. */
   once?: boolean;
+  arrest?: number;
 };
 
 export type EffectCtx = {
@@ -675,6 +676,16 @@ export function resolveActivatedAbility(
       if (ctx.units[uid]) destroyUnit(ctx, uid);
     }
     pushLog(ctx, `${card.name} screams. The adjacent circles are emptied.`);
+    markUsed();
+    return null;
+  }
+
+  if (act.op === 'gadget') {
+    const victims = Object.keys(ctx.units);
+    for (const uid of victims) {
+      if (ctx.units[uid]) destroyUnit(ctx, uid);
+    }
+    pushLog(ctx, 'The gadget answers — the field is ash.');
     markUsed();
     return null;
   }

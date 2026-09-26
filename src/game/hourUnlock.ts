@@ -1,10 +1,56 @@
-/** Second Hour unlock — matches grok.me Ei / Ti / ki(). */
+/** Occultist name codes — matches grok.me Ei/Di/Oi/Ti/Mi/me/he + Oppenheimer. */
 
 export const HOUR_OPEN_KEY = 'occult-wars.hour-open';
+export const FORCE_SIGHTING_KEY = 'occult-wars.force-sighting';
+export const PENDING_JUSTIN_HAND_KEY = 'occult-wars.pending-justin-hand';
+
 export const SECOND_HOUR_CODE = 'the second hour';
+export const BATTLE_COUNT_CODE = 'battle count';
+export const ATHENS_CODE = 'athens ohio';
+export const OPPENHEIMER_CODE = 'oppenheimer';
+
+const PHRASE_CODES = [
+  SECOND_HOUR_CODE,
+  BATTLE_COUNT_CODE,
+  ATHENS_CODE,
+  OPPENHEIMER_CODE,
+] as const;
+
+/** Trim, lower-case, collapse internal whitespace. */
+export function normalizeCode(name: string): string {
+  return name.trim().toLowerCase().replace(/\s+/g, ' ');
+}
 
 export function isSecondHourCode(name: string): boolean {
-  return name.trim().toLowerCase() === SECOND_HOUR_CODE;
+  return normalizeCode(name) === SECOND_HOUR_CODE;
+}
+
+export function isBattleCountCode(name: string): boolean {
+  return normalizeCode(name) === BATTLE_COUNT_CODE;
+}
+
+export function isAthensCode(name: string): boolean {
+  return normalizeCode(name) === ATHENS_CODE;
+}
+
+export function isOppenheimerCode(name: string): boolean {
+  return normalizeCode(name) === OPPENHEIMER_CODE;
+}
+
+/** True while typing a strict prefix of a phrase code (Mi). */
+export function isCodePrefix(name: string): boolean {
+  const t = normalizeCode(name);
+  if (!t) return false;
+  return PHRASE_CODES.some((code) => code.startsWith(t) && t !== code);
+}
+
+/** Username trim === `911911` (exact digits). */
+export function isHiddenAdeptCode(name: string): boolean {
+  return name.trim() === '911911';
+}
+
+export function isSethKernCode(name: string): boolean {
+  return name.trim().toLowerCase() === 'seth kern';
 }
 
 export function readHourOpen(): boolean {
@@ -32,4 +78,70 @@ export function bootHourOpen(username: string): boolean {
     return true;
   }
   return false;
+}
+
+function sessionFlag(key: string): boolean {
+  try {
+    if (typeof sessionStorage !== 'undefined') {
+      if (sessionStorage.getItem(key) === '1') return true;
+    }
+    if (typeof localStorage !== 'undefined') {
+      return localStorage.getItem(key) === '1';
+    }
+  } catch {
+    /* private mode */
+  }
+  return false;
+}
+
+function writeSessionFlag(key: string): void {
+  try {
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.setItem(key, '1');
+      return;
+    }
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(key, '1');
+    }
+  } catch {
+    /* quota */
+  }
+}
+
+function clearSessionFlag(key: string): void {
+  try {
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.removeItem(key);
+    }
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem(key);
+    }
+  } catch {
+    /* private mode */
+  }
+}
+
+export function readForceSighting(): boolean {
+  return sessionFlag(FORCE_SIGHTING_KEY);
+}
+
+export function writeForceSighting(): void {
+  writeSessionFlag(FORCE_SIGHTING_KEY);
+}
+
+export function clearForceSighting(): void {
+  clearSessionFlag(FORCE_SIGHTING_KEY);
+}
+
+/** Menu Oppenheimer: drop Justin into Azure hand on next match boot. */
+export function readPendingJustinHand(): boolean {
+  return sessionFlag(PENDING_JUSTIN_HAND_KEY);
+}
+
+export function writePendingJustinHand(): void {
+  writeSessionFlag(PENDING_JUSTIN_HAND_KEY);
+}
+
+export function clearPendingJustinHand(): void {
+  clearSessionFlag(PENDING_JUSTIN_HAND_KEY);
 }

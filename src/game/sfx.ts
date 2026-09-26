@@ -171,6 +171,92 @@ export function sirenSfx(dur = 1.5) {
   o.stop(t0 + dur + 0.05);
 }
 
+/** Short distorted metal power-chord sting for Oppenheimer. */
+export function metalRiffSfx() {
+  unlockAudio();
+  const a = new Audio('/assets/sfx/metal-riff.mp3');
+  a.volume = 0.78;
+  void a.play().catch(() => {
+    // WebAudio fallback: stacked saw power chords
+    const c = getAC();
+    if (!c) return;
+    const t0 = c.currentTime;
+    const chords: Array<[number, number, number]> = [
+      [0, 0.35, 82.41],
+      [0.4, 0.35, 98],
+      [0.85, 0.55, 110],
+      [1.5, 0.7, 82.41],
+    ];
+    for (const [delay, dur, freq] of chords) {
+      for (const f of [freq, freq * 1.5, freq * 2]) {
+        const o = c.createOscillator();
+        const g = c.createGain();
+        const sh = c.createWaveShaper();
+        const curve = new Float32Array(256);
+        for (let i = 0; i < 256; i++) {
+          const x = (i / 128) - 1;
+          curve[i] = Math.tanh(x * 4.5);
+        }
+        sh.curve = curve;
+        o.type = 'sawtooth';
+        o.frequency.value = f;
+        const start = t0 + delay;
+        g.gain.setValueAtTime(0.0001, start);
+        g.gain.exponentialRampToValueAtTime(0.12, start + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, start + dur);
+        o.connect(sh);
+        sh.connect(g);
+        g.connect(c.destination);
+        o.start(start);
+        o.stop(start + dur + 0.02);
+      }
+    }
+  });
+}
+
+/** Deep boom / rumble when the gadget answers. */
+export function nukeBoomSfx() {
+  unlockAudio();
+  const a = new Audio('/assets/sfx/nuke-boom.mp3');
+  a.volume = 0.88;
+  void a.play().catch(() => {
+    const c = getAC();
+    if (!c) return;
+    const t0 = c.currentTime;
+    const o = c.createOscillator();
+    const g = c.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(58, t0);
+    o.frequency.exponentialRampToValueAtTime(22, t0 + 1.8);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.55, t0 + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.001, t0 + 2.4);
+    o.connect(g);
+    g.connect(c.destination);
+    o.start(t0);
+    o.stop(t0 + 2.5);
+    // noise crack
+    const bufferSize = Math.floor(c.sampleRate * 0.35);
+    const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (c.sampleRate * 0.08));
+    }
+    const src = c.createBufferSource();
+    src.buffer = buffer;
+    const ng = c.createGain();
+    ng.gain.setValueAtTime(0.4, t0);
+    ng.gain.exponentialRampToValueAtTime(0.001, t0 + 0.4);
+    const f = c.createBiquadFilter();
+    f.type = 'lowpass';
+    f.frequency.value = 900;
+    src.connect(f);
+    f.connect(ng);
+    ng.connect(c.destination);
+    src.start(t0);
+  });
+}
+
 export function victoryStinger() {
   unlockAudio();
   beep(220, 0.4, 'sine', 0.09);

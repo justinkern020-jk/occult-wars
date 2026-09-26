@@ -79,7 +79,13 @@ export const KEYWORDS: Record<string, KeywordInfo> = {
     glyph: '⟳',
     title: 'Relay. When you muster another unit, draw 1 card.',
   },
-  veiled: {
+  arrest: {
+    key: 'arrest',
+    glyph: 'A',
+    title:
+      'Arrest. A unit wounded by this strike cannot move for its next two turns.',
+  },
+    veiled: {
     key: 'veiled',
     glyph: '◌',
     title:

@@ -41,7 +41,7 @@ import {
   victoryReason,
   type VictoryKind,
 } from '../game/scoring';
-import { clashSfx, gunshotSfx, defeatStinger, victoryStinger, brassClick, setMusicBed, unlockAudio, sirenSfx } from '../game/sfx';
+import { clashSfx, gunshotSfx, defeatStinger, victoryStinger, brassClick, setMusicBed, unlockAudio, sirenSfx, metalRiffSfx, nukeBoomSfx } from '../game/sfx';
 import {
   recordMatchVisit,
   rollVisitTurn,
@@ -57,6 +57,27 @@ import {
   markPrimerSeen,
 } from './RulesPrimer';
 import { UnitCoin, type BoardUnit } from './UnitCoin';
+import { MushroomCloud } from './MushroomCloud';
+import { BattleCountModal } from './BattleCountModal';
+import {
+  clearForceSighting,
+  clearPendingJustinHand,
+  isAthensCode,
+  isBattleCountCode,
+  isCodePrefix,
+  isHiddenAdeptCode,
+  isOppenheimerCode,
+  isSecondHourCode,
+  isSethKernCode,
+  readForceSighting,
+  readPendingJustinHand,
+  writeHourOpen,
+} from '../game/hourUnlock';
+import {
+  applyJustinKernUnlock,
+  applySethKernUnlock,
+  type Profile,
+} from '../game/profile';
 
 type Pos = { r: number; c: number };
 
@@ -76,6 +97,8 @@ export type BattlefieldProps = {
   redHeroId?: string;
   blueDeckIds?: string[];
   redDeckIds?: string[];
+  profile?: Profile;
+  onUpdateProfile?: (next: Profile) => void;
   onLeave?: () => void;
   onMatchEnd?: (result: {
     winner: Side;
@@ -237,6 +260,8 @@ export function Battlefield({
   redHeroId,
   blueDeckIds,
   redDeckIds,
+  profile,
+  onUpdateProfile,
   onLeave,
   onMatchEnd,
 }: BattlefieldProps = {}) {
@@ -314,6 +339,20 @@ export function Battlefield({
   const [cryptidSight, setCryptidSight] = useState<string | null>(null);
   const visitTurnRef = useRef<number | null>(null);
   const sightingFiredRef = useRef(false);
+  const [codeDraft, setCodeDraft] = useState('');
+  const [codeToast, setCodeToast] = useState<string | null>(null);
+  const [battleCountOpen, setBattleCountOpen] = useState(false);
+  const [nukeActive, setNukeActive] = useState(false);
+  const codeRealNameRef = useRef(
+    profile?.username &&
+      !isSecondHourCode(profile.username) &&
+      !isBattleCountCode(profile.username) &&
+      !isAthensCode(profile.username) &&
+      !isOppenheimerCode(profile.username)
+      ? profile.username
+      : 'Adept',
+  );
+  const pendingGadgetRef = useRef<null | { acting: Side; sourceUid: string }>(null);
   const eraRef = useRef<Era>('first');
   const [aiBusy, setAiBusy] = useState(false);
   /** Live match state for the AI turn loop (avoids stale-closure flash loops). */
@@ -404,12 +443,16 @@ export function Battlefield({
         row.map((u) => {
           if (!u) return null;
           // Clear lock from previous; keep sick only for delay muster this rite
+          const prevSide: Side = nextSide === 'blue' ? 'red' : 'blue';
+          let arrest = u.arrest ?? 0;
+          if (u.side === prevSide && arrest > 0) arrest -= 1;
           const next = {
             ...u,
             moved: false,
             attacked: false,
             powder: false,
             used: false,
+            arrest,
           };
           if (u.powder) {
             // was locked by foe — stays sick one rite then clears
@@ -509,7 +552,7 @@ export function Battlefield({
       const redDraw = drawFromDeck(dRed, [], 5);
       dBlue = blueDraw.deck;
       dRed = redDraw.deck;
-      const h = { blue: blueDraw.hand, red: redDraw.hand };
+      let h = { blue: blueDraw.hand, red: redDraw.hand };
       const d = { blue: dBlue, red: dRed };
       const b = emptyBoard();
 
@@ -539,14 +582,33 @@ export function Battlefield({
       sightingFiredRef.current = false;
       // Rare sighting every 15th real match boot (Strict Mode remounts deduped).
       let veilNote: string | null = null;
-      if (recordMatchVisit(era)) {
+      const forcedSight = readForceSighting();
+      if (forcedSight) {
+        clearForceSighting();
+        visitTurnRef.current = rollVisitTurn();
+        veilNote = 'Athens answers — a cryptid will visit this sitting.';
+      } else if (recordMatchVisit(era)) {
         visitTurnRef.current = rollVisitTurn();
         veilNote = 'The veil thins — a cryptid may visit this sitting.';
       } else {
         visitTurnRef.current = null;
       }
+      // Oppenheimer pending: drop Justin Kern into Azure hand if space.
+      let justinNote: string | null = null;
+      if (readPendingJustinHand()) {
+        clearPendingJustinHand();
+        const jk = cardById('justin_kern');
+        if (jk && h.blue.length < HAND_CAP) {
+          h = { ...h, blue: [...h.blue, jk] };
+          setHand(h);
+          justinNote = 'Justin Kern answers the circle.';
+        } else if (jk) {
+          justinNote = "Justin Kern's hand is sealed — no room.";
+        }
+      }
       setLog([
         ...(veilNote ? [veilNote] : []),
+        ...(justinNote ? [justinNote] : []),
         `The leaden hour opens on ${m.name}. ${sideLabel('blue')} takes the first rite.`,
       ]);
 
@@ -660,6 +722,7 @@ export function Battlefield({
               powder: u.powder,
               used: u.used,
               once: u.once,
+              arrest: u.arrest,
             };
           }
         }
@@ -716,6 +779,7 @@ export function Battlefield({
             powder: u.powder,
             used: u.used,
             once: u.once,
+            arrest: u.arrest,
           };
         }
       setBoard(nextBoard);
@@ -872,6 +936,27 @@ export function Battlefield({
         pushLog(`Name a target for ${def.name}.`);
         return false;
       }
+      // Nuclear gadget: play mushroom cloud, then wipe the field.
+      if (act.op === 'gadget') {
+        if (act.once ? found.unit.once : found.unit.used) {
+          pushLog('That power has already been called.');
+          return false;
+        }
+        const pay = act.pay ?? 0;
+        if (loyalty[acting] < pay) {
+          pushLog(`Not enough resources (need ${pay}).`);
+          return false;
+        }
+        pendingGadgetRef.current = { acting, sourceUid };
+        setNukeActive(true);
+        setAim(null);
+        setSelectedUnit(null);
+        setAttacker(null);
+        brassClick();
+        unlockAudio();
+        nukeBoomSfx();
+        return true;
+      }
       const ctx = buildEffectCtx(acting);
       const err = resolveActivatedAbility(ctx, sourceUid, targetUid);
       if (err) {
@@ -893,8 +978,117 @@ export function Battlefield({
       }
       return true;
     },
-    [findUnit, buildEffectCtx, applyEffectCtx, pushLog, finishMatch],
+    [findUnit, buildEffectCtx, applyEffectCtx, pushLog, finishMatch, loyalty],
   );
+
+  const finishGadget = useCallback(() => {
+    const pending = pendingGadgetRef.current;
+    pendingGadgetRef.current = null;
+    setNukeActive(false);
+    if (!pending) return;
+    const ctx = buildEffectCtx(pending.acting);
+    const err = resolveActivatedAbility(ctx, pending.sourceUid);
+    if (err) {
+      pushLog(err);
+      return;
+    }
+    applyEffectCtx(ctx);
+  }, [buildEffectCtx, applyEffectCtx, pushLog]);
+
+
+  function dropJustinIntoHand(seat: Side): string {
+    const jk = cardById('justin_kern');
+    if (!jk) return 'Justin Kern is missing from the catalogue.';
+    const cur = liveRef.current.hand[seat];
+    if (cur.length >= HAND_CAP) {
+      return "The hand is sealed — Justin Kern cannot enter.";
+    }
+    const nextHand = { ...liveRef.current.hand, [seat]: [...cur, jk] };
+    setHand(nextHand);
+    liveRef.current = { ...liveRef.current, hand: nextHand };
+    if (profile && onUpdateProfile) {
+      onUpdateProfile(applyJustinKernUnlock(profile));
+    }
+    return 'Justin Kern answers — the gadget is in hand.';
+  }
+
+  function forceSightingNow(): string {
+    if (matchOver || phase === 'over') {
+      return 'The night answers only while a circle is open.';
+    }
+    if (sightingFiredRef.current) {
+      return 'A cryptid has already answered this sitting.';
+    }
+    const era = eraRef.current;
+    const recipients: Array<'blue' | 'red'> =
+      mode === 'hotseat' ? ['blue', 'red'] : ['blue'];
+    const names: string[] = [];
+    let handAfter = { ...liveRef.current.hand };
+    for (const s of recipients) {
+      if (handAfter[s].length >= HAND_CAP) continue;
+      const faction = s === 'blue' ? blueFaction : redFaction;
+      const card = pickCryptid(faction, era);
+      if (!card) continue;
+      handAfter = { ...handAfter, [s]: [...handAfter[s], card] };
+      names.push(card.name);
+      pushLog(`Cryptid sighted. ${card.name} joins ${sideLabel(s)}.`);
+    }
+    if (names.length === 0) {
+      return 'No cryptid answers that order.';
+    }
+    sightingFiredRef.current = true;
+    visitTurnRef.current = null;
+    setHand(handAfter);
+    liveRef.current = { ...liveRef.current, hand: handAfter };
+    setCryptidSight(names[0]);
+    setTimeout(() => setCryptidSight(null), 2400);
+    return `Sighting: ${names.join(', ')}.`;
+  }
+
+  function onBattleCodeChange(raw: string) {
+    const next = raw.slice(0, 32);
+    setCodeDraft(next);
+    if (isSecondHourCode(next)) {
+      writeHourOpen();
+      setCodeToast('The leaden hour answers.');
+      setCodeDraft('');
+      return;
+    }
+    if (isBattleCountCode(next)) {
+      setBattleCountOpen(true);
+      setCodeToast(null);
+      setCodeDraft('');
+      return;
+    }
+    if (isAthensCode(next)) {
+      setCodeDraft('');
+      setCodeToast(forceSightingNow());
+      return;
+    }
+    if (isOppenheimerCode(next)) {
+      setCodeDraft('');
+      unlockAudio();
+      metalRiffSfx();
+      const seat: Side = mode === 'hotseat' ? side : 'blue';
+      setCodeToast(dropJustinIntoHand(seat));
+      return;
+    }
+    if (!isCodePrefix(next)) {
+      codeRealNameRef.current = next || codeRealNameRef.current;
+    }
+    if (isSethKernCode(next) && profile && onUpdateProfile) {
+      const before = profile.collection.includes('seth_kern');
+      const unlocked = applySethKernUnlock({ ...profile, username: next });
+      onUpdateProfile(unlocked);
+      if (!before && unlocked.collection.includes('seth_kern')) {
+        setCodeToast('Seth Kern has joined the working.');
+      }
+    }
+    if (isHiddenAdeptCode(next) && profile && onUpdateProfile) {
+      onUpdateProfile(applyJustinKernUnlock({ ...profile, username: next }));
+      setCodeToast('A hidden adept has answered.');
+    }
+  }
 
   const callPowerRef = useRef<
     (acting: Side, sourceUid: string, targetUid?: string) => boolean
@@ -1040,6 +1234,10 @@ export function Battlefield({
         pushLog(`${atk.unit.name} cannot act.`);
         return 'fail';
       }
+      if ((atk.unit.arrest ?? 0) > 0) {
+        pushLog(`${atk.unit.name} is arrested and cannot move.`);
+        return 'fail';
+      }
       const tile = gameMap.tiles[r][c];
       if (tile.kind === 'void') return 'fail';
       if (board[r][c]) {
@@ -1160,11 +1358,17 @@ export function Battlefield({
           const next = b.map((row) => [...row]);
           next[atk.r][atk.c] = { ...atk.unit, attacked: true };
           if (isDestroyed(resultDef)) next[defR][defC] = null;
-          else
+          else {
+            const wounded = resultDef.power < here.power;
             next[defR][defC] = {
               ...here,
               power: resultDef.power,
+              ...(wounded && hasKeyword(atk.unit, 'arrest') ? { arrest: 2 } : {}),
             };
+            if (wounded && hasKeyword(atk.unit, 'arrest')) {
+              pushLog(`${here.name} is arrested and cannot move for two turns.`);
+            }
+          }
           return next;
         });
         setAttacker(null);
@@ -1204,14 +1408,24 @@ export function Battlefield({
             attacked: true,
           };
         if (result.defenderDestroyed) next[defR][defC] = null;
-        else
+        else {
+          const wounded = result.defender.power < here.power;
           next[defR][defC] = {
             ...here,
             power: result.defender.power,
+            ...(wounded && hasKeyword(atk.unit, 'arrest') ? { arrest: 2 } : {}),
           };
+        }
         return next;
       });
       result.log.forEach((line) => pushLog(line));
+      if (
+        !result.defenderDestroyed &&
+        result.defender.power < here.power &&
+        hasKeyword(atk.unit, 'arrest')
+      ) {
+        pushLog(`${here.name} is arrested and cannot move for two turns.`);
+      }
       setAttacker(null);
       setSelectedUnit(null);
       setTimeout(() => {
@@ -2055,6 +2269,7 @@ export function Battlefield({
                           phase === 'main' &&
                           unit.side === inputSide &&
                           !unit.sick &&
+                          !(unit.arrest && unit.arrest > 0) &&
                           !unit.moved &&
                           !unit.attacked
                         }
@@ -2162,6 +2377,25 @@ export function Battlefield({
         </div>
       </div>
 
+      <div className="bf-occultist-bar" data-testid="battle-occultist">
+        <label>
+          Occultist
+          <input
+            className="ledger-input bf-occultist-input"
+            value={codeDraft}
+            maxLength={32}
+            aria-label="Occultist code"
+            placeholder="Speak a name…"
+            onChange={(e) => onBattleCodeChange(e.target.value)}
+          />
+        </label>
+        {codeToast && (
+          <p className="bf-code-toast" role="status" data-testid="battle-code-toast">
+            {codeToast}
+          </p>
+        )}
+      </div>
+
       <aside className="bf-log" aria-live="polite">
         <h3>Chronicle</h3>
         <ol>
@@ -2197,6 +2431,12 @@ export function Battlefield({
           <p className="cryptid-word">Sighting</p>
           <p className="cryptid-name">{cryptidSight}</p>
         </div>
+      )}
+
+      <MushroomCloud active={nukeActive} onDone={finishGadget} />
+
+      {battleCountOpen && (
+        <BattleCountModal onClose={() => setBattleCountOpen(false)} />
       )}
 
       {dragHand != null && dragPos && activeHand[dragHand] && (

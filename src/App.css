@@ -2835,3 +2835,328 @@ input[type='search'] {
   font-size: 1.02rem;
   line-height: 1.55;
 }
+
+/* === occultist-codes / nuke vfx === */
+.battle-count-overlay {
+  z-index: 120;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: #070605d0;
+  animation: fade-in 0.2s ease-out;
+}
+.battle-count-plate {
+  width: min(92vw, 28rem);
+  text-align: center;
+  padding: 1.5rem 1.25rem 1.25rem;
+}
+.battle-count-title {
+  margin: 0.35rem 0 1rem;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 2.2rem;
+  color: #f3ead7;
+}
+.battle-count-grid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: 1fr 1fr;
+  margin: 0 0 1rem;
+  text-align: left;
+}
+.battle-count-stat {
+  border: 1px solid #c6a15b55;
+  background: linear-gradient(165deg, #1c1914, #12100d);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+}
+.battle-count-stat dt {
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #c6a15b;
+}
+.battle-count-stat dd {
+  margin: 0.35rem 0 0;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 2.4rem;
+  color: #f3ead7;
+  font-variant-numeric: tabular-nums;
+}
+.battle-count-shut {
+  margin: 0 0 1.1rem;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  color: #c07060;
+}
+.menu-occultist-badges {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.15rem 0 0;
+}
+.menu-occultist-badge {
+  margin: 0;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #c6a15b;
+}
+
+.bf-occultist-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+  margin: 0.55rem 0 0;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid #c6a15b44;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #16110ccc, #0e0b09ee);
+}
+.bf-occultist-bar label {
+  display: flex;
+  flex: 1 1 14rem;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #c6a15b;
+}
+.bf-occultist-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 2.1rem;
+  max-width: 16rem;
+  font-size: 0.85rem !important;
+}
+.bf-code-toast {
+  margin: 0;
+  flex: 1 1 100%;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: #e7d7a4;
+}
+
+/* —— Mushroom cloud (Justin Kern gadget) —— */
+.nuke-overlay {
+  z-index: 140;
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  overflow: hidden;
+  animation: nuke-overlay-life 3.2s ease-in forwards;
+}
+.nuke-fade {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 70%, #c6a15b33 0%, transparent 55%),
+    linear-gradient(180deg, #1a1008ee, #070504f2 55%, #050403f5);
+  animation: nuke-fade-pulse 3.2s ease-in-out forwards;
+}
+.nuke-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 58%, #fff8e0 0%, #f0d09088 18%, transparent 52%);
+  mix-blend-mode: screen;
+  animation: nuke-flash-burst 0.85s ease-out forwards;
+}
+.nuke-shockwave,
+.nuke-shockwave-2 {
+  position: absolute;
+  left: 50%;
+  top: 62%;
+  width: 4rem;
+  height: 4rem;
+  margin: -2rem 0 0 -2rem;
+  border-radius: 50%;
+  border: 2px solid #e7d7a4cc;
+  box-shadow:
+    0 0 24px #c6a15b88,
+    inset 0 0 18px #f3ead744;
+  animation: nuke-shock 2.4s cubic-bezier(0.12, 0.7, 0.2, 1) forwards;
+}
+.nuke-shockwave-2 {
+  animation-delay: 0.18s;
+  border-color: #c6a15b99;
+  opacity: 0.7;
+}
+.nuke-column {
+  position: relative;
+  z-index: 2;
+  width: min(72vw, 22rem);
+  aspect-ratio: 200 / 280;
+  animation: nuke-rise 2.8s cubic-bezier(0.18, 0.72, 0.22, 1) forwards;
+}
+.nuke-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 8px 28px #000c);
+}
+.nuke-ground {
+  transform-origin: 100px 255px;
+  animation: nuke-ground-pulse 3s ease-in-out forwards;
+}
+.nuke-stem,
+.nuke-stem-veil {
+  transform-origin: 100px 250px;
+  transform: scaleY(0.08);
+  animation: nuke-stem-grow 1.6s 0.12s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+.nuke-cap,
+.nuke-cap-rim,
+.nuke-cap-hot {
+  transform-origin: 100px 70px;
+  transform: scale(0.15);
+  opacity: 0;
+  animation: nuke-cap-bloom 1.8s 0.35s cubic-bezier(0.15, 0.85, 0.25, 1) forwards;
+}
+.nuke-cap-rim {
+  animation-delay: 0.48s;
+}
+.nuke-cap-hot {
+  animation-delay: 0.42s;
+}
+.nuke-lobe {
+  transform-origin: center;
+  transform: scale(0);
+  animation: nuke-lobe-pop 1.4s 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+.nuke-lobe-late {
+  animation-delay: 0.95s;
+}
+.nuke-shimmer {
+  position: absolute;
+  inset: 8% 18% 18%;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    #fff6d433 40%,
+    transparent 48%,
+    #c6a15b22 60%,
+    transparent 72%
+  );
+  mix-blend-mode: soft-light;
+  animation: nuke-shimmer-sweep 2.6s 0.4s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: 40%;
+  filter: blur(1px);
+}
+.nuke-ash {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+}
+.nuke-ember {
+  position: absolute;
+  left: calc(12% + (var(--i) * 2.7%));
+  bottom: -4%;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #e7d7a4;
+  box-shadow: 0 0 6px #c6a15bcc;
+  opacity: 0;
+  animation: nuke-ember-rise 2.8s ease-out forwards;
+  animation-delay: calc(0.35s + var(--i) * 0.045s);
+}
+.nuke-ember-1 { width: 2px; height: 2px; background: #c6a15b; }
+.nuke-ember-2 { width: 4px; height: 2px; border-radius: 1px; background: #8a6a3a; }
+.nuke-ember-3 { width: 2px; height: 4px; background: #f3ead7aa; }
+.nuke-ember-4 { width: 3px; height: 3px; background: #5c4030; }
+.nuke-ember-5 { width: 2px; height: 2px; background: #d4b56a; }
+.nuke-ember-6 { width: 5px; height: 2px; border-radius: 1px; background: #3d2a1a; }
+.nuke-legend {
+  position: absolute;
+  z-index: 4;
+  bottom: 12%;
+  margin: 0;
+  font-family: Cinzel, Georgia, serif;
+  font-size: clamp(0.75rem, 2.4vw, 1rem);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #e7d7a4;
+  text-shadow: 0 0 18px #c6a15b88, 0 2px 8px #000c;
+  opacity: 0;
+  animation: nuke-legend-in 2.4s 0.55s ease-out forwards;
+}
+
+@keyframes nuke-overlay-life {
+  0% { opacity: 0; }
+  8% { opacity: 1; }
+  78% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes nuke-fade-pulse {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+@keyframes nuke-flash-burst {
+  0% { opacity: 0; transform: scale(0.6); }
+  18% { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 0; transform: scale(1.35); }
+}
+@keyframes nuke-shock {
+  0% { transform: scale(0.2); opacity: 0.95; }
+  70% { opacity: 0.35; }
+  100% { transform: scale(14); opacity: 0; }
+}
+@keyframes nuke-rise {
+  0% { transform: translateY(18%) scale(0.72); opacity: 0; }
+  18% { opacity: 1; }
+  100% { transform: translateY(-2%) scale(1); opacity: 1; }
+}
+@keyframes nuke-stem-grow {
+  0% { transform: scaleY(0.08); opacity: 0.2; }
+  100% { transform: scaleY(1); opacity: 1; }
+}
+@keyframes nuke-cap-bloom {
+  0% { transform: scale(0.15); opacity: 0; }
+  55% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes nuke-lobe-pop {
+  0% { transform: scale(0); opacity: 0; }
+  70% { transform: scale(1.08); opacity: 0.85; }
+  100% { transform: scale(1); opacity: 0.7; }
+}
+@keyframes nuke-ground-pulse {
+  0%, 100% { transform: scaleX(0.6); opacity: 0.15; }
+  30% { transform: scaleX(1.25); opacity: 0.55; }
+  60% { transform: scaleX(1); opacity: 0.35; }
+}
+@keyframes nuke-shimmer-sweep {
+  0% { transform: translateX(-18%) skewX(-8deg); opacity: 0.15; }
+  50% { transform: translateX(12%) skewX(-4deg); opacity: 0.45; }
+  100% { transform: translateX(28%) skewX(-8deg); opacity: 0.1; }
+}
+@keyframes nuke-ember-rise {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  15% { opacity: 0.9; }
+  100% {
+    transform: translateY(-78vh) translateX(calc((var(--i) % 5 - 2) * 12px));
+    opacity: 0;
+  }
+}
+@keyframes nuke-legend-in {
+  0% { opacity: 0; letter-spacing: 0.5em; transform: translateY(8px); }
+  30% { opacity: 1; }
+  75% { opacity: 1; letter-spacing: 0.28em; transform: translateY(0); }
+  100% { opacity: 0; }
+}

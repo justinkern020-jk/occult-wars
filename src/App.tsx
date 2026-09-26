@@ -350,6 +350,8 @@ export default function App() {
           redHeroId={redHeroId}
           blueDeckIds={blueDeckIds}
           redDeckIds={redDeckIds}
+          profile={profile}
+          onUpdateProfile={update}
           onLeave={() =>
             setScreen(
               matchMode === 'campaign'

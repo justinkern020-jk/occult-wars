@@ -1,12 +1,26 @@
 import { useEffect, useRef, useState } from 'react';
 import { MAPS, mapsForEra, type GameMap } from '../game/maps';
-import { PACK_COST, type Profile } from '../game/profile';
+import {
+  PACK_COST,
+  applyJustinKernUnlock,
+  applySethKernUnlock,
+  type Profile,
+} from '../game/profile';
 import {
   bootHourOpen,
+  isAthensCode,
+  isBattleCountCode,
+  isCodePrefix,
+  isHiddenAdeptCode,
+  isOppenheimerCode,
   isSecondHourCode,
+  isSethKernCode,
+  writeForceSighting,
   writeHourOpen,
+  writePendingJustinHand,
 } from '../game/hourUnlock';
-import { brassClick, setMusicBed, unlockAudio } from '../game/sfx';
+import { BattleCountModal } from './BattleCountModal';
+import { brassClick, metalRiffSfx, setMusicBed, unlockAudio } from '../game/sfx';
 
 type Props = {
   profile: Profile;
@@ -63,14 +77,26 @@ export function MenuAtelier({
   onSandbox,
 }: Props) {
   const realNameRef = useRef(
-    isSecondHourCode(profile.username) ? 'Adept' : profile.username,
+    isSecondHourCode(profile.username) ||
+      isBattleCountCode(profile.username) ||
+      isAthensCode(profile.username) ||
+      isOppenheimerCode(profile.username)
+      ? 'Adept'
+      : profile.username,
   );
   const [hourOpen, setHourOpen] = useState(() => bootHourOpen(profile.username));
   const [toast, setToast] = useState<string | null>(null);
+  const [battleCountOpen, setBattleCountOpen] = useState(false);
   const firstMaps = mapsForEra('first');
 
   useEffect(() => {
-    if (!isSecondHourCode(profile.username)) {
+    if (
+      !isSecondHourCode(profile.username) &&
+      !isBattleCountCode(profile.username) &&
+      !isAthensCode(profile.username) &&
+      !isOppenheimerCode(profile.username) &&
+      !isCodePrefix(profile.username)
+    ) {
       realNameRef.current = profile.username;
     }
   }, [profile.username]);
@@ -89,7 +115,7 @@ export function MenuAtelier({
   };
 
   function onOccultistChange(raw: string) {
-    const next = raw.slice(0, 24);
+    const next = raw.slice(0, 32);
     if (isSecondHourCode(next)) {
       writeHourOpen();
       setHourOpen(true);
@@ -97,8 +123,42 @@ export function MenuAtelier({
       onUpdateProfile({ ...profile, username: realNameRef.current });
       return;
     }
-    realNameRef.current = next;
-    onUpdateProfile({ ...profile, username: next });
+    if (isBattleCountCode(next)) {
+      setBattleCountOpen(true);
+      setToast(null);
+      onUpdateProfile({ ...profile, username: realNameRef.current });
+      return;
+    }
+    if (isAthensCode(next)) {
+      writeForceSighting();
+      setToast('The night will answer at the next circle.');
+      onUpdateProfile({ ...profile, username: realNameRef.current });
+      return;
+    }
+    if (isOppenheimerCode(next)) {
+      unlockAudio();
+      metalRiffSfx();
+      writePendingJustinHand();
+      const unlocked = applyJustinKernUnlock({ ...profile, username: realNameRef.current });
+      setToast('The gadget waits — Justin Kern joins the next circle.');
+      onUpdateProfile(unlocked);
+      return;
+    }
+    if (!isCodePrefix(next)) {
+      realNameRef.current = next;
+    }
+    let nextProfile = { ...profile, username: next };
+    if (isSethKernCode(next)) {
+      const before = nextProfile.collection.includes('seth_kern');
+      nextProfile = applySethKernUnlock(nextProfile);
+      if (!before && nextProfile.collection.includes('seth_kern')) {
+        setToast('Seth Kern has joined the working.');
+      }
+    }
+    if (isHiddenAdeptCode(next)) {
+      nextProfile = applyJustinKernUnlock(nextProfile);
+    }
+    onUpdateProfile(nextProfile);
   }
 
   return (
@@ -121,10 +181,20 @@ export function MenuAtelier({
               className="ledger-input menu-occultist-input"
               value={profile.username}
               aria-label="Occultist name"
-              maxLength={24}
+              maxLength={32}
               onChange={(e) => onOccultistChange(e.target.value)}
             />
           </label>
+          {(isHiddenAdeptCode(profile.username) || isSethKernCode(profile.username)) && (
+            <div className="menu-occultist-badges">
+              {isHiddenAdeptCode(profile.username) && (
+                <p className="menu-occultist-badge">A hidden adept has answered</p>
+              )}
+              {isSethKernCode(profile.username) && (
+                <p className="menu-occultist-badge">The chief has taken a seat</p>
+              )}
+            </div>
+          )}
 
           <p className="menu-shards" data-testid="shard-count">
             {profile.username} · {profile.alchemicalShards} shards
@@ -349,6 +419,9 @@ export function MenuAtelier({
         <span aria-hidden> · </span>
         <span>{MAPS.length} maps loaded</span>
       </p>
+      {battleCountOpen && (
+        <BattleCountModal onClose={() => setBattleCountOpen(false)} />
+      )}
     </div>
   );
 }
