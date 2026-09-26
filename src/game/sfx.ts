@@ -1,8 +1,15 @@
-/** Brass clicks, clash SFX, victory/defeat stingers (Web Audio + mp3). */
+/** Brass clicks, clash SFX, victory/defeat stingers, menu/match music beds. */
+
+export type MusicBed = 'none' | 'menu' | 'match';
 
 let ctx: AudioContext | null = null;
+let unlockBound = false;
+let bed: MusicBed = 'none';
+let bedStop: (() => void) | null = null;
+let bedGen = 0;
+const liveOsc: OscillatorNode[] = [];
 
-function ac(): AudioContext | null {
+function getAC(): AudioContext | null {
   if (typeof window === 'undefined') return null;
   if (!ctx) {
     const AC =
@@ -15,21 +22,50 @@ function ac(): AudioContext | null {
   return ctx;
 }
 
+/** Resume AudioContext; call from any user gesture. Safe to call often. */
+export function unlockAudio(): void {
+  const c = getAC();
+  if (!c) return;
+  if (c.state === 'suspended') {
+    void c.resume().catch(() => {});
+  }
+}
+
+function bindUnlockOnce(): void {
+  if (typeof window === 'undefined' || unlockBound) return;
+  unlockBound = true;
+  const kick = () => {
+    unlockAudio();
+    // If a bed was requested while suspended, restart it now.
+    if (bed !== 'none' && !bedStop) {
+      const want = bed;
+      bed = 'none';
+      setMusicBed(want);
+    }
+  };
+  window.addEventListener('pointerdown', kick, { passive: true });
+  window.addEventListener('keydown', kick, { passive: true });
+  window.addEventListener('touchstart', kick, { passive: true });
+}
+
+bindUnlockOnce();
+
 function beep(
   freq: number,
   dur: number,
   type: OscillatorType = 'sine',
-  gain = 0.04,
+  gain = 0.1,
   delay = 0,
 ) {
-  const c = ac();
+  const c = getAC();
   if (!c) return;
+  unlockAudio();
   const t0 = c.currentTime + delay;
   const o = c.createOscillator();
   const g = c.createGain();
   o.type = type;
   o.frequency.value = freq;
-  g.gain.setValueAtTime(gain, t0);
+  g.gain.setValueAtTime(Math.max(0.0001, gain), t0);
   g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
   o.connect(g);
   g.connect(c.destination);
@@ -38,39 +74,73 @@ function beep(
 }
 
 export function brassClick() {
-  beep(440, 0.04, 'triangle', 0.03);
-  beep(660, 0.03, 'sine', 0.02, 0.02);
+  unlockAudio();
+  beep(440, 0.05, 'triangle', 0.1);
+  beep(660, 0.04, 'sine', 0.07, 0.02);
 }
 
 export function clashSfx() {
+  unlockAudio();
   const n = 1 + Math.floor(Math.random() * 3);
   const a = new Audio(`/assets/audio/swords/clash-${n}.mp3`);
-  a.volume = 0.45;
+  a.volume = 0.55;
   void a.play().catch(() => {
-    beep(180, 0.08, 'sawtooth', 0.05);
-    beep(90, 0.12, 'square', 0.03, 0.05);
+    beep(180, 0.1, 'sawtooth', 0.12);
+    beep(90, 0.14, 'square', 0.08, 0.05);
   });
 }
 
+/** ~1.5s air-raid style siren for gas / chlorine rites (replaces cough static). */
+export function sirenSfx(dur = 1.5) {
+  unlockAudio();
+  const c = getAC();
+  if (!c) return;
+  const t0 = c.currentTime;
+  const o = c.createOscillator();
+  const g = c.createGain();
+  o.type = 'sawtooth';
+  // Sweep 600→900→600 Hz twice — classic siren contour
+  o.frequency.setValueAtTime(600, t0);
+  o.frequency.linearRampToValueAtTime(900, t0 + dur * 0.25);
+  o.frequency.linearRampToValueAtTime(600, t0 + dur * 0.5);
+  o.frequency.linearRampToValueAtTime(900, t0 + dur * 0.75);
+  o.frequency.linearRampToValueAtTime(550, t0 + dur);
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(0.09, t0 + 0.05);
+  g.gain.setValueAtTime(0.09, t0 + dur * 0.85);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  // Soft lowpass so it is not harsh static
+  const f = c.createBiquadFilter();
+  f.type = 'lowpass';
+  f.frequency.value = 1800;
+  o.connect(f);
+  f.connect(g);
+  g.connect(c.destination);
+  o.start(t0);
+  o.stop(t0 + dur + 0.05);
+}
+
 export function victoryStinger() {
-  beep(220, 0.4, 'sine', 0.03);
-  beep(277, 0.35, 'triangle', 0.018, 0.08);
-  beep(440, 0.5, 'sine', 0.028, 0.22);
-  beep(659, 0.42, 'sine', 0.016, 0.38);
-  beep(880, 0.55, 'triangle', 0.012, 0.5);
+  unlockAudio();
+  beep(220, 0.4, 'sine', 0.09);
+  beep(277, 0.35, 'triangle', 0.06, 0.08);
+  beep(440, 0.5, 'sine', 0.08, 0.22);
+  beep(659, 0.42, 'sine', 0.05, 0.38);
+  beep(880, 0.55, 'triangle', 0.04, 0.5);
 }
 
 export function defeatStinger() {
-  beep(220, 0.5, 'sine', 0.04);
-  beep(196, 0.55, 'triangle', 0.03, 0.15);
-  beep(147, 0.7, 'sine', 0.035, 0.35);
+  unlockAudio();
+  beep(220, 0.5, 'sine', 0.1);
+  beep(196, 0.55, 'triangle', 0.08, 0.15);
+  beep(147, 0.7, 'sine', 0.09, 0.35);
 }
 
 export function playChronicle(id: string) {
+  unlockAudio();
   const a = new Audio(`/assets/audio/chronicle/${id}.mp3`);
   a.volume = 0.55;
   void a.play().catch(() => {
-    /* TTS / silent fallback */
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       const u = new SpeechSynthesisUtterance(id.replace(/_/g, ' '));
       u.rate = 0.9;
@@ -86,4 +156,156 @@ export function speakLine(text: string) {
   u.pitch = 0.85;
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(u);
+}
+
+/* ── Music beds (WebAudio ritual pulse — port of grok sn/nn/an) ── */
+
+function midiHz(m: number): number {
+  return 440 * 2 ** ((m - 69) / 12);
+}
+
+function stopLiveOsc() {
+  for (const o of liveOsc) {
+    try {
+      o.stop();
+    } catch {
+      /* already stopped */
+    }
+  }
+  liveOsc.length = 0;
+}
+
+/** Harmonic sine cluster with lowpass — dark brass/organ color. */
+function noteAt(
+  c: AudioContext,
+  when: number,
+  freq: number,
+  dur: number,
+  gain: number,
+) {
+  const filter = c.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(2200, when);
+  filter.frequency.exponentialRampToValueAtTime(
+    900,
+    when + Math.min(dur, 1.2),
+  );
+  const master = c.createGain();
+  master.gain.setValueAtTime(1e-4, when);
+  master.gain.exponentialRampToValueAtTime(gain, when + 0.018);
+  master.gain.exponentialRampToValueAtTime(
+    Math.max(1e-4, gain * 0.45),
+    when + Math.min(0.22, dur * 0.35),
+  );
+  master.gain.exponentialRampToValueAtTime(1e-4, when + dur);
+  filter.connect(master);
+  master.connect(c.destination);
+  const partials: [number, number][] = [
+    [1, 1],
+    [2, 0.12],
+    [3, 0.04],
+  ];
+  for (const [mult, amp] of partials) {
+    const o = c.createOscillator();
+    const g = c.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(freq * mult, when);
+    g.gain.value = amp;
+    o.connect(g);
+    g.connect(filter);
+    liveOsc.push(o);
+    o.start(when);
+    o.stop(when + dur + 0.03);
+  }
+}
+
+function loopPhrase(
+  schedule: (t0: number) => number,
+): { stop: () => void } {
+  const c = getAC();
+  let alive = true;
+  let timer = 0;
+  const tick = () => {
+    if (!alive || !c) return;
+    const dur = schedule(c.currentTime + 0.08);
+    timer = window.setTimeout(tick, Math.max(300, dur * 1000 - 60));
+  };
+  tick();
+  return {
+    stop: () => {
+      alive = false;
+      window.clearTimeout(timer);
+      stopLiveOsc();
+    },
+  };
+}
+
+/** Match theme: darker brass/sine ritual pulse (grolk sn). Modest gain so SFX cut through. */
+function startMatchTheme(): { stop: () => void } {
+  const c = getAC();
+  if (!c) return { stop: () => {} };
+  const step = 1.7;
+  const melody = [69, 72, 71, 67, 65, 64, 65, 67];
+  const g = 0.028; // modest — SFX stay audible
+  return loopPhrase((t0) => {
+    noteAt(c, t0, midiHz(45), step * 8 * 0.98, g);
+    noteAt(c, t0, midiHz(52), step * 8 * 0.98, g * 0.7);
+    noteAt(c, t0, midiHz(57), step * 4 * 0.98, g * 0.5);
+    noteAt(c, t0 + step * 4, midiHz(55), step * 4 * 0.98, g * 0.5);
+    melody.forEach((m, i) => {
+      noteAt(c, t0 + i * step, midiHz(m), step * 0.92, g);
+    });
+    return step * 8;
+  });
+}
+
+/** Menu bed: same family, quieter/slower drone — no moonlight piano. */
+function startMenuTheme(): { stop: () => void } {
+  const c = getAC();
+  if (!c) return { stop: () => {} };
+  const step = 2.4;
+  const melody = [57, 60, 59, 55, 53, 52, 53, 55];
+  const g = 0.016;
+  return loopPhrase((t0) => {
+    noteAt(c, t0, midiHz(33), step * 8 * 0.98, g * 1.2);
+    noteAt(c, t0, midiHz(40), step * 8 * 0.98, g * 0.8);
+    noteAt(c, t0, midiHz(45), step * 4 * 0.98, g * 0.55);
+    noteAt(c, t0 + step * 4, midiHz(43), step * 4 * 0.98, g * 0.55);
+    melody.forEach((m, i) => {
+      noteAt(c, t0 + i * step, midiHz(m), step * 0.9, g * 0.85);
+    });
+    return step * 8;
+  });
+}
+
+export function setMusicBed(next: MusicBed): void {
+  bindUnlockOnce();
+  if (next === bed && bedStop) return;
+  bedGen += 1;
+  const gen = bedGen;
+  bedStop?.();
+  bedStop = null;
+  bed = next;
+  if (next === 'none') return;
+
+  const c = getAC();
+  if (!c) return;
+
+  const start = () => {
+    if (gen !== bedGen || bed !== next) return;
+    bedStop?.();
+    bedStop = (next === 'match' ? startMatchTheme() : startMenuTheme()).stop;
+  };
+
+  if (c.state === 'suspended') {
+    void c.resume().then(start).catch(() => {
+      // Will retry on next pointerdown via bindUnlockOnce kick.
+    });
+    return;
+  }
+  start();
+}
+
+export function currentMusicBed(): MusicBed {
+  return bed;
 }

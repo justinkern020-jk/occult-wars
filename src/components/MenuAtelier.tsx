@@ -6,7 +6,7 @@ import {
   isSecondHourCode,
   writeHourOpen,
 } from '../game/hourUnlock';
-import { brassClick } from '../game/sfx';
+import { brassClick, setMusicBed, unlockAudio } from '../game/sfx';
 
 type Props = {
   profile: Profile;
@@ -62,7 +62,6 @@ export function MenuAtelier({
   onAllegiance,
   onSandbox,
 }: Props) {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const realNameRef = useRef(
     isSecondHourCode(profile.username) ? 'Adept' : profile.username,
   );
@@ -77,18 +76,10 @@ export function MenuAtelier({
   }, [profile.username]);
 
   useEffect(() => {
-    const el = audioRef.current;
-    if (!el) return;
-    el.volume = 0.22;
-    const tryPlay = () => {
-      void el.play().catch(() => {});
-    };
-    tryPlay();
-    const unlock = () => tryPlay();
-    window.addEventListener('pointerdown', unlock, { once: true });
+    unlockAudio();
+    setMusicBed('menu');
     return () => {
-      window.removeEventListener('pointerdown', unlock);
-      el.pause();
+      setMusicBed('none');
     };
   }, []);
 
@@ -112,13 +103,6 @@ export function MenuAtelier({
 
   return (
     <div className="menu-root" data-testid="main-menu">
-      <audio
-        ref={audioRef}
-        src="/assets/audio/moonlight.mp3"
-        loop
-        preload="auto"
-        aria-hidden
-      />
       <section
         className="menu-stage"
         style={{ backgroundImage: 'url(/assets/titles/menu-atelier.jpg)' }}

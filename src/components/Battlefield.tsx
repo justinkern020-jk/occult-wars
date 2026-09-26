@@ -30,6 +30,7 @@ import { crownBonus, hasKeyword, manhattan, rangedReach } from '../game/keywords
 import { MAPS, mapById, tileLabel, type Side } from '../game/maps';
 import {
   DOMINATION_WIN,
+  HAND_CAP,
   applyBank,
   bankFromHoldings,
   countHoldings,
@@ -38,7 +39,13 @@ import {
   victoryReason,
   type VictoryKind,
 } from '../game/scoring';
-import { clashSfx, defeatStinger, victoryStinger, brassClick } from '../game/sfx';
+import { clashSfx, defeatStinger, victoryStinger, brassClick, setMusicBed, unlockAudio, sirenSfx } from '../game/sfx';
+import {
+  recordMatchVisit,
+  rollVisitTurn,
+  pickCryptid,
+  type Era,
+} from '../game/visits';
 import type { Card } from '../game/types';
 import { TarotPop } from './TarotPop';
 import { HandCard } from './HandCard';
@@ -199,6 +206,9 @@ export function Battlefield({
   const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);
   const dragHandRef = useRef<number | null>(null);
   const [cryptidSight, setCryptidSight] = useState<string | null>(null);
+  const visitTurnRef = useRef<number | null>(null);
+  const sightingFiredRef = useRef(false);
+  const eraRef = useRef<Era>('first');
   const [aiBusy, setAiBusy] = useState(false);
   const [aim, setAim] = useState<AimMode>(null);
   const [leaderUsed, setLeaderUsed] = useState({ blue: false, red: false });
@@ -250,7 +260,7 @@ export function Battlefield({
 
       const drawn = drawFromDeck(d[nextSide], h[nextSide], 1);
       const nextDeck = { ...d, [nextSide]: drawn.deck };
-      const nextHand = { ...h, [nextSide]: drawn.hand };
+      let nextHand = { ...h, [nextSide]: drawn.hand };
       setDeck(nextDeck);
       setHand(nextHand);
       if (drawn.sealed) {
@@ -276,9 +286,40 @@ export function Battlefield({
           : `${sideLabel(nextSide)} banks ${gain} from the stronghold and held nodes.`,
       );
       pushLog(`${sideLabel(nextSide)} opens the rite.`);
+
+      // Cryptid visit: inject into both hands on the scheduled turn.
+      if (
+        visitTurnRef.current != null &&
+        turnNum === visitTurnRef.current &&
+        !sightingFiredRef.current
+      ) {
+        sightingFiredRef.current = true;
+        const era = eraRef.current;
+        const names: string[] = [];
+        let handAfter = { ...nextHand };
+        for (const s of ['blue', 'red'] as const) {
+          if (handAfter[s].length >= HAND_CAP) continue;
+          const faction = s === 'blue' ? blueFaction : redFaction;
+          const card = pickCryptid(faction, era);
+          if (!card) continue;
+          handAfter = {
+            ...handAfter,
+            [s]: [...handAfter[s], card],
+          };
+          names.push(card.name);
+          pushLog(`Cryptid sighted. ${card.name} joins ${sideLabel(s)}.`);
+        }
+        if (names.length > 0) {
+          setHand(handAfter);
+          nextHand = handAfter;
+          setCryptidSight(names[0]);
+          setTimeout(() => setCryptidSight(null), 2400);
+        }
+      }
+
       return { nextDeck, nextHand, cleared };
     },
-    [bankUnits, pushLog],
+    [bankUnits, pushLog, blueFaction, redFaction],
   );
 
   const bootMatch = useCallback(
@@ -315,6 +356,16 @@ export function Battlefield({
       setAiBusy(false);
       setPassPrompt(false);
       setCryptidSight(null);
+      const era: Era =
+        mode === 'second' || m.era === 'second' ? 'second' : 'first';
+      eraRef.current = era;
+      sightingFiredRef.current = false;
+      if (recordMatchVisit(era)) {
+        visitTurnRef.current = rollVisitTurn();
+        // sighting fires when that turn opens
+      } else {
+        visitTurnRef.current = null;
+      }
       setLog([
         `The leaden hour opens on ${m.name}. ${sideLabel('blue')} takes the first rite.`,
       ]);
@@ -326,7 +377,7 @@ export function Battlefield({
         ...L,
       ]);
     },
-    [blueFaction, redFaction, blueDeckIds, redDeckIds],
+    [blueFaction, redFaction, blueDeckIds, redDeckIds, mode],
   );
 
   const bootedFor = useRef<string | null>(null);
@@ -336,6 +387,14 @@ export function Battlefield({
     bootedFor.current = key;
     bootMatch(mapId);
   }, [mapId, blueFaction, redFaction, mode, bootMatch]);
+
+  useEffect(() => {
+    unlockAudio();
+    setMusicBed('match');
+    return () => {
+      setMusicBed('none');
+    };
+  }, []);
 
   const unitAt = useCallback(
     (r: number, c: number) => board[r][c],
@@ -542,7 +601,8 @@ export function Battlefield({
       applyEffectCtx(ctx);
       setSelectedHand(null);
       setAim(null);
-      brassClick();
+      if (hasKeyword(card, 'gas')) sirenSfx();
+      else brassClick();
       return true;
     },
     [hand, loyalty, buildEffectCtx, applyEffectCtx, pushLog],
@@ -859,6 +919,7 @@ export function Battlefield({
 
   const endRite = useCallback(() => {
     if (phase === 'over' || matchOver) return;
+    brassClick();
     const acting = side;
     const holdings = countHoldings(gameMap.tiles, control, acting);
     const scored = domination[acting] + holdings;

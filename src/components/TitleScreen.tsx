@@ -1,3 +1,5 @@
+import { unlockAudio, brassClick } from '../game/sfx';
+
 type Props = {
   onEnter: () => void;
   dailyGranted?: number;
@@ -32,7 +34,11 @@ export function TitleScreen({ onEnter, dailyGranted = 0 }: Props) {
           type="button"
           className="brass-btn brass-btn-solid title-enter"
           data-testid="enter-circle"
-          onClick={onEnter}
+          onClick={() => {
+            unlockAudio();
+            brassClick();
+            onEnter();
+          }}
         >
           Enter the circle
         </button>
