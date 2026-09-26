@@ -4,10 +4,12 @@ import { resolve } from 'node:path';
 import { cardById, CARDS } from '../data/catalog';
 import { cardImageUrl } from './maps';
 import {
+  applyNukeAftermathUnlocks,
   applyRadiationPoisoningUnlock,
   defaultProfile,
 } from './profile';
 import {
+  applyPendingFieldPoison,
   resolveEffect,
   type EffectCtx,
   type EffectUnit,
@@ -51,7 +53,7 @@ function baseCtx(side: Side = 'blue'): EffectCtx {
 }
 
 describe('radiation_poisoning card', () => {
-  it('exists in catalog with quote, Gas, and smite_all 2', () => {
+  it('exists in catalog with quote, Gas, and lingering field_poison 3', () => {
     const card = cardById('radiation_poisoning');
     expect(card).toBeDefined();
     expect(card!.name).toBe('Radiation Poisoning');
@@ -62,7 +64,9 @@ describe('radiation_poisoning card', () => {
     expect(card!.quoted?.trim().length ?? 0).toBeGreaterThan(0);
     expect(/\bloyalty\b/i.test(card!.text)).toBe(false);
     expect(card!.keywords).toContain('gas');
-    expect(card!.effect).toEqual({ op: 'smite_all', n: 2 });
+    expect(card!.text.toLowerCase()).toContain('lingering poison');
+    expect(card!.text).toContain('3');
+    expect(card!.effect).toEqual({ op: 'field_poison', n: 3 });
     expect(CARDS.some((c) => c.id === 'radiation_poisoning')).toBe(true);
   });
 
@@ -90,7 +94,7 @@ describe('radiation_poisoning card', () => {
     ).toHaveLength(1);
   });
 
-  it('rite smites every unit for 2', () => {
+  it('rite schedules lingering poison for next turn (does not strike immediately)', () => {
     const card = cardById('radiation_poisoning')!;
     expect(card.effect).toBeDefined();
     const ctx = baseCtx('blue');
@@ -112,7 +116,44 @@ describe('radiation_poisoning card', () => {
     ctx.board[2][2] = 'b';
     const err = resolveEffect(ctx, card.effect!, card);
     expect(err).toBeNull();
+    expect(ctx.fieldPoisonDamage).toBe(3);
+    expect(ctx.units.a?.power).toBe(4);
+    expect(ctx.units.b?.power).toBe(3);
+  });
+
+  it('pending poison deals 3 at next rite open (Toughness still matters)', () => {
+    const ctx = baseCtx('blue');
+    ctx.units.a = unit({
+      uid: 'a',
+      cardId: 'lamp_bearer',
+      name: 'Ally',
+      side: 'blue',
+      power: 5,
+    });
+    ctx.units.t = unit({
+      uid: 't',
+      cardId: 'lamp_bearer',
+      name: 'Tough',
+      side: 'red',
+      power: 4,
+      tough: true,
+      keywords: ['tough'],
+    });
+    ctx.board[1][1] = 'a';
+    ctx.board[2][2] = 't';
+    const struck = applyPendingFieldPoison(ctx, 3);
+    expect(struck).toBe(2);
     expect(ctx.units.a?.power).toBe(2);
-    expect(ctx.units.b?.power).toBe(1);
+    // Toughness halves / reduces first hit — applyDamage path
+    expect(ctx.units.t?.power).toBe(2);
+  });
+});
+
+describe('nuke aftermath unlocks', () => {
+  it('applyNukeAftermathUnlocks adds both cards', () => {
+    const base = defaultProfile();
+    const next = applyNukeAftermathUnlocks(base);
+    expect(next.collection).toContain('radiation_poisoning');
+    expect(next.collection).toContain('nuclear_winter');
   });
 });

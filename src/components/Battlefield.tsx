@@ -20,6 +20,7 @@ import {
 } from '../game/deck';
 import {
   actNeedsAim,
+  applyPendingFieldPoison,
   effectNeedsAim,
   leaderNeedsAim,
   resolveActivatedAbility,
@@ -93,7 +94,7 @@ import type {
 } from '../net/friendSession';
 import {
   applyJustinKernUnlock,
-  applyRadiationPoisoningUnlock,
+  applyNukeAftermathUnlocks,
   applySethKernUnlock,
   applySouthHavenDispatchUnlock,
   type Profile,
@@ -377,6 +378,14 @@ export function Battlefield({
   const [falloutActive, setFalloutActive] = useState(false);
   /** Post-fallout Radiation Poisoning TarotPop (dismissible Close/Esc). */
   const [radiationPop, setRadiationPop] = useState<Card | null>(null);
+  /** Post-radiation Nuclear Winter TarotPop (dismissible Close/Esc). */
+  const [winterPop, setWinterPop] = useState<Card | null>(null);
+  /** Lingering poison damage to apply once at the next rite open. */
+  const [fieldPoisonDamage, setFieldPoisonDamage] = useState(0);
+  /** Remaining rite-opens that skip Resource banking (2 ≈ one turn). */
+  const [noBankOpens, setNoBankOpens] = useState(0);
+  const fieldStatusRef = useRef({ fieldPoisonDamage: 0, noBankOpens: 0 });
+  fieldStatusRef.current = { fieldPoisonDamage, noBankOpens };
   const codeRealNameRef = useRef(
     profile?.username &&
       !isSecondHourCode(profile.username) &&
@@ -495,7 +504,75 @@ export function Battlefield({
           return next;
         }),
       );
-      setBoard(cleared);
+      let working = cleared;
+
+      // Lingering field poison resolves once at the start of the next turn.
+      const pendingPoison = fieldStatusRef.current.fieldPoisonDamage;
+      if (pendingPoison > 0) {
+        const poisonCtx: EffectCtx = {
+          side: nextSide,
+          loyalty: { ...liveRef.current.loyalty },
+          domination: { ...liveRef.current.domination },
+          hand: {
+            blue: [...liveRef.current.hand.blue],
+            red: [...liveRef.current.hand.red],
+          },
+          deck: {
+            blue: [...liveRef.current.deck.blue],
+            red: [...liveRef.current.deck.red],
+          },
+          discard: {
+            blue: [...liveRef.current.discard.blue],
+            red: [...liveRef.current.discard.red],
+          },
+          units: {},
+          board: Array.from({ length: 5 }, () => Array(5).fill(null)),
+          control: liveRef.current.control.map((row) => [...row]),
+          log: [],
+        };
+        for (let r = 0; r < 5; r++) {
+          for (let c = 0; c < 5; c++) {
+            const u = working[r][c];
+            if (!u) continue;
+            poisonCtx.board[r][c] = u.uid;
+            poisonCtx.units[u.uid] = {
+              uid: u.uid,
+              cardId: u.cardId,
+              name: u.name,
+              side: u.side,
+              power: u.power,
+              maxPower: u.maxPower,
+              loyalty: u.loyalty,
+              keywords: [...u.keywords],
+              moved: u.moved,
+              attacked: u.attacked,
+              sick: u.sick,
+              tough: u.tough,
+              fast: u.fast,
+              shutter: u.shutter,
+              silenced: u.silenced,
+              powder: u.powder,
+              used: u.used,
+              once: u.once,
+              arrest: u.arrest,
+            };
+          }
+        }
+        applyPendingFieldPoison(poisonCtx, pendingPoison);
+        working = working.map((row) =>
+          row.map((u) => {
+            if (!u) return null;
+            const pu = poisonCtx.units[u.uid];
+            if (!pu) return null; // destroyed
+            return { ...u, power: pu.power, maxPower: pu.maxPower };
+          }),
+        );
+        poisonCtx.log.forEach((line) => pushLog(line));
+        setFieldPoisonDamage(0);
+        fieldStatusRef.current.fieldPoisonDamage = 0;
+      }
+
+      setBoard(working);
 
       const drawn = drawFromDeck(d[nextSide], h[nextSide], 1);
       const nextDeck = { ...d, [nextSide]: drawn.deck };
@@ -504,7 +581,7 @@ export function Battlefield({
       setHand(nextHand);
       liveRef.current = {
         ...liveRef.current,
-        board: cleared,
+        board: working,
         deck: nextDeck,
         hand: nextHand,
       };
@@ -518,24 +595,39 @@ export function Battlefield({
         tiles,
         ctrl,
         nextSide,
-        bankUnits(cleared),
+        bankUnits(working),
       );
       if (nextSide === 'red' && turnNum === 2) gain += 1;
-      setLoyalty((L) => {
-        const next = {
-          ...L,
-          [nextSide]: applyBank(L[nextSide], gain),
-        };
-        // Bank into liveRef immediately so an AI tick cannot see loyalty 0
-        // before React flushes this setState.
-        liveRef.current = { ...liveRef.current, loyalty: next };
-        return next;
-      });
-      pushLog(
-        nextSide === 'red' && turnNum === 2
-          ? `${sideLabel(nextSide)} banks ${gain} (holdings, plus the second seat's crumb).`
-          : `${sideLabel(nextSide)} banks ${gain} from the stronghold and held nodes.`,
-      );
+      // Nuclear Winter: skip Resource income for remaining blocked rite-opens.
+      let skipBank = false;
+      if (fieldStatusRef.current.noBankOpens > 0) {
+        skipBank = true;
+        const left = fieldStatusRef.current.noBankOpens - 1;
+        fieldStatusRef.current.noBankOpens = left;
+        setNoBankOpens(left);
+        gain = 0;
+      }
+      if (!skipBank) {
+        setLoyalty((L) => {
+          const next = {
+            ...L,
+            [nextSide]: applyBank(L[nextSide], gain),
+          };
+          // Bank into liveRef immediately so an AI tick cannot see loyalty 0
+          // before React flushes this setState.
+          liveRef.current = { ...liveRef.current, loyalty: next };
+          return next;
+        });
+        pushLog(
+          nextSide === 'red' && turnNum === 2
+            ? `${sideLabel(nextSide)} banks ${gain} (holdings, plus the second seat's crumb).`
+            : `${sideLabel(nextSide)} banks ${gain} from the stronghold and held nodes.`,
+        );
+      } else {
+        pushLog(
+          `${sideLabel(nextSide)} finds no Resources — nuclear winter holds the bank.`,
+        );
+      }
       pushLog(`${sideLabel(nextSide)} opens the rite.`);
 
       // Rare cryptid sighting (era pool): one hand drop, not both sides in Training.
@@ -810,9 +902,21 @@ export function Battlefield({
         board: b,
         control: control.map((row) => [...row]),
         log: [],
+        fieldPoisonDamage,
+        noBankOpens,
       };
     },
-    [board, loyalty, domination, hand, deck, discard, control],
+    [
+      board,
+      loyalty,
+      domination,
+      hand,
+      deck,
+      discard,
+      control,
+      fieldPoisonDamage,
+      noBankOpens,
+    ],
   );
 
   const applyEffectCtx = useCallback(
@@ -873,6 +977,15 @@ export function Battlefield({
         control: ctx.control.map((row) => [...row]),
       };
       ctx.log.forEach((line) => pushLog(line));
+
+      if (ctx.fieldPoisonDamage != null) {
+        setFieldPoisonDamage(ctx.fieldPoisonDamage);
+        fieldStatusRef.current.fieldPoisonDamage = ctx.fieldPoisonDamage;
+      }
+      if (ctx.noBankOpens != null) {
+        setNoBankOpens(ctx.noBankOpens);
+        fieldStatusRef.current.noBankOpens = ctx.noBankOpens;
+      }
 
       for (const u of Object.values(ctx.units)) {
         if (hasKeyword(u, 'cryptid')) {
@@ -2936,10 +3049,14 @@ export function Battlefield({
         durationMs={6000}
         onDone={() => {
           setFalloutActive(false);
+          if (profile && onUpdateProfile) {
+            onUpdateProfile(applyNukeAftermathUnlocks(profile));
+          }
           const rad = cardById('radiation_poisoning');
           if (rad) setRadiationPop(rad);
-          if (profile && onUpdateProfile) {
-            onUpdateProfile(applyRadiationPoisoningUnlock(profile));
+          else {
+            const winter = cardById('nuclear_winter');
+            if (winter) setWinterPop(winter);
           }
         }}
       />
@@ -2967,7 +3084,20 @@ export function Battlefield({
           card={radiationPop}
           caption="The ash settles — Radiation Poisoning"
           closeOnBackdrop={false}
-          onClose={() => setRadiationPop(null)}
+          onClose={() => {
+            setRadiationPop(null);
+            const winter = cardById('nuclear_winter');
+            if (winter) setWinterPop(winter);
+          }}
+        />
+      )}
+
+      {winterPop && (
+        <TarotPop
+          card={winterPop}
+          caption="The sun fails — Nuclear Winter"
+          closeOnBackdrop={false}
+          onClose={() => setWinterPop(null)}
         />
       )}
 

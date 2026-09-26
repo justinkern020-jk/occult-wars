@@ -8,7 +8,11 @@ import {
   type EndingId,
   type StageOutcome,
 } from '../game/campaign';
-import { applyJustinKernUnlock, applyRadiationPoisoningUnlock, type Profile } from '../game/profile';
+import {
+  applyJustinKernUnlock,
+  applyNukeAftermathUnlocks,
+  type Profile,
+} from '../game/profile';
 import { cardById } from '../data/catalog';
 import type { Card } from '../game/types';
 import {
@@ -33,8 +37,16 @@ type Props = {
   onConsumeOutcome?: () => void;
 };
 
-/** nuke → fallout → radiation card → epilogue → justin card → plate → Fulcanelli warning (final) */
-type CloserPhase = 'nuke' | 'fallout' | 'radiation' | 'epilogue' | 'reveal' | 'plate' | 'warning';
+/** nuke → fallout → radiation → winter → epilogue → justin → plate → Fulcanelli warning */
+type CloserPhase =
+  | 'nuke'
+  | 'fallout'
+  | 'radiation'
+  | 'winter'
+  | 'epilogue'
+  | 'reveal'
+  | 'plate'
+  | 'warning';
 
 export function CampaignHour({
   profile,
@@ -54,6 +66,7 @@ export function CampaignHour({
   const [closer, setCloser] = useState<CloserPhase | null>(null);
   const [justinCard, setJustinCard] = useState<Card | null>(null);
   const [radiationCard, setRadiationCard] = useState<Card | null>(null);
+  const [winterCard, setWinterCard] = useState<Card | null>(null);
 
   useEffect(() => {
     if (!lastOutcome || !onConsumeOutcome) return;
@@ -129,13 +142,19 @@ export function CampaignHour({
   }, []);
 
   const onFalloutDone = useCallback(() => {
+    onUpdate(applyNukeAftermathUnlocks(profile));
     const rad = cardById('radiation_poisoning');
     if (rad) {
       setRadiationCard(rad);
       setCloser('radiation');
-      onUpdate(applyRadiationPoisoningUnlock(profile));
     } else {
-      setCloser('epilogue');
+      const winter = cardById('nuclear_winter');
+      if (winter) {
+        setWinterCard(winter);
+        setCloser('winter');
+      } else {
+        setCloser('epilogue');
+      }
     }
   }, [onUpdate, profile]);
 
@@ -156,6 +175,7 @@ export function CampaignHour({
     setCloser(null);
     setJustinCard(null);
     setRadiationCard(null);
+    setWinterCard(null);
     setShowCutscene(true);
   }
 
@@ -188,6 +208,24 @@ export function CampaignHour({
             closeOnBackdrop={false}
             onClose={() => {
               setRadiationCard(null);
+              const winter = cardById('nuclear_winter');
+              if (winter) {
+                setWinterCard(winter);
+                setCloser('winter');
+              } else {
+                setCloser('epilogue');
+              }
+            }}
+          />
+        )}
+
+        {closer === 'winter' && winterCard && (
+          <TarotPop
+            card={winterCard}
+            caption="The sun fails — Nuclear Winter"
+            closeOnBackdrop={false}
+            onClose={() => {
+              setWinterCard(null);
               setCloser('epilogue');
             }}
           />

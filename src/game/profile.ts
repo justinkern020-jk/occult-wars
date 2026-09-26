@@ -360,4 +360,26 @@ export function applyRadiationPoisoningUnlock(p: Profile): Profile {
 }
 
 
+
+/** Unlock nuclear_winter into collection (+ legal custom decks). Aftermath of the gadget. */
+export function applyNuclearWinterUnlock(p: Profile): Profile {
+  const id = 'nuclear_winter';
+  const collection = p.collection.includes(id)
+    ? p.collection
+    : [...p.collection, id];
+  const card = cardById(id);
+  const customDecks = p.customDecks.map((d) => {
+    if (!card || d.cards.includes(id) || d.cards.length >= 40) return d;
+    const hero = CARDS.find((c) => c.id === d.heroId);
+    if (!hero || !isLegalForOrder(hero.faction, card.faction)) return d;
+    return { ...d, cards: [...d.cards, id] };
+  });
+  return { ...p, collection, customDecks };
+}
+
+/** Unlock both nuke-aftermath rites (Radiation Poisoning then Nuclear Winter). */
+export function applyNukeAftermathUnlocks(p: Profile): Profile {
+  return applyNuclearWinterUnlock(applyRadiationPoisoningUnlock(p));
+}
+
 export { FIRST_HOUR_ORDERS };

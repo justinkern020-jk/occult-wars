@@ -48,6 +48,16 @@ export type EffectCtx = {
   board: (string | null)[][];
   control: (Side | null)[][];
   log: string[];
+  /**
+   * Lingering field poison: damage applied once at the next rite open.
+   * Set by field_poison; consumed by applyPendingFieldPoison.
+   */
+  fieldPoisonDamage?: number;
+  /**
+   * Remaining rite-opens that skip Resource banking (2 ≈ one full turn for both chairs).
+   * Set by no_bank; decremented when a rite open would bank.
+   */
+  noBankOpens?: number;
 };
 
 export type AimPos = { r: number; c: number };
@@ -390,6 +400,24 @@ export function resolveEffect(
       pushLog(ctx, `${name} is returned to hand.`);
       break;
     }
+    case 'field_poison': {
+      const dmg = n > 0 ? n : 3;
+      ctx.fieldPoisonDamage = Math.max(ctx.fieldPoisonDamage ?? 0, dmg);
+      pushLog(
+        ctx,
+        `${card.name} blankets the field in lingering poison (${dmg} at the next rite open).`,
+      );
+      break;
+    }
+    case 'no_bank': {
+      const opens = n > 0 ? n : 2;
+      ctx.noBankOpens = Math.max(ctx.noBankOpens ?? 0, opens);
+      pushLog(
+        ctx,
+        `${card.name} freezes Resource banking for the next turn.`,
+      );
+      break;
+    }
     default:
       pushLog(ctx, `${card.name} works an obscure rite (${effect.op}).`);
       break;
@@ -566,6 +594,26 @@ export function resolveLeaderPower(
   return null;
 }
 
+
+
+/**
+ * Apply pending lingering field poison at rite open.
+ * Deals `damage` to every unit via the normal combat damage path (Toughness applies).
+ * Returns the number of units struck.
+ */
+export function applyPendingFieldPoison(ctx: EffectCtx, damage: number): number {
+  if (damage <= 0) return 0;
+  let struck = 0;
+  for (const uid of Object.keys(ctx.units)) {
+    const u = ctx.units[uid];
+    if (!u) continue;
+    const dmg = dealTo(ctx, u, damage);
+    pushLog(ctx, `Lingering poison deals ${dmg} to ${u.name}.`);
+    struck += 1;
+    if (u.power <= 0) destroyUnit(ctx, uid);
+  }
+  return struck;
+}
 export function effectNeedsAim(effect?: EffectSpec | null, aim?: boolean): boolean {
   if (!effect) return false;
   if (aim) return true;
