@@ -9,7 +9,7 @@ import { validateDeck, buildOrderAllyWorkingIds } from './deck';
 import { heroForFaction } from './deck';
 import { breakSeal, defaultProfile, swearAllegiance, isLegalDeck } from './profile';
 import { pickEnding } from './campaign';
-import { manhattan, rangedReach } from './keywords';
+import { canBeStruck, manhattan, rangedReach } from './keywords';
 import { resolveEffect, type EffectCtx } from './effects';
 
 describe('orders & allies', () => {
@@ -141,5 +141,20 @@ describe('effects', () => {
     const ctx = emptyCtx();
     resolveEffect(ctx, { op: 'draw', n: 1 }, { name: 'Vision' });
     expect(ctx.hand.blue).toHaveLength(1);
+  });
+});
+
+describe('veiled and shutter strike rules', () => {
+  it('veiled cannot be struck at any range', () => {
+    const atk = { keywords: ['ranged'] };
+    const def = { keywords: ['veiled'] };
+    expect(canBeStruck(atk, def, 1)).toBe(false);
+    expect(canBeStruck(atk, def, 2)).toBe(false);
+  });
+  it('shutter blocks ranged but not adjacent melee', () => {
+    const atk = { keywords: ['ranged'] };
+    const def = { keywords: ['shutter'] };
+    expect(canBeStruck(atk, def, 1)).toBe(true);
+    expect(canBeStruck(atk, def, 2)).toBe(false);
   });
 });

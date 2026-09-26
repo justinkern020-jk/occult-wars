@@ -82,9 +82,28 @@ export const KEYWORDS: Record<string, KeywordInfo> = {
   veiled: {
     key: 'veiled',
     glyph: '◌',
-    title: 'Veiled. Cannot be named by rites or leaders.',
+    title:
+      'Veiled (Untargetable). Combat and ranged strikes pass over this unit. Cannot be named by rites or leaders. Does not conquer.',
   },
 };
+
+/** True if attacker may choose defender for a strike at the given Manhattan distance. */
+export function canBeStruck(
+  attacker: { keywords: string[] },
+  defender: { keywords: string[]; shutter?: boolean },
+  dist: number,
+): boolean {
+  if (dist < 1) return false;
+  if (hasKeyword(defender, 'veiled')) return false;
+  const reach = rangedReach(attacker);
+  if (dist > reach) return false;
+  // Ranged shot (beyond melee adjacency) cannot choose Shutter.
+  if (dist > 1 && (hasKeyword(defender, 'shutter') || defender.shutter)) {
+    return false;
+  }
+  return true;
+}
+
 
 export function hasKeyword(
   unit: { keywords: string[]; tough?: boolean; fast?: boolean; slow?: boolean },

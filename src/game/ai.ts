@@ -7,6 +7,7 @@ import type { Side, Tile } from './maps';
 import type { Card } from './types';
 import type { ControlGrid } from './scoring';
 import { canDeployOn, isEnemyStronghold, isPaintable } from './control';
+import { canBeStruck, hasKeyword, manhattan, rangedReach } from './keywords';
 
 export type AiUnit = {
   uid: string;
@@ -72,6 +73,7 @@ function moveScore(
 }
 
 function attackScore(attacker: AiUnit, defender: AiUnit): number {
+  if (hasKeyword(defender, 'veiled')) return -999;
   let score = 1 + defender.power;
   if (attacker.power >= defender.power) score += 40;
   else score += attacker.power * 3;
@@ -179,7 +181,7 @@ export function pickTrainingAction(snap: AiSnapshot): AiAction {
     };
   }
 
-  // 3. Best attack
+  // 3. Best attack (melee + ranged; skip veiled / shuttered-at-range)
   let bestAtk: {
     uid: string;
     targetUid: string;
@@ -187,14 +189,20 @@ export function pickTrainingAction(snap: AiSnapshot): AiAction {
   } | null = null;
   for (const unit of listUnits(snap, side)) {
     if (unit.moved || unit.attacked) continue;
-    for (const p of neighbors(unit.r, unit.c)) {
-      const foe = snap.board[p.r][p.c];
-      if (!foe || foe.side === side) continue;
-      const score = attackScore(unit, foe);
-      if (!bestAtk || score > bestAtk.score) {
-        bestAtk = { uid: unit.uid, targetUid: foe.uid, score };
+    const reach = rangedReach(unit);
+    for (let r = 0; r < 5; r++) {
+      for (let c = 0; c < 5; c++) {
+        const foe = snap.board[r][c];
+        if (!foe || foe.side === side) continue;
+        const dist = manhattan(unit.r, unit.c, r, c);
+        if (!canBeStruck(unit, foe, dist)) continue;
+        const score = attackScore(unit, foe) + (dist > 1 ? 5 : 0);
+        if (!bestAtk || score > bestAtk.score) {
+          bestAtk = { uid: unit.uid, targetUid: foe.uid, score };
+        }
       }
     }
+    void reach;
   }
   if (bestAtk && bestAtk.score > 0) {
     return {

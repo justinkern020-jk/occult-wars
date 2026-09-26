@@ -26,7 +26,7 @@ import {
   type EffectCtx,
   type EffectUnit,
 } from '../game/effects';
-import { crownBonus, hasKeyword, manhattan, rangedReach } from '../game/keywords';
+import { canBeStruck, crownBonus, hasKeyword, manhattan } from '../game/keywords';
 import { MAPS, mapById, tileLabel, type Side } from '../game/maps';
 import {
   DOMINATION_WIN,
@@ -731,14 +731,8 @@ export function Battlefield({
   const canStrikeTarget = useCallback(
     (atk: BoardUnit & Pos, def: BoardUnit & Pos): boolean => {
       if (def.side === atk.side) return false;
-      const reach = rangedReach(atk);
       const dist = manhattan(atk.r, atk.c, def.r, def.c);
-      if (dist < 1 || dist > reach) return false;
-      if (reach > 1 && dist > 1) {
-        // ranged shot — shutter blocks
-        if (hasKeyword(def, 'shutter') || def.shutter) return false;
-      }
-      return true;
+      return canBeStruck(atk, def, dist);
     },
     [],
   );
@@ -784,13 +778,16 @@ export function Battlefield({
       }
 
       const prevOwner = control[r][c];
+      const veiled = hasKeyword(atk.unit, 'veiled');
       setBoard((b) => {
         const next = b.map((row) => [...row]);
         next[atk.r][atk.c] = null;
         next[r][c] = { ...atk.unit, moved: true };
         return next;
       });
-      if (isPaintable(tile)) {
+      if (veiled) {
+        pushLog(`${atk.unit.name} advances without claiming (veiled).`);
+      } else if (isPaintable(tile)) {
         setControl((C) => paintTile(C, gameMap.tiles, r, c, atk.unit.side));
         if (prevOwner !== atk.unit.side) {
           pushLog(
@@ -824,7 +821,7 @@ export function Battlefield({
           { ...here, r: defR, c: defC },
         )
       ) {
-        pushLog('That foe is out of reach — or shuttered.');
+        pushLog('That foe cannot be struck (out of reach, shuttered, or veiled).');
         return false;
       }
       const atkPow = strikePower(atk.unit, atk.r, atk.c);
