@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { CARDS, FACTIONS } from '../data/catalog';
+import { CARDS } from '../data/catalog';
 import {
   countOwned,
   exportLedger,
@@ -8,6 +8,7 @@ import {
 } from '../game/profile';
 import { CardView } from './CardView';
 import { TarotPop } from './TarotPop';
+import { FIRST_HOUR_ORDERS, isSecondHourSociety } from '../game/orders';
 
 type Props = {
   profile?: Profile;
@@ -27,7 +28,7 @@ export function Catalog({ profile, onUpdate }: Props) {
   );
 
   const list = useMemo(() => {
-    let rows = [...CARDS];
+    let rows = CARDS.filter((c) => !isSecondHourSociety(c.faction));
     if (unitsOnly) rows = rows.filter((c) => c.kind === 'unit');
     if (kind !== 'all') rows = rows.filter((c) => c.kind === kind);
     if (faction !== 'all') rows = rows.filter((c) => c.faction === faction);
@@ -98,7 +99,7 @@ export function Catalog({ profile, onUpdate }: Props) {
         />
         <select value={faction} onChange={(e) => setFaction(e.target.value)}>
           <option value="all">All factions</option>
-          {FACTIONS.map((f) => (
+          {FIRST_HOUR_ORDERS.map((f) => (
             <option key={f} value={f}>
               {f}
             </option>
