@@ -78,3 +78,17 @@ export function cardGeneratesResources(card: Card): boolean {
   if (/takes?\s+up\s+to\s+\d+\s+resources?/.test(t)) return true;
   return false;
 }
+
+/** Nuke TarotPop rites — never pack/deck/collection plates. */
+export const NUKE_AFTERMATH_IDS = [
+  'radiation_poisoning',
+  'nuclear_winter',
+] as const;
+
+export function isNukeAftermathId(id: string): boolean {
+  return (NUKE_AFTERMATH_IDS as readonly string[]).includes(id);
+}
+
+export function isNukeAftermathCard(card: Card): boolean {
+  return isNukeAftermathId(card.id);
+}

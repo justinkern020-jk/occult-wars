@@ -1,6 +1,6 @@
 /** Auto-built workings + deck legality (order+ally, 30–40, max 3). */
 
-import { CARDS } from '../data/catalog';
+import { CARDS, isNukeAftermathId } from '../data/catalog';
 import type { Card } from './types';
 import { HAND_CAP } from './scoring';
 import { allyOf, isLegalForOrder } from './orders';
@@ -11,10 +11,17 @@ export function buildWorkingIds(faction: string, size = 30): string[] {
     (c) =>
       c.faction === faction &&
       c.kind !== 'hero' &&
-      !c.keywords.includes('cryptid'),
+      !c.keywords.includes('cryptid') &&
+      !isNukeAftermathId(c.id),
   );
   if (pool.length === 0) {
-    const units = CARDS.filter((c) => c.kind === 'unit' && c.power != null);
+    const units = CARDS.filter(
+      (c) =>
+        c.kind === 'unit' &&
+        c.power != null &&
+        !isNukeAftermathId(c.id) &&
+        !c.keywords.includes('cryptid'),
+    );
     const ids: string[] = [];
     for (let pass = 0; pass < 3 && ids.length < size; pass++) {
       for (const u of units) {
@@ -121,6 +128,12 @@ export function validateDeck(
       return {
         ok: false,
         error: `${card.name} is a Second Hour sighting — not a First Hour plate.`,
+      };
+    }
+    if (isNukeAftermathId(card.id)) {
+      return {
+        ok: false,
+        error: `${card.name} is nuke aftermath — not a working plate.`,
       };
     }
     if (!legalCardForHero(heroId, card)) {

@@ -1,12 +1,13 @@
 /** Profile persistence: occult-wars.profile.v1 */
 
-import { CARDS, cardById } from '../data/catalog';
+import { CARDS, cardById, isNukeAftermathId } from '../data/catalog';
 import type { Card } from './types';
 import {
   FIRST_HOUR_ORDERS,
   allyOf,
   isFirstHourOrder,
   isLegalForOrder,
+  isSecondHourSociety,
   normalizeFaction,
   type FirstHourOrder,
 } from './orders';
@@ -123,7 +124,10 @@ export function migrateProfile(raw: Partial<Profile> & Record<string, unknown>):
         ? Math.max(0, Math.floor(raw.alchemicalShards))
         : base.alchemicalShards,
     collection: Array.isArray(raw.collection)
-      ? raw.collection.filter((id): id is string => typeof id === 'string')
+      ? raw.collection.filter(
+          (id): id is string =>
+            typeof id === 'string' && !isNukeAftermathId(id),
+        )
       : [],
     customDecks: Array.isArray(raw.customDecks)
       ? (raw.customDecks as CustomDeck[])
@@ -133,7 +137,10 @@ export function migrateProfile(raw: Partial<Profile> & Record<string, unknown>):
             name: String(d.name ?? 'Untitled working').slice(0, 32),
             heroId: String(d.heroId ?? ''),
             cards: Array.isArray(d.cards)
-              ? d.cards.filter((c): c is string => typeof c === 'string')
+              ? d.cards.filter(
+                  (c): c is string =>
+                    typeof c === 'string' && !isNukeAftermathId(c),
+                )
               : [],
           }))
       : [],
@@ -148,7 +155,10 @@ export function migrateProfile(raw: Partial<Profile> & Record<string, unknown>):
     secondOrder: typeof raw.secondOrder === 'string' ? raw.secondOrder : null,
     secondHero: typeof raw.secondHero === 'string' ? raw.secondHero : null,
     secondCards: Array.isArray(raw.secondCards)
-      ? raw.secondCards.filter((c): c is string => typeof c === 'string')
+      ? raw.secondCards.filter(
+          (c): c is string =>
+            typeof c === 'string' && !isNukeAftermathId(c),
+        )
       : null,
   };
 }
@@ -228,6 +238,8 @@ export function isLegalDeck(deck: CustomDeck | null | undefined): boolean {
   for (const id of deck.cards) {
     const card = CARDS.find((c) => c.id === id);
     if (!card || card.kind === 'hero') return false;
+    if (card.keywords.includes('cryptid')) return false;
+    if (isNukeAftermathId(card.id)) return false;
     if (!isLegalForOrder(hero.faction, card.faction)) return false;
     counts[id] = (counts[id] ?? 0) + 1;
     if (counts[id] > 3) return false;
@@ -235,11 +247,16 @@ export function isLegalDeck(deck: CustomDeck | null | undefined): boolean {
   return true;
 }
 
-/** Pack pool: non-hero, non-cryptid; first 3 pulls bias to order+ally. */
+/**
+ * First Hour pack pool: non-hero, non-cryptid, no Second Hour societies,
+ * no nuke-aftermath rites. First 3 pulls bias to order+ally.
+ */
 export function packPool(order: string | null, biasOrder: boolean): Card[] {
   return CARDS.filter((c) => {
     if (c.kind === 'hero') return false;
     if (c.keywords.includes('cryptid')) return false;
+    if (isSecondHourSociety(c.faction)) return false;
+    if (isNukeAftermathId(c.id)) return false;
     if (!biasOrder || !order) return true;
     return isLegalForOrder(order, c.faction);
   });
@@ -343,43 +360,51 @@ export function applySouthHavenDispatchUnlock(p: Profile): Profile {
   return { ...p, collection, customDecks };
 }
 
-/** Unlock radiation_poisoning into collection (+ legal custom decks). Aftermath of the gadget. */
+/**
+ * Strip a nuke-aftermath id from collection / workings.
+ * These rites are TarotPop-only — never owned plates.
+ */
+function stripAftermathId(p: Profile, id: string): Profile {
+  const collection = p.collection.filter((x) => x !== id);
+  const customDecks = p.customDecks.map((d) => ({
+    ...d,
+    cards: d.cards.filter((x) => x !== id),
+  }));
+  const secondCards = p.secondCards
+    ? p.secondCards.filter((x) => x !== id)
+    : null;
+  if (
+    collection.length === p.collection.length &&
+    customDecks.every((d, i) => d.cards.length === p.customDecks[i]!.cards.length) &&
+    (secondCards?.length ?? 0) === (p.secondCards?.length ?? 0)
+  ) {
+    return p;
+  }
+  return { ...p, collection, customDecks, secondCards };
+}
+
+/** Ensure radiation_poisoning is not a collectible plate. */
 export function applyRadiationPoisoningUnlock(p: Profile): Profile {
-  const id = 'radiation_poisoning';
-  const collection = p.collection.includes(id)
-    ? p.collection
-    : [...p.collection, id];
-  const card = cardById(id);
-  const customDecks = p.customDecks.map((d) => {
-    if (!card || d.cards.includes(id) || d.cards.length >= 40) return d;
-    const hero = CARDS.find((c) => c.id === d.heroId);
-    if (!hero || !isLegalForOrder(hero.faction, card.faction)) return d;
-    return { ...d, cards: [...d.cards, id] };
-  });
-  return { ...p, collection, customDecks };
+  return stripAftermathId(p, 'radiation_poisoning');
 }
 
-
-
-/** Unlock nuclear_winter into collection (+ legal custom decks). Aftermath of the gadget. */
+/** Ensure nuclear_winter is not a collectible plate. */
 export function applyNuclearWinterUnlock(p: Profile): Profile {
-  const id = 'nuclear_winter';
-  const collection = p.collection.includes(id)
-    ? p.collection
-    : [...p.collection, id];
-  const card = cardById(id);
-  const customDecks = p.customDecks.map((d) => {
-    if (!card || d.cards.includes(id) || d.cards.length >= 40) return d;
-    const hero = CARDS.find((c) => c.id === d.heroId);
-    if (!hero || !isLegalForOrder(hero.faction, card.faction)) return d;
-    return { ...d, cards: [...d.cards, id] };
-  });
-  return { ...p, collection, customDecks };
+  return stripAftermathId(p, 'nuclear_winter');
 }
 
-/** Unlock both nuke-aftermath rites (Radiation Poisoning then Nuclear Winter). */
+/**
+ * Post-nuke profile pass: strip Radiation Poisoning / Nuclear Winter from
+ * collection and workings. TarotPop still reveals them in-battle; they are
+ * never owned deck plates.
+ */
 export function applyNukeAftermathUnlocks(p: Profile): Profile {
   return applyNuclearWinterUnlock(applyRadiationPoisoningUnlock(p));
+}
+
+/** Strip both nuke-aftermath rites from any profile surface. */
+export function stripNukeAftermathPlates(p: Profile): Profile {
+  return applyNukeAftermathUnlocks(p);
 }
 
 export { FIRST_HOUR_ORDERS };

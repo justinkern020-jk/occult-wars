@@ -81,17 +81,25 @@ describe('radiation_poisoning card', () => {
     expect(existsSync(disk)).toBe(true);
   });
 
-  it('unlock adds to collection once', () => {
-    const base = defaultProfile();
-    expect(base.collection.includes('radiation_poisoning')).toBe(false);
+  it('aftermath helper strips radiation_poisoning from collection (never owns)', () => {
+    const base = {
+      ...defaultProfile(),
+      collection: ['radiation_poisoning', 'justin_kern'],
+      customDecks: [
+        {
+          id: 'first-working',
+          name: 'Test',
+          heroId: 'the_rune_colonel',
+          cards: ['radiation_poisoning', 'lamp_bearer'],
+        },
+      ],
+    };
     const once = applyRadiationPoisoningUnlock(base);
-    expect(once.collection.filter((id) => id === 'radiation_poisoning')).toEqual([
-      'radiation_poisoning',
-    ]);
+    expect(once.collection).not.toContain('radiation_poisoning');
+    expect(once.collection).toContain('justin_kern');
+    expect(once.customDecks[0]?.cards).not.toContain('radiation_poisoning');
     const twice = applyRadiationPoisoningUnlock(once);
-    expect(
-      twice.collection.filter((id) => id === 'radiation_poisoning'),
-    ).toHaveLength(1);
+    expect(twice).toEqual(once);
   });
 
   it('rite schedules lingering poison for next turn (does not strike immediately)', () => {
@@ -150,10 +158,14 @@ describe('radiation_poisoning card', () => {
 });
 
 describe('nuke aftermath unlocks', () => {
-  it('applyNukeAftermathUnlocks adds both cards', () => {
-    const base = defaultProfile();
+  it('applyNukeAftermathUnlocks strips both cards from collection', () => {
+    const base = {
+      ...defaultProfile(),
+      collection: ['radiation_poisoning', 'nuclear_winter', 'justin_kern'],
+    };
     const next = applyNukeAftermathUnlocks(base);
-    expect(next.collection).toContain('radiation_poisoning');
-    expect(next.collection).toContain('nuclear_winter');
+    expect(next.collection).not.toContain('radiation_poisoning');
+    expect(next.collection).not.toContain('nuclear_winter');
+    expect(next.collection).toContain('justin_kern');
   });
 });

@@ -60,17 +60,16 @@ describe('nuclear_winter card', () => {
     expect(existsSync(disk)).toBe(true);
   });
 
-  it('unlock adds to collection once', () => {
-    const base = defaultProfile();
-    expect(base.collection.includes('nuclear_winter')).toBe(false);
+  it('aftermath helper strips nuclear_winter from collection (never owns)', () => {
+    const base = {
+      ...defaultProfile(),
+      collection: ['nuclear_winter', 'justin_kern'],
+    };
     const once = applyNuclearWinterUnlock(base);
-    expect(once.collection.filter((id) => id === 'nuclear_winter')).toEqual([
-      'nuclear_winter',
-    ]);
+    expect(once.collection).not.toContain('nuclear_winter');
+    expect(once.collection).toContain('justin_kern');
     const twice = applyNuclearWinterUnlock(once);
-    expect(twice.collection.filter((id) => id === 'nuclear_winter')).toHaveLength(
-      1,
-    );
+    expect(twice).toEqual(once);
   });
 
   it('rite schedules no-bank for two rite-opens (one turn)', () => {

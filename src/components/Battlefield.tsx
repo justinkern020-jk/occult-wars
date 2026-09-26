@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
-import { cardById } from '../data/catalog';
+import { cardById, isNukeAftermathId } from '../data/catalog';
 import { pickTrainingAction, type AiSnapshot } from '../game/ai';
 import { applyDamage, combatantFrom, isDestroyed, resolveMelee } from '../game/combat';
 import {
@@ -172,17 +172,19 @@ function deckFor(
   faction: string,
   ids?: string[],
 ): Card[] {
-  // Cryptids are Second Hour sightings — never shuffle into First Hour workings.
-  const stripCryptids = (cards: Card[]) =>
-    cards.filter((c) => !c.keywords.includes('cryptid'));
+  // Cryptids / nuke aftermath are never shuffleable into First Hour workings.
+  const stripNonPlates = (cards: Card[]) =>
+    cards.filter(
+      (c) => !c.keywords.includes('cryptid') && !isNukeAftermathId(c.id),
+    );
   if (ids && ids.length >= 30) {
-    const cleaned = stripCryptids(cardsFromIds(ids));
+    const cleaned = stripNonPlates(cardsFromIds(ids));
     if (cleaned.length >= 30) return shuffleInPlace(cleaned);
   }
   try {
-    return stripCryptids(buildShuffledOrderWorking(faction));
+    return stripNonPlates(buildShuffledOrderWorking(faction));
   } catch {
-    return stripCryptids(buildShuffledWorking(faction));
+    return stripNonPlates(buildShuffledWorking(faction));
   }
 }
 

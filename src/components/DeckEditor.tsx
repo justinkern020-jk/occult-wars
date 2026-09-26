@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { CARDS } from '../data/catalog';
+import { CARDS, isNukeAftermathId } from '../data/catalog';
 import {
   allyOf,
   isLegalForOrder,
@@ -44,6 +44,7 @@ export function DeckEditor({ profile, onSave, onBack }: Props) {
       (c) =>
         c.kind !== 'hero' &&
         !c.keywords.includes('cryptid') &&
+        !isNukeAftermathId(c.id) &&
         isLegalForOrder(order, c.faction) &&
         (owned[c.id] ?? 0) > 0,
     ).filter((c) => {
