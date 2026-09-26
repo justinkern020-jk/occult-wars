@@ -72,4 +72,21 @@ describe('parseFriendMessage', () => {
     expect(parseFriendMessage({ v: 2, type: 'ping' })).toBeNull();
     expect(parseFriendMessage({ v: 1, type: 'nope' })).toBeNull();
   });
+  it('accepts loadout messages with cards array', () => {
+    expect(
+      parseFriendMessage({
+        v: 1,
+        type: 'loadout',
+        heroId: 'the_rune_colonel',
+        cards: ['coil_novice'],
+        faction: 'The Vril Syndicate',
+      }),
+    ).toMatchObject({ type: 'loadout', heroId: 'the_rune_colonel' });
+  });
+  it('rejects loadout without cards array', () => {
+    expect(
+      parseFriendMessage({ v: 1, type: 'loadout', heroId: 'x' }),
+    ).toBeNull();
+  });
+
 });

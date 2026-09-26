@@ -50,10 +50,19 @@ export type FriendIntent =
   | { kind: 'endRite' }
   | { kind: 'resign' };
 
+export type FriendLoadoutMessage = {
+  v: 1;
+  type: 'loadout';
+  heroId?: string;
+  cards: string[];
+  faction?: string;
+};
+
 export type FriendMessage =
   | { v: 1; type: 'hello'; role: FriendRole; room: string }
   | { v: 1; type: 'state'; state: FriendMatchState }
   | { v: 1; type: 'intent'; intent: FriendIntent }
+  | FriendLoadoutMessage
   | { v: 1; type: 'ping' }
   | { v: 1; type: 'error'; message: string };
 
@@ -144,6 +153,9 @@ export function parseFriendMessage(raw: unknown): FriendMessage | null {
     case 'intent':
     case 'ping':
     case 'error':
+      return m as unknown as FriendMessage;
+    case 'loadout':
+      if (!Array.isArray(m.cards)) return null;
       return m as unknown as FriendMessage;
     default:
       return null;

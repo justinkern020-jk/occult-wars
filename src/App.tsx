@@ -10,6 +10,11 @@ import { PackBreak } from './components/PackBreak';
 import { CampaignHour } from './components/CampaignHour';
 import { FriendWorking } from './components/FriendWorking';
 import type { FriendRole, FriendSession } from './net/friendSession';
+import {
+  loadoutFromWorking,
+  resolveFriendMatchLoadouts,
+  type FriendLoadout,
+} from './net/friendLoadout';
 import { SecondHour } from './components/SecondHour';
 import { useProfile } from './hooks/useProfile';
 import {
@@ -153,17 +158,27 @@ export default function App() {
     _room: string,
     role: FriendRole,
     session: FriendSession,
+    hostLoadout: FriendLoadout,
+    guestLoadout: FriendLoadout,
   ) {
     ensureSworn(() => {
       const order = firstHourAllegiance()!;
-      const foe = trainingFoe(order);
-      // Shared match: host = Azure, guest = Crimson. Same factions on both browsers.
-      setBlueFaction(order);
-      setRedFaction(foe);
-      setBlueHeroId(working?.heroId);
-      setBlueDeckIds(working?.cards);
-      setRedHeroId(undefined);
-      setRedDeckIds(undefined);
+      // Host = Azure, guest = Crimson. Both browsers use the exchanged loadouts.
+      // Prefer host loadout faction; only the host may fall back to local allegiance.
+      const hostFallback =
+        hostLoadout.faction ||
+        (role === 'host' ? order : 'The Vril Syndicate');
+      const resolved = resolveFriendMatchLoadouts(
+        hostLoadout,
+        guestLoadout,
+        hostFallback,
+      );
+      setBlueFaction(resolved.blueFaction);
+      setRedFaction(resolved.redFaction);
+      setBlueHeroId(resolved.blueHeroId);
+      setBlueDeckIds(resolved.blueDeckIds);
+      setRedHeroId(resolved.redHeroId);
+      setRedDeckIds(resolved.redDeckIds);
       setFriendRole(role);
       setFriendSession(session);
       setMatchMode('friend');
@@ -281,7 +296,13 @@ export default function App() {
           </p>
         </nav>
         <FriendWorking
-          onReady={({ room, role, session }) => startFriend(room, role, session)}
+          localLoadout={loadoutFromWorking(
+            working,
+            firstHourAllegiance(),
+          )}
+          onReady={({ room, role, session, hostLoadout, guestLoadout }) =>
+            startFriend(room, role, session, hostLoadout, guestLoadout)
+          }
           onBack={() => setScreen('menu')}
         />
       </div>

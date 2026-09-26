@@ -10,27 +10,38 @@ import {
   type FriendSession,
   type QuickMatchHandle,
 } from '../net/friendSession';
+import {
+  sanitizeFriendLoadout,
+  type FriendLoadout,
+} from '../net/friendLoadout';
 
 export type FriendReadyPayload = {
   room: string;
   role: FriendRole;
   session: FriendSession;
+  hostLoadout: FriendLoadout;
+  guestLoadout: FriendLoadout;
 };
 
 type Props = {
+  /** Local Deck Editor working (customDecks[0]) + allegiance. */
+  localLoadout: FriendLoadout;
   onReady: (payload: FriendReadyPayload) => void;
   onBack: () => void;
 };
 
+const LOADOUT_RETRY_MS = 300;
+const LOADOUT_MAX_ATTEMPTS = 40;
+
 /**
  * Friend Working lobby: Quick Match + 4-letter room Host/Join.
- * PeerJS only — no SDP paste.
+ * Exchanges loadouts over PeerJS before entering the field.
  */
-export function FriendWorking({ onReady, onBack }: Props) {
+export function FriendWorking({ localLoadout, onReady, onBack }: Props) {
   const [room, setRoom] = useState(randomRoomCode);
   const [role, setRole] = useState<FriendRole | null>(null);
   const [status, setStatus] = useState(
-    'Find a match automatically, or host/join with a 4-letter room code.',
+    'Find a match automatically, or host/join with a 4-letter room code. Each player brings their Deck Editor working deck.',
   );
   const [busy, setBusy] = useState(false);
   const [searching, setSearching] = useState(false);
@@ -40,22 +51,39 @@ export function FriendWorking({ onReady, onBack }: Props) {
   const quickRef = useRef<QuickMatchHandle | null>(null);
   const readySent = useRef(false);
   const handedOff = useRef(false);
+  const handshakeTimer = useRef<number | null>(null);
+  const localLoadoutRef = useRef(localLoadout);
+  localLoadoutRef.current = localLoadout;
+
+  const clearHandshakeTimer = useCallback(() => {
+    if (handshakeTimer.current != null) {
+      window.clearInterval(handshakeTimer.current);
+      handshakeTimer.current = null;
+    }
+  }, []);
 
   const cleanup = useCallback(() => {
     if (handedOff.current) return;
+    clearHandshakeTimer();
     quickRef.current?.cancel();
     quickRef.current = null;
     sessionRef.current?.destroy();
     sessionRef.current = null;
     readySent.current = false;
-  }, []);
+  }, [clearHandshakeTimer]);
 
   useEffect(() => () => cleanup(), [cleanup]);
 
-  function finishReady(session: FriendSession) {
+  function finishReady(
+    session: FriendSession,
+    hostLoadout: FriendLoadout,
+    guestLoadout: FriendLoadout,
+  ) {
     if (readySent.current) return;
     readySent.current = true;
     handedOff.current = true;
+    clearHandshakeTimer();
+    session.setOnMessage(null);
     sessionRef.current = null;
     quickRef.current = null;
     setLinked(true);
@@ -63,10 +91,80 @@ export function FriendWorking({ onReady, onBack }: Props) {
     setBusy(false);
     setStatus(
       session.role === 'host'
-        ? `Connected · you are Azure (host). Room ${session.room}.`
-        : `Connected · you are Crimson (guest). Room ${session.room}.`,
+        ? `Connected · you are Azure (host). Room ${session.room}. Workings exchanged.`
+        : `Connected · you are Crimson (guest). Room ${session.room}. Workings exchanged.`,
     );
-    onReady({ room: session.room, role: session.role, session });
+    onReady({
+      room: session.room,
+      role: session.role,
+      session,
+      hostLoadout,
+      guestLoadout,
+    });
+  }
+
+  function beginHandshake(session: FriendSession) {
+    if (readySent.current) return;
+    setStatus('Linked — exchanging Deck Editor workings…');
+    setSearching(false);
+    setBusy(true);
+
+    const local = sanitizeFriendLoadout(localLoadoutRef.current);
+    let peer: FriendLoadout | null = null;
+    let attempts = 0;
+
+    const sendLocal = () => {
+      session.send({
+        v: 1,
+        type: 'loadout',
+        heroId: local.heroId,
+        cards: local.cards,
+        faction: local.faction,
+      });
+    };
+
+    const tryFinish = () => {
+      if (readySent.current || !peer) return;
+      clearHandshakeTimer();
+      if (session.role === 'host') {
+        finishReady(session, local, peer);
+      } else {
+        finishReady(session, peer, local);
+      }
+    };
+
+    session.setOnMessage((msg) => {
+      if (msg.type !== 'loadout') return;
+      peer = sanitizeFriendLoadout(msg);
+      // Echo ours so a peer that missed the first send still gets it.
+      sendLocal();
+      tryFinish();
+    });
+
+    sendLocal();
+    clearHandshakeTimer();
+    handshakeTimer.current = window.setInterval(() => {
+      if (readySent.current) {
+        clearHandshakeTimer();
+        return;
+      }
+      attempts += 1;
+      sendLocal();
+      if (attempts >= LOADOUT_MAX_ATTEMPTS) {
+        clearHandshakeTimer();
+        setBusy(false);
+        setFailed(true);
+        setStatus(
+          'Timed out exchanging workings. Ask your partner to retry, or use Pass the Grimoire.',
+        );
+        try {
+          session.destroy();
+        } catch {
+          /* ignore */
+        }
+        sessionRef.current = null;
+      }
+    }, LOADOUT_RETRY_MS);
   }
 
   function beginQuickMatch() {
@@ -84,7 +182,9 @@ export function FriendWorking({ onReady, onBack }: Props) {
         if (!handedOff.current) setStatus(s);
       },
       onMatched: (session) => {
-        finishReady(session);
+        sessionRef.current = session;
+        setRole(session.role);
+        beginHandshake(session);
       },
       onFailed: (reason) => {
         setBusy(false);
@@ -98,6 +198,7 @@ export function FriendWorking({ onReady, onBack }: Props) {
 
   function cancelSearch() {
     brassClick();
+    clearHandshakeTimer();
     quickRef.current?.cancel();
     quickRef.current = null;
     sessionRef.current?.destroy();
@@ -107,7 +208,7 @@ export function FriendWorking({ onReady, onBack }: Props) {
     setRole(null);
     setFailed(false);
     setStatus(
-      'Find a match automatically, or host/join with a 4-letter room code.',
+      'Find a match automatically, or host/join with a 4-letter room code. Each player brings their Deck Editor working deck.',
     );
   }
 
@@ -128,8 +229,9 @@ export function FriendWorking({ onReady, onBack }: Props) {
     setRoom(code);
     setStatus(`Waiting for guest… share code ${code}`);
     try {
-      const session = hostFriendSession(code, {
-        onOpen: () => finishReady(session),
+      let session!: FriendSession;
+      session = hostFriendSession(code, {
+        onOpen: () => beginHandshake(session),
         onError: (err) => {
           setBusy(false);
           setFailed(true);
@@ -143,6 +245,7 @@ export function FriendWorking({ onReady, onBack }: Props) {
         },
         onClose: (reason) => {
           if (!readySent.current) {
+            clearHandshakeTimer();
             setBusy(false);
             setStatus(reason || 'Channel closed before a guest joined.');
           }
@@ -175,8 +278,9 @@ export function FriendWorking({ onReady, onBack }: Props) {
     setRoom(code);
     setStatus(`Connecting to room ${code}…`);
     try {
-      const session = joinFriendSession(code, {
-        onOpen: () => finishReady(session),
+      let session!: FriendSession;
+      session = joinFriendSession(code, {
+        onOpen: () => beginHandshake(session),
         onError: (err) => {
           setBusy(false);
           setFailed(true);
@@ -186,6 +290,7 @@ export function FriendWorking({ onReady, onBack }: Props) {
         },
         onClose: (reason) => {
           if (!readySent.current) {
+            clearHandshakeTimer();
             setBusy(false);
             setFailed(true);
             setStatus(reason || 'Connection closed. Ask the host to re-host.');
@@ -208,7 +313,9 @@ export function FriendWorking({ onReady, onBack }: Props) {
       <h2>Find a friend</h2>
       <p className="lede">
         Quick Match pairs you with anyone searching. Or share a 4-letter room
-        for a private sitting. Host plays Azure; guest plays Crimson.
+        for a private sitting. Host plays Azure; guest plays Crimson. Each
+        player brings their Deck Editor working deck (the first saved custom
+        deck).
       </p>
 
       <div className="friend-roles friend-roles-quick">
@@ -298,7 +405,7 @@ export function FriendWorking({ onReady, onBack }: Props) {
             setFailed(false);
             setLinked(false);
             setStatus(
-              'Find a match automatically, or host/join with a 4-letter room code.',
+              'Find a match automatically, or host/join with a 4-letter room code. Each player brings their Deck Editor working deck.',
             );
           }}
         >
