@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   cryptidPoolFor,
-  pickCryptid,
   readVisitCount,
   recordMatchVisit,
   rollVisitTurn,
@@ -49,23 +48,21 @@ describe('recordMatchVisit', () => {
 });
 
 describe('cryptid pools', () => {
-  it('picks First Hour order cryptids for sightings (not Second Hour beasts)', () => {
+  it('First Hour order cryptid data exists (Vril Wyrm etc.) but is not Second Hour', () => {
     const pool = cryptidPoolFor('The Vril Syndicate', 'first');
-    expect(pool.length).toBeGreaterThan(0);
+    expect(pool.some((c) => c.id === 'vril_wyrm' || c.id === 'foo_fighter')).toBe(
+      true,
+    );
     expect(pool.every((c) => c.faction === 'The Vril Syndicate')).toBe(true);
-    expect(pool.every((c) => !c.faction.includes('Blackout'))).toBe(true);
-    const card = pickCryptid('The Vril Syndicate', 'first', () => 0);
-    expect(card?.keywords).toContain('cryptid');
-    expect(card?.id).toMatch(/foo_fighter|vril_wyrm/);
+    expect(pool.some((c) => c.id === 'blackout_hound')).toBe(false);
   });
 
-  it('keeps Second Hour cryptids out of First Hour pools', () => {
-    const first = cryptidPoolFor('The Vril Syndicate', 'first');
-    expect(first.some((c) => c.id === 'blackout_hound')).toBe(false);
+  it('Second Hour pools only society cryptids', () => {
     const second = cryptidPoolFor('The Blackout Wardens', 'second');
     expect(second.some((c) => c.id === 'blackout_hound' || c.id === 'roof_moth')).toBe(
       true,
     );
+    expect(second.some((c) => c.id === 'vril_wyrm')).toBe(false);
   });
 
   it('picks second-hour society cryptids', () => {

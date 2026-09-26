@@ -461,8 +461,9 @@ export function Battlefield({
       );
       pushLog(`${sideLabel(nextSide)} opens the rite.`);
 
-      // Cryptid sighting: inject era-correct cryptid into hands (never from the deck).
+      // Second Hour cryptid sighting: inject into hands on the scheduled turn.
       if (
+        eraRef.current === 'second' &&
         visitTurnRef.current != null &&
         turnNum === visitTurnRef.current &&
         !sightingFiredRef.current
@@ -534,8 +535,9 @@ export function Battlefield({
         mode === 'second' || m.era === 'second' ? 'second' : 'first';
       eraRef.current = era;
       sightingFiredRef.current = false;
-      // Rare cryptid sighting every 15th match of this era (hand drop, not deck).
-      if (recordMatchVisit(era)) {
+      // Hand cryptid drops are Second Hour only (Justin). First Hour keeps
+      // cryptids out of the working and never injects them mid-match.
+      if (era === 'second' && recordMatchVisit(era)) {
         visitTurnRef.current = rollVisitTurn();
       } else {
         visitTurnRef.current = null;

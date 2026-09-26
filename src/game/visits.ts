@@ -37,9 +37,9 @@ export function setVisitsForNextSighting(era: Era): void {
 }
 
 /**
- * Sighting pools by era.
- * First Hour: order cryptids (Mothman, Foo Fighter, …) — rare hand drops only.
- * Second Hour: society cryptids — only on Second Hour matches.
+ * Cryptid pools by era (card data).
+ * Battlefield hand drops: Second Hour only. First Hour order cryptids
+ * (Vril Wyrm, Foo Fighter, …) stay out of First Hour hands for now.
  * Never treated as ordinary deck plates.
  */
 function cryptidsInEra(era: Era): Card[] {
