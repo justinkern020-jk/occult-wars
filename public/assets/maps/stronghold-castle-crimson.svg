@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" aria-hidden="true">
+  <!-- Occult ledger stone castle — Crimson roofs/banners -->
+  <defs>
+    <linearGradient id="goldRim" x1="8" y1="6" x2="120" y2="122" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffe8e0"/>
+      <stop offset=".2" stop-color="#e8a898"/>
+      <stop offset=".5" stop-color="#c05040"/>
+      <stop offset=".8" stop-color="#882820"/>
+      <stop offset="1" stop-color="#481410"/>
+    </linearGradient>
+    <linearGradient id="stoneWall" x1="20" y1="30" x2="108" y2="110" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6a6458"/>
+      <stop offset=".3" stop-color="#4a453c"/>
+      <stop offset=".65" stop-color="#2e2a24"/>
+      <stop offset="1" stop-color="#161410"/>
+    </linearGradient>
+    <linearGradient id="stoneTower" x1="20" y1="20" x2="44" y2="100" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7a7468"/>
+      <stop offset=".4" stop-color="#524c42"/>
+      <stop offset=".8" stop-color="#2a2620"/>
+      <stop offset="1" stop-color="#12100e"/>
+    </linearGradient>
+    <linearGradient id="keepFace" x1="48" y1="24" x2="80" y2="100" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5a5448"/>
+      <stop offset=".4" stop-color="#3a362e"/>
+      <stop offset=".75" stop-color="#221e1a"/>
+      <stop offset="1" stop-color="#0e0c0a"/>
+    </linearGradient>
+    <linearGradient id="roof" x1="48" y1="18" x2="80" y2="36" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f0c0b0"/>
+      <stop offset=".4" stop-color="#c05040"/>
+      <stop offset=".8" stop-color="#882820"/>
+      <stop offset="1" stop-color="#481410"/>
+    </linearGradient>
+    <linearGradient id="banner" x1="58" y1="40" x2="70" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#e8a898"/>
+      <stop offset=".5" stop-color="#b03028"/>
+      <stop offset="1" stop-color="#681818"/>
+    </linearGradient>
+    <linearGradient id="gateDark" x1="56" y1="78" x2="72" y2="108" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1a1410"/>
+      <stop offset="1" stop-color="#050403"/>
+    </linearGradient>
+    <filter id="castSoft" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2.2" flood-color="#020100" flood-opacity=".72"/>
+    </filter>
+  </defs>
+
+  <circle cx="64" cy="64" r="61" stroke="url(#goldRim)" stroke-width="2" opacity=".42"/>
+  <circle cx="64" cy="64" r="57" stroke="#fff4d6" stroke-width=".55" opacity=".16" stroke-dasharray="3 4"/>
+
+
+  <!-- brass inlay plate so castle fills tile like resource jewel -->
+  <path d="M64 8 L106 22 L120 64 L106 106 L64 120 L22 106 L8 64 L22 22 Z"
+        fill="#140e08" stroke="url(#goldRim)" stroke-width="3.5" stroke-linejoin="round" opacity=".92"/>
+  <path d="M64 14 L100 26 L112 64 L100 102 L64 114 L28 102 L16 64 L28 26 Z"
+        fill="#1c1814" stroke="#d87868" stroke-width="1.1" opacity=".55"/>
+
+  <g filter="url(#castSoft)">
+    <!-- ground / bailey base -->
+    <path d="M14 108 H114 V114 H14 Z" fill="#1a1612" stroke="url(#goldRim)" stroke-width="1.4"/>
+    <path d="M16 106 H112" stroke="#d87868" stroke-width="1" opacity=".45"/>
+
+    <!-- left tower -->
+    <path d="M16 106 V42 H38 V106 Z" fill="url(#stoneTower)" stroke="url(#goldRim)" stroke-width="1.6" stroke-linejoin="round"/>
+    <!-- left battlements -->
+    <path d="M16 42 V30 H22 V36 H28 V30 H34 V36 H38 V42 Z" fill="url(#stoneTower)" stroke="url(#goldRim)" stroke-width="1.3" stroke-linejoin="round"/>
+    <!-- left tower roof cap -->
+    <path d="M14 30 L27 16 L40 30 Z" fill="url(#roof)" stroke="#3a2a14" stroke-width=".8"/>
+    <path d="M27 16 V12" stroke="url(#goldRim)" stroke-width="1.4" stroke-linecap="round"/>
+    <circle cx="27" cy="11" r="1.6" fill="#e8a898"/>
+
+    <!-- right tower -->
+    <path d="M90 106 V42 H112 V106 Z" fill="url(#stoneTower)" stroke="url(#goldRim)" stroke-width="1.6" stroke-linejoin="round"/>
+    <path d="M90 42 V30 H96 V36 H102 V30 H108 V36 H112 V42 Z" fill="url(#stoneTower)" stroke="url(#goldRim)" stroke-width="1.3" stroke-linejoin="round"/>
+    <path d="M88 30 L101 16 L114 30 Z" fill="url(#roof)" stroke="#3a2a14" stroke-width=".8"/>
+    <path d="M101 16 V12" stroke="url(#goldRim)" stroke-width="1.4" stroke-linecap="round"/>
+    <circle cx="101" cy="11" r="1.6" fill="#e8a898"/>
+
+    <!-- curtain wall between towers -->
+    <path d="M38 106 V58 H90 V106 Z" fill="url(#stoneWall)" stroke="url(#goldRim)" stroke-width="1.5" stroke-linejoin="round"/>
+    <!-- curtain battlements -->
+    <path d="M38 58 V50 H44 V54 H50 V50 H56 V54 H62 V50 H66 V54 H72 V50 H78 V54 H84 V50 H90 V58 Z"
+          fill="url(#stoneWall)" stroke="url(#goldRim)" stroke-width="1.2" stroke-linejoin="round"/>
+
+    <!-- central keep -->
+    <path d="M48 106 V36 H80 V106 Z" fill="url(#keepFace)" stroke="url(#goldRim)" stroke-width="1.8" stroke-linejoin="round"/>
+    <!-- keep battlements -->
+    <path d="M48 36 V26 H54 V32 H60 V26 H68 V32 H74 V26 H80 V36 Z"
+          fill="url(#keepFace)" stroke="url(#goldRim)" stroke-width="1.3" stroke-linejoin="round"/>
+    <!-- keep roof -->
+    <path d="M46 26 L64 10 L82 26 Z" fill="url(#roof)" stroke="#3a2a14" stroke-width="1"/>
+    <path d="M64 10 V5" stroke="url(#goldRim)" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="64" cy="4" r="2" fill="#ffe8e0" stroke="#882820" stroke-width=".5"/>
+
+    <!-- banner from keep -->
+    <path d="M64 22 L64 40" stroke="#3a2a14" stroke-width="1.2"/>
+    <path d="M64 24 L78 30 L64 38 Z" fill="url(#banner)" stroke="#3a2a14" stroke-width=".7"/>
+    <path d="M66 27 L74 30.5 L66 34.5 Z" fill="#ffe8e0" fill-opacity=".25"/>
+
+    <!-- masonry courses (horizontal) -->
+    <g stroke="#0c0907" stroke-opacity=".28" stroke-width=".7">
+      <path d="M17 52 H37 M39 68 H89 M91 52 H111"/>
+      <path d="M17 66 H37 M39 82 H89 M91 66 H111"/>
+      <path d="M17 80 H37 M49 50 H79 M91 80 H111"/>
+      <path d="M17 94 H37 M39 96 H89 M91 94 H111"/>
+      <path d="M49 64 H79 M49 78 H79 M49 92 H79"/>
+    </g>
+    <!-- vertical mortar breaks -->
+    <g stroke="#0c0907" stroke-opacity=".2" stroke-width=".55">
+      <path d="M27 42 V106 M101 42 V106"/>
+      <path d="M56 36 V106 M72 36 V106"/>
+      <path d="M45 58 V106 M83 58 V106"/>
+    </g>
+    <!-- stone highlight blocks -->
+    <rect x="20" y="54" width="10" height="6" fill="#8a8478" fill-opacity=".18"/>
+    <rect x="98" y="70" width="10" height="6" fill="#8a8478" fill-opacity=".15"/>
+    <rect x="52" y="54" width="12" height="5" fill="#7a7468" fill-opacity=".16"/>
+
+    <!-- tower windows -->
+    <rect x="22" y="48" width="8" height="10" rx="1" fill="#0a0806" stroke="#d87868" stroke-width=".7"/>
+    <path d="M26 48 V58" stroke="#3a342c" stroke-width=".6" opacity=".6"/>
+    <rect x="98" y="48" width="8" height="10" rx="1" fill="#0a0806" stroke="#d87868" stroke-width=".7"/>
+    <path d="M102 48 V58" stroke="#3a342c" stroke-width=".6" opacity=".6"/>
+    <rect x="22" y="72" width="8" height="10" rx="1" fill="#0a0806" stroke="#882820" stroke-width=".6"/>
+    <rect x="98" y="72" width="8" height="10" rx="1" fill="#0a0806" stroke="#882820" stroke-width=".6"/>
+
+    <!-- keep windows -->
+    <rect x="54" y="44" width="7" height="9" rx="1" fill="#0a0806" stroke="#f0c0b0" stroke-width=".65"/>
+    <rect x="67" y="44" width="7" height="9" rx="1" fill="#0a0806" stroke="#f0c0b0" stroke-width=".65"/>
+    <rect x="58" y="60" width="12" height="8" rx="1" fill="#0a0806" stroke="#d87868" stroke-width=".7"/>
+
+    <!-- gatehouse arch + portcullis -->
+    <path d="M52 106 V88 C52 78 76 78 76 88 V106" fill="url(#gateDark)" stroke="url(#goldRim)" stroke-width="1.6"/>
+    <path d="M54 106 V89 C54 81 74 81 74 89 V106" fill="none" stroke="#f0c0b0" stroke-width=".55" opacity=".35"/>
+    <!-- portcullis bars -->
+    <g stroke="#d87868" stroke-width=".85" opacity=".55">
+      <path d="M56 88 V106 M60 86 V106 M64 84 V106 M68 86 V106 M72 88 V106"/>
+      <path d="M54 92 H74 M54 98 H74"/>
+    </g>
+    <!-- brass lamp / eye over gate -->
+    <circle cx="64" cy="76" r="3.2" fill="#ffe8e0" stroke="#882820" stroke-width=".7"/>
+    <circle cx="64" cy="76" r="1.4" fill="#3a2a14"/>
+    <path d="M64 71 V73.2 M60.5 76 H58.5 M69.5 76 H67.5" stroke="#f0c0b0" stroke-width=".8" stroke-linecap="round" opacity=".7"/>
+
+    <!-- threshold step -->
+    <rect x="48" y="104" width="32" height="4" fill="#3a342c" stroke="url(#goldRim)" stroke-width=".8"/>
+  </g>
+</svg>

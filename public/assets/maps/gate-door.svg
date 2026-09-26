@@ -1,0 +1,175 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" aria-hidden="true">
+  <!-- Occult ledger wooden door — fills the tile face (neutral brass trim) -->
+  <defs>
+    <linearGradient id="stoneFace" x1="10" y1="8" x2="118" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4a4338"/>
+      <stop offset=".35" stop-color="#2e2a24"/>
+      <stop offset=".7" stop-color="#1c1814"/>
+      <stop offset="1" stop-color="#0e0c0a"/>
+    </linearGradient>
+    <linearGradient id="stoneHi" x1="20" y1="12" x2="60" y2="50" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7a7264" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#4a4338" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="trim" x1="16" y1="10" x2="112" y2="118" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff4d6"/>
+      <stop offset=".25" stop-color="#e7d7a4"/>
+      <stop offset=".55" stop-color="#c6a15b"/>
+      <stop offset=".85" stop-color="#8c6d32"/>
+      <stop offset="1" stop-color="#4a3418"/>
+    </linearGradient>
+    <linearGradient id="woodL" x1="28" y1="22" x2="28" y2="108" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8a5a2e"/>
+      <stop offset=".4" stop-color="#6b4322"/>
+      <stop offset=".75" stop-color="#4a2e16"/>
+      <stop offset="1" stop-color="#2a180c"/>
+    </linearGradient>
+    <linearGradient id="woodM" x1="50" y1="20" x2="50" y2="110" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#a06a38"/>
+      <stop offset=".35" stop-color="#7a4e28"/>
+      <stop offset=".7" stop-color="#55361a"/>
+      <stop offset="1" stop-color="#301c0e"/>
+    </linearGradient>
+    <linearGradient id="woodR" x1="78" y1="22" x2="78" y2="108" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7a5028"/>
+      <stop offset=".4" stop-color="#5c3a1c"/>
+      <stop offset=".8" stop-color="#3c2410"/>
+      <stop offset="1" stop-color="#1e1008"/>
+    </linearGradient>
+    <linearGradient id="iron" x1="24" y1="40" x2="104" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6a6258"/>
+      <stop offset=".4" stop-color="#3a342e"/>
+      <stop offset=".75" stop-color="#1a1612"/>
+      <stop offset="1" stop-color="#0a0806"/>
+    </linearGradient>
+    <linearGradient id="ironHi" x1="24" y1="38" x2="104" y2="42" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#c6a15b" stop-opacity=".7"/>
+      <stop offset=".5" stop-color="#e7d7a4" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#8c6d32" stop-opacity=".5"/>
+    </linearGradient>
+    <radialGradient id="recess" cx="64" cy="64" r="54" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0c0907" stop-opacity="0"/>
+      <stop offset=".7" stop-color="#0c0907" stop-opacity=".15"/>
+      <stop offset="1" stop-color="#0c0907" stop-opacity=".55"/>
+    </radialGradient>
+    <filter id="doorSoft" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#020100" flood-opacity=".7"/>
+    </filter>
+  </defs>
+
+  <!-- occult seal ring -->
+  <circle cx="64" cy="64" r="61" stroke="url(#trim)" stroke-width="2" opacity=".4"/>
+  <circle cx="64" cy="64" r="57" stroke="#fff4d6" stroke-width=".6" opacity=".18" stroke-dasharray="3 4"/>
+
+  <g filter="url(#doorSoft)">
+    <!-- stone doorway block -->
+    <path d="M18 14 H110 V114 H18 Z" fill="url(#stoneFace)" stroke="url(#trim)" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M22 18 H106 V110 H22 Z" fill="url(#stoneHi)" opacity=".45"/>
+    <!-- inner brass lip -->
+    <rect x="24" y="20" width="80" height="88" rx="2" fill="none" stroke="url(#trim)" stroke-width="2.4"/>
+    <rect x="27" y="23" width="74" height="82" rx="1.5" fill="#0a0806" fill-opacity=".55" stroke="#c6a15b" stroke-width="1" opacity=".85"/>
+
+    <!-- recessed door cavity -->
+    <rect x="30" y="26" width="68" height="76" rx="1" fill="#120e0a"/>
+
+    <!-- wood planks (3 vertical) -->
+    <rect x="31" y="27" width="21" height="74" fill="url(#woodL)"/>
+    <rect x="52" y="27" width="24" height="74" fill="url(#woodM)"/>
+    <rect x="76" y="27" width="21" height="74" fill="url(#woodR)"/>
+
+    <!-- plank seams -->
+    <path d="M52 27 V101 M76 27 V101" stroke="#1a1008" stroke-width="1.4" opacity=".85"/>
+    <path d="M52.7 27 V101 M76.7 27 V101" stroke="#a87840" stroke-width=".45" opacity=".25"/>
+
+    <!-- wood grain -->
+    <path d="M35 34 C38 42 36 52 39 62 C41 70 37 80 40 92"
+          stroke="#3a2410" stroke-width=".7" opacity=".45" fill="none"/>
+    <path d="M44 30 C46 44 43 58 47 74 C48 84 45 94 46 100"
+          stroke="#2a180c" stroke-width=".55" opacity=".4" fill="none"/>
+    <path d="M58 32 C62 48 57 64 61 82 C62 90 59 98 60 100"
+          stroke="#3a2410" stroke-width=".65" opacity=".4" fill="none"/>
+    <path d="M68 29 C70 46 67 66 71 86 C72 94 69 100 70 100"
+          stroke="#2a180c" stroke-width=".5" opacity=".35" fill="none"/>
+    <path d="M82 33 C85 48 81 66 84 84 C85 92 82 98 83 100"
+          stroke="#3a2410" stroke-width=".65" opacity=".4" fill="none"/>
+    <path d="M91 31 C93 50 90 70 92 90" stroke="#2a180c" stroke-width=".5" opacity=".35" fill="none"/>
+
+    <!-- top highlight on planks -->
+    <rect x="31" y="27" width="66" height="4" fill="#c89858" fill-opacity=".18"/>
+
+    <!-- iron/brass bands -->
+    <g>
+      <rect x="30" y="40" width="68" height="7" fill="url(#iron)" stroke="#0a0806" stroke-width=".6"/>
+      <rect x="30" y="40" width="68" height="2" fill="url(#ironHi)"/>
+      <circle cx="36" cy="43.5" r="1.3" fill="#1a1410" stroke="#c6a15b" stroke-width=".5"/>
+      <circle cx="92" cy="43.5" r="1.3" fill="#1a1410" stroke="#c6a15b" stroke-width=".5"/>
+      <circle cx="52" cy="43.5" r="1.1" fill="#1a1410" stroke="#8c6d32" stroke-width=".4"/>
+      <circle cx="76" cy="43.5" r="1.1" fill="#1a1410" stroke="#8c6d32" stroke-width=".4"/>
+    </g>
+    <g>
+      <rect x="30" y="62" width="68" height="7" fill="url(#iron)" stroke="#0a0806" stroke-width=".6"/>
+      <rect x="30" y="62" width="68" height="2" fill="url(#ironHi)"/>
+      <circle cx="36" cy="65.5" r="1.3" fill="#1a1410" stroke="#c6a15b" stroke-width=".5"/>
+      <circle cx="92" cy="65.5" r="1.3" fill="#1a1410" stroke="#c6a15b" stroke-width=".5"/>
+      <circle cx="52" cy="65.5" r="1.1" fill="#1a1410" stroke="#8c6d32" stroke-width=".4"/>
+      <circle cx="76" cy="65.5" r="1.1" fill="#1a1410" stroke="#8c6d32" stroke-width=".4"/>
+    </g>
+    <g>
+      <rect x="30" y="84" width="68" height="7" fill="url(#iron)" stroke="#0a0806" stroke-width=".6"/>
+      <rect x="30" y="84" width="68" height="2" fill="url(#ironHi)"/>
+      <circle cx="36" cy="87.5" r="1.3" fill="#1a1410" stroke="#c6a15b" stroke-width=".5"/>
+      <circle cx="92" cy="87.5" r="1.3" fill="#1a1410" stroke="#c6a15b" stroke-width=".5"/>
+      <circle cx="52" cy="87.5" r="1.1" fill="#1a1410" stroke="#8c6d32" stroke-width=".4"/>
+      <circle cx="76" cy="87.5" r="1.1" fill="#1a1410" stroke="#8c6d32" stroke-width=".4"/>
+    </g>
+
+    <!-- hinges (left) -->
+    <g>
+      <rect x="28" y="38" width="8" height="11" rx="1" fill="#2a241e" stroke="url(#trim)" stroke-width="1"/>
+      <rect x="29.5" y="40" width="5" height="2" fill="#c6a15b" opacity=".55"/>
+      <rect x="29.5" y="45" width="5" height="2" fill="#8c6d32" opacity=".55"/>
+      <circle cx="32" cy="43.5" r="1.4" fill="#0a0806" stroke="#e7d7a4" stroke-width=".55"/>
+    </g>
+    <g>
+      <rect x="28" y="60" width="8" height="11" rx="1" fill="#2a241e" stroke="url(#trim)" stroke-width="1"/>
+      <rect x="29.5" y="62" width="5" height="2" fill="#c6a15b" opacity=".55"/>
+      <rect x="29.5" y="67" width="5" height="2" fill="#8c6d32" opacity=".55"/>
+      <circle cx="32" cy="65.5" r="1.4" fill="#0a0806" stroke="#e7d7a4" stroke-width=".55"/>
+    </g>
+    <g>
+      <rect x="28" y="82" width="8" height="11" rx="1" fill="#2a241e" stroke="url(#trim)" stroke-width="1"/>
+      <rect x="29.5" y="84" width="5" height="2" fill="#c6a15b" opacity=".55"/>
+      <rect x="29.5" y="89" width="5" height="2" fill="#8c6d32" opacity=".55"/>
+      <circle cx="32" cy="87.5" r="1.4" fill="#0a0806" stroke="#e7d7a4" stroke-width=".55"/>
+    </g>
+
+    <!-- knocker / handle (right) -->
+    <g>
+      <circle cx="86" cy="66" r="8.5" fill="#1a1410" stroke="url(#trim)" stroke-width="1.8"/>
+      <circle cx="86" cy="66" r="5.5" fill="none" stroke="#e7d7a4" stroke-width="1.2" opacity=".55"/>
+      <circle cx="86" cy="66" r="2.2" fill="#c6a15b" stroke="#3a2a14" stroke-width=".6"/>
+      <!-- ring -->
+      <path d="M86 72.5 C92 72.5 94 78 90 82 C88 84 84 84 82 82 C78 78 80 72.5 86 72.5 Z"
+            fill="none" stroke="url(#trim)" stroke-width="2.2" stroke-linejoin="round"/>
+      <path d="M86 74.2 C90.5 74.2 91.5 78.5 88.5 81.2 C87.2 82.4 84.8 82.4 83.5 81.2 C80.5 78.5 81.5 74.2 86 74.2 Z"
+            fill="none" stroke="#fff4d6" stroke-width=".7" opacity=".4"/>
+    </g>
+
+    <!-- keyhole plate below knocker -->
+    <rect x="82" y="52" width="8" height="10" rx="1.5" fill="#2a241e" stroke="url(#trim)" stroke-width="1"/>
+    <circle cx="86" cy="55.5" r="1.6" fill="#0a0806"/>
+    <path d="M86 57 V59.5" stroke="#0a0806" stroke-width="1.6" stroke-linecap="round"/>
+
+    <!-- threshold stone -->
+    <rect x="26" y="102" width="76" height="6" rx="1" fill="#3a342c" stroke="url(#trim)" stroke-width="1.2"/>
+    <rect x="28" y="103" width="72" height="2" fill="#6a6258" opacity=".35"/>
+
+    <!-- corner filigree (ledger ticks) -->
+    <path d="M20 16 L24 22 L20 20 L16 22 Z" fill="#f0d78a" opacity=".55"/>
+    <path d="M108 16 L112 22 L108 20 L104 22 Z" fill="#f0d78a" opacity=".45"/>
+    <path d="M20 112 L16 106 L20 108 L24 106 Z" fill="#8c6d32" opacity=".55"/>
+    <path d="M108 112 L104 106 L108 108 L112 106 Z" fill="#8c6d32" opacity=".45"/>
+  </g>
+
+  <circle cx="64" cy="64" r="60" fill="url(#recess)"/>
+</svg>

@@ -657,10 +657,10 @@ input[type='search'] {
   outline-offset: 3px;
 }
 .tile-stronghold {
-  background: radial-gradient(circle at 50% 42%, #e8c4706b, #140e082e 68%);
+  background: radial-gradient(circle at 50% 42%, #e8c47038, #140e0818 68%);
 }
 .tile-gate {
-  background: radial-gradient(circle at 50% 42%, #48968466, #0c100e29 70%);
+  background: radial-gradient(circle at 50% 42%, #48968433, #0c100e18 70%);
 }
 .tile-resource {
   background: radial-gradient(circle at 50% 45%, #1ecf6a38, #0a181214 72%);
@@ -738,7 +738,7 @@ input[type='search'] {
   box-shadow: 0 1px 2px #0008;
 }
 
-/* Gate + stronghold marks (SVG masks) */
+/* Gate + stronghold — full-tile door / castle (match resource-jewel fill) */
 .tile-mark {
   position: absolute;
   inset: 18%;
@@ -757,11 +757,42 @@ input[type='search'] {
   z-index: 2;
   filter: drop-shadow(0 1px 2px #0006);
 }
+.gate-mark,
+.stronghold-mark {
+  inset: 4%;
+  display: block;
+  background: none;
+  filter: drop-shadow(0 2px 4px #000a);
+}
 .gate-mark {
-  background-image: url(/assets/maps/gate-mark.svg);
+  background: url(/assets/maps/gate-door.svg) center / contain no-repeat;
+}
+.gate-mark.gate-blue {
+  background: url(/assets/maps/gate-door-azure.svg) center / contain no-repeat;
+}
+.gate-mark.gate-red {
+  background: url(/assets/maps/gate-door-crimson.svg) center / contain no-repeat;
+}
+.gate-mark.gate-neutral {
+  background: url(/assets/maps/gate-door.svg) center / contain no-repeat;
 }
 .stronghold-mark {
-  background-image: url(/assets/maps/stronghold-mark.svg);
+  background: url(/assets/maps/stronghold-castle.svg) center / contain no-repeat;
+}
+.stronghold-mark.stronghold-blue {
+  background: url(/assets/maps/stronghold-castle-azure.svg) center / contain no-repeat;
+}
+.stronghold-mark.stronghold-red {
+  background: url(/assets/maps/stronghold-castle-crimson.svg) center / contain no-repeat;
+}
+.stronghold-mark.stronghold-neutral {
+  background: url(/assets/maps/stronghold-castle.svg) center / contain no-repeat;
+}
+.gate-mark.mark-under,
+.stronghold-mark.mark-under {
+  inset: 8%;
+  opacity: 0.36;
+  filter: drop-shadow(0 1px 2px #0006) saturate(0.9) brightness(0.88);
 }
 
 /* Resource jewels — lush emerald in gold inlay, fills the tile */
@@ -800,27 +831,23 @@ input[type='search'] {
   background: #0c0907b8;
   border-color: #7dffb066;
 }
+/* Faction color is baked into door/castle SVG trim — no hue-rotate on wood/stone */
 .gate-blue,
-.stronghold-blue {
-  filter: drop-shadow(0 2px 3px #0009) sepia(0.25) hue-rotate(170deg) saturate(1.35);
-}
 .gate-red,
-.stronghold-red {
-  filter: drop-shadow(0 2px 3px #0009) sepia(0.35) hue-rotate(-25deg) saturate(1.4);
-}
 .gate-neutral,
+.stronghold-blue,
+.stronghold-red,
 .stronghold-neutral {
-  filter: drop-shadow(0 2px 3px #0009);
+  filter: drop-shadow(0 2px 4px #000a);
 }
 .gate-blue.mark-under,
-.stronghold-blue.mark-under {
-  filter: drop-shadow(0 1px 2px #0006) sepia(0.25) hue-rotate(170deg) saturate(1.2);
-  opacity: 0.32;
-}
 .gate-red.mark-under,
-.stronghold-red.mark-under {
-  filter: drop-shadow(0 1px 2px #0006) sepia(0.35) hue-rotate(-25deg) saturate(1.25);
-  opacity: 0.32;
+.gate-neutral.mark-under,
+.stronghold-blue.mark-under,
+.stronghold-red.mark-under,
+.stronghold-neutral.mark-under {
+  filter: drop-shadow(0 1px 2px #0006) saturate(0.9) brightness(0.88);
+  opacity: 0.36;
 }
 
 /* Unit coins — Loyalty left · Power right */
@@ -967,10 +994,10 @@ input[type='search'] {
   flex: none;
 }
 .legend-gate {
-  background-image: url(/assets/maps/gate-mark.svg);
+  background-image: url(/assets/maps/gate-door.svg);
 }
 .legend-stronghold {
-  background-image: url(/assets/maps/stronghold-mark.svg);
+  background-image: url(/assets/maps/stronghold-castle.svg);
 }
 .legend-resource {
   background-image: url(/assets/maps/resource-jewel.svg);
