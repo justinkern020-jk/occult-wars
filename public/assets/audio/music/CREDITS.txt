@@ -1,3 +1,12 @@
-battlefield-mystical.mp3 — Occult Wars match bed
-  Melancholy piano BGM (CC0) https://opengameart.org/content/melancholy-piano-bgm
-  Clean piano only (soft reverb). No underlays that fight the key.
+battlefield-souls.mp3 — Occult Wars match bed (active)
+  Original synthesis (numpy + ffmpeg), 2026-09-26 — released as CC0 / public domain.
+  Soulsborne cathedral dread: sparse D-minor choir-formant pads, deep string drone,
+  distant low bells (~10s), long overlapping decays, loop crossfade ~78s @ 160kbps.
+  No FromSoftware / Bandai Namco audio was used or ripped.
+  Preference note: Justin wants Soulsborne battlefield dread under combat
+  (quiet bed, HTMLAudio gain ~0.32), not cheerful piano.
+
+Retired: battlefield-mystical.mp3 (melancholy piano CC0 from OpenGameArt) removed;
+  startMatchTheme now loads battlefield-souls.mp3 only.
+
+Menu bed remains Moonlight Sonata: /assets/audio/moonlight.mp3

@@ -1,4 +1,4 @@
-/** Brass clicks, clash/gunshot SFX, stingers; moonlight menu + match music beds. */
+/** Brass clicks, clash/gunshot SFX, stingers; moonlight menu + Soulsborne match bed. */
 
 export type MusicBed = 'none' | 'menu' | 'match';
 
@@ -131,7 +131,7 @@ export function windChimeSfx(): Promise<void> {
   unlockAudio();
   return new Promise((resolve) => {
     const a = new Audio('/assets/audio/sfx/wind-chime.mp3');
-    a.volume = 0.38;
+    a.volume = 0.26;
     const done = () => resolve();
     a.addEventListener('ended', done, { once: true });
     a.addEventListener('error', done, { once: true });
@@ -292,15 +292,15 @@ function loopPhrase(
 }
 
 /**
- * Match theme: quiet mystical piano bed (+ soft pad). No theremin / siren lead.
- * Modest volume so combat SFX stay clear.
+ * Match theme: Soulsborne cathedral dread bed. Quiet under combat.
+ * Wind chime intro (quieter) then fade into battlefield-souls.mp3.
  */
 function startMatchTheme(): { stop: () => void } {
   unlockAudio();
   let fallbackStop: (() => void) | null = null;
   let themeTimer = 0;
   let stopped = false;
-  const a = new Audio('/assets/audio/music/battlefield-mystical.mp3');
+  const a = new Audio('/assets/audio/music/battlefield-souls.mp3');
   a.loop = true;
   a.volume = 0;
   const startTheme = () => {
@@ -309,8 +309,8 @@ function startMatchTheme(): { stop: () => void } {
       if (!stopped) fallbackStop = startMatchThemeFallback().stop;
     });
     // Gentle fade-in after chimes
-    const fadeMs = 1600;
-    const target = 0.34;
+    const fadeMs = 1800;
+    const target = 0.32;
     const t0 = performance.now();
     const tick = () => {
       if (stopped) return;
@@ -339,20 +339,21 @@ function startMatchTheme(): { stop: () => void } {
   };
 }
 
-/** Soft piano-like WebAudio fallback if the mp3 fails. */
+/** Dark drone WebAudio fallback if the souls mp3 fails. */
 function startMatchThemeFallback(): { stop: () => void } {
   const c = getAC();
   if (!c) return { stop: () => {} };
-  const step = 2.8;
-  const melody = [60, 63, 67, 65, 63, 60, 58, 55];
-  const g = 0.016;
+  const step = 3.6;
+  // Sparse D-minor lament: A Bb A F D
+  const melody = [57, 58, 57, 53, 50, 53, 57, 50];
+  const g = 0.012;
   return loopPhrase((t0) => {
-    noteAt(c, t0, midiHz(36), step * 8 * 0.98, g);
-    noteAt(c, t0, midiHz(43), step * 8 * 0.98, g * 0.7);
-    noteAt(c, t0, midiHz(48), step * 4 * 0.98, g * 0.5);
-    noteAt(c, t0 + step * 4, midiHz(46), step * 4 * 0.98, g * 0.5);
+    noteAt(c, t0, midiHz(26), step * 8 * 0.98, g * 1.1); // D1 drone
+    noteAt(c, t0, midiHz(33), step * 8 * 0.98, g * 0.6); // A1
+    noteAt(c, t0, midiHz(38), step * 4 * 0.98, g * 0.35); // D2
+    noteAt(c, t0 + step * 4, midiHz(36), step * 4 * 0.98, g * 0.3); // C2
     melody.forEach((m, i) => {
-      noteAt(c, t0 + i * step, midiHz(m), step * 1.1, g * 0.75);
+      noteAt(c, t0 + i * step, midiHz(m), step * 1.4, g * 0.45);
     });
     return step * 8;
   });
