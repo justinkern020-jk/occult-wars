@@ -293,6 +293,10 @@ export function Battlefield({
     key: number;
   }>(null);
   const boardGridRef = useRef<HTMLDivElement | null>(null);
+  const [claimFlash, setClaimFlash] = useState<string | null>(null);
+  const [domToast, setDomToast] = useState<string | null>(null);
+  const claimFlashTimer = useRef<number | null>(null);
+  const domToastTimer = useRef<number | null>(null);
   const slideTimerRef = useRef<number | null>(null);
   const [inspectCard, setInspectCard] = useState<Card | null>(null);
   const [inspectPower, setInspectPower] = useState<number | undefined>(undefined);
@@ -843,6 +847,15 @@ export function Battlefield({
     [],
   );
 
+  const flashClaim = useCallback((r: number, c: number, label: string) => {
+    if (claimFlashTimer.current != null) window.clearTimeout(claimFlashTimer.current);
+    setClaimFlash(`${r},${c}|${label}`);
+    claimFlashTimer.current = window.setTimeout(() => {
+      claimFlashTimer.current = null;
+      setClaimFlash(null);
+    }, 850);
+  }, []);
+
   const kickCoinSlide = useCallback(
     (unit: BoardUnit, fromR: number, fromC: number, toR: number, toC: number) => {
       if (slideTimerRef.current != null) {
@@ -920,9 +933,9 @@ export function Battlefield({
       } else if (isPaintable(tile)) {
         setControl((C) => paintTile(C, gameMap.tiles, r, c, atk.unit.side));
         if (prevOwner !== atk.unit.side) {
-          pushLog(
-            `${atk.unit.name} claims the ${tileLabel(tile) || 'circle'}.`,
-          );
+          const label = tileLabel(tile) || 'circle';
+          pushLog(`${atk.unit.name} conquers the ${label}.`);
+          flashClaim(r, c, 'Conquered');
         } else {
           pushLog(`${atk.unit.name} advances.`);
         }
@@ -933,7 +946,7 @@ export function Battlefield({
       setSelectedUnit(null);
       return 'ok';
     },
-    [findUnit, gameMap, board, control, pushLog, finishMatch, kickCoinSlide],
+    [findUnit, gameMap, board, control, pushLog, finishMatch, kickCoinSlide, flashClaim],
   );
 
   const strike = useCallback(
@@ -1052,8 +1065,16 @@ export function Battlefield({
     const scored = domination[acting] + holdings;
     setDomination((D) => ({ ...D, [acting]: scored }));
     pushLog(
-      `${sideLabel(acting)} holds ${holdings} circles. Domination ${scored}.`,
+      `${sideLabel(acting)} holds ${holdings} circles (+${holdings} Domination → ${scored}/${DOMINATION_WIN}).`,
     );
+    if (domToastTimer.current != null) window.clearTimeout(domToastTimer.current);
+    setDomToast(
+      `${sideLabel(acting)} · +${holdings} Domination · ${scored}/${DOMINATION_WIN}`,
+    );
+    domToastTimer.current = window.setTimeout(() => {
+      domToastTimer.current = null;
+      setDomToast(null);
+    }, 2400);
 
     if (scored >= DOMINATION_WIN) {
       finishMatch(
@@ -1471,10 +1492,13 @@ export function Battlefield({
         <div className="bf-score">
           <span className="bf-side is-blue">
             Azure · {blueFaction.split(' ').slice(-1)[0]}
-            <strong>
-              {domination.blue}/{DOMINATION_WIN}
+            <strong title="Domination score">
+              Dom {domination.blue}/{DOMINATION_WIN}
             </strong>
             <em>L{loyalty.blue}</em>
+            <span className="bf-hold">
+              Holding <b>{countHoldings(gameMap.tiles, control, 'blue')}</b> circles
+            </span>
           </span>
           <span className="bf-turn">
             Rite {turn} · {sideLabel(side)}
@@ -1482,10 +1506,13 @@ export function Battlefield({
           </span>
           <span className="bf-side is-red">
             Crimson · {redFaction.split(' ').slice(-1)[0]}
-            <strong>
-              {domination.red}/{DOMINATION_WIN}
+            <strong title="Domination score">
+              Dom {domination.red}/{DOMINATION_WIN}
             </strong>
             <em>L{loyalty.red}</em>
+            <span className="bf-hold">
+              Holding <b>{countHoldings(gameMap.tiles, control, 'red')}</b> circles
+            </span>
           </span>
         </div>
         <div className="bf-actions">
@@ -1578,7 +1605,12 @@ export function Battlefield({
       ) : null}
       </div>
 
-      <div className="bf-stage">
+      {domToast && (
+        <div className="dom-toast" role="status" data-testid="dom-toast">
+          <strong>{domToast}</strong>
+        </div>
+      )}
+      <div className="bf-stage" style={{ position: 'relative' }}>
         <div
           className="board-wrap"
           style={{
@@ -1593,6 +1625,11 @@ export function Battlefield({
                 }
                 const here = board[r][c];
                 const owned = control[r][c];
+                const claimKey = claimFlash?.split('|')[0];
+                const claimLabel = claimFlash?.includes('|')
+                  ? claimFlash.split('|')[1]
+                  : null;
+                const justClaimed = claimKey === `${r},${c}`;
                 const key = `${r},${c}`;
                 const deployOk = legalDeploy.has(key);
                 const moveOk = legalMove.empty.has(key);
@@ -1610,13 +1647,15 @@ export function Battlefield({
                       tile.kind === 'resource' && tile.symbols === 2
                         ? 'tile-resource-2'
                         : ''
-                    } ${owned ? `owned-${owned}` : ''} ${
+                    } ${owned ? `owned-${owned} held-${owned}` : ''} ${
                       deployOk ? 'legal-tile' : ''
                     } ${moveOk ? 'legal-move' : ''} ${
                       strikeOk ? 'legal-strike' : ''
                     } ${isOrigin ? 'stone-origin' : ''} ${
                       dragHand != null && deployOk ? 'drag-target' : ''
-                    } ${unit ? 'has-unit' : ''}`.trim()}
+                    } ${unit ? 'has-unit' : ''} ${
+                      justClaimed ? 'just-claimed' : ''
+                    }`.trim()}
                     data-tile-r={r}
                     data-tile-c={c}
                     onClick={(e) => {
@@ -1643,6 +1682,11 @@ export function Battlefield({
                       />
                     )}
                     <span className="cell-label">{tileLabel(tile)}</span>
+                    {justClaimed && claimLabel && (
+                      <span className="claim-float" aria-hidden>
+                        {claimLabel}
+                      </span>
+                    )}
                     {moveOk && moveDir && (
                       <svg
                         className={`move-way move-${moveDir}`}
@@ -1736,6 +1780,10 @@ export function Battlefield({
       </div>
 
       <ul className="board-key">
+        <li>
+          <i className="legend-mark legend-gate" aria-hidden /> Step a circle to
+          conquer it · held circles score Domination each rite
+        </li>
         <li>
           <i className="legend-mark legend-stronghold" aria-hidden /> Stronghold
           · banks 2 · always deploys

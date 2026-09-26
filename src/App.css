@@ -1057,6 +1057,9 @@ input[type='search'] {
 .tile-street {
   background: radial-gradient(circle, #f3ead70f, #08060447 72%);
 }
+/* Ownership paint — Battlefield uses owned-*; held-* kept as alias. */
+.owned-blue:before,
+.owned-red:before,
 .held-blue:before,
 .held-red:before {
   content: '';
@@ -1064,13 +1067,105 @@ input[type='search'] {
   border-radius: inherit;
   pointer-events: none;
   position: absolute;
-  inset: 7%;
+  inset: 6%;
 }
+.owned-blue:before,
 .held-blue:before {
-  box-shadow: inset 0 0 0 3px #8eb6eaf2, inset 0 0 18px #2460ba59;
+  box-shadow:
+    inset 0 0 0 3px #8eb6eaf2,
+    inset 0 0 22px #2460ba66;
+  background: radial-gradient(circle at 50% 45%, #4a7ec833, transparent 70%);
 }
+.owned-red:before,
 .held-red:before {
-  box-shadow: inset 0 0 0 3px #e07070f2, inset 0 0 18px #961c1c61;
+  box-shadow:
+    inset 0 0 0 3px #e07070f2,
+    inset 0 0 22px #961c1c66;
+  background: radial-gradient(circle at 50% 45%, #c0404033, transparent 70%);
+}
+.stone.just-claimed {
+  animation: claim-flash 0.7s ease-out;
+}
+@keyframes claim-flash {
+  0% {
+    filter: brightness(1.55) saturate(1.35);
+    box-shadow:
+      0 0 0 1px #1a120c,
+      0 0 0 3px #fff6d8,
+      0 0 0 5px #2a1e12,
+      0 0 0 6px #e7d7a4,
+      0 0 28px #f3e2b8cc,
+      0 8px 14px #0006;
+  }
+  100% {
+    filter: none;
+  }
+}
+.claim-float {
+  position: absolute;
+  left: 50%;
+  top: 18%;
+  z-index: 9;
+  transform: translateX(-50%);
+  pointer-events: none;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fff6d8;
+  text-shadow: 0 1px 2px #000c, 0 0 10px #c6a15baa;
+  animation: claim-float-up 0.85s ease-out forwards;
+  white-space: nowrap;
+}
+@keyframes claim-float-up {
+  0% { opacity: 0; transform: translateX(-50%) translateY(6px); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-18px); }
+}
+.dom-toast {
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  z-index: 20;
+  transform: translateX(-50%);
+  pointer-events: none;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: 1px solid #c6a15b;
+  background: linear-gradient(180deg, #3a2a12f2, #1a140cf2);
+  color: #f3e2b8;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  box-shadow: 0 10px 28px #000a, inset 0 1px #ffecc844;
+  animation: dom-toast-in 2.4s ease forwards;
+  text-align: center;
+}
+.dom-toast strong {
+  color: #fff6d8;
+}
+@keyframes dom-toast-in {
+  0% { opacity: 0; transform: translateX(-50%) translateY(-8px) scale(0.96); }
+  12% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-6px); }
+}
+.bf-side strong {
+  display: inline-block;
+}
+.bf-hold {
+  display: block;
+  font-style: normal;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #b9a98a;
+  margin-top: 0.15rem;
+  opacity: 0.92;
+}
+.bf-hold b {
+  color: #f3e2b8;
+  font-weight: 600;
 }
 .legal-tile {
   box-shadow:
@@ -2386,6 +2481,9 @@ input[type='search'] {
   display: flex;
   gap: 0.5rem;
   margin: 0.75rem 0 1rem;
+}
+.battlefield {
+  position: relative;
 }
 .bf-hud {
   display: flex;
