@@ -210,6 +210,17 @@ export function Battlefield({
   const sightingFiredRef = useRef(false);
   const eraRef = useRef<Era>('first');
   const [aiBusy, setAiBusy] = useState(false);
+  /** Live match state for the AI turn loop (avoids stale-closure flash loops). */
+  const liveRef = useRef({
+    board,
+    hand,
+    loyalty,
+    control,
+    gameMap,
+  });
+  liveRef.current = { board, hand, loyalty, control, gameMap };
+  const aiTimersRef = useRef<number[]>([]);
+  const revealTimerRef = useRef<number | null>(null);
   const [aim, setAim] = useState<AimMode>(null);
   const [leaderUsed, setLeaderUsed] = useState({ blue: false, red: false });
   const [passPrompt, setPassPrompt] = useState(false);
@@ -1087,15 +1098,51 @@ export function Battlefield({
     if (aiBusy) return;
 
     let cancelled = false;
+    let steps = 0;
     setAiBusy(true);
+
+    const clearAiTimers = () => {
+      for (const id of aiTimersRef.current) window.clearTimeout(id);
+      aiTimersRef.current = [];
+    };
+
+    const later = (fn: () => void, ms: number) => {
+      const id = window.setTimeout(() => {
+        aiTimersRef.current = aiTimersRef.current.filter((x) => x !== id);
+        if (cancelled) return;
+        fn();
+      }, ms);
+      aiTimersRef.current.push(id);
+    };
+
+    const showAiReveal = (card: Card) => {
+      if (revealTimerRef.current != null) {
+        window.clearTimeout(revealTimerRef.current);
+        revealTimerRef.current = null;
+      }
+      setRevealCard(card);
+      revealTimerRef.current = window.setTimeout(() => {
+        revealTimerRef.current = null;
+        setRevealCard(null);
+      }, 1100);
+    };
 
     const run = () => {
       if (cancelled) return;
+      steps += 1;
+      if (steps > 14) {
+        setAiBusy(false);
+        setRevealCard(null);
+        endRite();
+        return;
+      }
+
+      const live = liveRef.current;
       const snap: AiSnapshot = {
         side: AI_SIDE,
-        tiles: gameMap.tiles,
-        control,
-        board: board.map((row, r) =>
+        tiles: live.gameMap.tiles,
+        control: live.control,
+        board: live.board.map((row, r) =>
           row.map((u, c) =>
             u
               ? {
@@ -1111,34 +1158,37 @@ export function Battlefield({
               : null,
           ),
         ),
-        hand: hand.red,
-        loyalty: loyalty.red,
+        hand: live.hand.red,
+        loyalty: live.loyalty.red,
       };
       const action = pickTrainingAction(snap);
 
-      // Prefer casting a cheap non-aim rite occasionally
-      const castIdx = hand.red.findIndex(
+      const castIdx = live.hand.red.findIndex(
         (c, i) =>
           (c.kind === 'rite' || c.kind === 'device') &&
           c.effect &&
           !effectNeedsAim(c.effect, c.aim) &&
-          c.cost <= loyalty.red &&
-          i === hand.red.findIndex((x) => x.id === c.id),
+          c.cost <= live.loyalty.red &&
+          i === live.hand.red.findIndex((x) => x.id === c.id),
       );
-      if (castIdx >= 0 && Math.random() < 0.35) {
-        castCard(AI_SIDE, castIdx);
-        setTimeout(run, 420);
+      if (castIdx >= 0 && Math.random() < 0.28) {
+        const ok = castCard(AI_SIDE, castIdx);
+        later(run, ok ? 420 : 80);
         return;
       }
 
       if (action.type === 'deploy') {
-        const card = hand.red[action.index];
+        const card = live.hand.red[action.index];
         if (card?.kind === 'unit') {
-          setRevealCard(card);
-          setTimeout(() => setRevealCard(null), 900);
-          deployTo(action.r, action.c, action.index, AI_SIDE);
+          const ok = deployTo(action.r, action.c, action.index, AI_SIDE);
+          if (ok) {
+            showAiReveal(card);
+            later(run, 520);
+            return;
+          }
         }
-        setTimeout(run, 480);
+        // Deploy failed (stale or illegal) — do not reflash; try again next tick once.
+        later(run, 120);
         return;
       }
       if (action.type === 'move') {
@@ -1147,24 +1197,37 @@ export function Battlefield({
           setAiBusy(false);
           return;
         }
-        setTimeout(run, 420);
+        if (res === 'fail') {
+          later(run, 120);
+          return;
+        }
+        later(run, 420);
         return;
       }
       if (action.type === 'attack') {
         const def = findUnit(action.targetUid);
-        if (def) strike(action.uid, def.r, def.c);
-        setTimeout(run, 500);
+        if (def) {
+          const ok = strike(action.uid, def.r, def.c);
+          later(run, ok ? 500 : 120);
+          return;
+        }
+        later(run, 120);
         return;
       }
       // end
       setAiBusy(false);
+      setRevealCard(null);
       endRite();
     };
 
-    const t = setTimeout(run, 550);
+    later(run, 550);
     return () => {
       cancelled = true;
-      clearTimeout(t);
+      clearAiTimers();
+      if (revealTimerRef.current != null) {
+        window.clearTimeout(revealTimerRef.current);
+        revealTimerRef.current = null;
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [side, phase, matchOver, hotseat]);
@@ -1679,7 +1742,13 @@ export function Battlefield({
       {revealCard && (
         <TarotPop
           card={revealCard}
-          onClose={() => setRevealCard(null)}
+          onClose={() => {
+            if (revealTimerRef.current != null) {
+              window.clearTimeout(revealTimerRef.current);
+              revealTimerRef.current = null;
+            }
+            setRevealCard(null);
+          }}
           caption="Crimson plays"
         />
       )}
