@@ -2235,12 +2235,20 @@ export function Battlefield({
         </div>
       )}
       <div className="bf-stage" style={{ position: 'relative' }}>
-        <div
-          className="board-wrap"
-          style={{
-            backgroundImage: `url(/assets/maps/${gameMap.id}.jpg)`,
-          }}
-        >
+        <div className="bf-board-socket">
+          <img
+            className="bf-board-socket-frame"
+            src="/assets/images/bf_board_frame.png"
+            alt=""
+            aria-hidden
+            draggable={false}
+          />
+          <div
+            className="board-wrap"
+            style={{
+              backgroundImage: `url(/assets/maps/${gameMap.id}.jpg)`,
+            }}
+          >
           <div className="board-grid" role="grid" ref={boardGridRef}>
             {gameMap.tiles.map((row, r) =>
               row.map((tile, c) => {
@@ -2412,6 +2420,7 @@ export function Battlefield({
               <CoinSlideLayer slide={coinSlide} gridRef={boardGridRef} />
             )}
           </div>
+          </div>
         </div>
       </div>
 
@@ -2492,23 +2501,32 @@ export function Battlefield({
         </div>
       </div>
 
-      <div className="bf-occultist-bar" data-testid="battle-occultist">
-        <label>
-          Occultist
-          <input
-            className="ledger-input bf-occultist-input"
-            value={codeDraft}
-            maxLength={32}
-            aria-label="Occultist code"
-            placeholder="Speak a name…"
-            onChange={(e) => onBattleCodeChange(e.target.value)}
-          />
-        </label>
-        {codeToast && (
-          <p className="bf-code-toast" role="status" data-testid="battle-code-toast">
-            {codeToast}
-          </p>
-        )}
+      <div className="bf-occultist-socket" data-testid="battle-occultist">
+        <img
+          className="bf-occultist-socket-frame"
+          src="/assets/images/occultist_socket.png"
+          alt=""
+          aria-hidden
+          draggable={false}
+        />
+        <div className="bf-occultist-bar">
+          <label>
+            Occultist
+            <input
+              className="ledger-input bf-occultist-input"
+              value={codeDraft}
+              maxLength={32}
+              aria-label="Occultist code"
+              placeholder="Speak a name…"
+              onChange={(e) => onBattleCodeChange(e.target.value)}
+            />
+          </label>
+          {codeToast && (
+            <p className="bf-code-toast" role="status" data-testid="battle-code-toast">
+              {codeToast}
+            </p>
+          )}
+        </div>
       </div>
 
       <aside className="bf-log" aria-live="polite">
