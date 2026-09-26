@@ -1,6 +1,5 @@
 import { useRef, type PointerEvent as ReactPointerEvent } from 'react';
 import type { Card } from '../game/types';
-import { CardArt } from './CardArt';
 
 /** Compact hand strip card — Resources left, Power right (Cabals). */
 export function HandCard({
@@ -93,10 +92,16 @@ export function HandCard({
       }}
       title={`${card.name} · Resources ${card.cost}${card.power != null ? ` · Power ${card.power}` : ''} · ${card.kind}${canDrag ? ' · drag to muster' : ''} · double-tap to inspect`}
     >
+      <img
+        className="hand-card-back"
+        src="/assets/images/card_back.jpg"
+        alt=""
+        draggable={false}
+        aria-hidden
+      />
       <span className="hand-card-pip hand-card-loyalty" title="Resources">
         {card.cost}
       </span>
-      <CardArt name={card.name} />
       <span className="hand-card-name">{card.name}</span>
       <span className="hand-card-kind">{card.kind}</span>
       {card.kind === 'unit' && card.power != null && (
