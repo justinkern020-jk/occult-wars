@@ -39,6 +39,7 @@ export function UnitCoin({
   selected,
   foe,
   sliding,
+  canStep,
   onClick,
   onInspect,
 }: {
@@ -47,6 +48,8 @@ export function UnitCoin({
   foe?: boolean;
   /** Hidden while the glide ghost is traveling onto this tile. */
   sliding?: boolean;
+  /** Soft pulse: this unit can still move this rite (before you tap it). */
+  canStep?: boolean;
   onClick?: () => void;
   onInspect?: () => void;
 }) {
@@ -65,7 +68,7 @@ export function UnitCoin({
     <div
       role="button"
       tabIndex={0}
-      className={`stone-coin is-${unit.side} ${foe ? 'coin-foe' : 'coin-mine'} ${selected ? 'stone-picked' : ''} ${unit.sick ? 'is-sick' : ''} ${veiled ? 'is-veiled' : ''} ${sliding ? 'coin-slide-hide' : ''}`}
+      className={`stone-coin is-${unit.side} ${foe ? 'coin-foe' : 'coin-mine'} ${selected ? 'stone-picked' : ''} ${unit.sick ? 'is-sick' : ''} ${veiled ? 'is-veiled' : ''} ${sliding ? 'coin-slide-hide' : ''} ${canStep && !selected ? 'can-step' : ''}`}
       onClick={(e) => {
         e.stopPropagation();
         onClick?.();
@@ -83,7 +86,7 @@ export function UnitCoin({
         e.stopPropagation();
         onInspect();
       }}
-      title={`${unit.name} · Power ${unit.power} · Resources ${unit.loyalty}${fast ? ' · Fast Attack' : ''}${veilTitle} · tap to move · double-tap to inspect`}
+      title={`${unit.name} · Power ${unit.power} · Resources ${unit.loyalty}${fast ? ' · Fast Attack' : ''}${veilTitle}${canStep && !selected ? ' · ready to move' : ''} · tap to move · double-tap to inspect`}
       aria-label={`${unit.name}, Power ${unit.power}, Resources ${unit.loyalty}${fast ? ', Fast Attack' : ''}${veiled ? ', veiled and untargetable' : ''}`}
     >
       <CardArt name={unit.name} className="stone-face" />

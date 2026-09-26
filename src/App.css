@@ -2658,6 +2658,68 @@ input[type='search'] {
   100% { opacity: 0; transform: translateY(-42%) scale(0.25); }
 }
 
+/* Ready-to-move hint — soft light pulse, no scale (avoids board bounce) */
+.stone-coin.can-step {
+  animation: coin-ready-pulse 2.4s ease-in-out infinite;
+}
+.stone-coin.can-step.is-blue {
+  animation-name: coin-ready-pulse-blue;
+}
+.stone-coin.can-step.is-red {
+  animation-name: coin-ready-pulse-red;
+}
+@keyframes coin-ready-pulse-blue {
+  0%, 100% {
+    box-shadow:
+      0 0 0 3px #7eb0e0,
+      0 0 0 5px #1d3f68,
+      0 0 10px #9ec8ff55,
+      0 4px #1a120c,
+      0 8px 12px #00000080,
+      inset 0 1px #fff4d6e6;
+    filter: brightness(1);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px #b6d8ff,
+      0 0 0 5px #2a5a90,
+      0 0 18px #cfe6ffaa,
+      0 0 28px #8eb6e066,
+      0 4px #1a120c,
+      0 8px 12px #00000080,
+      inset 0 1px #fffef8;
+    filter: brightness(1.08);
+  }
+}
+@keyframes coin-ready-pulse-red {
+  0%, 100% {
+    box-shadow:
+      0 0 0 3px #e07070,
+      0 0 0 5px #5c1818,
+      0 0 10px #ff9a9a44,
+      0 4px #1a120c,
+      0 8px 12px #00000080,
+      inset 0 1px #fff4d6e6;
+    filter: brightness(1);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px #ffb0b0,
+      0 0 0 5px #7a2222,
+      0 0 18px #ffc8c8aa,
+      0 0 28px #e0707066,
+      0 4px #1a120c,
+      0 8px 12px #00000080,
+      inset 0 1px #fffef8;
+    filter: brightness(1.08);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stone-coin.can-step {
+    animation: none;
+  }
+}
+
 .stone-coin.is-sick {
   opacity: 0.72;
   filter: grayscale(0.25);

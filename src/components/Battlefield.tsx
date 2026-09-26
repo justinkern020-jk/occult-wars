@@ -2040,6 +2040,14 @@ export function Battlefield({
                         unit={unit}
                         selected={selectedUnit === unit.uid || attacker === unit.uid}
                         foe={unit.side !== inputSide}
+                        canStep={
+                          !inputLocked &&
+                          phase === 'main' &&
+                          unit.side === inputSide &&
+                          !unit.sick &&
+                          !unit.moved &&
+                          !unit.attacked
+                        }
                         sliding={
                           !!coinSlide &&
                           coinSlide.unit.uid === unit.uid &&
