@@ -343,4 +343,21 @@ export function applySouthHavenDispatchUnlock(p: Profile): Profile {
   return { ...p, collection, customDecks };
 }
 
+/** Unlock radiation_poisoning into collection (+ legal custom decks). Aftermath of the gadget. */
+export function applyRadiationPoisoningUnlock(p: Profile): Profile {
+  const id = 'radiation_poisoning';
+  const collection = p.collection.includes(id)
+    ? p.collection
+    : [...p.collection, id];
+  const card = cardById(id);
+  const customDecks = p.customDecks.map((d) => {
+    if (!card || d.cards.includes(id) || d.cards.length >= 40) return d;
+    const hero = CARDS.find((c) => c.id === d.heroId);
+    if (!hero || !isLegalForOrder(hero.faction, card.faction)) return d;
+    return { ...d, cards: [...d.cards, id] };
+  });
+  return { ...p, collection, customDecks };
+}
+
+
 export { FIRST_HOUR_ORDERS };

@@ -93,6 +93,7 @@ import type {
 } from '../net/friendSession';
 import {
   applyJustinKernUnlock,
+  applyRadiationPoisoningUnlock,
   applySethKernUnlock,
   applySouthHavenDispatchUnlock,
   type Profile,
@@ -374,6 +375,8 @@ export function Battlefield({
   const [battleCountOpen, setBattleCountOpen] = useState(false);
   const [nukeActive, setNukeActive] = useState(false);
   const [falloutActive, setFalloutActive] = useState(false);
+  /** Post-fallout Radiation Poisoning TarotPop (dismissible Close/Esc). */
+  const [radiationPop, setRadiationPop] = useState<Card | null>(null);
   const codeRealNameRef = useRef(
     profile?.username &&
       !isSecondHourCode(profile.username) &&
@@ -2931,7 +2934,14 @@ export function Battlefield({
       <FalloutRain
         active={falloutActive}
         durationMs={6000}
-        onDone={() => setFalloutActive(false)}
+        onDone={() => {
+          setFalloutActive(false);
+          const rad = cardById('radiation_poisoning');
+          if (rad) setRadiationPop(rad);
+          if (profile && onUpdateProfile) {
+            onUpdateProfile(applyRadiationPoisoningUnlock(profile));
+          }
+        }}
       />
 
       {battleCountOpen && (
@@ -2950,6 +2960,15 @@ export function Battlefield({
         >
           <HandCard card={activeHand[dragHand]} selected />
         </div>
+      )}
+
+      {radiationPop && (
+        <TarotPop
+          card={radiationPop}
+          caption="The ash settles — Radiation Poisoning"
+          closeOnBackdrop={false}
+          onClose={() => setRadiationPop(null)}
+        />
       )}
 
       {inspectCard && (

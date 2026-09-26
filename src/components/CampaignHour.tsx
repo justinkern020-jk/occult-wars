@@ -8,7 +8,7 @@ import {
   type EndingId,
   type StageOutcome,
 } from '../game/campaign';
-import { applyJustinKernUnlock, type Profile } from '../game/profile';
+import { applyJustinKernUnlock, applyRadiationPoisoningUnlock, type Profile } from '../game/profile';
 import { cardById } from '../data/catalog';
 import type { Card } from '../game/types';
 import {
@@ -33,8 +33,8 @@ type Props = {
   onConsumeOutcome?: () => void;
 };
 
-/** nuke → epilogue → justin card → plate → Fulcanelli warning (final) */
-type CloserPhase = 'nuke' | 'fallout' | 'epilogue' | 'reveal' | 'plate' | 'warning';
+/** nuke → fallout → radiation card → epilogue → justin card → plate → Fulcanelli warning (final) */
+type CloserPhase = 'nuke' | 'fallout' | 'radiation' | 'epilogue' | 'reveal' | 'plate' | 'warning';
 
 export function CampaignHour({
   profile,
@@ -53,6 +53,7 @@ export function CampaignHour({
   const [endingId, setEndingId] = useState<EndingId | null>(null);
   const [closer, setCloser] = useState<CloserPhase | null>(null);
   const [justinCard, setJustinCard] = useState<Card | null>(null);
+  const [radiationCard, setRadiationCard] = useState<Card | null>(null);
 
   useEffect(() => {
     if (!lastOutcome || !onConsumeOutcome) return;
@@ -128,8 +129,15 @@ export function CampaignHour({
   }, []);
 
   const onFalloutDone = useCallback(() => {
-    setCloser('epilogue');
-  }, []);
+    const rad = cardById('radiation_poisoning');
+    if (rad) {
+      setRadiationCard(rad);
+      setCloser('radiation');
+      onUpdate(applyRadiationPoisoningUnlock(profile));
+    } else {
+      setCloser('epilogue');
+    }
+  }, [onUpdate, profile]);
 
   function beginStage() {
     if (!stage) return;
@@ -147,6 +155,7 @@ export function CampaignHour({
     setEndingId(null);
     setCloser(null);
     setJustinCard(null);
+    setRadiationCard(null);
     setShowCutscene(true);
   }
 
@@ -170,6 +179,18 @@ export function CampaignHour({
               Ash settles
             </p>
           </div>
+        )}
+
+        {closer === 'radiation' && radiationCard && (
+          <TarotPop
+            card={radiationCard}
+            caption="The ash settles — Radiation Poisoning"
+            closeOnBackdrop={false}
+            onClose={() => {
+              setRadiationCard(null);
+              setCloser('epilogue');
+            }}
+          />
         )}
 
         {closer === 'epilogue' && (
