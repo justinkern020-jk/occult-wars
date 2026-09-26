@@ -603,15 +603,15 @@ export function MushroomCloud({ active, onDone }: Props) {
       role="presentation"
       aria-hidden
     >
+      <canvas ref={canvasRef} className="nuke-canvas" />
       <div className="nuke-skull-wrap" data-testid="nuke-skull">
         <img
           className="nuke-skull"
-          src="/assets/vfx/skull-crossbones.png"
+          src="/assets/vfx/skull-crossbones.png?v=2"
           alt=""
           draggable={false}
         />
       </div>
-      <canvas ref={canvasRef} className="nuke-canvas" />
       <p className="nuke-legend">The gadget answers</p>
     </div>
   );
