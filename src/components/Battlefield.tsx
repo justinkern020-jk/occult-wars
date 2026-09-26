@@ -79,6 +79,12 @@ import {
   readPendingSouthHavenHand,
   writeHourOpen,
 } from '../game/hourUnlock';
+import type {
+  FriendMatchState,
+  FriendMessage,
+  FriendRole,
+  FriendSession,
+} from '../net/friendSession';
 import {
   applyJustinKernUnlock,
   applySethKernUnlock,
@@ -104,6 +110,9 @@ export type BattlefieldProps = {
   redHeroId?: string;
   blueDeckIds?: string[];
   redDeckIds?: string[];
+  /** Friend Working seat — host=Azure, guest=Crimson. */
+  friendRole?: FriendRole;
+  friendSession?: FriendSession;
   profile?: Profile;
   onUpdateProfile?: (next: Profile) => void;
   onLeave?: () => void;
@@ -267,6 +276,8 @@ export function Battlefield({
   redHeroId,
   blueDeckIds,
   redDeckIds,
+  friendRole,
+  friendSession,
   profile,
   onUpdateProfile,
   onLeave,
@@ -279,8 +290,17 @@ export function Battlefield({
   const gameMap = useMemo(() => mapById(mapId), [mapId]);
 
   const hotseat = mode === 'hotseat';
-  const PLAYER: Side = 'blue';
+  const friend = mode === 'friend';
+  const sharedTwoPlayer = hotseat || friend;
+  /** Host (or missing role) = Azure; guest = Crimson. */
+  const mySide: Side =
+    friend && friendRole === 'guest' ? 'red' : 'blue';
+  const PLAYER: Side = mySide;
   const AI_SIDE: Side = 'red';
+  const isFriendGuest = friend && friendRole === 'guest';
+  const isFriendHost = friend && friendRole === 'host';
+  /** Guest waits until first host state arrives. */
+  const [friendSynced, setFriendSynced] = useState(!friend || friendRole === 'host');
 
   const blueHero = useMemo(
     () =>
@@ -524,9 +544,9 @@ export function Battlefield({
         const era = eraRef.current;
         const names: string[] = [];
         let handAfter = { ...nextHand };
-        // Hotseat: both seats may see a sighting. Vs AI: only Azure (the player).
+        // Shared 2P: both seats may see a sighting. Vs AI: only Azure (the player).
         const recipients: Array<'blue' | 'red'> =
-          mode === 'hotseat' ? ['blue', 'red'] : ['blue'];
+          mode === 'hotseat' || mode === 'friend' ? ['blue', 'red'] : ['blue'];
         for (const s of recipients) {
           if (handAfter[s].length >= HAND_CAP) continue;
           const faction = s === 'blue' ? blueFaction : redFaction;
@@ -722,12 +742,14 @@ export function Battlefield({
       setAim(null);
       setAiBusy(false);
       pushLog(msg);
-      const playerWon = hotseat ? winner === side : winner === PLAYER;
+      const playerWon = sharedTwoPlayer
+        ? winner === (friend ? mySide : side)
+        : winner === PLAYER;
       if (playerWon) victoryStinger();
       else defeatStinger();
-      onMatchEnd?.({ winner, kind, playerWon: winner === PLAYER });
+      onMatchEnd?.({ winner, kind, playerWon });
     },
-    [pushLog, onMatchEnd, hotseat, side],
+    [pushLog, onMatchEnd, hotseat, friend, sharedTwoPlayer, side, mySide, PLAYER],
   );
 
   const buildEffectCtx = useCallback(
@@ -866,6 +888,23 @@ export function Battlefield({
       targetUid?: string,
       aimPos?: Pos,
     ): boolean => {
+      if (isFriendGuest && friendSession) {
+        const card = hand[acting][handIndex];
+        if (!card || (card.kind !== 'rite' && card.kind !== 'device')) return false;
+        if (effectNeedsAim(card.effect, card.aim) && !targetUid && !aimPos) {
+          setAim({ kind: 'cast', handIndex, card });
+          pushLog(`Name a target for ${card.name}.`);
+          return false;
+        }
+        friendSession.send({
+          v: 1,
+          type: 'intent',
+          intent: { kind: 'cast', handIndex, targetUid, aimPos },
+        });
+        setAim(null);
+        setSelectedHand(null);
+        return true;
+      }
       const card = hand[acting][handIndex];
       if (!card || (card.kind !== 'rite' && card.kind !== 'device')) return false;
       if (loyalty[acting] < card.cost) {
@@ -918,6 +957,25 @@ export function Battlefield({
 
   const useLeader = useCallback(
     (acting: Side, targetUid?: string, aimPos?: Pos): boolean => {
+      if (isFriendGuest && friendSession) {
+        const hero = acting === 'blue' ? blueHero : redHero;
+        if (!hero) {
+          pushLog('No leader sworn for this chair.');
+          return false;
+        }
+        if (leaderNeedsAim(hero) && !targetUid && !(hero.leaderPower?.op === 'claim' && aimPos)) {
+          setAim({ kind: 'leader' });
+          pushLog(`Name a target for ${hero.name}.`);
+          return false;
+        }
+        friendSession.send({
+          v: 1,
+          type: 'intent',
+          intent: { kind: 'useLeader', targetUid, aimPos },
+        });
+        setAim(null);
+        return true;
+      }
       const hero = acting === 'blue' ? blueHero : redHero;
       if (!hero) {
         pushLog('No leader sworn for this chair.');
@@ -956,6 +1014,35 @@ export function Battlefield({
 
   const callPower = useCallback(
     (acting: Side, sourceUid: string, targetUid?: string): boolean => {
+      if (isFriendGuest && friendSession) {
+        const found = findUnit(sourceUid);
+        if (!found) {
+          pushLog('That unit is not on the field.');
+          return false;
+        }
+        const def = cardById(found.unit.cardId);
+        const act = def?.act;
+        if (!def || !act) {
+          pushLog('That unit has no power to call.');
+          return false;
+        }
+        if (actNeedsAim(act) && !targetUid) {
+          setAim({ kind: 'act', uid: sourceUid });
+          setSelectedUnit(sourceUid);
+          setAttacker(null);
+          setSelectedHand(null);
+          pushLog(`Name a target for ${def.name}.`);
+          return false;
+        }
+        friendSession.send({
+          v: 1,
+          type: 'intent',
+          intent: { kind: 'callPower', uid: sourceUid, targetUid },
+        });
+        setAim(null);
+        setSelectedUnit(null);
+        return true;
+      }
       const found = findUnit(sourceUid);
       if (!found) {
         pushLog('That unit is not on the field.');
@@ -1097,7 +1184,7 @@ export function Battlefield({
     }
     const era = eraRef.current;
     const recipients: Array<'blue' | 'red'> =
-      mode === 'hotseat' ? ['blue', 'red'] : ['blue'];
+      mode === 'hotseat' || mode === 'friend' ? ['blue', 'red'] : ['blue'];
     const names: string[] = [];
     let handAfter = { ...liveRef.current.hand };
     for (const s of recipients) {
@@ -1145,7 +1232,8 @@ export function Battlefield({
       setCodeDraft('');
       unlockAudio();
       metalRiffSfx();
-      const seat: Side = mode === 'hotseat' ? side : 'blue';
+      const seat: Side =
+        mode === 'hotseat' || mode === 'friend' ? (mode === 'friend' ? mySide : side) : 'blue';
       setCodeToast(dropJustinIntoHand(seat));
       const jk = cardById('justin_kern');
       if (jk) {
@@ -1159,7 +1247,8 @@ export function Battlefield({
       setCodeDraft('');
       unlockAudio();
       copSirenSfx();
-      const seat: Side = mode === 'hotseat' ? side : 'blue';
+      const seat: Side =
+        mode === 'hotseat' || mode === 'friend' ? (mode === 'friend' ? mySide : side) : 'blue';
       setCodeToast(dropSethIntoHand(seat));
       const sk = cardById('seth_kern');
       if (sk) {
@@ -1173,7 +1262,8 @@ export function Battlefield({
       setCodeDraft('');
       unlockAudio();
       copSirenSfx();
-      const seat: Side = mode === 'hotseat' ? side : 'blue';
+      const seat: Side =
+        mode === 'hotseat' || mode === 'friend' ? (mode === 'friend' ? mySide : side) : 'blue';
       setCodeToast(dropSouthHavenIntoHand(seat));
       const sh = cardById('south_haven_dispatch');
       if (sh) {
@@ -1209,6 +1299,16 @@ export function Battlefield({
 
   const deployTo = useCallback(
     (r: number, c: number, handIndex: number, acting: Side) => {
+      if (isFriendGuest && friendSession) {
+        friendSession.send({
+          v: 1,
+          type: 'intent',
+          intent: { kind: 'deploy', r, c, handIndex },
+        });
+        setSelectedHand(null);
+        setDragHand(null);
+        return true;
+      }
       const card = hand[acting][handIndex];
       if (!card || card.kind !== 'unit' || card.power == null) return false;
       if (board[r][c]) {
@@ -1340,6 +1440,16 @@ export function Battlefield({
 
   const moveUnit = useCallback(
     (uidStr: string, r: number, c: number): 'ok' | 'storm' | 'fail' => {
+      if (isFriendGuest && friendSession) {
+        friendSession.send({
+          v: 1,
+          type: 'intent',
+          intent: { kind: 'move', uid: uidStr, r, c },
+        });
+        setAttacker(null);
+        setSelectedUnit(null);
+        return 'ok';
+      }
       const atk = findUnit(uidStr);
       if (!atk) return 'fail';
       if (atk.unit.sick || atk.unit.moved || atk.unit.attacked) {
@@ -1422,6 +1532,16 @@ export function Battlefield({
 
   const strike = useCallback(
     (atkUid: string, defR: number, defC: number): boolean => {
+      if (isFriendGuest && friendSession) {
+        friendSession.send({
+          v: 1,
+          type: 'intent',
+          intent: { kind: 'strike', atkUid, defR, defC },
+        });
+        setAttacker(null);
+        setSelectedUnit(null);
+        return true;
+      }
       const atk = findUnit(atkUid);
       const here = board[defR][defC];
       if (!atk || !here) return false;
@@ -1549,6 +1669,10 @@ export function Battlefield({
   );
 
   const endRite = useCallback(() => {
+    if (isFriendGuest && friendSession) {
+      friendSession.send({ v: 1, type: 'intent', intent: { kind: 'endRite' } });
+      return;
+    }
     const live = liveRef.current;
     if (live.phase === 'over' || live.matchOver) return;
     brassClick();
@@ -1614,17 +1738,34 @@ export function Battlefield({
 
   const resign = useCallback(() => {
     if (phase === 'over' || matchOver) return;
-    const loser = hotseat ? side : PLAYER;
+    if (isFriendGuest && friendSession) {
+      friendSession.send({ v: 1, type: 'intent', intent: { kind: 'resign' } });
+      return;
+    }
+    const loser = sharedTwoPlayer ? (friend ? mySide : side) : PLAYER;
     const winner: Side = loser === 'blue' ? 'red' : 'blue';
     finishMatch(winner, 'yield', `${sideLabel(loser)} yields the circle.`);
-  }, [phase, matchOver, side, finishMatch, hotseat]);
+  }, [
+    phase,
+    matchOver,
+    side,
+    finishMatch,
+    hotseat,
+    friend,
+    sharedTwoPlayer,
+    mySide,
+    PLAYER,
+    isFriendGuest,
+    friendSession,
+  ]);
 
-  const inputSide: Side = hotseat ? side : PLAYER;
+  const inputSide: Side = hotseat ? side : friend ? mySide : PLAYER;
   const inputLocked =
     phase === 'over' ||
     !!matchOver ||
-    (!hotseat && (side !== PLAYER || aiBusy)) ||
-    (hotseat && passPrompt);
+    (friend && (!friendSynced || side !== mySide)) ||
+    (hotseat && passPrompt) ||
+    (!sharedTwoPlayer && (side !== PLAYER || aiBusy));
 
   function onTileClick(r: number, c: number) {
     if (inputLocked) return;
@@ -1743,9 +1884,212 @@ export function Battlefield({
   endRiteRef.current = endRite;
   findUnitRef.current = findUnit;
 
-  // AI loop for training / campaign / second / friend-vs-ai
+  const useLeaderRef = useRef(useLeader);
+  useLeaderRef.current = useLeader;
+
+  const buildFriendState = useCallback((): FriendMatchState => {
+    return {
+      mapId,
+      loyalty,
+      domination,
+      turn,
+      side,
+      phase,
+      matchOver,
+      log: log.slice(0, 30),
+      deck,
+      hand,
+      discard,
+      board,
+      control,
+      leaderUsed,
+      cryptidSight,
+      blueFaction,
+      redFaction,
+    };
+  }, [
+    mapId,
+    loyalty,
+    domination,
+    turn,
+    side,
+    phase,
+    matchOver,
+    log,
+    deck,
+    hand,
+    discard,
+    board,
+    control,
+    leaderUsed,
+    cryptidSight,
+    blueFaction,
+    redFaction,
+  ]);
+
+  const applyFriendState = useCallback((st: FriendMatchState) => {
+    if (st.mapId && st.mapId !== mapId) setMapId(st.mapId);
+    setLoyalty(st.loyalty);
+    setDomination(st.domination);
+    setTurn(st.turn);
+    setSide(st.side);
+    setPhase(st.phase);
+    setMatchOver(st.matchOver);
+    setLog(st.log ?? []);
+    setDeck(st.deck);
+    setHand(st.hand);
+    setDiscard(st.discard);
+    setBoard(st.board);
+    setControl(st.control);
+    setLeaderUsed(st.leaderUsed);
+    if (st.cryptidSight != null) setCryptidSight(st.cryptidSight);
+    liveRef.current = {
+      ...liveRef.current,
+      board: st.board,
+      hand: st.hand,
+      loyalty: st.loyalty,
+      control: st.control,
+      deck: st.deck,
+      discard: st.discard,
+      side: st.side,
+      turn: st.turn,
+      domination: st.domination,
+      phase: st.phase,
+      matchOver: st.matchOver,
+    };
+    setFriendSynced(true);
+    setSelectedHand(null);
+    setSelectedUnit(null);
+    setAttacker(null);
+    setAim(null);
+    setPassPrompt(false);
+    setAiBusy(false);
+  }, [mapId]);
+
+  // Host: broadcast authoritative state (debounced).
   useEffect(() => {
-    if (hotseat) return;
+    if (!isFriendHost || !friendSession) return;
+    const t = window.setTimeout(() => {
+      friendSession.send({ v: 1, type: 'state', state: buildFriendState() });
+    }, 60);
+    return () => window.clearTimeout(t);
+  }, [isFriendHost, friendSession, buildFriendState]);
+
+  // Wire PeerJS messages: guest applies state; host applies guest intents.
+  useEffect(() => {
+    if (!friend || !friendSession) return;
+
+    const onMessage = (msg: FriendMessage) => {
+      if (msg.type === 'state' && isFriendGuest) {
+        applyFriendState(msg.state);
+        return;
+      }
+      if (msg.type === 'hello') {
+        if (isFriendHost) {
+          friendSession.send({
+            v: 1,
+            type: 'hello',
+            role: 'host',
+            room: friendSession.room,
+          });
+          friendSession.send({
+            v: 1,
+            type: 'state',
+            state: buildFriendState(),
+          });
+        }
+        return;
+      }
+      if (msg.type === 'intent' && isFriendHost) {
+        const intent = msg.intent;
+        // Guest is always Crimson (red).
+        const acting: Side = 'red';
+        if (liveRef.current.side !== acting && intent.kind !== 'resign') {
+          return;
+        }
+        switch (intent.kind) {
+          case 'deploy':
+            deployToRef.current(
+              intent.r,
+              intent.c,
+              intent.handIndex,
+              acting,
+            );
+            break;
+          case 'move':
+            moveUnitRef.current(intent.uid, intent.r, intent.c);
+            break;
+          case 'strike':
+            strikeRef.current(intent.atkUid, intent.defR, intent.defC);
+            break;
+          case 'cast':
+            castCardRef.current(
+              acting,
+              intent.handIndex,
+              intent.targetUid,
+              intent.aimPos,
+            );
+            break;
+          case 'useLeader':
+            useLeaderRef.current(acting, intent.targetUid, intent.aimPos);
+            break;
+          case 'callPower':
+            callPowerRef.current(acting, intent.uid, intent.targetUid);
+            break;
+          case 'endRite':
+            endRiteRef.current();
+            break;
+          case 'resign': {
+            const loser: Side = 'red';
+            const winner: Side = 'blue';
+            finishMatch(
+              winner,
+              'yield',
+              `${sideLabel(loser)} yields the circle.`,
+            );
+            break;
+          }
+          default:
+            break;
+        }
+      }
+    };
+
+    friendSession.setOnMessage((msg) => onMessage(msg));
+
+    if (isFriendGuest) {
+      friendSession.send({
+        v: 1,
+        type: 'hello',
+        role: 'guest',
+        room: friendSession.room,
+      });
+    } else if (isFriendHost) {
+      friendSession.send({
+        v: 1,
+        type: 'hello',
+        role: 'host',
+        room: friendSession.room,
+      });
+      friendSession.send({ v: 1, type: 'state', state: buildFriendState() });
+    }
+
+    return () => {
+      friendSession.setOnMessage(null);
+    };
+  }, [
+    friend,
+    friendSession,
+    isFriendGuest,
+    isFriendHost,
+    applyFriendState,
+    buildFriendState,
+    finishMatch,
+  ]);
+
+  // AI loop for training / campaign / second — skipped for shared 2P
+  useEffect(() => {
+    if (sharedTwoPlayer) return;
     if (phase === 'over' || matchOver) return;
     if (side !== AI_SIDE) return;
 
@@ -1924,7 +2268,7 @@ export function Battlefield({
       revealResumeRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [side, phase, matchOver, hotseat]);
+  }, [side, phase, matchOver, sharedTwoPlayer]);
 
   const legalMove = useMemo(() => {
     const empty = new Set<string>();
@@ -2075,7 +2419,7 @@ export function Battlefield({
             <strong>{turn}</strong>
             <span className={`bf-side is-${side}`}>
               {sideLabel(side)}
-              {hotseat ? ' · Pass the Grimoire' : ''}
+              {hotseat ? ' · Pass the Grimoire' : friend ? (friendRole === 'guest' ? ' · guest · Crimson' : ' · host · Azure') : ''}
             </span>
           </div>
           <dl className="score-chip is-enemy" data-testid="score-crimson">
@@ -2453,7 +2797,13 @@ export function Battlefield({
       <div className="hand-rail">
         <p className="hand-kicker">
           {sideLabel(inputSide)} hand · drag units to muster · tap coins to move · Call power on the coin · rites & devices speak
-          {!hotseat && side === AI_SIDE ? ' · Crimson is working…' : ''}
+          {friend && !friendSynced
+            ? ' · syncing with host…'
+            : friend && side !== mySide
+              ? ` · waiting for ${sideLabel(side)}…`
+              : !sharedTwoPlayer && side === AI_SIDE
+                ? ' · Crimson is working…'
+                : ''}
         </p>
         <div className="hand-row">
           {activeHand.map((card, i) => {

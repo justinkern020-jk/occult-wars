@@ -2597,6 +2597,15 @@ input[type='search'] {
   flex-wrap: wrap;
   margin: 1rem 0;
 }
+.friend-roles-quick {
+  margin-top: 1.25rem;
+}
+.friend-divider {
+  color: #8a7a5a;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  margin: 1.25rem 0 0.5rem;
+}
 .room-code {
   display: flex;
   flex-direction: column;
@@ -2614,6 +2623,16 @@ input[type='search'] {
   color: #f0e6c8;
   padding: 0.4rem;
   border-radius: 4px;
+}
+.friend-fallback {
+  color: #c9a98a;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin: 0.75rem 0;
+  max-width: 36rem;
+}
+.friend-fallback strong {
+  color: #e7d7a4;
 }
 .friend-status {
   color: #d4b56a;

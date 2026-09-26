@@ -9,6 +9,7 @@ import { DeckEditor } from './components/DeckEditor';
 import { PackBreak } from './components/PackBreak';
 import { CampaignHour } from './components/CampaignHour';
 import { FriendWorking } from './components/FriendWorking';
+import type { FriendRole, FriendSession } from './net/friendSession';
 import { SecondHour } from './components/SecondHour';
 import { useProfile } from './hooks/useProfile';
 import {
@@ -60,6 +61,8 @@ export default function App() {
     outcome: StageOutcome;
   } | null>(null);
   const [campaignStage, setCampaignStage] = useState(0);
+  const [friendRole, setFriendRole] = useState<FriendRole | null>(null);
+  const [friendSession, setFriendSession] = useState<FriendSession | null>(null);
 
   const working = profile.customDecks[0] as CustomDeck | undefined;
 
@@ -146,15 +149,27 @@ export default function App() {
     });
   }
 
-  function startFriend(_room: string, asHost: boolean) {
+  function startFriend(
+    _room: string,
+    role: FriendRole,
+    session: FriendSession,
+  ) {
     ensureSworn(() => {
       const order = firstHourAllegiance()!;
       const foe = trainingFoe(order);
-      setBlueFaction(asHost ? order : foe);
-      setRedFaction(asHost ? foe : order);
+      // Shared match: host = Azure, guest = Crimson. Same factions on both browsers.
+      setBlueFaction(order);
+      setRedFaction(foe);
       setBlueHeroId(working?.heroId);
       setBlueDeckIds(working?.cards);
+      setRedHeroId(undefined);
+      setRedDeckIds(undefined);
+      setFriendRole(role);
+      setFriendSession(session);
       setMatchMode('friend');
+      setMapId((prev) =>
+        mapsForEra('first').some((m) => m.id === prev) ? prev : 'ashen-cross',
+      );
       setScreen('field');
     });
   }
@@ -266,8 +281,7 @@ export default function App() {
           </p>
         </nav>
         <FriendWorking
-          onStartAsHost={(room) => startFriend(room, true)}
-          onStartAsGuest={(room) => startFriend(room, false)}
+          onReady={({ room, role, session }) => startFriend(room, role, session)}
           onBack={() => setScreen('menu')}
         />
       </div>
@@ -350,17 +364,22 @@ export default function App() {
           redHeroId={redHeroId}
           blueDeckIds={blueDeckIds}
           redDeckIds={redDeckIds}
+          friendRole={friendRole ?? undefined}
+          friendSession={friendSession ?? undefined}
           profile={profile}
           onUpdateProfile={update}
-          onLeave={() =>
+          onLeave={() => {
+            friendSession?.destroy();
+            setFriendSession(null);
+            setFriendRole(null);
             setScreen(
               matchMode === 'campaign'
                 ? 'campaign'
                 : matchMode === 'second'
                   ? 'second'
                   : 'menu',
-            )
-          }
+            );
+          }}
           onMatchEnd={({ playerWon, kind }) => {
             const modeKey =
               matchMode === 'campaign'

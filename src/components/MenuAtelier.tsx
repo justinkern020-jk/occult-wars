@@ -313,7 +313,7 @@ export function MenuAtelier({
               </span>
               <span className="menu-door-copy">
                 <span className="menu-door-title">Friend Working</span>
-                <span className="menu-door-sub">4-letter room · WebRTC</span>
+                <span className="menu-door-sub">quick match or room code</span>
               </span>
             </button>
             <button
