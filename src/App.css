@@ -2408,6 +2408,73 @@ input[type='search'] {
   flex-wrap: wrap;
   gap: 0.4rem;
 }
+
+/* ——— Veiled / untargetable fairy-dust shield ——— */
+.stone-coin.is-veiled {
+  box-shadow:
+    0 0 0 1px #1a120c,
+    0 0 0 3px #c6a15b,
+    0 0 0 5px #2a1e12,
+    0 0 0 6px #e7d7a4,
+    inset 0 0 0 7px #0c090747,
+    0 0 18px #e8d6ff66,
+    0 0 28px #b8a0ff44,
+    0 8px 14px #0006;
+}
+.veil-dust {
+  z-index: 6;
+  position: absolute;
+  inset: -2%;
+  border-radius: inherit;
+  pointer-events: none;
+  overflow: hidden;
+}
+.veil-haze {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 35% 30%, #fff8e6aa 0%, transparent 42%),
+    radial-gradient(circle at 70% 65%, #d4c0ff77 0%, transparent 48%),
+    radial-gradient(circle at 50% 50%, #f3ead733 0%, transparent 70%);
+  mix-blend-mode: screen;
+  animation: veil-haze-breathe 3.4s ease-in-out infinite;
+}
+@keyframes veil-haze-breathe {
+  0%, 100% { opacity: 0.55; filter: brightness(1); }
+  50% { opacity: 0.9; filter: brightness(1.15); }
+}
+.veil-spark {
+  position: absolute;
+  width: 5%;
+  height: 5%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fffef6 0%, #ffe9a8 35%, #c9b0ff00 72%);
+  box-shadow:
+    0 0 4px #fff8e6,
+    0 0 8px #e0c8ffaa;
+  animation: veil-sparkle 2.8s ease-in-out infinite;
+  opacity: 0;
+}
+.veil-spark.s1 { left: 18%; top: 22%; animation-delay: 0s; }
+.veil-spark.s2 { left: 62%; top: 18%; width: 4%; height: 4%; animation-delay: 0.35s; }
+.veil-spark.s3 { left: 78%; top: 42%; animation-delay: 0.7s; }
+.veil-spark.s4 { left: 28%; top: 68%; width: 6%; height: 6%; animation-delay: 1.05s; }
+.veil-spark.s5 { left: 52%; top: 58%; animation-delay: 1.4s; }
+.veil-spark.s6 { left: 12%; top: 48%; width: 3.5%; height: 3.5%; animation-delay: 0.2s; }
+.veil-spark.s7 { left: 88%; top: 28%; width: 4.5%; height: 4.5%; animation-delay: 1.75s; }
+.veil-spark.s8 { left: 42%; top: 12%; animation-delay: 0.9s; }
+.veil-spark.s9 { left: 70%; top: 72%; width: 3%; height: 3%; animation-delay: 2.1s; }
+.veil-spark.s10 { left: 36%; top: 40%; width: 4%; height: 4%; animation-delay: 1.2s; }
+.veil-spark.s11 { left: 58%; top: 34%; width: 5.5%; height: 5.5%; animation-delay: 0.55s; }
+.veil-spark.s12 { left: 22%; top: 78%; width: 3.5%; height: 3.5%; animation-delay: 2.4s; }
+@keyframes veil-sparkle {
+  0% { opacity: 0; transform: translateY(8%) scale(0.4); }
+  18% { opacity: 1; transform: translateY(0) scale(1); }
+  55% { opacity: 0.85; transform: translateY(-18%) scale(0.85); }
+  100% { opacity: 0; transform: translateY(-42%) scale(0.25); }
+}
+
 .stone-coin.is-sick {
   opacity: 0.72;
   filter: grayscale(0.25);
