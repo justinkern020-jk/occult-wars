@@ -32,11 +32,13 @@ export function UnitCoin({
   selected,
   foe,
   onClick,
+  onInspect,
 }: {
   unit: BoardUnit;
   selected?: boolean;
   foe?: boolean;
   onClick?: () => void;
+  onInspect?: () => void;
 }) {
   const hurt = unit.power < unit.maxPower;
   return (
@@ -44,7 +46,19 @@ export function UnitCoin({
       type="button"
       className={`stone-coin is-${unit.side} ${foe ? 'coin-foe' : 'coin-mine'} ${selected ? 'stone-picked' : ''} ${unit.sick ? 'is-sick' : ''}`}
       onClick={onClick}
-      title={`${unit.name} · Power ${unit.power} · Loyalty ${unit.loyalty}`}
+      onContextMenu={(e) => {
+        if (!onInspect) return;
+        e.preventDefault();
+        e.stopPropagation();
+        onInspect();
+      }}
+      onDoubleClick={(e) => {
+        if (!onInspect) return;
+        e.preventDefault();
+        e.stopPropagation();
+        onInspect();
+      }}
+      title={`${unit.name} · Power ${unit.power} · Loyalty ${unit.loyalty} · double-tap to inspect`}
       aria-label={`${unit.name}, Power ${unit.power}, Loyalty ${unit.loyalty}`}
     >
       <CardArt name={unit.name} className="stone-face" />

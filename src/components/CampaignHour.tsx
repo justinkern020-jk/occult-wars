@@ -89,7 +89,7 @@ export function CampaignHour({
       ENDINGS[(endingId ?? pickEnding(outcomes)) as EndingId] ??
       ENDINGS['sealed-hour'];
     return (
-      <section className="campaign-root" data-testid="campaign-ending">
+      <section className="campaign-root plate-screen" data-testid="campaign-ending">
         <p className="plate-kicker">The Leaden Hour</p>
         <h2>{end.title}</h2>
         <p className="lede">{end.text}</p>
@@ -117,16 +117,17 @@ export function CampaignHour({
   if (!stage) return null;
 
   return (
-    <section className="campaign-root" data-testid="campaign-hour">
+    <section className="campaign-root plate-screen" data-testid="campaign-hour">
       <p className="plate-kicker">
         The Leaden Hour · Stage {progress.stage + 1} / {LEADEN_STAGES.length}
       </p>
       <h2>{stage.title}</h2>
 
       {showCutscene ? (
-        <div className="campaign-cutscene">
-          <div className="campaign-veil">{stage.cutscene.veil}</div>
-          <p className="lede">{stage.cutscene.vo}</p>
+        <div className="campaign-cutscene cutscene">
+          <p className="campaign-veil plate-kicker">{stage.cutscene.veil}</p>
+          <div className="deco-rule" />
+          <p className="cutscene-line lede">{stage.cutscene.vo}</p>
           <p className="campaign-brief">{stage.briefing}</p>
           <p className="campaign-foe">Foe · {stage.foe}</p>
           <button

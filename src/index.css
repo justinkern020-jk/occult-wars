@@ -12,6 +12,7 @@
   --font-display: 'Cinzel', Palatino, serif;
   --font-body: 'Libre Baskerville', Georgia, serif;
   --font-ui: 'Cinzel', Palatino, serif;
+  --font-decorative: 'Cinzel Decorative', Cinzel, Palatino, serif;
   font-family: var(--font-body);
   line-height: 1.5;
   font-weight: 400;
@@ -31,8 +32,10 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    radial-gradient(ellipse at 50% 0%, #1a1710 0%, transparent 55%),
-    #0c0b09;
+    radial-gradient(ellipse 80% 50% at 50% -10%, color-mix(in oklab, var(--color-brass) 18%, transparent), transparent 55%),
+    radial-gradient(ellipse 40% 30% at 100% 100%, color-mix(in oklab, var(--color-enemy) 18%, transparent), transparent 50%),
+    var(--color-ink);
+  color: var(--color-parchment);
 }
 
 a {
@@ -47,4 +50,9 @@ button,
 select,
 input {
   font: inherit;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  text-wrap: balance;
 }

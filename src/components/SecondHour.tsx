@@ -35,7 +35,7 @@ export function SecondHour({ profile, onUpdate, onEnterYard, onBack }: Props) {
 
   if (!sworn) {
     return (
-      <section className="second-hour" data-testid="second-hour-oath">
+      <section className="second-hour plate-screen" data-testid="second-hour-oath">
         <p className="plate-kicker">The hour after</p>
         <h2>Four societies took what the six left</h2>
         <p className="lede">
@@ -65,7 +65,7 @@ export function SecondHour({ profile, onUpdate, onEnterYard, onBack }: Props) {
   }
 
   return (
-    <section className="second-hour" data-testid="second-hour-yard">
+    <section className="second-hour plate-screen" data-testid="second-hour-yard">
       <p className="plate-kicker">Second Hour · {sworn}</p>
       <h2>Choose the yard</h2>
       <p className="lede">

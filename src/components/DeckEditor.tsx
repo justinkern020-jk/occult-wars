@@ -15,6 +15,8 @@ import {
 import { validateDeck } from '../game/deck';
 import { brassClick } from '../game/sfx';
 import { CardArt } from './CardArt';
+import { TarotPop } from './TarotPop';
+import type { Card } from '../game/types';
 
 type Props = {
   profile: Profile;
@@ -23,6 +25,7 @@ type Props = {
 };
 
 export function DeckEditor({ profile, onSave, onBack }: Props) {
+  const [inspect, setInspect] = useState<Card | null>(null);
   const order = profile.allegiance as FirstHourOrder | null;
   const existing = profile.customDecks[0];
   const heroes = order ? heroesForOrder(order) : [];
@@ -106,7 +109,7 @@ export function DeckEditor({ profile, onSave, onBack }: Props) {
   }
 
   return (
-    <section className="deck-editor" data-testid="deck-editor">
+    <section className="deck-editor plate-screen" data-testid="deck-editor">
       <header className="deck-editor-head">
         <div>
           <p className="plate-kicker">Deck editor</p>
@@ -148,15 +151,27 @@ export function DeckEditor({ profile, onSave, onBack }: Props) {
               <button
                 key={c.id}
                 type="button"
-                className="deck-plate"
+                className={`deck-plate rarity-${c.rarity}`}
                 onClick={() => add(c.id)}
-                title={`Own ${owned[c.id] ?? 0} · in working ${counts[c.id] ?? 0}`}
+                onDoubleClick={(e) => {
+                  e.preventDefault();
+                  setInspect(c);
+                }}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  setInspect(c);
+                }}
+                title={`Own ${owned[c.id] ?? 0} · in working ${counts[c.id] ?? 0} · double-tap to inspect`}
               >
                 <CardArt name={c.name} className="deck-plate-art" />
-                <span>{c.name}</span>
-                <em>
-                  {counts[c.id] ?? 0}/{Math.min(3, owned[c.id] ?? 0)}
-                </em>
+                <span className="deck-plate-name">{c.name}</span>
+                <span className="deck-plate-stats">
+                  <em>L{c.cost}</em>
+                  {c.power != null ? <em>P{c.power}</em> : null}
+                  <em>
+                    {counts[c.id] ?? 0}/{Math.min(3, owned[c.id] ?? 0)}
+                  </em>
+                </span>
               </button>
             ))}
           </div>
@@ -187,6 +202,7 @@ export function DeckEditor({ profile, onSave, onBack }: Props) {
           Return
         </button>
       </div>
+      {inspect && <TarotPop card={inspect} onClose={() => setInspect(null)} />}
     </section>
   );
 }

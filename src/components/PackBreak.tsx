@@ -3,7 +3,7 @@ import type { Card } from '../game/types';
 import { PACK_COST, breakSeal, type Profile } from '../game/profile';
 import { brassClick } from '../game/sfx';
 import { CardArt } from './CardArt';
-import { CardView } from './CardView';
+import { TarotPop } from './TarotPop';
 
 type Props = {
   profile: Profile;
@@ -39,7 +39,7 @@ export function PackBreak({ profile, onUpdate, onBack }: Props) {
   }
 
   return (
-    <section className="pack-break" data-testid="pack-break">
+    <section className="pack-break plate-screen" data-testid="pack-break">
       <p className="plate-kicker">Break a Seal</p>
       <h2>Five assorted plates</h2>
       <p className="lede">
@@ -95,16 +95,7 @@ export function PackBreak({ profile, onUpdate, onBack }: Props) {
         Return to the atelier
       </button>
 
-      {inspect && (
-        <div className="tarot-pop" role="dialog" onClick={() => setInspect(null)}>
-          <div className="tarot-pop-inner" onClick={(e) => e.stopPropagation()}>
-            <CardView card={inspect} />
-            <button type="button" className="brass-btn" onClick={() => setInspect(null)}>
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+      {inspect && <TarotPop card={inspect} onClose={() => setInspect(null)} />}
     </section>
   );
 }

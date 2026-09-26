@@ -13,7 +13,7 @@ type Props = {
 
 export function AllegianceScreen({ onSwear, onBack }: Props) {
   return (
-    <section className="allegiance-root" data-testid="allegiance">
+    <section className="allegiance-root plate-screen" data-testid="allegiance">
       <p className="plate-kicker">The first hour</p>
       <h2 className="allegiance-title">Swear your order</h2>
       <p className="lede">

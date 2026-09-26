@@ -7,6 +7,7 @@ import {
   type Profile,
 } from '../game/profile';
 import { CardView } from './CardView';
+import { TarotPop } from './TarotPop';
 
 type Props = {
   profile?: Profile;
@@ -19,6 +20,7 @@ export function Catalog({ profile, onUpdate }: Props) {
   const [unitsOnly, setUnitsOnly] = useState(false);
   const [ownedOnly, setOwnedOnly] = useState(!!profile);
   const [kind, setKind] = useState<string>('all');
+  const [inspect, setInspect] = useState<(typeof CARDS)[number] | null>(null);
   const owned = useMemo(
     () => (profile ? countOwned(profile.collection) : {}),
     [profile],
@@ -75,7 +77,7 @@ export function Catalog({ profile, onUpdate }: Props) {
   }
 
   return (
-    <section className="catalog" data-testid="collection">
+    <section className="catalog plate-screen" data-testid="collection">
       <h2>The Collection</h2>
       <p className="lede">
         Archive of every plate in this working. Cabals dual-Power.
@@ -142,7 +144,7 @@ export function Catalog({ profile, onUpdate }: Props) {
       <div className="card-grid">
         {list.map((c) => (
           <div key={`${c.faction}-${c.id}`} className="catalog-card-wrap">
-            <CardView card={c} />
+            <CardView card={c} onClick={() => setInspect(c)} />
             {profile && (
               <p className="owned-count">
                 Owned ×{owned[c.id] ?? 0}
@@ -151,6 +153,7 @@ export function Catalog({ profile, onUpdate }: Props) {
           </div>
         ))}
       </div>
+      {inspect && <TarotPop card={inspect} onClose={() => setInspect(null)} />}
     </section>
   );
 }

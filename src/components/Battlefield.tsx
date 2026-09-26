@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { cardById } from '../data/catalog';
 import { pickTrainingAction, type AiSnapshot } from '../game/ai';
 import { applyDamage, combatantFrom, isDestroyed, resolveMelee } from '../game/combat';
@@ -40,7 +40,7 @@ import {
 } from '../game/scoring';
 import { clashSfx, defeatStinger, victoryStinger, brassClick } from '../game/sfx';
 import type { Card } from '../game/types';
-import { CardView } from './CardView';
+import { TarotPop } from './TarotPop';
 import { HandCard } from './HandCard';
 import {
   RulesPrimer,
@@ -193,6 +193,11 @@ export function Battlefield({
   const [attacker, setAttacker] = useState<string | null>(null);
   const [revealCard, setRevealCard] = useState<Card | null>(null);
   const [inspectCard, setInspectCard] = useState<Card | null>(null);
+  const [inspectPower, setInspectPower] = useState<number | undefined>(undefined);
+  /** Hand index being dragged to muster (units only). */
+  const [dragHand, setDragHand] = useState<number | null>(null);
+  const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);
+  const dragHandRef = useRef<number | null>(null);
   const [cryptidSight, setCryptidSight] = useState<string | null>(null);
   const [aiBusy, setAiBusy] = useState(false);
   const [aim, setAim] = useState<AimMode>(null);
@@ -1086,11 +1091,63 @@ export function Battlefield({
   }, [side, phase, matchOver, hotseat]);
 
   const legalDeploy = useMemo(() => {
-    if (selectedHand == null || inputLocked) return new Set<string>();
-    const card = hand[inputSide][selectedHand];
+    const idx = dragHand ?? selectedHand;
+    if (idx == null || inputLocked) return new Set<string>();
+    const card = hand[inputSide][idx];
     if (!card || card.kind !== 'unit') return new Set<string>();
     return new Set(deploySpots.map((p) => `${p.r},${p.c}`));
-  }, [selectedHand, deploySpots, inputLocked, hand, inputSide]);
+  }, [selectedHand, dragHand, deploySpots, inputLocked, hand, inputSide]);
+
+  const startDragDeploy = useCallback(
+    (handIndex: number, e: ReactPointerEvent) => {
+      if (inputLocked) return;
+      const card = hand[inputSide][handIndex];
+      if (!card || card.kind !== 'unit' || card.power == null) return;
+      if (card.cost > loyalty[inputSide]) {
+        pushLog(`Not enough loyalty (need ${card.cost}).`);
+        return;
+      }
+      dragHandRef.current = handIndex;
+      setDragHand(handIndex);
+      setDragPos({ x: e.clientX, y: e.clientY });
+      setSelectedHand(handIndex);
+      setAttacker(null);
+      setSelectedUnit(null);
+      setAim(null);
+
+      const onMove = (ev: PointerEvent) => {
+        setDragPos({ x: ev.clientX, y: ev.clientY });
+      };
+      const onUp = (ev: PointerEvent) => {
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('pointercancel', onUp);
+        const idx = dragHandRef.current;
+        dragHandRef.current = null;
+        setDragHand(null);
+        setDragPos(null);
+        if (idx == null) return;
+        const el = document.elementFromPoint(ev.clientX, ev.clientY);
+        const tile = el?.closest?.('[data-tile-r][data-tile-c]') as HTMLElement | null;
+        if (!tile) {
+          setSelectedHand(null);
+          return;
+        }
+        const r = Number(tile.dataset.tileR);
+        const c = Number(tile.dataset.tileC);
+        if (!Number.isFinite(r) || !Number.isFinite(c)) {
+          setSelectedHand(null);
+          return;
+        }
+        const ok = deployTo(r, c, idx, inputSide);
+        if (!ok) setSelectedHand(null);
+      };
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
+    },
+    [inputLocked, hand, inputSide, loyalty, pushLog, deployTo],
+  );
 
   const playerWon = matchOver ? matchOver.winner === PLAYER : false;
   const activeHand = hand[inputSide];
@@ -1212,7 +1269,9 @@ export function Battlefield({
                         : ''
                     } ${owned ? `owned-${owned}` : ''} ${
                       deployOk ? 'legal-tile' : ''
-                    } ${unit ? 'has-unit' : ''}`.trim()}
+                    } ${dragHand != null && deployOk ? 'drag-target' : ''} ${unit ? 'has-unit' : ''}`.trim()}
+                    data-tile-r={r}
+                    data-tile-c={c}
                     onClick={() => onTileClick(r, c)}
                   >
                     {tile.kind === 'gate' && (
@@ -1240,6 +1299,13 @@ export function Battlefield({
                         selected={selectedUnit === unit.uid || attacker === unit.uid}
                         foe={unit.side !== inputSide}
                         onClick={() => onTileClick(r, c)}
+                        onInspect={() => {
+                          const def = cardById(unit.cardId);
+                          if (def) {
+                            setInspectPower(unit.power);
+                            setInspectCard(def);
+                          }
+                        }}
                       />
                     )}
                   </button>
@@ -1274,7 +1340,7 @@ export function Battlefield({
 
       <div className="hand-rail">
         <p className="hand-kicker">
-          {sideLabel(inputSide)} hand · units deploy · rites & devices speak
+          {sideLabel(inputSide)} hand · drag units to muster · rites & devices speak
           {!hotseat && side === AI_SIDE ? ' · Crimson is working…' : ''}
         </p>
         <div className="hand-row">
@@ -1286,7 +1352,7 @@ export function Battlefield({
               <HandCard
                 key={`${card.id}-${i}`}
                 card={card}
-                selected={selectedHand === i}
+                selected={selectedHand === i || dragHand === i}
                 disabled={inputLocked || tooCostly}
                 onClick={() => {
                   if (inputLocked) return;
@@ -1311,7 +1377,12 @@ export function Battlefield({
                   setSelectedUnit(null);
                   setAim(null);
                 }}
-                onInspect={() => setInspectCard(card)}
+                onInspect={() => { setInspectPower(undefined); setInspectCard(card); }}
+                onDragDeployStart={
+                  isUnit
+                    ? (e) => startDragDeploy(i, e)
+                    : undefined
+                }
               />
             );
           })}
@@ -1355,32 +1426,37 @@ export function Battlefield({
         </div>
       )}
 
-      {inspectCard && (
-        <div className="tarot-pop" role="dialog" onClick={() => setInspectCard(null)}>
-          <div className="tarot-pop-inner" onClick={(e) => e.stopPropagation()}>
-            <CardView card={inspectCard} />
-            <button
-              type="button"
-              className="brass-btn"
-              onClick={() => setInspectCard(null)}
-            >
-              Close
-            </button>
-          </div>
+      {dragHand != null && dragPos && activeHand[dragHand] && (
+        <div
+          className="drag-ghost"
+          data-testid="drag-ghost"
+          style={{
+            left: dragPos.x,
+            top: dragPos.y,
+          }}
+          aria-hidden
+        >
+          <HandCard card={activeHand[dragHand]} selected />
         </div>
       )}
 
+      {inspectCard && (
+        <TarotPop
+          card={inspectCard}
+          power={inspectPower}
+          onClose={() => {
+            setInspectCard(null);
+            setInspectPower(undefined);
+          }}
+        />
+      )}
+
       {revealCard && (
-        <div
-          className="enemy-play"
-          role="dialog"
-          onClick={() => setRevealCard(null)}
-        >
-          <div className="enemy-play-card">
-            <CardView card={revealCard} />
-            <p className="enemy-play-hint">Crimson plays</p>
-          </div>
-        </div>
+        <TarotPop
+          card={revealCard}
+          onClose={() => setRevealCard(null)}
+          caption="Crimson plays"
+        />
       )}
 
       {matchOver && (

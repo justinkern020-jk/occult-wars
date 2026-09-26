@@ -1,4 +1,4 @@
-import type { Card } from '../game/types';
+import type { Card, Rarity } from '../game/types';
 import { KEYWORDS } from '../game/keywords';
 import { CardArt } from './CardArt';
 
@@ -9,59 +9,138 @@ const KIND_LABEL: Record<string, string> = {
   hero: 'Leader',
 };
 
+const RARITY_LABEL: Record<Rarity, string> = {
+  common: 'Common',
+  uncommon: 'Uncommon',
+  rare: 'Rare',
+  patron: 'Patron',
+};
+
+export type CardViewProps = {
+  card: Card;
+  /** Smaller face for collection / deck grids. */
+  compact?: boolean;
+  /** Live Power override (board inspect). */
+  power?: number;
+  className?: string;
+  onClick?: () => void;
+};
+
 /**
- * Tarot-style card face.
- * Left pip = Loyalty (muster cost from the loyalty bank).
- * Right pip = Cabals Power (vitality + damage) for units.
- * These must NEVER be swapped — board coins use the same layout.
+ * Rare trading-card / tarot face.
+ * Left pip = Loyalty (muster). Right pip = Cabals Power for units.
+ * Never show legacy ATK/HP on the pretty face.
  */
-export function CardView({ card }: { card: Card }) {
+export function CardView({
+  card,
+  compact = false,
+  power,
+  className = '',
+  onClick,
+}: CardViewProps) {
+  const shownPower = power ?? card.power;
   const combatKw = card.keywords.filter((k) => KEYWORDS[k]?.combat);
-  return (
-    <article className="card tarot-card" data-kind={card.kind} data-faction={card.faction}>
-      <header className="card-head">
-        <span className="card-cost" title="Loyalty · muster cost from the bank">
-          <abbr className="stat-abbr">L</abbr>
+  const cls =
+    `tarot rarity-${card.rarity}${compact ? ' tarot-compact' : ''} ${className}`.trim();
+
+  const body = (
+    <>
+      <header className="tarot-banner">
+        <span className="tarot-pip tarot-pip-l" title="Loyalty · muster cost">
+          <abbr>L</abbr>
           {card.cost}
         </span>
-        <div className="card-titles">
-          <h3 className="card-name">{card.name}</h3>
-          <p className="card-meta">
-            {KIND_LABEL[card.kind] ?? card.kind} · {card.rarity} · {card.faction}
-          </p>
-        </div>
-        {card.kind === 'unit' && card.power != null ? (
-          <div className="card-power" title="Cabals Power: vitality and damage">
-            <span className="power-label">P</span>
-            <span className="power-value">{card.power}</span>
-          </div>
-        ) : (
-          <div className="card-power card-power-mute" title="Spoken">
-            <span className="power-label">·</span>
-          </div>
-        )}
+        <h3 className="tarot-name">{card.name}</h3>
+        <span
+          className="tarot-pip tarot-pip-p"
+          title={card.kind === 'unit' ? 'Power · vitality and damage' : 'Spoken'}
+        >
+          {card.kind === 'unit' && shownPower != null ? (
+            <>
+              <abbr>P</abbr>
+              {shownPower}
+            </>
+          ) : (
+            '·'
+          )}
+        </span>
       </header>
-      <div className="card-art">
-        <CardArt name={card.name} />
+
+      <div className="tarot-window">
+        <CardArt name={card.name} className="tarot-art" alt="" />
+        <span className="tarot-foil" aria-hidden />
       </div>
-      {card.keywords.length > 0 && (
-        <ul className="card-keywords">
-          {card.keywords.map((k) => (
-            <li key={k} title={KEYWORDS[k]?.title ?? k}>
-              {KEYWORDS[k]?.glyph ? <abbr>{KEYWORDS[k].glyph}</abbr> : null} {k}
-              {combatKw.includes(k) ? ' ✦' : ''}
-            </li>
-          ))}
-        </ul>
-      )}
-      <p className="card-text">{card.text}</p>
-      {card.legacyAttack != null &&
-        card.legacyHealth != null &&
-        (card.legacyAttack !== card.power || card.legacyHealth !== card.power) && (
-          <p className="card-legacy">
-            legacy ATK {card.legacyAttack} / HP {card.legacyHealth} → Power {card.power}
+
+      <footer className="tarot-foot">
+        <p className="tarot-faction">{card.faction}</p>
+        <p className="tarot-life">
+          {card.kind === 'unit'
+            ? `Power ${shownPower ?? '—'}`
+            : KIND_LABEL[card.kind] ?? card.kind}
+        </p>
+      </footer>
+
+      {!compact && (
+        <div className="tarot-lore">
+          <p className="tarot-rarity-line">
+            {KIND_LABEL[card.kind] ?? card.kind}
+            {' · '}
+            {RARITY_LABEL[card.rarity] ?? card.rarity}
+            {card.cost > 0 ? ` · Loyalty ${card.cost}` : ''}
           </p>
-        )}
+
+          {card.keywords.length > 0 && (
+            <ul className="tarot-keywords">
+              {card.keywords.map((k) => (
+                <li key={k} title={KEYWORDS[k]?.title ?? k}>
+                  {KEYWORDS[k]?.glyph ? (
+                    <abbr>{KEYWORDS[k].glyph}</abbr>
+                  ) : null}{' '}
+                  {k}
+                  {combatKw.includes(k) ? ' ✦' : ''}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <p className="tarot-text">{card.text}</p>
+
+          {card.quote && (
+            <blockquote className="tarot-quote">
+              <p>“{card.quote}”</p>
+              {card.quoted && <footer>— {card.quoted}</footer>}
+            </blockquote>
+          )}
+        </div>
+      )}
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        className={cls}
+        data-kind={card.kind}
+        data-faction={card.faction}
+        data-rarity={card.rarity}
+        data-testid={compact ? 'tarot-compact' : 'tarot-card'}
+        onClick={onClick}
+      >
+        {body}
+      </button>
+    );
+  }
+
+  return (
+    <article
+      className={cls}
+      data-kind={card.kind}
+      data-faction={card.faction}
+      data-rarity={card.rarity}
+      data-testid={compact ? 'tarot-compact' : 'tarot-card'}
+    >
+      {body}
     </article>
   );
 }
