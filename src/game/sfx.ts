@@ -172,14 +172,15 @@ export function sirenSfx(dur = 1.5) {
 }
 
 /** Short distorted metal power-chord sting for Oppenheimer.
- * Sample: Freesound 417158 "A G Riff.wav" by aceinet — Creative Commons 0.
- * https://freesound.org/people/aceinet/sounds/417158/
+ * Sample: Freesound 777136 "130 BPM Harsh Rock Guitar Power Chords and 808 Bass"
+ * by DanJFilms — Creative Commons 0.
+ * https://freesound.org/people/DanJFilms/sounds/777136/
  * See public/assets/sfx/README.md
  */
 
 export function metalRiffSfx() {
   unlockAudio();
-  const a = new Audio('/assets/sfx/metal-riff.mp3?v=3');
+  const a = new Audio('/assets/sfx/metal-riff.mp3?v=4');
   a.volume = 0.78;
   void a.play().catch(() => {
     // WebAudio fallback: stacked saw power chords
@@ -223,6 +224,27 @@ export function metalRiffSfx() {
  * Layered CC0: qubodup Explosive (162265) + rhapsodize Cinematic Boom (255111) + sub rumble.
  * See public/assets/sfx/README.md
  */
+
+/** Aggressive shout "Nuke 'em!" when the gadget fires.
+ * Synthetic TTS (edge-tts en-US-GuyNeural) with grit post-process — original.
+ * See public/assets/sfx/README.md
+ */
+export function nukemVoiceSfx() {
+  unlockAudio();
+  const a = new Audio('/assets/sfx/nukem.mp3?v=1');
+  a.volume = 0.92;
+  void a.play().catch(() => {
+    // Web Speech fallback if mp3 blocked
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      const u = new SpeechSynthesisUtterance("Nuke 'em!");
+      u.rate = 1.15;
+      u.pitch = 0.7;
+      u.volume = 1;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+    }
+  });
+}
 
 export function nukeBoomSfx() {
   unlockAudio();

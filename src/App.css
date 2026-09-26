@@ -3063,6 +3063,38 @@ input[type='search'] {
   height: 100%;
   pointer-events: none;
 }
+.nuke-skull-wrap {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 52%;
+  transform: translate(-50%, -42%);
+  width: min(42vw, 320px);
+  height: min(42vw, 320px);
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  animation: nuke-skull-life 5.2s ease-in-out forwards;
+  filter: drop-shadow(0 0 18px rgba(90, 220, 70, 0.45))
+    drop-shadow(0 8px 24px rgba(0, 0, 0, 0.85));
+}
+.nuke-skull {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0.92;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+@keyframes nuke-skull-life {
+  0% { opacity: 0; transform: translate(-50%, -42%) scale(0.55); filter: drop-shadow(0 0 0 rgba(90,220,70,0)); }
+  6% { opacity: 0.15; transform: translate(-50%, -42%) scale(0.7); }
+  14% { opacity: 1; transform: translate(-50%, -42%) scale(1.05); filter: drop-shadow(0 0 28px rgba(140,255,80,0.7)) drop-shadow(0 8px 24px rgba(0,0,0,0.85)); }
+  28% { opacity: 0.95; transform: translate(-50%, -42%) scale(1); }
+  70% { opacity: 0.85; transform: translate(-50%, -40%) scale(1.02); }
+  88% { opacity: 0.55; transform: translate(-50%, -38%) scale(1.04); }
+  100% { opacity: 0; transform: translate(-50%, -36%) scale(1.08); filter: drop-shadow(0 0 8px rgba(90,220,70,0.2)); }
+}
 .nuke-legend {
   position: absolute;
   z-index: 5;
@@ -3107,4 +3139,29 @@ input[type='search'] {
   66% { transform: translate(-4px, 3px) rotate(-0.15deg); }
   78% { transform: translate(3px, -2px) rotate(0.1deg); }
   90% { transform: translate(-2px, 1px) rotate(-0.05deg); }
+}
+
+/* —— Radioactive fallout rain (post-mushroom) —— */
+.fallout-rain {
+  z-index: 138;
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.fallout-rain-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+
+.campaign-fallout-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 137;
+  background: radial-gradient(ellipse at 50% 40%, #1a2410 0%, #070a06 70%, #030403 100%);
+  pointer-events: none;
 }

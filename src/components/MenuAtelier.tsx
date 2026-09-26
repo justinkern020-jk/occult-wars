@@ -441,6 +441,7 @@ export function MenuAtelier({
         <TarotPop
           card={revealUnlock.card}
           caption={revealUnlock.caption}
+          closeOnBackdrop={false}
           onClose={() => setRevealUnlock(null)}
         />
       )}

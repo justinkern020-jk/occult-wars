@@ -41,7 +41,7 @@ import {
   victoryReason,
   type VictoryKind,
 } from '../game/scoring';
-import { clashSfx, gunshotSfx, defeatStinger, victoryStinger, brassClick, setMusicBed, unlockAudio, sirenSfx, metalRiffSfx, nukeBoomSfx, copSirenSfx } from '../game/sfx';
+import { clashSfx, gunshotSfx, defeatStinger, victoryStinger, brassClick, setMusicBed, unlockAudio, sirenSfx, metalRiffSfx, nukeBoomSfx, nukemVoiceSfx, copSirenSfx } from '../game/sfx';
 import {
   recordMatchVisit,
   rollVisitTurn,
@@ -58,6 +58,7 @@ import {
 } from './RulesPrimer';
 import { UnitCoin, type BoardUnit } from './UnitCoin';
 import { MushroomCloud } from './MushroomCloud';
+import { FalloutRain } from './FalloutRain';
 import { BattleCountModal } from './BattleCountModal';
 import {
   clearForceSighting,
@@ -343,6 +344,7 @@ export function Battlefield({
   const [codeToast, setCodeToast] = useState<string | null>(null);
   const [battleCountOpen, setBattleCountOpen] = useState(false);
   const [nukeActive, setNukeActive] = useState(false);
+  const [falloutActive, setFalloutActive] = useState(false);
   const codeRealNameRef = useRef(
     profile?.username &&
       !isSecondHourCode(profile.username) &&
@@ -954,6 +956,8 @@ export function Battlefield({
         setAttacker(null);
         brassClick();
         unlockAudio();
+        metalRiffSfx();
+        nukemVoiceSfx();
         nukeBoomSfx();
         return true;
       }
@@ -985,6 +989,7 @@ export function Battlefield({
     const pending = pendingGadgetRef.current;
     pendingGadgetRef.current = null;
     setNukeActive(false);
+    setFalloutActive(true);
     if (!pending) return;
     const ctx = buildEffectCtx(pending.acting);
     const err = resolveActivatedAbility(ctx, pending.sourceUid);
@@ -2457,6 +2462,11 @@ export function Battlefield({
       )}
 
       <MushroomCloud active={nukeActive} onDone={finishGadget} />
+      <FalloutRain
+        active={falloutActive}
+        durationMs={6000}
+        onDone={() => setFalloutActive(false)}
+      />
 
       {battleCountOpen && (
         <BattleCountModal onClose={() => setBattleCountOpen(false)} />

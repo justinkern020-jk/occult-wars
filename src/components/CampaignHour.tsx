@@ -17,9 +17,11 @@ import {
   brassClick,
   nukeBoomSfx,
   metalRiffSfx,
+  nukemVoiceSfx,
   unlockAudio,
 } from '../game/sfx';
 import { MushroomCloud } from './MushroomCloud';
+import { FalloutRain } from './FalloutRain';
 import { TarotPop } from './TarotPop';
 
 type Props = {
@@ -32,7 +34,7 @@ type Props = {
 };
 
 /** nuke → epilogue → justin card → plate → Fulcanelli warning (final) */
-type CloserPhase = 'nuke' | 'epilogue' | 'reveal' | 'plate' | 'warning';
+type CloserPhase = 'nuke' | 'fallout' | 'epilogue' | 'reveal' | 'plate' | 'warning';
 
 export function CampaignHour({
   profile,
@@ -75,6 +77,7 @@ export function CampaignHour({
       // Ultimate closer: Justin Kern nukes whoever "won" the hour.
       unlockAudio();
       metalRiffSfx();
+      nukemVoiceSfx();
       nukeBoomSfx();
       setCloser('nuke');
       nextProfile = applyJustinKernUnlock({ ...profile, username: profile.username });
@@ -121,6 +124,10 @@ export function CampaignHour({
   const done = progress.stage >= LEADEN_STAGES.length || !!endingId;
 
   const onNukeDone = useCallback(() => {
+    setCloser('fallout');
+  }, []);
+
+  const onFalloutDone = useCallback(() => {
     setCloser('epilogue');
   }, []);
 
@@ -154,6 +161,15 @@ export function CampaignHour({
       >
         {closer === 'nuke' && (
           <MushroomCloud active onDone={onNukeDone} />
+        )}
+
+        {closer === 'fallout' && (
+          <div className="campaign-fallout-veil" data-testid="campaign-fallout">
+            <FalloutRain active durationMs={4500} onDone={onFalloutDone} />
+            <p className="nuke-legend" style={{ opacity: 0.7, animation: 'none' }}>
+              Ash settles
+            </p>
+          </div>
         )}
 
         {closer === 'epilogue' && (
@@ -191,6 +207,7 @@ export function CampaignHour({
           <TarotPop
             card={justinCard}
             caption="Justin Kern · ruler of what remains"
+            closeOnBackdrop={false}
             onClose={() => {
               setJustinCard(null);
               setCloser('plate');
