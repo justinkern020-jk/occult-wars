@@ -158,6 +158,20 @@ export const ENDINGS: Record<
   },
 };
 
+
+/** Universal closer after any Leaden Hour ending — Justin Kern answers. */
+export const JUSTIN_EPILOGUE = {
+  title: 'Justin Kern Answers',
+  kicker: 'The Occult Wars · First Sitting',
+  paragraphs: [
+    'The lodges thought they had won the leaden hour. Crowns of ash. Sealed circles. Treaties no one signed out loud.',
+    'Then Justin Kern answered. The gadget spoke. The field became ash, and every chair — victor and vanquished — was empty under the same white fire.',
+    'He rules what remains of the occult world. The six orders remember only the flash.',
+    'The Occult Wars were only the first sitting. The hour after has not yet begun.',
+  ],
+  sequelTease: 'A true sequel waits beyond the seal.',
+} as const;
+
 export function stageByIndex(i: number): CampaignStage | null {
   return LEADEN_STAGES[i] ?? null;
 }

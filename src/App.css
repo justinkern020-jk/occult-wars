@@ -2969,6 +2969,40 @@ input[type='search'] {
   color: #e7d7a4;
 }
 
+
+
+/* Leaden Hour — Justin Kern ultimate closer */
+.campaign-epilogue {
+  max-width: 38rem;
+  margin: 0 auto;
+  text-align: center;
+  animation: campaign-epilogue-in 1.1s ease-out both;
+}
+.campaign-epilogue-p {
+  margin: 0.85rem 0;
+  color: var(--color-parchment, #f3ead7);
+  text-shadow: 0 1px 8px #000a;
+}
+.campaign-sequel-tease {
+  margin: 1.4rem 0 1.6rem;
+  font-family: Cinzel, Georgia, serif;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  color: var(--color-brass, #c6a15b);
+  text-shadow: 0 0 18px #c6a15b55;
+}
+.campaign-justin-footnote {
+  margin: 0.75rem 0 1.25rem;
+  font-style: italic;
+  color: var(--color-muted, #a89878);
+  font-size: 0.92rem;
+}
+@keyframes campaign-epilogue-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* —— Mushroom cloud (Justin Kern gadget) — photoreal v3 —— */
 .nuke-overlay {
   z-index: 140;

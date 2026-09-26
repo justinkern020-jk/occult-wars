@@ -1,13 +1,25 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ENDINGS,
+  JUSTIN_EPILOGUE,
   LEADEN_STAGES,
   pickEnding,
   type EndingId,
   type StageOutcome,
 } from '../game/campaign';
-import type { Profile } from '../game/profile';
-import { speakLine, playChronicle, brassClick } from '../game/sfx';
+import { applyJustinKernUnlock, type Profile } from '../game/profile';
+import { cardById } from '../data/catalog';
+import type { Card } from '../game/types';
+import {
+  speakLine,
+  playChronicle,
+  brassClick,
+  nukeBoomSfx,
+  metalRiffSfx,
+  unlockAudio,
+} from '../game/sfx';
+import { MushroomCloud } from './MushroomCloud';
+import { TarotPop } from './TarotPop';
 
 type Props = {
   profile: Profile;
@@ -17,6 +29,9 @@ type Props = {
   lastOutcome?: { stageIndex: number; outcome: StageOutcome } | null;
   onConsumeOutcome?: () => void;
 };
+
+/** nuke → epilogue → justin card → variant plate */
+type CloserPhase = 'nuke' | 'epilogue' | 'reveal' | 'plate';
 
 export function CampaignHour({
   profile,
@@ -33,6 +48,8 @@ export function CampaignHour({
   };
   const [showCutscene, setShowCutscene] = useState(true);
   const [endingId, setEndingId] = useState<EndingId | null>(null);
+  const [closer, setCloser] = useState<CloserPhase | null>(null);
+  const [justinCard, setJustinCard] = useState<Card | null>(null);
 
   useEffect(() => {
     if (!lastOutcome || !onConsumeOutcome) return;
@@ -44,6 +61,7 @@ export function CampaignHour({
     const nextStage = Math.min(stageIndex + 1, LEADEN_STAGES.length);
     let endings = progress.endings;
     let end: EndingId | null = null;
+    let nextProfile = profile;
     if (nextStage >= LEADEN_STAGES.length) {
       end = pickEnding(
         Object.keys(nextChoices)
@@ -53,9 +71,15 @@ export function CampaignHour({
       );
       endings = [...new Set([...endings, end])];
       setEndingId(end);
+      // Ultimate closer: Justin Kern nukes whoever "won" the hour.
+      unlockAudio();
+      metalRiffSfx();
+      nukeBoomSfx();
+      setCloser('nuke');
+      nextProfile = applyJustinKernUnlock({ ...profile, username: profile.username });
     }
     onUpdate({
-      ...profile,
+      ...nextProfile,
       campaign: {
         stage: nextStage,
         choices: nextChoices,
@@ -65,6 +89,25 @@ export function CampaignHour({
     onConsumeOutcome();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastOutcome]);
+
+  // If player returns to a finished campaign (stage already maxed), show plate
+  // without replaying nuke unless we just finished via lastOutcome.
+  useEffect(() => {
+    if (
+      progress.stage >= LEADEN_STAGES.length &&
+      !endingId &&
+      closer === null &&
+      !lastOutcome
+    ) {
+      setEndingId(pickEnding(
+        Object.keys(progress.choices)
+          .map(Number)
+          .sort((a, b) => a - b)
+          .map((k) => progress.choices[String(k)] as StageOutcome),
+      ));
+      setCloser('plate');
+    }
+  }, [progress.stage, progress.choices, endingId, closer, lastOutcome]);
 
   const outcomes = useMemo(() => {
     const keys = Object.keys(progress.choices)
@@ -76,6 +119,10 @@ export function CampaignHour({
   const stage = LEADEN_STAGES[progress.stage] ?? null;
   const done = progress.stage >= LEADEN_STAGES.length || !!endingId;
 
+  const onNukeDone = useCallback(() => {
+    setCloser('epilogue');
+  }, []);
+
   function beginStage() {
     if (!stage) return;
     brassClick();
@@ -84,32 +131,96 @@ export function CampaignHour({
     onPlayStage(stage.map, stage.foe, progress.stage);
   }
 
+  function resetHour() {
+    onUpdate({
+      ...profile,
+      campaign: { stage: 0, endings: progress.endings, choices: {} },
+    });
+    setEndingId(null);
+    setCloser(null);
+    setJustinCard(null);
+    setShowCutscene(true);
+  }
+
   if (done) {
-    const end =
-      ENDINGS[(endingId ?? pickEnding(outcomes)) as EndingId] ??
-      ENDINGS['sealed-hour'];
+    const variantId = (endingId ?? pickEnding(outcomes)) as EndingId;
+    const end = ENDINGS[variantId] ?? ENDINGS['sealed-hour'];
+
     return (
-      <section className="campaign-root plate-screen" data-testid="campaign-ending">
-        <p className="plate-kicker">The Leaden Hour</p>
-        <h2>{end.title}</h2>
-        <p className="lede">{end.text}</p>
-        <button
-          type="button"
-          className="brass-btn brass-btn-solid"
-          onClick={() => {
-            onUpdate({
-              ...profile,
-              campaign: { stage: 0, endings: progress.endings, choices: {} },
-            });
-            setEndingId(null);
-            setShowCutscene(true);
-          }}
-        >
-          Sit the hour again
-        </button>
-        <button type="button" className="brass-btn brass-btn-ghost" onClick={onBack}>
-          Return
-        </button>
+      <section
+        className="campaign-root plate-screen"
+        data-testid="campaign-ending"
+      >
+        {closer === 'nuke' && (
+          <MushroomCloud active onDone={onNukeDone} />
+        )}
+
+        {closer === 'epilogue' && (
+          <div className="campaign-epilogue" data-testid="campaign-epilogue">
+            <p className="plate-kicker">{JUSTIN_EPILOGUE.kicker}</p>
+            <h2>{JUSTIN_EPILOGUE.title}</h2>
+            <div className="deco-rule" />
+            {JUSTIN_EPILOGUE.paragraphs.map((p) => (
+              <p key={p.slice(0, 24)} className="lede campaign-epilogue-p">
+                {p}
+              </p>
+            ))}
+            <p className="campaign-sequel-tease">{JUSTIN_EPILOGUE.sequelTease}</p>
+            <button
+              type="button"
+              className="brass-btn brass-btn-solid"
+              data-testid="campaign-epilogue-continue"
+              onClick={() => {
+                brassClick();
+                const jk = cardById('justin_kern');
+                if (jk) {
+                  setJustinCard(jk);
+                  setCloser('reveal');
+                } else {
+                  setCloser('plate');
+                }
+              }}
+            >
+              Behold the occupant
+            </button>
+          </div>
+        )}
+
+        {closer === 'reveal' && justinCard && (
+          <TarotPop
+            card={justinCard}
+            caption="Justin Kern · ruler of what remains"
+            onClose={() => {
+              setJustinCard(null);
+              setCloser('plate');
+            }}
+          />
+        )}
+
+        {(closer === 'plate' || closer === null) && (
+          <>
+            <p className="plate-kicker">The Leaden Hour · Lodge memory</p>
+            <h2>{end.title}</h2>
+            <p className="lede">{end.text}</p>
+            <p className="campaign-justin-footnote">
+              Then the gadget answered. Justin Kern rules the ash.
+            </p>
+            <button
+              type="button"
+              className="brass-btn brass-btn-solid"
+              onClick={resetHour}
+            >
+              Sit the hour again
+            </button>
+            <button
+              type="button"
+              className="brass-btn brass-btn-ghost"
+              onClick={onBack}
+            >
+              Return
+            </button>
+          </>
+        )}
       </section>
     );
   }
