@@ -3065,6 +3065,7 @@ input[type='search'] {
 }
 .nuke-skull-wrap {
   position: absolute;
+  background: transparent;
   /* Above the particle canvas so the skull actually reads */
   z-index: 4;
   left: 50%;
