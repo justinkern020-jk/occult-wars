@@ -55,6 +55,10 @@ export interface Combatant {
   keywords: string[];
   /** Runtime Toughness flag (or keyword `tough`). */
   tough?: boolean;
+  /** Runtime Fast Attack flag (or keyword `fast`). */
+  fast?: boolean;
+  /** Runtime Slow Attack flag (or keyword `slow`). */
+  slow?: boolean;
 }
 
 export type CombatMode = 'normal' | 'fast' | 'slow';

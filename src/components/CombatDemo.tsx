@@ -58,8 +58,8 @@ export function CombatDemo() {
     <section className="combat-demo">
       <h2>Combat sandbox</h2>
       <p className="lede">
-        Cabals dual-Power: one number is vitality and damage. Fast strikes first;
-        Slow strikes last; otherwise simultaneous.
+        Cabals dual-Power: one number is vitality and damage. Fast strikes first
+        (either side); both Fast trade simultaneously; Slow strikes last.
       </p>
       <div className="combat-pickers">
         <label>

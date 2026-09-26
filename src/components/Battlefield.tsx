@@ -1130,6 +1130,7 @@ export function Battlefield({
           power: atkPow,
           keywords: atk.unit.keywords,
           tough: atk.unit.tough,
+          fast: atk.unit.fast,
         });
         const resultDef = combatantFrom({
           id: here.uid,
@@ -1137,6 +1138,7 @@ export function Battlefield({
           power: here.power,
           keywords: here.keywords,
           tough: here.tough,
+          fast: here.fast,
         });
         const dmg = applyDamage(resultDef, atkPow);
         pushLog(
@@ -1169,6 +1171,7 @@ export function Battlefield({
           power: atkPow,
           keywords: atk.unit.keywords,
           tough: atk.unit.tough,
+          fast: atk.unit.fast,
         }),
         combatantFrom({
           id: here.uid,
@@ -1176,6 +1179,7 @@ export function Battlefield({
           power: here.power,
           keywords: here.keywords,
           tough: here.tough,
+          fast: here.fast,
         }),
       );
       clashSfx();

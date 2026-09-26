@@ -52,6 +52,7 @@ export function UnitCoin({
 }) {
   const hurt = unit.power < unit.maxPower;
   const veiled = hasKeyword(unit, 'veiled');
+  const fast = hasKeyword(unit, 'fast');
   const onKey = (e: KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -82,8 +83,8 @@ export function UnitCoin({
         e.stopPropagation();
         onInspect();
       }}
-      title={`${unit.name} · Power ${unit.power} · Resources ${unit.loyalty}${veilTitle} · tap to move · double-tap to inspect`}
-      aria-label={`${unit.name}, Power ${unit.power}, Resources ${unit.loyalty}${veiled ? ', veiled and untargetable' : ''}`}
+      title={`${unit.name} · Power ${unit.power} · Resources ${unit.loyalty}${fast ? ' · Fast Attack' : ''}${veilTitle} · tap to move · double-tap to inspect`}
+      aria-label={`${unit.name}, Power ${unit.power}, Resources ${unit.loyalty}${fast ? ', Fast Attack' : ''}${veiled ? ', veiled and untargetable' : ''}`}
     >
       <CardArt name={unit.name} className="stone-face" />
       <span className="coin-stat coin-loyalty" title="Resources · muster cost">
@@ -97,6 +98,15 @@ export function UnitCoin({
         <abbr>P</abbr>
         {unit.power}
       </span>
+      {fast && (
+        <span
+          className="coin-fast-dagger"
+          title="Fast Attack · strikes first in melee"
+          aria-label="Fast Attack"
+        >
+          <img src="/assets/icons/fast-dagger.svg" alt="" aria-hidden />
+        </span>
+      )}
       {veiled && (
         <span className="veil-dust" aria-hidden title="Veiled · strikes pass over">
           <span className="veil-haze" />

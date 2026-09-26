@@ -128,4 +128,77 @@ describe('Cabals dual-Power combat', () => {
     expect(r.defender.power).toBe(3);
     expect(r.attackerDestroyed).toBe(true);
   });
+
+  it('non-Fast attacker vs Fast defender: Fast defender strikes first; lethal means no return', () => {
+    // Heath Maiden (bolstered to 3) walks into Foo Fighter (P3 Fast) —
+    // must NOT mutual-kill: Foo strikes first and Heath dies unanswered.
+    const r = resolveMelee(
+      combatantFrom({ name: 'Heath Maiden', power: 3 }),
+      combatantFrom({
+        name: 'Foo Fighter',
+        power: 3,
+        keywords: ['cryptid', 'fast'],
+      }),
+    );
+    expect(r.mode).toBe('slow'); // defender wins initiative
+    expect(r.attackerDestroyed).toBe(true);
+    expect(r.defenderDestroyed).toBe(false);
+    expect(r.defender.power).toBe(3); // no return damage
+  });
+
+  it('Fast attacker vs non-Fast: Fast lives when blow is lethal (no mutual kill)', () => {
+    const r = resolveMelee(
+      combatantFrom({
+        name: 'Foo Fighter',
+        power: 3,
+        keywords: ['fast'],
+      }),
+      combatantFrom({ name: 'Heath Maiden', power: 3 }),
+    );
+    expect(r.mode).toBe('fast');
+    expect(r.defenderDestroyed).toBe(true);
+    expect(r.attackerDestroyed).toBe(false);
+    expect(r.attacker.power).toBe(3);
+  });
+
+  it('both Fast: equal initiative → simultaneous mutual damage', () => {
+    const r = resolveMelee(
+      combatantFrom({ name: 'Blitz A', power: 3, keywords: ['fast'] }),
+      combatantFrom({ name: 'Blitz B', power: 3, keywords: ['fast'] }),
+    );
+    expect(r.mode).toBe('normal');
+    expect(r.attackerDestroyed).toBe(true);
+    expect(r.defenderDestroyed).toBe(true);
+  });
+
+  it('Fast vs Slow: Fast wins initiative even as defender', () => {
+    const r = resolveMelee(
+      combatantFrom({ name: 'Lead Slow', power: 4, keywords: ['slow'] }),
+      combatantFrom({ name: 'Static Child', power: 4, keywords: ['fast'] }),
+    );
+    expect(r.mode).toBe('slow'); // attacker slower → defender first
+    expect(r.attackerDestroyed).toBe(true);
+    expect(r.defender.power).toBe(4);
+  });
+
+  it('Toughness via runtime tough flag soaks first point', () => {
+    const r = resolveMelee(
+      combatantFrom({ name: 'Hitter', power: 3 }),
+      combatantFrom({ name: 'Sandbag', power: 5, tough: true }),
+    );
+    // Simultaneous: Sandbag soaks 1 of 3 → takes 2 → Power 3; Hitter takes 5 → dead
+    expect(r.defender.power).toBe(3);
+    expect(r.attackerDestroyed).toBe(true);
+  });
+
+  it('Fast runtime flag (granted Fast) works without keyword string alone', () => {
+    const r = resolveMelee(
+      combatantFrom({ name: 'Gifted', power: 2, fast: true }),
+      combatantFrom({ name: 'Tide Clerk', power: 2 }),
+    );
+    expect(r.mode).toBe('fast');
+    expect(r.defenderDestroyed).toBe(true);
+    expect(r.attacker.power).toBe(2);
+  });
+
 });

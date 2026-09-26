@@ -6,10 +6,12 @@
  * 2. Taking damage permanently reduces Power. Power ≤ 0 → destroyed.
  * 3. Example: Power 4 deals 4; takes 2 → Power 2 thereafter.
  * 4. Normal: simultaneous mutual damage at current Power.
- * 5. Fast Attack: strikes FIRST; if defender Power ≤ 0, no strike back.
- * 6. Slow Attack: strikes LAST; opponent deals first; if Slow survives,
+ * 5. Fast Attack: the Fast side strikes FIRST (attacker or defender).
+ *    If that blow drops the foe to Power ≤ 0, they do not strike back.
+ * 6. Both Fast (or equal initiative): simultaneous mutual damage.
+ * 7. Slow Attack: strikes LAST relative to Normal/Fast; if Slow survives,
  *    it deals its (possibly reduced) Power.
- * 7. Chipping Power before melee reduces return damage.
+ * 8. Chipping Power before melee reduces return damage.
  *
  * Toughness (legacy keyword): first point of any single strike is refused.
  */
@@ -24,6 +26,8 @@ function clone(u: Combatant): Combatant {
     power: u.power,
     keywords: [...u.keywords],
     tough: u.tough,
+    fast: u.fast,
+    slow: u.slow,
   };
 }
 
@@ -57,7 +61,7 @@ export function resolveMelee(
 ): CombatResult {
   const attacker = clone(attackerIn);
   const defender = clone(defenderIn);
-  const mode: CombatMode = combatModeFor(attacker);
+  const mode: CombatMode = combatModeFor(attacker, defender);
   const log: string[] = [];
 
   const atkPow = () => Math.max(0, attacker.power);
@@ -79,6 +83,7 @@ export function resolveMelee(
       `${defender.name} deals ${dmgToAtk}; ${attacker.name} is now Power ${Math.max(0, attacker.power)}.`,
     );
   } else if (mode === 'fast') {
+    // Attacker has higher initiative (Fast vs Normal/Slow).
     const aDeal = atkPow();
     const dmgToDef = applyDamage(defender, aDeal);
     log.push(
@@ -102,18 +107,23 @@ export function resolveMelee(
       );
     }
   } else {
-    // Slow Attack: opponent (defender) deals first.
+    // Defender has higher initiative (defender Fast, or attacker Slow).
     const dDeal = defPow();
     const dmgToAtk = applyDamage(attacker, dDeal);
+    const defFast = hasKeyword(defender, 'fast');
     log.push(
-      `Slow Attack: ${defender.name} deals first for ${dmgToAtk} (from Power ${dDeal}).`,
+      defFast
+        ? `Fast Attack: ${defender.name} strikes first for ${dmgToAtk} (from Power ${dDeal}).`
+        : `Slow Attack: ${defender.name} deals first for ${dmgToAtk} (from Power ${dDeal}).`,
     );
     log.push(
       `${attacker.name} is now Power ${Math.max(0, attacker.power)}.`,
     );
     if (isDestroyed(attacker)) {
       log.push(
-        `${attacker.name} is destroyed and never delivers its Slow blow.`,
+        defFast
+          ? `${attacker.name} is destroyed and does not strike back.`
+          : `${attacker.name} is destroyed and never delivers its Slow blow.`,
       );
     } else {
       const aDeal = atkPow(); // possibly reduced
@@ -152,6 +162,8 @@ export function combatantFrom(
     power: number;
     keywords?: string[];
     tough?: boolean;
+    fast?: boolean;
+    slow?: boolean;
   },
 ): Combatant {
   return {
@@ -160,5 +172,7 @@ export function combatantFrom(
     power: partial.power,
     keywords: partial.keywords ?? [],
     tough: partial.tough,
+    fast: partial.fast,
+    slow: partial.slow,
   };
 }

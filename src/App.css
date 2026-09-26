@@ -1462,6 +1462,43 @@ input[type='search'] {
   color: #5c1818;
   background: radial-gradient(circle at 35% 28%, #ffe8e0, #e4a06a 42%, #8c3d32 78%);
 }
+
+/* Fast Attack dagger badge — occult brass, right side of coin */
+.coin-fast-dagger {
+  z-index: 5;
+  position: absolute;
+  right: 3%;
+  top: 18%;
+  width: clamp(0.95rem, 2.8vw, 1.2rem);
+  height: clamp(0.95rem, 2.8vw, 1.2rem);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 28%, #fff8e4, #e4c56a 42%, #8c6d32 78%);
+  border: 1px solid #3a2a14;
+  box-shadow:
+    0 2px #1a120c,
+    inset 0 1px #ffffffb3,
+    0 0 6px #c9a84a66;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.coin-fast-dagger img {
+  width: 72%;
+  height: 72%;
+  display: block;
+  filter: drop-shadow(0 0.5px 0 #2a1c0c);
+}
+.coin-foe .coin-fast-dagger {
+  background:
+    radial-gradient(circle at 35% 28%, #f0f3f6, #c5ced8 42%, #5a6570 78%);
+  border-color: #2a3038;
+  box-shadow:
+    0 2px #121418,
+    inset 0 1px #ffffffb3,
+    0 0 6px #a8b4c066;
+}
+
 .stone-picked {
   outline: 2px solid #fff6d8;
   outline-offset: 3px;

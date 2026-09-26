@@ -12,7 +12,7 @@ export const KEYWORDS: Record<string, KeywordInfo> = {
     key: 'fast',
     glyph: 'F',
     title:
-      'Fast Attack. Strikes first in melee. If the blow drops the foe to Power ≤ 0, they do not strike back.',
+      'Fast Attack. Strikes first in melee (attacker or defender). If the blow drops the foe to Power ≤ 0, they do not strike back. Both Fast: simultaneous.',
     combat: true,
   },
   slow: {
@@ -115,11 +115,33 @@ export function hasKeyword(
   return unit.keywords.includes(key);
 }
 
+/**
+ * Initiative rank for melee timing.
+ * Fast (2) > Normal (1) > Slow (0).
+ * Higher rank strikes first; equal ranks trade simultaneously.
+ */
+export function initiativeRank(
+  unit: { keywords: string[]; fast?: boolean; slow?: boolean },
+): number {
+  if (hasKeyword(unit, 'fast')) return 2;
+  if (hasKeyword(unit, 'slow')) return 0;
+  return 1;
+}
+
+/**
+ * Melee timing from BOTH sides' keywords (Cabals dual-Power).
+ * - Only one Fast → that side strikes first (no return if lethal).
+ * - Both Fast (or equal initiative) → simultaneous.
+ * - Slow loses initiative to Normal/Fast.
+ */
 export function combatModeFor(
   attacker: { keywords: string[]; fast?: boolean; slow?: boolean },
+  defender?: { keywords: string[]; fast?: boolean; slow?: boolean },
 ): 'normal' | 'fast' | 'slow' {
-  if (hasKeyword(attacker, 'fast')) return 'fast';
-  if (hasKeyword(attacker, 'slow')) return 'slow';
+  const atk = initiativeRank(attacker);
+  const def = defender ? initiativeRank(defender) : 1;
+  if (atk > def) return 'fast';
+  if (atk < def) return 'slow';
   return 'normal';
 }
 
