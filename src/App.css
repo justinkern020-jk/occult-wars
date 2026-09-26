@@ -580,7 +580,13 @@ input[type='search'] {
   outline: 2px solid #f3e2b8;
   animation: 1.5s ease-in-out infinite legal-pulse;
 }
+.stone.has-unit {
+  /* Above empty circles so coins stay tappable; below legal targets. */
+  z-index: 4;
+}
 .stone.legal-move {
+  /* Above the selected origin — DOM order alone hides west/north arrows under the coin. */
+  z-index: 7;
   outline-offset: 4px;
   outline: 2px solid #9ec8ff;
   animation: 1.5s ease-in-out infinite move-pulse;
@@ -594,11 +600,14 @@ input[type='search'] {
     0 8px 14px #0006;
 }
 .stone.legal-strike {
+  z-index: 7;
   outline-offset: 3px;
   outline: 2px solid #c6a15b;
   animation: 1.4s ease-in-out infinite strike-pulse;
 }
 .stone.stone-origin {
+  /* Keep glow under legal move/strike neighbors so W/N chevrons stay visible. */
+  z-index: 3;
   box-shadow:
     0 0 0 1px #1a120c,
     0 0 0 3px #9ec8ff,
