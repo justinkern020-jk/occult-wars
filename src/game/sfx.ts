@@ -125,6 +125,22 @@ export function gunshotSfx() {
   });
 }
 
+
+/** Mystical wind chimes — plays at match open before the theme. */
+export function windChimeSfx(): Promise<void> {
+  unlockAudio();
+  return new Promise((resolve) => {
+    const a = new Audio('/assets/audio/sfx/wind-chime.mp3');
+    a.volume = 0.65;
+    const done = () => resolve();
+    a.addEventListener('ended', done, { once: true });
+    a.addEventListener('error', done, { once: true });
+    void a.play().catch(done);
+    // Safety: don't block theme forever
+    window.setTimeout(done, 3200);
+  });
+}
+
 /** ~1.5s air-raid style siren for gas / chlorine rites (replaces cough static). */
 export function sirenSfx(dur = 1.5) {
   unlockAudio();
@@ -282,14 +298,40 @@ function loopPhrase(
 function startMatchTheme(): { stop: () => void } {
   unlockAudio();
   let fallbackStop: (() => void) | null = null;
+  let themeTimer = 0;
+  let stopped = false;
   const a = new Audio('/assets/audio/music/battlefield-mystical.mp3');
   a.loop = true;
-  a.volume = 0.42;
-  void a.play().catch(() => {
-    fallbackStop = startMatchThemeFallback().stop;
+  a.volume = 0;
+  const startTheme = () => {
+    if (stopped) return;
+    void a.play().catch(() => {
+      if (!stopped) fallbackStop = startMatchThemeFallback().stop;
+    });
+    // Gentle fade-in after chimes
+    const fadeMs = 1600;
+    const target = 0.42;
+    const t0 = performance.now();
+    const tick = () => {
+      if (stopped) return;
+      const u = Math.min(1, (performance.now() - t0) / fadeMs);
+      a.volume = target * u;
+      if (u < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  };
+  // Chimes first, then theme
+  void windChimeSfx().then(() => {
+    if (!stopped) startTheme();
   });
+  // Also begin theme mid-chime so the handoff feels continuous (~2.1s)
+  themeTimer = window.setTimeout(() => {
+    if (!stopped && a.paused) startTheme();
+  }, 2100);
   return {
     stop: () => {
+      stopped = true;
+      window.clearTimeout(themeTimer);
       a.pause();
       a.src = '';
       fallbackStop?.();
