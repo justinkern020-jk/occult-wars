@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { MAPS, type GameMap } from '../game/maps';
 
 type Props = {
@@ -36,8 +37,35 @@ export function MenuAtelier({
   onCollection,
   onSandbox,
 }: Props) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    el.volume = 0.22;
+    const tryPlay = () => {
+      void el.play().catch(() => {
+        /* autoplay may be blocked until a gesture */
+      });
+    };
+    tryPlay();
+    const unlock = () => tryPlay();
+    window.addEventListener('pointerdown', unlock, { once: true });
+    return () => {
+      window.removeEventListener('pointerdown', unlock);
+      el.pause();
+    };
+  }, []);
+
   return (
     <div className="menu-root" data-testid="main-menu">
+      <audio
+        ref={audioRef}
+        src="/assets/audio/moonlight.mp3"
+        loop
+        preload="auto"
+        aria-hidden
+      />
       <section
         className="menu-stage"
         style={{ backgroundImage: 'url(/assets/titles/menu-atelier.jpg)' }}

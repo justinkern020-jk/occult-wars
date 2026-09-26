@@ -1463,3 +1463,120 @@ input[type='search'] {
   color: var(--color-parchment);
   letter-spacing: 0.06em;
 }
+
+/* ——— Score rail /60 ——— */
+.score-cap {
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+  font-size: 0.72em;
+  font-weight: 500;
+  margin-left: 0.1rem;
+}
+
+/* ——— Title cover image (reliable vs black bg) ——— */
+.title-cover-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+  pointer-events: none;
+  background: #140f0c;
+}
+
+/* ——— Rules primer ——— */
+.primer-veil,
+.match-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: #070605e6;
+  backdrop-filter: blur(4px);
+  animation: fade-in 0.25s ease;
+}
+.primer-plate,
+.match-plate {
+  width: min(100%, 34rem);
+  background: linear-gradient(165deg, #1c1914 0%, #12100d 100%);
+  border: 1px solid #8c6d32;
+  border-radius: 0.85rem;
+  padding: 1.5rem 1.4rem 1.35rem;
+  box-shadow:
+    inset 0 1px #ffecc833,
+    0 24px 48px #000000a6;
+  color: var(--color-parchment);
+  font-family: var(--font-body, 'Libre Baskerville', serif);
+}
+.primer-plate h2,
+.match-plate h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  letter-spacing: 0.04em;
+  color: var(--color-parchment);
+}
+.primer-plate ul {
+  margin: 0.9rem 0 1.2rem;
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--color-parchment);
+}
+.primer-plate li::marker {
+  color: var(--color-brass);
+}
+
+/* ——— Match-over veil ——— */
+.match-kicker {
+  margin: 0 0 0.35rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  color: var(--color-brass);
+}
+.match-reason {
+  margin: 0.55rem 0 0;
+  font-size: 0.95rem;
+  color: var(--color-muted);
+}
+.match-score {
+  margin: 0.85rem 0 0;
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+  font-size: 0.85rem;
+  color: var(--color-parchment);
+}
+.match-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1.25rem;
+}
+.match-veil.is-victory .match-plate {
+  box-shadow:
+    inset 0 1px #ffecc833,
+    0 0 0 1px #8eb6b055,
+    0 24px 48px #000000a6;
+}
+.match-veil.is-defeat .match-plate {
+  box-shadow:
+    inset 0 1px #ffecc833,
+    0 0 0 1px #e0707055,
+    0 24px 48px #000000a6;
+}
+.match-veil.is-defeat h2 {
+  color: #e8a0a0;
+}
+.match-veil.is-victory h2 {
+  color: #c6e8d8;
+}

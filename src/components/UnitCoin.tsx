@@ -13,6 +13,9 @@ export interface BoardUnit {
   /** Loyalty / muster cost — NOT combat Power. */
   loyalty: number;
   keywords: string[];
+  /** Acted this rite (one step). */
+  moved?: boolean;
+  attacked?: boolean;
 }
 
 /**
