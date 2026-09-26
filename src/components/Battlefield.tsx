@@ -63,6 +63,7 @@ import { BattleCountModal } from './BattleCountModal';
 import {
   clearForceSighting,
   clearPendingJustinHand,
+  clearPendingSethHand,
   isAthensCode,
   isBattleCountCode,
   isCodePrefix,
@@ -72,6 +73,7 @@ import {
   isSethKernCode,
   readForceSighting,
   readPendingJustinHand,
+  readPendingSethHand,
   writeHourOpen,
 } from '../game/hourUnlock';
 import {
@@ -608,9 +610,23 @@ export function Battlefield({
           justinNote = "Justin Kern's hand is sealed — no room.";
         }
       }
+      // Seth Kern pending: drop into Azure hand if space.
+      let sethNote: string | null = null;
+      if (readPendingSethHand()) {
+        clearPendingSethHand();
+        const sk = cardById('seth_kern');
+        if (sk && h.blue.length < HAND_CAP) {
+          h = { ...h, blue: [...h.blue, sk] };
+          setHand(h);
+          sethNote = 'Seth Kern answers the circle.';
+        } else if (sk) {
+          sethNote = "Seth Kern's hand is sealed — no room.";
+        }
+      }
       setLog([
         ...(veilNote ? [veilNote] : []),
         ...(justinNote ? [justinNote] : []),
+        ...(sethNote ? [sethNote] : []),
         `The leaden hour opens on ${m.name}. ${sideLabel('blue')} takes the first rite.`,
       ]);
 
@@ -1017,6 +1033,24 @@ export function Battlefield({
     return 'Justin Kern answers — the gadget is in hand.';
   }
 
+  function dropSethIntoHand(seat: Side): string {
+    const sk = cardById('seth_kern');
+    if (!sk) return 'Seth Kern is missing from the catalogue.';
+    const cur = liveRef.current.hand[seat];
+    if (cur.length >= HAND_CAP) {
+      return "The hand is sealed — Seth Kern cannot enter.";
+    }
+    const nextHand = { ...liveRef.current.hand, [seat]: [...cur, sk] };
+    setHand(nextHand);
+    liveRef.current = { ...liveRef.current, hand: nextHand };
+    if (profile && onUpdateProfile) {
+      // Unlock requires username === 'seth kern'; preserve display name after.
+      const unlocked = applySethKernUnlock({ ...profile, username: 'seth kern' });
+      onUpdateProfile({ ...unlocked, username: profile.username });
+    }
+    return 'Seth Kern answers — the chief is in hand.';
+  }
+
   function forceSightingNow(): string {
     if (matchOver || phase === 'over') {
       return 'The night answers only while a circle is open.';
@@ -1083,25 +1117,21 @@ export function Battlefield({
       }
       return;
     }
-    if (!isCodePrefix(next)) {
-      codeRealNameRef.current = next || codeRealNameRef.current;
-    }
-    if (isSethKernCode(next) && profile && onUpdateProfile) {
+    if (isSethKernCode(next)) {
+      setCodeDraft('');
       unlockAudio();
       copSirenSfx();
-      const before = profile.collection.includes('seth_kern');
-      const unlocked = applySethKernUnlock({ ...profile, username: next });
-      onUpdateProfile(unlocked);
-      if (!before && unlocked.collection.includes('seth_kern')) {
-        setCodeToast('Seth Kern has joined the working.');
-        const sk = cardById('seth_kern');
-        if (sk) {
-          setInspectPower(undefined);
-          setInspectCard(sk);
-        }
-      } else {
-        setCodeToast('The chief has taken a seat.');
+      const seat: Side = mode === 'hotseat' ? side : 'blue';
+      setCodeToast(dropSethIntoHand(seat));
+      const sk = cardById('seth_kern');
+      if (sk) {
+        setInspectPower(undefined);
+        setInspectCard(sk);
       }
+      return;
+    }
+    if (!isCodePrefix(next)) {
+      codeRealNameRef.current = next || codeRealNameRef.current;
     }
     if (isHiddenAdeptCode(next) && profile && onUpdateProfile) {
       const beforeJk = profile.collection.includes('justin_kern');

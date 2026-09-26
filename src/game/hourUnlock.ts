@@ -3,6 +3,7 @@
 export const HOUR_OPEN_KEY = 'occult-wars.hour-open';
 export const FORCE_SIGHTING_KEY = 'occult-wars.force-sighting';
 export const PENDING_JUSTIN_HAND_KEY = 'occult-wars.pending-justin-hand';
+export const PENDING_SETH_HAND_KEY = 'occult-wars.pending-seth-hand';
 
 export const SECOND_HOUR_CODE = 'the second hour';
 export const BATTLE_COUNT_CODE = 'battle count';
@@ -144,4 +145,17 @@ export function writePendingJustinHand(): void {
 
 export function clearPendingJustinHand(): void {
   clearSessionFlag(PENDING_JUSTIN_HAND_KEY);
+}
+
+/** Menu Seth Kern: drop Seth into Azure hand on next match boot. */
+export function readPendingSethHand(): boolean {
+  return sessionFlag(PENDING_SETH_HAND_KEY);
+}
+
+export function writePendingSethHand(): void {
+  writeSessionFlag(PENDING_SETH_HAND_KEY);
+}
+
+export function clearPendingSethHand(): void {
+  clearSessionFlag(PENDING_SETH_HAND_KEY);
 }

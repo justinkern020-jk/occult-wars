@@ -6,10 +6,12 @@ import {
   HOUR_OPEN_KEY,
   OPPENHEIMER_CODE,
   PENDING_JUSTIN_HAND_KEY,
+  PENDING_SETH_HAND_KEY,
   SECOND_HOUR_CODE,
   bootHourOpen,
   clearForceSighting,
   clearPendingJustinHand,
+  clearPendingSethHand,
   isAthensCode,
   isBattleCountCode,
   isCodePrefix,
@@ -21,9 +23,11 @@ import {
   readForceSighting,
   readHourOpen,
   readPendingJustinHand,
+  readPendingSethHand,
   writeForceSighting,
   writeHourOpen,
   writePendingJustinHand,
+  writePendingSethHand,
 } from './hourUnlock';
 
 const local = new Map<string, string>();
@@ -113,5 +117,13 @@ describe('hourUnlock / occultist codes', () => {
     expect(session.get(PENDING_JUSTIN_HAND_KEY)).toBe('1');
     clearPendingJustinHand();
     expect(readPendingJustinHand()).toBe(false);
+  });
+
+  it('pending seth hand flag', () => {
+    expect(readPendingSethHand()).toBe(false);
+    writePendingSethHand();
+    expect(session.get(PENDING_SETH_HAND_KEY)).toBe('1');
+    clearPendingSethHand();
+    expect(readPendingSethHand()).toBe(false);
   });
 });

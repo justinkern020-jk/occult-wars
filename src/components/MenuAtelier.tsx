@@ -18,6 +18,7 @@ import {
   writeForceSighting,
   writeHourOpen,
   writePendingJustinHand,
+  writePendingSethHand,
 } from '../game/hourUnlock';
 import { cardById } from '../data/catalog';
 import type { Card } from '../game/types';
@@ -150,23 +151,21 @@ export function MenuAtelier({
       if (jk) setRevealUnlock({ card: jk, caption: 'The gadget waits — Justin Kern' });
       return;
     }
+    if (isSethKernCode(next)) {
+      unlockAudio();
+      copSirenSfx();
+      writePendingSethHand();
+      const unlocked = applySethKernUnlock({ ...profile, username: next });
+      setToast('The chief waits — Seth Kern joins the next circle.');
+      onUpdateProfile(unlocked);
+      const sk = cardById('seth_kern');
+      if (sk) setRevealUnlock({ card: sk, caption: 'The chief waits — Seth Kern' });
+      return;
+    }
     if (!isCodePrefix(next)) {
       realNameRef.current = next;
     }
     let nextProfile = { ...profile, username: next };
-    if (isSethKernCode(next)) {
-      unlockAudio();
-      copSirenSfx();
-      const before = nextProfile.collection.includes('seth_kern');
-      nextProfile = applySethKernUnlock(nextProfile);
-      if (!before && nextProfile.collection.includes('seth_kern')) {
-        setToast('Seth Kern has joined the working.');
-        const sk = cardById('seth_kern');
-        if (sk) setRevealUnlock({ card: sk, caption: 'Seth Kern has joined the working' });
-      } else {
-        setToast('The chief has taken a seat.');
-      }
-    }
     if (isHiddenAdeptCode(next)) {
       const beforeJk = nextProfile.collection.includes('justin_kern');
       nextProfile = applyJustinKernUnlock(nextProfile);

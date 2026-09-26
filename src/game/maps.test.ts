@@ -12,10 +12,9 @@ describe('tile labels (map UI)', () => {
   it('walkable field never says Street', () => {
     expect(tileLabel({ kind: 'street' })).toBe('');
   });
-  it('strongholds are labeled', () => {
-    expect(tileLabel({ kind: 'stronghold', home: 'blue' })).toBe(
-      'Azure Stronghold',
-    );
+  it('stronghold and resource have no text overlay', () => {
+    expect(tileLabel({ kind: 'stronghold', home: 'blue' })).toBe('');
+    expect(tileLabel({ kind: 'resource', symbols: 1 })).toBe('');
   });
   it('Outer Seal center is a neutral Gate', () => {
     const m = MAPS.find((x) => x.id === 'outer-seal')!;
