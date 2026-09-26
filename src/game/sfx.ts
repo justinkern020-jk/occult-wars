@@ -1,4 +1,4 @@
-/** Brass clicks, clash SFX, victory/defeat stingers, menu/match music beds. */
+/** Brass clicks, clash/gunshot SFX, stingers; moonlight menu + match music beds. */
 
 export type MusicBed = 'none' | 'menu' | 'match';
 
@@ -87,6 +87,41 @@ export function clashSfx() {
   void a.play().catch(() => {
     beep(180, 0.1, 'sawtooth', 0.12);
     beep(90, 0.14, 'square', 0.08, 0.05);
+  });
+}
+
+/** Real recorded gunshot for ranged strikes (replaces Atari square bloop). */
+export function gunshotSfx() {
+  unlockAudio();
+  const n = 1 + Math.floor(Math.random() * 3);
+  const a = new Audio(`/assets/audio/guns/shot-${n}.mp3`);
+  a.volume = 0.7;
+  a.playbackRate = 0.94 + Math.random() * 0.12;
+  void a.play().catch(() => {
+    // Noise-burst fallback if mp3 blocked
+    const c = getAC();
+    if (!c) return;
+    const t0 = c.currentTime;
+    const bufferSize = Math.floor(c.sampleRate * 0.18);
+    const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      const env = Math.exp(-i / (c.sampleRate * 0.045));
+      data[i] = (Math.random() * 2 - 1) * env;
+    }
+    const src = c.createBufferSource();
+    src.buffer = buffer;
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.45, t0);
+    g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.2);
+    const f = c.createBiquadFilter();
+    f.type = 'lowpass';
+    f.frequency.value = 2800;
+    src.connect(f);
+    f.connect(g);
+    g.connect(c.destination);
+    src.start(t0);
+    beep(90, 0.12, 'sine', 0.2, 0);
   });
 }
 
@@ -259,23 +294,19 @@ function startMatchTheme(): { stop: () => void } {
   });
 }
 
-/** Menu bed: same family, quieter/slower drone — no moonlight piano. */
+/** Menu bed: Moonlight Sonata loop (battlefield uses WebAudio match theme). */
 function startMenuTheme(): { stop: () => void } {
-  const c = getAC();
-  if (!c) return { stop: () => {} };
-  const step = 2.4;
-  const melody = [57, 60, 59, 55, 53, 52, 53, 55];
-  const g = 0.016;
-  return loopPhrase((t0) => {
-    noteAt(c, t0, midiHz(33), step * 8 * 0.98, g * 1.2);
-    noteAt(c, t0, midiHz(40), step * 8 * 0.98, g * 0.8);
-    noteAt(c, t0, midiHz(45), step * 4 * 0.98, g * 0.55);
-    noteAt(c, t0 + step * 4, midiHz(43), step * 4 * 0.98, g * 0.55);
-    melody.forEach((m, i) => {
-      noteAt(c, t0 + i * step, midiHz(m), step * 0.9, g * 0.85);
-    });
-    return step * 8;
-  });
+  unlockAudio();
+  const a = new Audio('/assets/audio/moonlight.mp3');
+  a.loop = true;
+  a.volume = 0.45;
+  void a.play().catch(() => {});
+  return {
+    stop: () => {
+      a.pause();
+      a.src = '';
+    },
+  };
 }
 
 export function setMusicBed(next: MusicBed): void {

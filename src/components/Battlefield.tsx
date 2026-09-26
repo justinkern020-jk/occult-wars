@@ -39,7 +39,7 @@ import {
   victoryReason,
   type VictoryKind,
 } from '../game/scoring';
-import { clashSfx, defeatStinger, victoryStinger, brassClick, setMusicBed, unlockAudio, sirenSfx } from '../game/sfx';
+import { clashSfx, gunshotSfx, defeatStinger, victoryStinger, brassClick, setMusicBed, unlockAudio, sirenSfx } from '../game/sfx';
 import {
   recordMatchVisit,
   rollVisitTurn,
@@ -851,7 +851,7 @@ export function Battlefield({
         pushLog(
           `Ranged: ${atk.unit.name} strikes ${here.name} for ${dmg} from ${dist} away.`,
         );
-        clashSfx();
+        gunshotSfx();
         setPhase('melee');
         setBoard((b) => {
           const next = b.map((row) => [...row]);
