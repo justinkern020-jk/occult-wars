@@ -278,7 +278,7 @@ export function resolveEffect(
       if (err) return err;
       let smiteN = n;
       if (card.id === 'goofer_dust' && hasAlliedPapaJohn(ctx, side)) {
-        smiteN = n + 2;
+        smiteN = n + 1;
         pushLog(ctx, `Papa John's root strengthens the dust.`);
       }
       const dmg = dealTo(ctx, target!, smiteN);
@@ -308,7 +308,7 @@ export function resolveEffect(
       lockUnit(ctx, target!, side, 'cannot move or attack on its next rite.');
       if (card.id === 'hot_foot_powder' && hasAlliedPapaJohn(ctx, side)) {
         pushLog(ctx, `Papa John's root burns through the powder.`);
-        const dmg = dealTo(ctx, target!, 2);
+        const dmg = dealTo(ctx, target!, 1);
         pushLog(ctx, `${card.name} deals ${dmg} to ${target!.name}.`);
         if (target!.power <= 0) destroyUnit(ctx, target!.uid);
       }

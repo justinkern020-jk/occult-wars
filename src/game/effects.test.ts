@@ -355,7 +355,7 @@ describe('resolveActivatedAbility', () => {
 
 
 describe('Papa John powder synergy', () => {
-  it('Goofer Dust deals 3 without Papa John and 5 with allied Papa John', () => {
+  it('Goofer Dust deals 3 without Papa John and 4 with allied Papa John', () => {
     const dust = cardById('goofer_dust');
     expect(dust?.effect?.op).toBe('smite');
     expect(dust?.effect?.n).toBe(3);
@@ -406,10 +406,10 @@ describe('Papa John powder synergy', () => {
     expect(
       resolveEffect(withJohn, dust!.effect!, { id: dust!.id, name: dust!.name }, 'foe'),
     ).toBeNull();
-    expect(withJohn.units['foe'].power).toBe(5);
+    expect(withJohn.units['foe'].power).toBe(6);
   });
 
-  it('Hot-Foot Powder locks only without Papa John; with him also deals 2', () => {
+  it('Hot-Foot Powder locks only without Papa John; with him also deals 1', () => {
     const powder = cardById('hot_foot_powder');
     expect(powder?.effect?.op).toBe('lock');
 
@@ -462,7 +462,7 @@ describe('Papa John powder synergy', () => {
       resolveEffect(withJohn, powder!.effect!, { id: powder!.id, name: powder!.name }, 'foe'),
     ).toBeNull();
     expect(withJohn.units['foe'].sick).toBe(true);
-    expect(withJohn.units['foe'].power).toBe(4);
+    expect(withJohn.units['foe'].power).toBe(5);
   });
 
   it('enemy Papa John does not buff your powders', () => {
