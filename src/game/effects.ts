@@ -183,6 +183,8 @@ function tide(ctx: EffectCtx, side: Side, sourceName: string) {
 export type EffectSpec = { op: string; n?: number };
 
 export type CardExtras = {
+  /** Catalog card id when resolving a cast rite/device (for synergies). */
+  id?: string;
   alsoDraw?: number;
   alsoBank?: number;
   alsoHealth?: number;
@@ -192,6 +194,13 @@ export type CardExtras = {
   name: string;
   aim?: boolean;
 };
+
+/** True when an allied high_john (Papa John) unit is on the board for `side`. */
+function hasAlliedPapaJohn(ctx: EffectCtx, side: Side): boolean {
+  return Object.values(ctx.units).some(
+    (u) => u.side === side && u.cardId === 'high_john' && !u.silenced,
+  );
+}
 
 /** Resolve a rite/device effect. Mutates ctx. Target optional when aim. */
 export function resolveEffect(
@@ -267,7 +276,12 @@ export function resolveEffect(
     case 'smite': {
       const err = needTarget();
       if (err) return err;
-      const dmg = dealTo(ctx, target!, n);
+      let smiteN = n;
+      if (card.id === 'goofer_dust' && hasAlliedPapaJohn(ctx, side)) {
+        smiteN = n + 2;
+        pushLog(ctx, `Papa John's root strengthens the dust.`);
+      }
+      const dmg = dealTo(ctx, target!, smiteN);
       pushLog(ctx, `${card.name} deals ${dmg} to ${target!.name}.`);
       if (target!.power <= 0) destroyUnit(ctx, target!.uid);
       break;
@@ -292,6 +306,12 @@ export function resolveEffect(
       const err = needTarget();
       if (err) return err;
       lockUnit(ctx, target!, side, 'cannot move or attack on its next rite.');
+      if (card.id === 'hot_foot_powder' && hasAlliedPapaJohn(ctx, side)) {
+        pushLog(ctx, `Papa John's root burns through the powder.`);
+        const dmg = dealTo(ctx, target!, 2);
+        pushLog(ctx, `${card.name} deals ${dmg} to ${target!.name}.`);
+        if (target!.power <= 0) destroyUnit(ctx, target!.uid);
+      }
       break;
     }
     case 'set_power': {

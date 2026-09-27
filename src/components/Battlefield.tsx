@@ -1045,6 +1045,7 @@ export function Battlefield({
         ctx,
         card.effect,
         {
+          id: card.id,
           name: card.name,
           alsoDraw: card.alsoDraw,
           alsoBank: card.alsoBank,

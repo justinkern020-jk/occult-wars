@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   actNeedsAim,
   resolveActivatedAbility,
+  resolveEffect,
   type EffectCtx,
   type EffectUnit,
 } from './effects';
@@ -349,5 +350,149 @@ describe('resolveActivatedAbility', () => {
     expect(ctx.units['b']).toBeUndefined();
     expect(ctx.units['wail']).toBeDefined();
     expect(ctx.loyalty.blue).toBe(0);
+  });
+});
+
+
+describe('Papa John powder synergy', () => {
+  it('Goofer Dust deals 3 without Papa John and 5 with allied Papa John', () => {
+    const dust = cardById('goofer_dust');
+    expect(dust?.effect?.op).toBe('smite');
+    expect(dust?.effect?.n).toBe(3);
+
+    const alone = baseCtx('blue');
+    place(
+      alone,
+      unit({
+        uid: 'foe',
+        cardId: 'fodder',
+        name: 'Fodder',
+        side: 'red',
+        power: 10,
+      }),
+      2,
+      2,
+    );
+    expect(
+      resolveEffect(alone, dust!.effect!, { id: dust!.id, name: dust!.name }, 'foe'),
+    ).toBeNull();
+    expect(alone.units['foe'].power).toBe(7);
+
+    const withJohn = baseCtx('blue');
+    place(
+      withJohn,
+      unit({
+        uid: 'john',
+        cardId: 'high_john',
+        name: 'Papa John',
+        side: 'blue',
+        power: 2,
+      }),
+      0,
+      0,
+    );
+    place(
+      withJohn,
+      unit({
+        uid: 'foe',
+        cardId: 'fodder',
+        name: 'Fodder',
+        side: 'red',
+        power: 10,
+      }),
+      2,
+      2,
+    );
+    expect(
+      resolveEffect(withJohn, dust!.effect!, { id: dust!.id, name: dust!.name }, 'foe'),
+    ).toBeNull();
+    expect(withJohn.units['foe'].power).toBe(5);
+  });
+
+  it('Hot-Foot Powder locks only without Papa John; with him also deals 2', () => {
+    const powder = cardById('hot_foot_powder');
+    expect(powder?.effect?.op).toBe('lock');
+
+    const alone = baseCtx('blue');
+    place(
+      alone,
+      unit({
+        uid: 'foe',
+        cardId: 'fodder',
+        name: 'Fodder',
+        side: 'red',
+        power: 6,
+      }),
+      2,
+      2,
+    );
+    expect(
+      resolveEffect(alone, powder!.effect!, { id: powder!.id, name: powder!.name }, 'foe'),
+    ).toBeNull();
+    expect(alone.units['foe'].sick).toBe(true);
+    expect(alone.units['foe'].powder).toBe(true);
+    expect(alone.units['foe'].power).toBe(6);
+
+    const withJohn = baseCtx('blue');
+    place(
+      withJohn,
+      unit({
+        uid: 'john',
+        cardId: 'high_john',
+        name: 'Papa John',
+        side: 'blue',
+        power: 2,
+      }),
+      0,
+      0,
+    );
+    place(
+      withJohn,
+      unit({
+        uid: 'foe',
+        cardId: 'fodder',
+        name: 'Fodder',
+        side: 'red',
+        power: 6,
+      }),
+      2,
+      2,
+    );
+    expect(
+      resolveEffect(withJohn, powder!.effect!, { id: powder!.id, name: powder!.name }, 'foe'),
+    ).toBeNull();
+    expect(withJohn.units['foe'].sick).toBe(true);
+    expect(withJohn.units['foe'].power).toBe(4);
+  });
+
+  it('enemy Papa John does not buff your powders', () => {
+    const dust = cardById('goofer_dust')!;
+    const ctx = baseCtx('blue');
+    place(
+      ctx,
+      unit({
+        uid: 'john',
+        cardId: 'high_john',
+        name: 'Papa John',
+        side: 'red',
+        power: 2,
+      }),
+      0,
+      0,
+    );
+    place(
+      ctx,
+      unit({
+        uid: 'foe',
+        cardId: 'fodder',
+        name: 'Fodder',
+        side: 'red',
+        power: 10,
+      }),
+      2,
+      2,
+    );
+    expect(resolveEffect(ctx, dust.effect!, { id: dust.id, name: dust.name }, 'foe')).toBeNull();
+    expect(ctx.units['foe'].power).toBe(7);
   });
 });
