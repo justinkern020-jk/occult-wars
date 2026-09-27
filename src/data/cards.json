@@ -940,8 +940,8 @@
     "power": 2,
     "legacyAttack": 1,
     "legacyHealth": 2,
-    "quote": "The fear of the Lord is the beginning of wisdom.",
-    "quoted": "Proverbs 9:10"
+    "quote": "Philosophy begins in wonder.",
+    "quoted": "Plato, Theaetetus"
   },
   {
     "id": "gyro_rocketeer",
@@ -1029,8 +1029,8 @@
     "power": 2,
     "legacyAttack": 1,
     "legacyHealth": 2,
-    "quote": "In the beginning was the Word, and the Word was with God.",
-    "quoted": "John 1:1"
+    "quote": "He formed substance out of chaos and made nonexistence into existence.",
+    "quoted": "Sefer Yetzirah"
   },
   {
     "id": "faustian_coilwright",
@@ -1070,8 +1070,8 @@
       "n": 3,
       "aim": true
     },
-    "quote": "The hand of the diligent shall bear rule.",
-    "quoted": "Proverbs 12:24"
+    "quote": "Nature, to be commanded, must be obeyed.",
+    "quoted": "Francis Bacon"
   },
   {
     "id": "hex_banner",
@@ -1255,8 +1255,8 @@
     "power": 8,
     "legacyAttack": 6,
     "legacyHealth": 8,
-    "quote": "The kingdom of God is within you.",
-    "quoted": "Luke 17:21"
+    "quote": "Know thyself.",
+    "quoted": "Inscription at Delphi"
   },
   {
     "id": "amulet_of_the_coil",
@@ -1290,8 +1290,8 @@
     "effect": {
       "op": "destroy"
     },
-    "quote": "Awake, thou that sleepest, and arise from the dead.",
-    "quoted": "Ephesians 5:14"
+    "quote": "Arise! Awake! and stop not till the goal is reached.",
+    "quoted": "Katha Upanishad"
   },
   {
     "id": "industrial_rite",
@@ -1343,8 +1343,8 @@
       "op": "empty"
     },
     "alsoDraw": 1,
-    "quote": "The love of money is the root of all evil.",
-    "quoted": "1 Timothy 6:10"
+    "quote": "Wealth consists not in having great possessions, but in having few wants.",
+    "quoted": "Epictetus"
   },
   {
     "id": "the_rune_colonel",
@@ -1375,8 +1375,8 @@
     "leaderPower": {
       "op": "haste"
     },
-    "quote": "Iron sharpeneth iron; so a man sharpeneth the countenance of his friend.",
-    "quoted": "Proverbs 27:17"
+    "quote": "The best steel goes through the hottest fire.",
+    "quoted": "English proverb"
   },
   {
     "id": "ash_lice",
@@ -1391,8 +1391,8 @@
     "power": 2,
     "legacyAttack": 1,
     "legacyHealth": 2,
-    "quote": "Behold, how great a matter a little fire kindleth!",
-    "quoted": "James 3:5"
+    "quote": "Little things are infinitely the most important.",
+    "quoted": "Arthur Conan Doyle"
   },
   {
     "id": "parish_tithe_lord",
@@ -1409,8 +1409,8 @@
     "power": 2,
     "legacyAttack": 1,
     "legacyHealth": 2,
-    "quote": "Render therefore unto Caesar the things which are Caesar's.",
-    "quoted": "Matthew 22:21"
+    "quote": "In this world nothing can be said to be certain, except death and taxes.",
+    "quoted": "Benjamin Franklin"
   },
   {
     "id": "candle_warden",
@@ -1464,8 +1464,8 @@
     "power": 4,
     "legacyAttack": 1,
     "legacyHealth": 4,
-    "quote": "Whatsoever thy hand findeth to do, do it with thy might.",
-    "quoted": "Ecclesiastes 9:10"
+    "quote": "Work is love made visible.",
+    "quoted": "Kahlil Gibran, The Prophet"
   },
   {
     "id": "cellar_informant",
@@ -1523,8 +1523,8 @@
     "power": 3,
     "legacyAttack": 2,
     "legacyHealth": 3,
-    "quote": "Confess your faults one to another, and pray one for another.",
-    "quoted": "James 5:16"
+    "quote": "To err is human; to forgive, divine.",
+    "quoted": "Alexander Pope"
   },
   {
     "id": "strix_widow",
@@ -1562,8 +1562,8 @@
       "op": "tap-mend",
       "aim": true
     },
-    "quote": "O sing unto the Lord a new song.",
-    "quoted": "Psalm 96:1"
+    "quote": "Without music, life would be a mistake.",
+    "quoted": "Friedrich Nietzsche"
   },
   {
     "id": "hearth_imp",
@@ -1650,8 +1650,8 @@
     "power": 3,
     "legacyAttack": 1,
     "legacyHealth": 3,
-    "quote": "Like as the cold of snow in the time of harvest, so is a faithful messenger.",
-    "quoted": "Proverbs 25:13"
+    "quote": "The frost performs its secret ministry.",
+    "quoted": "Samuel Taylor Coleridge, Frost at Midnight"
   },
   {
     "id": "the_lead_bear",
@@ -1701,8 +1701,8 @@
       "op": "smite_all",
       "n": 1
     },
-    "quote": "The light shineth in darkness; and the darkness comprehended it not.",
-    "quoted": "John 1:5"
+    "quote": "We are all in the gutter, but some of us are looking at the stars.",
+    "quoted": "Oscar Wilde"
   },
   {
     "id": "the_sunk_stroke",
@@ -1718,8 +1718,8 @@
     "effect": {
       "op": "lock"
     },
-    "quote": "Be still, and know that I am God.",
-    "quoted": "Psalm 46:10"
+    "quote": "Sitting quietly, doing nothing, spring comes, and the grass grows by itself.",
+    "quoted": "Zen saying"
   },
   {
     "id": "mind_mildew",
@@ -1807,8 +1807,8 @@
     "leaderPower": {
       "op": "bulwark"
     },
-    "quote": "The eye is the lamp of the body.",
-    "quoted": "Matthew 6:22"
+    "quote": "The eye, which is called the window of the soul.",
+    "quoted": "Leonardo da Vinci"
   },
   {
     "id": "the_birch_crone",
@@ -1936,8 +1936,8 @@
     "power": 3,
     "legacyAttack": 1,
     "legacyHealth": 3,
-    "quote": "The righteous are bold as a lion.",
-    "quoted": "Proverbs 28:1"
+    "quote": "Fortune favors the bold.",
+    "quoted": "Virgil"
   },
   {
     "id": "sotted_greenhand",
@@ -1952,8 +1952,8 @@
     "power": 4,
     "legacyAttack": 2,
     "legacyHealth": 4,
-    "quote": "Wine is a mocker, strong drink is raging.",
-    "quoted": "Proverbs 20:1"
+    "quote": "In vino veritas — in wine, there is truth.",
+    "quoted": "Latin proverb"
   },
   {
     "id": "the_grazing_seven",
@@ -1970,8 +1970,8 @@
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2,
-    "quote": "The earth is the Lord's, and the fulness thereof.",
-    "quoted": "Psalm 24:1"
+    "quote": "Nature does nothing in vain.",
+    "quoted": "Aristotle"
   },
   {
     "id": "hedgerow_driver",
@@ -2043,8 +2043,8 @@
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3,
-    "quote": "Though I walk through the valley of the shadow of death, I will fear no evil.",
-    "quoted": "Psalm 23:4"
+    "quote": "The wind of heaven is that which blows between a horse's ears.",
+    "quoted": "Arabian proverb"
   },
   {
     "id": "briar_party",
@@ -2221,8 +2221,8 @@
       "n": 1
     },
     "alsoDraw": 1,
-    "quote": "My cup runneth over.",
-    "quoted": "Psalm 23:5"
+    "quote": "Drink! for you know not whence you came, nor why.",
+    "quoted": "Omar Khayyam, Rubaiyat"
   },
   {
     "id": "false_vintage",
@@ -2239,8 +2239,8 @@
       "op": "set_power",
       "n": 1
     },
-    "quote": "Woe unto them that call evil good, and good evil.",
-    "quoted": "Isaiah 5:20"
+    "quote": "Appearances are often deceiving.",
+    "quoted": "Aesop"
   },
   {
     "id": "the_green_sovereign",
@@ -2423,8 +2423,8 @@
     "power": 3,
     "legacyAttack": 2,
     "legacyHealth": 3,
-    "quote": "Watch ye therefore: for ye know not when the master of the house cometh.",
-    "quoted": "Mark 13:35"
+    "quote": "Festina lente — make haste slowly.",
+    "quoted": "Augustus"
   },
   {
     "id": "serpent_adept",
@@ -2459,8 +2459,8 @@
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2,
-    "quote": "If therefore thine eye be single, thy whole body shall be full of light.",
-    "quoted": "Matthew 6:22"
+    "quote": "The eye with which I see God is the same eye with which God sees me.",
+    "quoted": "Meister Eckhart"
   },
   {
     "id": "azoth_twin",
@@ -2481,8 +2481,8 @@
       "aim": true,
       "once": true
     },
-    "quote": "That which is born of the Spirit is spirit.",
-    "quoted": "John 3:6"
+    "quote": "Two souls, alas, dwell within my breast.",
+    "quoted": "Johann Wolfgang von Goethe, Faust"
   },
   {
     "id": "sealed_assassin",
@@ -2536,8 +2536,8 @@
     "power": 4,
     "legacyAttack": 3,
     "legacyHealth": 4,
-    "quote": "A pearl of great price.",
-    "quoted": "Matthew 13:46"
+    "quote": "A thing of beauty is a joy for ever.",
+    "quoted": "John Keats"
   },
   {
     "id": "quicksilver_valet",
@@ -2588,8 +2588,8 @@
     "power": 6,
     "legacyAttack": 6,
     "legacyHealth": 6,
-    "quote": "Then the Lord God formed man of dust from the ground.",
-    "quoted": "Genesis 2:7"
+    "quote": "From the first matter all forms arise.",
+    "quoted": "Alchemical tradition"
   },
   {
     "id": "cranial_engine",
@@ -2655,8 +2655,8 @@
     "effect": {
       "op": "bounce"
     },
-    "quote": "Where two or three are gathered together in my name, there am I in the midst of them.",
-    "quoted": "Matthew 18:20"
+    "quote": "When the dead speak, the living should listen.",
+    "quoted": "Spiritualist maxim"
   },
   {
     "id": "rose_of_the_shut_garden",
@@ -2792,8 +2792,8 @@
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3,
-    "quote": "All they that take the sword shall perish with the sword.",
-    "quoted": "Matthew 26:52"
+    "quote": "He who fights with monsters should look to it that he himself does not become a monster.",
+    "quoted": "Friedrich Nietzsche"
   },
   {
     "id": "bone_consigliere",
@@ -2808,8 +2808,8 @@
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3,
-    "quote": "In the multitude of counsellors there is safety.",
-    "quoted": "Proverbs 11:14"
+    "quote": "No man is wise enough by himself.",
+    "quoted": "Plautus"
   },
   {
     "id": "concrete_angel",
@@ -2896,8 +2896,8 @@
       "op": "empower",
       "n": 2
     },
-    "quote": "Let your yea be yea; and your nay, nay.",
-    "quoted": "James 5:12"
+    "quote": "A man's word is his bond.",
+    "quoted": "English proverb"
   },
   {
     "id": "funeral_march",
@@ -3029,8 +3029,8 @@
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2,
-    "quote": "If ye have faith as a grain of mustard seed, ye shall say unto this mountain, Remove hence.",
-    "quoted": "Matthew 17:20"
+    "quote": "Only possess that root, and he can be summoned at any time.",
+    "quoted": "Zora Neale Hurston, High John de Conquer"
   },
   {
     "id": "appleseed_walker",
@@ -3119,8 +3119,8 @@
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2,
-    "quote": "For now we see through a glass, darkly; but then face to face.",
-    "quoted": "1 Corinthians 13:12"
+    "quote": "All that we see or seem is but a dream within a dream.",
+    "quoted": "Edgar Allan Poe"
   },
   {
     "id": "powwow_doctor",
@@ -3137,8 +3137,8 @@
     "power": 4,
     "legacyAttack": 2,
     "legacyHealth": 4,
-    "quote": "Physician, heal thyself.",
-    "quoted": "Luke 4:23"
+    "quote": "Whoever carries this book with him is safe from all his enemies, visible or invisible.",
+    "quoted": "John George Hohman, The Long Lost Friend"
   },
   {
     "id": "wardenclyffe_adept",
@@ -3312,8 +3312,8 @@
     "effect": {
       "op": "lock"
     },
-    "quote": "The wicked flee when no man pursueth: but the righteous are bold as a lion.",
-    "quoted": "Proverbs 28:1"
+    "quote": "You sprinkled hot foot powder all around your daddy's door.",
+    "quoted": "Robert Johnson, Hellhound on My Trail"
   },
   {
     "id": "liberty_lightning",
@@ -3382,8 +3382,8 @@
       "op": "empower",
       "n": 2
     },
-    "quote": "Faith without works is dead.",
-    "quoted": "James 2:26"
+    "quote": "A mojo is a prayer you can carry.",
+    "quoted": "Hoodoo tradition"
   },
   {
     "id": "edgar_cayce",
@@ -3491,8 +3491,8 @@
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 2,
-    "quote": "Fiat lux — let there be light.",
-    "quoted": "Genesis 1:3"
+    "quote": "The sun is new each day.",
+    "quoted": "Heraclitus"
   },
   {
     "id": "black_shuck",
@@ -3548,8 +3548,8 @@
     "power": 5,
     "legacyAttack": 3,
     "legacyHealth": 5,
-    "quote": "I am the vine, ye are the branches.",
-    "quoted": "John 15:5"
+    "quote": "And this our life, exempt from public haunt, finds tongues in trees, books in the running brooks.",
+    "quoted": "William Shakespeare, As You Like It"
   },
   {
     "id": "afanc",
