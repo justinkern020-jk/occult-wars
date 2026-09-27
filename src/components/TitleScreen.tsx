@@ -21,12 +21,19 @@ export function TitleScreen({ onEnter, dailyGranted = 0 }: Props) {
         }}
       />
       <div className="title-plate">
-        <p className="title-presents" aria-label="Kern presents">
-          <span className="presents-line" aria-hidden="true" />
-          <span className="presents-mark">Kern</span>
-          <span className="presents-verb">presents</span>
-          <span className="presents-line" aria-hidden="true" />
-        </p>
+        <div className="presents-socket title-presents-socket" aria-label="Kern presents">
+          <img
+            className="presents-socket-frame"
+            src="/assets/images/occultist_socket.png"
+            alt=""
+            draggable={false}
+            aria-hidden
+          />
+          <p className="title-presents">
+            <span className="presents-mark">Kern</span>
+            <span className="presents-verb">presents</span>
+          </p>
+        </div>
         <h1 className="title-word">Occult Wars</h1>
         <div className="title-rule" />
         <p className="title-epithet">Six orders · one leaden hour</p>
