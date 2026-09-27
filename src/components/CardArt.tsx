@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { cardImageFallback, cardImageUrl } from '../game/maps';
 
 /** Local art with grok CDN fallback so plates survive CDN flakes. */
@@ -13,6 +13,10 @@ export function CardArt({
 }) {
   const [src, setSrc] = useState(cardImageUrl(name));
   const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    setSrc(cardImageUrl(name));
+    setFailed(false);
+  }, [name]);
   if (failed) {
     return <div className={`card-art-fallback ${className ?? ''}`} aria-hidden />;
   }

@@ -1,5 +1,16 @@
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { MAPS, tileLabel, tileLogName, type Tile } from './maps';
+import { MAPS, cardImageUrl, tileLabel, tileLogName, type Tile } from './maps';
+
+describe('card art paths', () => {
+  it('resolves Papa John art to an existing local asset', () => {
+    expect(cardImageUrl('Papa John')).toBe('/assets/images/papa_john.jpg');
+    expect(
+      existsSync(resolve(process.cwd(), 'public/assets/images/papa_john.jpg')),
+    ).toBe(true);
+  });
+});
 
 describe('tile labels (map UI)', () => {
   it('gates have no board text overlay', () => {
