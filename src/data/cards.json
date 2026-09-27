@@ -1966,7 +1966,7 @@
     "keywords": [
       "graze"
     ],
-    "text": "When it moves, every adjacent tile the enemy owns becomes neutral. Strongholds are spared. It claims only the square it stands on. Seven pale pigs eat a claim down to dirt.",
+    "text": "When it moves, every adjacent tile the enemy owns becomes neutral. Strongholds are spared. It claims only the square it stands on. Seven pale goats eat a claim down to dirt.",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2,
@@ -3027,7 +3027,7 @@
     "keywords": [
       "fast"
     ],
-    "text": "Fast Attack. The root strikes first when he steps into a foe. A killing blow is not answered.",
+    "text": "Fast Attack. The conjure man's root strikes first when he steps into a foe. A killing blow is not answered.",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2,
