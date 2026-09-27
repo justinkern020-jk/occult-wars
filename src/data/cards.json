@@ -3738,5 +3738,22 @@
       "op": "no_bank",
       "n": 2
     }
+  },
+  {
+    "id": "black_monday",
+    "name": "Black Monday",
+    "faction": "Unaligned",
+    "kind": "rite",
+    "rarity": "uncommon",
+    "cost": 0,
+    "oath": 0,
+    "keywords": [],
+    "text": "The ticker opens and does not close clean. Bank 2 resources.",
+    "effect": {
+      "op": "bank",
+      "n": 2
+    },
+    "quote": "The sense of responsibility in the financial community for the community as a whole is not small. It is nearly nil.",
+    "quoted": "John Kenneth Galbraith, The Great Crash 1929"
   }
 ]

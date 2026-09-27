@@ -35,18 +35,20 @@ describe('First Hour pack pool', () => {
     }
   });
 
-  it('never includes radiation_poisoning, nuclear_winter, or south_haven_dispatch', () => {
+  it('never includes radiation_poisoning, nuclear_winter, south_haven_dispatch, or black_monday', () => {
     for (const bias of [true, false]) {
       const pool = packPool('The Columbia Lodge', bias);
       const ids = pool.map((c) => c.id);
       expect(ids).not.toContain('radiation_poisoning');
       expect(ids).not.toContain('nuclear_winter');
       expect(ids).not.toContain('south_haven_dispatch');
+      expect(ids).not.toContain('black_monday');
     }
     const open = packPool(null, false);
     expect(open.map((c) => c.id)).not.toContain('radiation_poisoning');
     expect(open.map((c) => c.id)).not.toContain('nuclear_winter');
     expect(open.map((c) => c.id)).not.toContain('south_haven_dispatch');
+    expect(open.map((c) => c.id)).not.toContain('black_monday');
   });
 
   it('breakSeal pulls never include Second Hour or nuke aftermath', () => {

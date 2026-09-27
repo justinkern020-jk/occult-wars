@@ -1,6 +1,12 @@
 /** Profile persistence: occult-wars.profile.v1 */
 
-import { CARDS, cardById, isExcludedPlateId } from '../data/catalog';
+import {
+  BLACK_MONDAY_ID,
+  CARDS,
+  cardById,
+  isExcludedPlateId,
+  isLossInjectId,
+} from '../data/catalog';
 import type { Card } from './types';
 import {
   FIRST_HOUR_ORDERS,
@@ -249,7 +255,8 @@ export function isLegalDeck(deck: CustomDeck | null | undefined): boolean {
 
 /**
  * First Hour pack pool: non-hero, non-cryptid, no Second Hour societies,
- * no nuke-aftermath / secret hand-drop plates. First 3 pulls bias to order+ally.
+ * no nuke-aftermath / secret hand-drop / loss-inject plates.
+ * First 3 pulls bias to order+ally.
  */
 export function packPool(order: string | null, biasOrder: boolean): Card[] {
   return CARDS.filter((c) => {
@@ -257,6 +264,7 @@ export function packPool(order: string | null, biasOrder: boolean): Card[] {
     if (c.keywords.includes('cryptid')) return false;
     if (isSecondHourSociety(c.faction)) return false;
     if (isExcludedPlateId(c.id)) return false;
+    if (isLossInjectId(c.id)) return false;
     if (!biasOrder || !order) return true;
     return isLegalForOrder(order, c.faction);
   });
@@ -397,6 +405,69 @@ export function applyNukeAftermathUnlocks(p: Profile): Profile {
 /** Strip both nuke-aftermath rites from any profile surface. */
 export function stripNukeAftermathPlates(p: Profile): Profile {
   return applyNukeAftermathUnlocks(p);
+}
+
+
+/** Chance a lost match grants Black Monday into collection / working. */
+export const BLACK_MONDAY_CHANCE = 0.3;
+
+export type BlackMondayInjectOpts = {
+  rand?: () => number;
+  /** Prefer this custom deck id (match working) when inserting a copy. */
+  deckId?: string;
+};
+
+/**
+ * After a local-player loss: ~30% chance to grant Black Monday into the
+ * collection and insert one copy into a custom working (prefer match deck)
+ * if there is room (<40) and fewer than 3 copies already.
+ */
+export function applyBlackMondayLossInject(
+  p: Profile,
+  opts: BlackMondayInjectOpts = {},
+): { profile: Profile; injected: boolean } {
+  const rand = opts.rand ?? Math.random;
+  if (rand() >= BLACK_MONDAY_CHANCE) {
+    return { profile: p, injected: false };
+  }
+  const id = BLACK_MONDAY_ID;
+  const card = cardById(id);
+  if (!card) return { profile: p, injected: false };
+
+  let collection = p.collection;
+  let changed = false;
+  if (!collection.includes(id)) {
+    collection = [...collection, id];
+    changed = true;
+  }
+
+  const canInsert = (d: CustomDeck): boolean => {
+    if (d.cards.length >= 40) return false;
+    const n = d.cards.filter((c) => c === id).length;
+    if (n >= 3) return false;
+    const hero = CARDS.find((c) => c.id === d.heroId);
+    if (!hero || hero.kind !== 'hero') return false;
+    return isLegalForOrder(hero.faction, card.faction);
+  };
+
+  let customDecks = p.customDecks;
+  const preferred =
+    opts.deckId != null
+      ? customDecks.find((d) => d.id === opts.deckId)
+      : undefined;
+  const target =
+    (preferred && canInsert(preferred) ? preferred : undefined) ??
+    customDecks.find(canInsert);
+
+  if (target) {
+    customDecks = customDecks.map((d) =>
+      d.id === target.id ? { ...d, cards: [...d.cards, id] } : d,
+    );
+    changed = true;
+  }
+
+  if (!changed) return { profile: p, injected: false };
+  return { profile: { ...p, collection, customDecks }, injected: true };
 }
 
 export { FIRST_HOUR_ORDERS };

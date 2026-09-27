@@ -113,3 +113,17 @@ export function isSecretHandDropId(id: string): boolean {
 export function isExcludedPlateId(id: string): boolean {
   return isNukeAftermathId(id) || isSecretHandDropId(id);
 }
+
+/**
+ * Loss-inject comeback plates (e.g. Black Monday after a match loss).
+ * Never pack / auto-built working plates — only enter via loss inject
+ * into collection (+ optional custom-deck insert). validateDeck accepts
+ * them once owned; DeckEditor shows them only when owned.
+ */
+export const LOSS_INJECT_IDS = ['black_monday'] as const;
+
+export const BLACK_MONDAY_ID = 'black_monday';
+
+export function isLossInjectId(id: string): boolean {
+  return (LOSS_INJECT_IDS as readonly string[]).includes(id);
+}

@@ -15,10 +15,13 @@ describe('Collection encyclopedia (Catalog default)', () => {
     expect(ids.has('nuclear_winter')).toBe(true);
     expect(ids.has('justin_kern')).toBe(true);
     expect(ids.has('seth_kern')).toBe(true);
+    expect(ids.has('black_monday')).toBe(true);
     // Still flagged for packs/decks — visibility ≠ unlock / own.
     expect(isExcludedPlateId('south_haven_dispatch')).toBe(true);
     expect(isExcludedPlateId('radiation_poisoning')).toBe(true);
     expect(isExcludedPlateId('nuclear_winter')).toBe(true);
+    // Loss-inject is collectible once granted — not an excluded archive plate.
+    expect(isExcludedPlateId('black_monday')).toBe(false);
   });
 
   it('includes First Hour cryptids (not only owned)', () => {

@@ -17,10 +17,14 @@ import {
 import { SecondHour } from './components/SecondHour';
 import { useProfile } from './hooks/useProfile';
 import {
+  applyBlackMondayLossInject,
   awardShards,
   swearAllegiance,
   type CustomDeck,
 } from './game/profile';
+import { cardById } from './data/catalog';
+import { TarotPop } from './components/TarotPop';
+import type { Card } from './game/types';
 import { FIRST_HOUR_ORDERS, allyOf, isFirstHourOrder, type FirstHourOrder } from './game/orders';
 import { readHourOpen } from './game/hourUnlock';
 import type { StageOutcome } from './game/campaign';
@@ -67,6 +71,7 @@ export default function App() {
   const [campaignStage, setCampaignStage] = useState(0);
   const [friendRole, setFriendRole] = useState<FriendRole | null>(null);
   const [friendSession, setFriendSession] = useState<FriendSession | null>(null);
+  const [blackMondayReveal, setBlackMondayReveal] = useState<Card | null>(null);
 
   const working = profile.customDecks[0] as CustomDeck | undefined;
 
@@ -407,7 +412,18 @@ export default function App() {
                   : matchMode === 'friend'
                     ? 'pvp'
                     : 'training';
-            update(awardShards(profile, modeKey, playerWon));
+            let next = awardShards(profile, modeKey, playerWon);
+            if (!playerWon) {
+              const r = applyBlackMondayLossInject(next, {
+                deckId: working?.id,
+              });
+              next = r.profile;
+              if (r.injected) {
+                const bm = cardById('black_monday');
+                if (bm) setBlackMondayReveal(bm);
+              }
+            }
+            update(next);
             if (matchMode === 'campaign') {
               const outcome: StageOutcome = !playerWon
                 ? 'lost'
@@ -447,6 +463,14 @@ export default function App() {
         />
       )}
       {screen === 'sandbox' && <CombatDemo />}
+      {blackMondayReveal && (
+        <TarotPop
+          card={blackMondayReveal}
+          caption="The ticker remembers your fall — Black Monday joins the working"
+          closeOnBackdrop={false}
+          onClose={() => setBlackMondayReveal(null)}
+        />
+      )}
     </div>
   );
 }

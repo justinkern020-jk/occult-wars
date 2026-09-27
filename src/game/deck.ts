@@ -1,6 +1,6 @@
 /** Auto-built workings + deck legality (order+ally, 30–40, max 3). */
 
-import { CARDS, isExcludedPlateId, isNukeAftermathId, isSecretHandDropId } from '../data/catalog';
+import { CARDS, isExcludedPlateId, isLossInjectId, isNukeAftermathId, isSecretHandDropId } from '../data/catalog';
 import type { Card } from './types';
 import { HAND_CAP } from './scoring';
 import { allyOf, isLegalForOrder } from './orders';
@@ -12,7 +12,8 @@ export function buildWorkingIds(faction: string, size = 30): string[] {
       c.faction === faction &&
       c.kind !== 'hero' &&
       !c.keywords.includes('cryptid') &&
-      !isExcludedPlateId(c.id),
+      !isExcludedPlateId(c.id) &&
+      !isLossInjectId(c.id),
   );
   if (pool.length === 0) {
     const units = CARDS.filter(
@@ -20,6 +21,7 @@ export function buildWorkingIds(faction: string, size = 30): string[] {
         c.kind === 'unit' &&
         c.power != null &&
         !isExcludedPlateId(c.id) &&
+        !isLossInjectId(c.id) &&
         !c.keywords.includes('cryptid'),
     );
     const ids: string[] = [];
