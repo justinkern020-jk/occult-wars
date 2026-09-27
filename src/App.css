@@ -1856,36 +1856,57 @@ input[type='search'] {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  /* The socket is intentionally stretched a little; contain would letterbox
+     this 16:9-ish plate inside the wider presentation mark box. */
+  object-fit: fill;
   object-position: center;
   pointer-events: none;
   z-index: 0;
   filter: drop-shadow(0 6px 14px #000a);
 }
 .title-presents-socket {
-  width: min(100%, 15.5rem);
-  aspect-ratio: 2.35 / 1;
-  max-height: 4.25rem;
+  width: min(100%, 14rem);
+  aspect-ratio: 2.1 / 1;
   margin: 0 auto 0.15rem;
 }
 .menu-presents-socket {
-  width: min(100%, 12.5rem);
-  aspect-ratio: 2.35 / 1;
-  max-height: 3.5rem;
+  width: min(100%, 11rem);
+  aspect-ratio: 2.1 / 1;
   margin: 0 0 0.1rem;
+}
+.presents-resource-jewel {
+  position: absolute;
+  top: 50%;
+  width: 0.62rem;
+  height: 0.62rem;
+  z-index: 1;
+  transform: translateY(-50%);
+  background: url(/assets/maps/resource-jewel.svg) center / contain no-repeat;
+  filter: drop-shadow(0 1px 2px #000c) drop-shadow(0 0 5px #7dff9a99);
+  pointer-events: none;
+}
+.presents-resource-jewel-left {
+  left: 14%;
+}
+.presents-resource-jewel-right {
+  right: 14%;
+}
+.menu-presents-socket .presents-resource-jewel {
+  width: 0.46rem;
+  height: 0.46rem;
 }
 .title-presents,
 .menu-presents {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
   gap: 0.35em;
   margin: 0;
-  width: 58%;
-  max-width: 13.5rem;
+  width: 56%;
+  max-width: none;
   font-family: var(--font-display);
   text-transform: uppercase;
   line-height: 1;
@@ -1899,7 +1920,7 @@ input[type='search'] {
   max-width: 10rem;
 }
 .presents-mark {
-  letter-spacing: 0.38em;
+  letter-spacing: 0.25em;
   padding-right: 0.08em; /* optical balance for trailing tracking */
   font-weight: 600;
   background: linear-gradient(
@@ -1923,7 +1944,7 @@ input[type='search'] {
   animation: presents-foil 7.5s ease-in-out infinite;
 }
 .presents-verb {
-  letter-spacing: 0.28em;
+  letter-spacing: 0.22em;
   padding-right: 0.06em;
   font-size: 0.72em;
   font-weight: 400;

@@ -29,6 +29,8 @@ export function TitleScreen({ onEnter, dailyGranted = 0 }: Props) {
             draggable={false}
             aria-hidden
           />
+          <span className="presents-resource-jewel presents-resource-jewel-left" aria-hidden />
+          <span className="presents-resource-jewel presents-resource-jewel-right" aria-hidden />
           <p className="title-presents">
             <span className="presents-mark">Kern</span>
             <span className="presents-verb">presents</span>

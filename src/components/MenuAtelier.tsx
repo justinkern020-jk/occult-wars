@@ -216,6 +216,8 @@ export function MenuAtelier({
               draggable={false}
               aria-hidden
             />
+            <span className="presents-resource-jewel presents-resource-jewel-left" aria-hidden />
+            <span className="presents-resource-jewel presents-resource-jewel-right" aria-hidden />
             <p className="menu-presents">
               <span className="presents-mark">Kern</span>
               <span className="presents-verb">presents</span>
