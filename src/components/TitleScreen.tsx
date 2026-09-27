@@ -21,7 +21,12 @@ export function TitleScreen({ onEnter, dailyGranted = 0 }: Props) {
         }}
       />
       <div className="title-plate">
-        <p className="title-presents">Kern presents...</p>
+        <p className="title-presents" aria-label="Kern presents">
+          <span className="presents-line" aria-hidden="true" />
+          <span className="presents-mark">Kern</span>
+          <span className="presents-verb">presents</span>
+          <span className="presents-line" aria-hidden="true" />
+        </p>
         <h1 className="title-word">Occult Wars</h1>
         <div className="title-rule" />
         <p className="title-epithet">Six orders · one leaden hour</p>

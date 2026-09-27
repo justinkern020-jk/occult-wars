@@ -208,7 +208,12 @@ export function MenuAtelier({
         style={{ backgroundImage: 'url(/assets/titles/menu-atelier.jpg)' }}
       >
         <div className="menu-veil">
-          <p className="menu-presents">Kern presents...</p>
+          <p className="menu-presents" aria-label="Kern presents">
+            <span className="presents-line" aria-hidden="true" />
+            <span className="presents-mark">Kern</span>
+            <span className="presents-verb">presents</span>
+            <span className="presents-line" aria-hidden="true" />
+          </p>
           <h1 className="menu-title">Occult Wars</h1>
           <p className="menu-lede">
             Six orders. One leaden hour. Cabals dual-Power — vitality and damage

@@ -1845,13 +1845,93 @@ input[type='search'] {
   padding: 2.5rem 1.5rem 3.25rem;
   position: relative;
 }
-.title-presents {
-  letter-spacing: 0.42em;
-  text-transform: uppercase;
-  color: var(--color-brass);
-  font-family: var(--font-display);
-  font-size: 0.78rem;
+.title-presents,
+.menu-presents {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65em;
   margin: 0;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  line-height: 1;
+}
+.title-presents {
+  font-size: 0.78rem;
+}
+.menu-presents {
+  font-size: 0.65rem;
+  justify-content: flex-start;
+}
+.presents-mark {
+  letter-spacing: 0.48em;
+  padding-right: 0.08em; /* optical balance for trailing tracking */
+  font-weight: 600;
+  background: linear-gradient(
+    105deg,
+    #8c6d32 0%,
+    #e8d09a 22%,
+    #c6a15b 42%,
+    #f3ead7 52%,
+    #c6a15b 62%,
+    #a8843f 82%,
+    #8c6d32 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 0 10px color-mix(in oklab, var(--color-brass) 45%, transparent))
+    drop-shadow(0 1px 0 #0c0907aa);
+  animation: presents-foil 7.5s ease-in-out infinite;
+}
+.presents-verb {
+  letter-spacing: 0.36em;
+  padding-right: 0.06em;
+  font-size: 0.88em;
+  font-weight: 400;
+  color: color-mix(in oklab, var(--color-brass) 62%, var(--color-muted));
+  opacity: 0.82;
+  text-shadow: 0 1px 0 #0c090788;
+}
+.presents-line {
+  display: block;
+  width: 2.4em;
+  height: 1px;
+  flex-shrink: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--color-brass) 55%, transparent) 35%,
+    color-mix(in oklab, var(--color-brass) 85%, var(--color-parchment)) 50%,
+    color-mix(in oklab, var(--color-brass) 55%, transparent) 65%,
+    transparent
+  );
+  opacity: 0.7;
+  box-shadow: 0 0 6px color-mix(in oklab, var(--color-brass) 28%, transparent);
+}
+.title-presents .presents-line {
+  width: 2.85em;
+}
+@keyframes presents-foil {
+  0%, 100% {
+    background-position: 0% 50%;
+    filter: drop-shadow(0 0 8px color-mix(in oklab, var(--color-brass) 35%, transparent))
+      drop-shadow(0 1px 0 #0c0907aa);
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: drop-shadow(0 0 14px color-mix(in oklab, var(--color-brass) 55%, transparent))
+      drop-shadow(0 1px 0 #0c0907aa);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .presents-mark {
+    animation: none;
+    background-position: 40% 50%;
+  }
 }
 .title-word {
   color: var(--color-parchment);
@@ -1910,14 +1990,7 @@ input[type='search'] {
   background: linear-gradient(#0c090733 0%, #0c09079e 42%, #0c0907eb 100%);
   padding: 2.75rem 1.25rem 1.75rem;
 }
-.menu-presents {
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
-  color: var(--color-brass);
-  font-family: var(--font-display);
-  font-size: 0.65rem;
-  margin: 0;
-}
+
 .menu-title {
   margin: 0.5rem 0 0;
   max-width: 36rem;
