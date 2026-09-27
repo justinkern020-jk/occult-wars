@@ -1572,7 +1572,12 @@ input[type='search'] {
 }
 .coin-stat {
   z-index: 4;
-  color: #1a120c;
+  color: #b8ffc4;
+  text-shadow:
+    0 0 6px #7dff9acc,
+    0 0 14px #3cff7a99,
+    0 0 28px #1aff5e66,
+    0 1px 2px #001808aa;
   background: radial-gradient(circle at 35% 28%, #fff8e4, #e4c56a 42%, #8c6d32 78%);
   border: 1px solid #3a2a14;
   border-radius: 50%;
@@ -1596,7 +1601,12 @@ input[type='search'] {
   right: 4%;
 }
 .coin-hurt {
-  color: #5c1818;
+  color: #ffb8b8;
+  text-shadow:
+    0 0 6px #ff7d7dcc,
+    0 0 14px #ff3c3c99,
+    0 0 28px #ff1a1a66,
+    0 1px 2px #180000aa;
   background: radial-gradient(circle at 35% 28%, #ffe8e0, #e4a06a 42%, #8c3d32 78%);
 }
 
