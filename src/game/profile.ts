@@ -1,6 +1,6 @@
 /** Profile persistence: occult-wars.profile.v1 */
 
-import { CARDS, cardById, isNukeAftermathId } from '../data/catalog';
+import { CARDS, cardById, isExcludedPlateId } from '../data/catalog';
 import type { Card } from './types';
 import {
   FIRST_HOUR_ORDERS,
@@ -126,7 +126,7 @@ export function migrateProfile(raw: Partial<Profile> & Record<string, unknown>):
     collection: Array.isArray(raw.collection)
       ? raw.collection.filter(
           (id): id is string =>
-            typeof id === 'string' && !isNukeAftermathId(id),
+            typeof id === 'string' && !isExcludedPlateId(id),
         )
       : [],
     customDecks: Array.isArray(raw.customDecks)
@@ -139,7 +139,7 @@ export function migrateProfile(raw: Partial<Profile> & Record<string, unknown>):
             cards: Array.isArray(d.cards)
               ? d.cards.filter(
                   (c): c is string =>
-                    typeof c === 'string' && !isNukeAftermathId(c),
+                    typeof c === 'string' && !isExcludedPlateId(c),
                 )
               : [],
           }))
@@ -157,7 +157,7 @@ export function migrateProfile(raw: Partial<Profile> & Record<string, unknown>):
     secondCards: Array.isArray(raw.secondCards)
       ? raw.secondCards.filter(
           (c): c is string =>
-            typeof c === 'string' && !isNukeAftermathId(c),
+            typeof c === 'string' && !isExcludedPlateId(c),
         )
       : null,
   };
@@ -239,7 +239,7 @@ export function isLegalDeck(deck: CustomDeck | null | undefined): boolean {
     const card = CARDS.find((c) => c.id === id);
     if (!card || card.kind === 'hero') return false;
     if (card.keywords.includes('cryptid')) return false;
-    if (isNukeAftermathId(card.id)) return false;
+    if (isExcludedPlateId(card.id)) return false;
     if (!isLegalForOrder(hero.faction, card.faction)) return false;
     counts[id] = (counts[id] ?? 0) + 1;
     if (counts[id] > 3) return false;
@@ -249,14 +249,14 @@ export function isLegalDeck(deck: CustomDeck | null | undefined): boolean {
 
 /**
  * First Hour pack pool: non-hero, non-cryptid, no Second Hour societies,
- * no nuke-aftermath rites. First 3 pulls bias to order+ally.
+ * no nuke-aftermath / secret hand-drop plates. First 3 pulls bias to order+ally.
  */
 export function packPool(order: string | null, biasOrder: boolean): Card[] {
   return CARDS.filter((c) => {
     if (c.kind === 'hero') return false;
     if (c.keywords.includes('cryptid')) return false;
     if (isSecondHourSociety(c.faction)) return false;
-    if (isNukeAftermathId(c.id)) return false;
+    if (isExcludedPlateId(c.id)) return false;
     if (!biasOrder || !order) return true;
     return isLegalForOrder(order, c.faction);
   });
@@ -344,25 +344,17 @@ export function applyJustinKernUnlock(p: Profile): Profile {
   return { ...p, collection, customDecks };
 }
 
-/** Unlock south_haven_dispatch into collection (+ legal custom decks). No username gate. */
+/**
+ * South Haven Dispatch is a secret hand-drop only (siren + reveal + pending /
+ * mid-match inject). Never a collectible or working plate — strip leaks.
+ */
 export function applySouthHavenDispatchUnlock(p: Profile): Profile {
-  const id = 'south_haven_dispatch';
-  const collection = p.collection.includes(id)
-    ? p.collection
-    : [...p.collection, id];
-  const card = cardById(id);
-  const customDecks = p.customDecks.map((d) => {
-    if (!card || d.cards.includes(id) || d.cards.length >= 40) return d;
-    const hero = CARDS.find((c) => c.id === d.heroId);
-    if (!hero || !isLegalForOrder(hero.faction, card.faction)) return d;
-    return { ...d, cards: [...d.cards, id] };
-  });
-  return { ...p, collection, customDecks };
+  return stripAftermathId(p, 'south_haven_dispatch');
 }
 
 /**
- * Strip a nuke-aftermath id from collection / workings.
- * These rites are TarotPop-only — never owned plates.
+ * Strip a non-collectible id (nuke aftermath or secret hand-drop) from
+ * collection / workings. Never owned deck plates.
  */
 function stripAftermathId(p: Profile, id: string): Profile {
   const collection = p.collection.filter((x) => x !== id);

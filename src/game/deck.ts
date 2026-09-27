@@ -1,6 +1,6 @@
 /** Auto-built workings + deck legality (order+ally, 30–40, max 3). */
 
-import { CARDS, isNukeAftermathId } from '../data/catalog';
+import { CARDS, isExcludedPlateId, isNukeAftermathId, isSecretHandDropId } from '../data/catalog';
 import type { Card } from './types';
 import { HAND_CAP } from './scoring';
 import { allyOf, isLegalForOrder } from './orders';
@@ -12,14 +12,14 @@ export function buildWorkingIds(faction: string, size = 30): string[] {
       c.faction === faction &&
       c.kind !== 'hero' &&
       !c.keywords.includes('cryptid') &&
-      !isNukeAftermathId(c.id),
+      !isExcludedPlateId(c.id),
   );
   if (pool.length === 0) {
     const units = CARDS.filter(
       (c) =>
         c.kind === 'unit' &&
         c.power != null &&
-        !isNukeAftermathId(c.id) &&
+        !isExcludedPlateId(c.id) &&
         !c.keywords.includes('cryptid'),
     );
     const ids: string[] = [];
@@ -134,6 +134,12 @@ export function validateDeck(
       return {
         ok: false,
         error: `${card.name} is nuke aftermath — not a working plate.`,
+      };
+    }
+    if (isSecretHandDropId(card.id)) {
+      return {
+        ok: false,
+        error: `${card.name} is a secret unlock — not a working plate.`,
       };
     }
     if (!legalCardForHero(heroId, card)) {

@@ -92,3 +92,19 @@ export function isNukeAftermathId(id: string): boolean {
 export function isNukeAftermathCard(card: Card): boolean {
   return isNukeAftermathId(card.id);
 }
+
+/**
+ * Secret code unlocks (siren + dismissible reveal + one-shot hand drop).
+ * Never pack / deck-editor / catalog / shuffle plates — unlock injects
+ * into hand mid-match or next circle via pending flag only.
+ */
+export const SECRET_HAND_DROP_IDS = ['south_haven_dispatch'] as const;
+
+export function isSecretHandDropId(id: string): boolean {
+  return (SECRET_HAND_DROP_IDS as readonly string[]).includes(id);
+}
+
+/** Plates excluded from packs, workings, catalog browse, and collection. */
+export function isExcludedPlateId(id: string): boolean {
+  return isNukeAftermathId(id) || isSecretHandDropId(id);
+}

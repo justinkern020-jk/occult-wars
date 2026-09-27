@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
-import { cardById, isNukeAftermathId } from '../data/catalog';
+import { cardById, isExcludedPlateId } from '../data/catalog';
 import { pickTrainingAction, type AiSnapshot } from '../game/ai';
 import { applyDamage, combatantFrom, isDestroyed, resolveMelee } from '../game/combat';
 import {
@@ -172,10 +172,10 @@ function deckFor(
   faction: string,
   ids?: string[],
 ): Card[] {
-  // Cryptids / nuke aftermath are never shuffleable into First Hour workings.
+  // Cryptids / nuke aftermath / secret hand-drops never shuffle into workings.
   const stripNonPlates = (cards: Card[]) =>
     cards.filter(
-      (c) => !c.keywords.includes('cryptid') && !isNukeAftermathId(c.id),
+      (c) => !c.keywords.includes('cryptid') && !isExcludedPlateId(c.id),
     );
   if (ids && ids.length >= 30) {
     const cleaned = stripNonPlates(cardsFromIds(ids));

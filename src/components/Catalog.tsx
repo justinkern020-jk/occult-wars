@@ -9,7 +9,7 @@ import {
 import { CardView } from './CardView';
 import { TarotPop } from './TarotPop';
 import { FIRST_HOUR_ORDERS, isSecondHourSociety } from '../game/orders';
-import { isNukeAftermathId } from '../data/catalog';
+import { isExcludedPlateId } from '../data/catalog';
 
 type Props = {
   profile?: Profile;
@@ -30,7 +30,7 @@ export function Catalog({ profile, onUpdate }: Props) {
 
   const list = useMemo(() => {
     let rows = CARDS.filter(
-      (c) => !isSecondHourSociety(c.faction) && !isNukeAftermathId(c.id),
+      (c) => !isSecondHourSociety(c.faction) && !isExcludedPlateId(c.id),
     );
     if (unitsOnly) rows = rows.filter((c) => c.kind === 'unit');
     if (kind !== 'all') rows = rows.filter((c) => c.kind === kind);
