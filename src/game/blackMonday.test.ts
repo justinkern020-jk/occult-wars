@@ -37,7 +37,8 @@ describe('Black Monday card', () => {
     expect(card!.effect).toEqual({ op: 'bank', n: 2 });
     expect(card!.alsoDraw).toBeUndefined();
     expect(card!.text.toLowerCase()).toMatch(/bank 2 resources/);
-    expect(card!.quote.trim().length).toBeGreaterThan(0);
+    expect(typeof card!.quote).toBe('string');
+    expect(card!.quote!.trim().length).toBeGreaterThan(0);
     expect(card!.quoted).toMatch(/Galbraith/);
     expect(cardImageUrl(card!.name)).toBe('/assets/images/black_monday.jpg');
     expect(isLossInjectId(card!.id)).toBe(true);
