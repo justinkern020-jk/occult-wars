@@ -79,7 +79,7 @@ export function cardGeneratesResources(card: Card): boolean {
   return false;
 }
 
-/** Nuke TarotPop rites — never pack/deck/collection plates. */
+/** Nuke TarotPop rites — never pack/deck/owned plates (Collection shows archive faces). */
 export const NUKE_AFTERMATH_IDS = [
   'radiation_poisoning',
   'nuclear_winter',
@@ -95,8 +95,9 @@ export function isNukeAftermathCard(card: Card): boolean {
 
 /**
  * Secret code unlocks (siren + dismissible reveal + one-shot hand drop).
- * Never pack / deck-editor / catalog / shuffle plates — unlock injects
- * into hand mid-match or next circle via pending flag only.
+ * Never pack / deck-editor / shuffle plates — unlock injects into hand
+ * mid-match or next circle via pending flag only. Collection still shows
+ * the plate as an archive face (not auto-unlocked).
  */
 export const SECRET_HAND_DROP_IDS = ['south_haven_dispatch'] as const;
 
@@ -104,7 +105,11 @@ export function isSecretHandDropId(id: string): boolean {
   return (SECRET_HAND_DROP_IDS as readonly string[]).includes(id);
 }
 
-/** Plates excluded from packs, workings, catalog browse, and collection. */
+/**
+ * Plates excluded from packs, workings, deck editor, and shuffleable hands.
+ * The Collection encyclopedia still shows them as archive-only faces
+ * (never auto-unlocked / never owned).
+ */
 export function isExcludedPlateId(id: string): boolean {
   return isNukeAftermathId(id) || isSecretHandDropId(id);
 }

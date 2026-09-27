@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { CARDS } from '../data/catalog';
+import { CARDS, isExcludedPlateId } from '../data/catalog';
 import {
   countOwned,
   exportLedger,
@@ -9,18 +9,26 @@ import {
 import { CardView } from './CardView';
 import { TarotPop } from './TarotPop';
 import { FIRST_HOUR_ORDERS, isSecondHourSociety } from '../game/orders';
-import { isExcludedPlateId } from '../data/catalog';
 
 type Props = {
   profile?: Profile;
   onUpdate?: (p: Profile) => void;
 };
 
+/**
+ * The Collection is a full First Hour encyclopedia: every order plate,
+ * cryptid, secret unlock, and nuke-aftermath Tarot — owned or not.
+ * Second Hour societies stay on Second Hour matches (deliberately
+ * filtered here since efa2bf7). Pack/deck/hand leak rules are unchanged;
+ * excluded plates appear as archive-only faces, never auto-unlocked.
+ */
 export function Catalog({ profile, onUpdate }: Props) {
   const [faction, setFaction] = useState<string>('all');
   const [q, setQ] = useState('');
   const [unitsOnly, setUnitsOnly] = useState(false);
-  const [ownedOnly, setOwnedOnly] = useState(!!profile);
+  /** Default off: Collection shows the full archive, not inventory. */
+  const [ownedOnly, setOwnedOnly] = useState(false);
+  const [cryptidsOnly, setCryptidsOnly] = useState(false);
   const [kind, setKind] = useState<string>('all');
   const [inspect, setInspect] = useState<(typeof CARDS)[number] | null>(null);
   const owned = useMemo(
@@ -29,10 +37,11 @@ export function Catalog({ profile, onUpdate }: Props) {
   );
 
   const list = useMemo(() => {
-    let rows = CARDS.filter(
-      (c) => !isSecondHourSociety(c.faction) && !isExcludedPlateId(c.id),
-    );
+    // First Hour complete set + Unaligned specials (secrets / nuke aftermath).
+    // Do NOT filter isExcludedPlateId — those plates browse here as archive faces.
+    let rows = CARDS.filter((c) => !isSecondHourSociety(c.faction));
     if (unitsOnly) rows = rows.filter((c) => c.kind === 'unit');
+    if (cryptidsOnly) rows = rows.filter((c) => c.keywords.includes('cryptid'));
     if (kind !== 'all') rows = rows.filter((c) => c.kind === kind);
     if (faction !== 'all') rows = rows.filter((c) => c.faction === faction);
     if (ownedOnly && profile) {
@@ -48,7 +57,7 @@ export function Catalog({ profile, onUpdate }: Props) {
       );
     }
     return rows;
-  }, [faction, q, unitsOnly, ownedOnly, kind, profile, owned]);
+  }, [faction, q, unitsOnly, ownedOnly, cryptidsOnly, kind, profile, owned]);
 
   function doExport() {
     if (!profile) return;
@@ -80,11 +89,19 @@ export function Catalog({ profile, onUpdate }: Props) {
     input.click();
   }
 
+  function ownershipLabel(id: string): string {
+    if (isExcludedPlateId(id)) return 'Archive · never owned';
+    const n = owned[id] ?? 0;
+    if (n > 0) return `Owned ×${n}`;
+    return 'Locked';
+  }
+
   return (
     <section className="catalog plate-screen" data-testid="collection">
       <h2>The Collection</h2>
       <p className="lede">
-        Archive of every plate in this working. Cabals dual-Power.
+        Encyclopedia of every First Hour plate — units, rites, devices, leaders,
+        cryptids, secrets, and nuke aftermath. Cabals dual-Power.
         {profile ? (
           <>
             {' '}
@@ -107,6 +124,7 @@ export function Catalog({ profile, onUpdate }: Props) {
               {f}
             </option>
           ))}
+          <option value="Unaligned">Unaligned</option>
         </select>
         <select value={kind} onChange={(e) => setKind(e.target.value)}>
           <option value="all">All kinds</option>
@@ -122,6 +140,14 @@ export function Catalog({ profile, onUpdate }: Props) {
             onChange={(e) => setUnitsOnly(e.target.checked)}
           />
           Units only
+        </label>
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={cryptidsOnly}
+            onChange={(e) => setCryptidsOnly(e.target.checked)}
+          />
+          Cryptids
         </label>
         {profile && (
           <label className="check">
@@ -146,16 +172,32 @@ export function Catalog({ profile, onUpdate }: Props) {
         </div>
       )}
       <div className="card-grid">
-        {list.map((c) => (
-          <div key={`${c.faction}-${c.id}`} className="catalog-card-wrap">
-            <CardView card={c} onClick={() => setInspect(c)} />
-            {profile && (
-              <p className="owned-count">
-                Owned ×{owned[c.id] ?? 0}
-              </p>
-            )}
-          </div>
-        ))}
+        {list.map((c) => {
+          const count = owned[c.id] ?? 0;
+          const archiveOnly = isExcludedPlateId(c.id);
+          const locked = !!profile && !archiveOnly && count === 0;
+          const wrapCls = [
+            'catalog-card-wrap',
+            locked ? 'catalog-locked' : '',
+            archiveOnly ? 'catalog-archive' : '',
+          ]
+            .filter(Boolean)
+            .join(' ');
+          return (
+            <div key={`${c.faction}-${c.id}`} className={wrapCls}>
+              <CardView card={c} onClick={() => setInspect(c)} />
+              {profile && (
+                <p
+                  className={`owned-count${locked ? ' owned-locked' : ''}${
+                    archiveOnly ? ' owned-archive' : ''
+                  }`}
+                >
+                  {ownershipLabel(c.id)}
+                </p>
+              )}
+            </div>
+          );
+        })}
       </div>
       {inspect && <TarotPop card={inspect} onClose={() => setInspect(null)} />}
     </section>
