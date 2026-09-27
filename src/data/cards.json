@@ -1338,7 +1338,7 @@
     "cost": 4,
     "oath": 2,
     "keywords": [],
-    "text": "Empty both banks. Then draw 1 card.",
+    "text": "The presses will not stop. Empty both banks. Then draw 1 card.",
     "effect": {
       "op": "empty"
     },
