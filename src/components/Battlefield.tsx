@@ -99,6 +99,7 @@ import {
   type PortalCode,
 } from '../net/watch';
 import { reportPlayed, setActivity } from '../net/table';
+import { haptic } from '../game/haptics';
 import { reportSecretFound, secretIdForCode } from '../net/secrets';
 import {
   RulesPrimer,
@@ -1915,6 +1916,7 @@ export function Battlefield({
   );
 
   const flashClaim = useCallback((r: number, c: number, label: string) => {
+    haptic('capture');
     if (claimFlashTimer.current != null) window.clearTimeout(claimFlashTimer.current);
     setClaimFlash(`${r},${c}|${label}`);
     claimFlashTimer.current = window.setTimeout(() => {

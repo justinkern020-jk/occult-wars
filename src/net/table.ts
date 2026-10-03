@@ -59,12 +59,24 @@ export type Activity = {
 let activity: Activity = { where: 'title' };
 let newerBuild = '';
 let activityTimer: number | null = null;
+const activityListeners = new Set<() => void>();
+
+/** True on screens where a reload (or a service-worker swap) loses nothing. */
+export function safeToReload(): boolean {
+  return SAFE_TO_RELOAD.has(activity.where) && !activity.match;
+}
+/** Called after every activity change (the service worker waits for a safe screen). */
+export function onActivity(fn: () => void): () => void {
+  activityListeners.add(fn);
+  return () => activityListeners.delete(fn);
+}
 
 export function setActivity(patch: Partial<Activity>): void {
   const next = { ...activity, ...patch };
   const moved = next.where !== activity.where || next.match !== activity.match || next.mode !== activity.mode;
   activity = next;
   maybeReload();
+  for (const fn of activityListeners) fn();
   // Tell the table promptly when the hand moves (one beat, debounced).
   if (moved && started && typeof window !== 'undefined') {
     if (activityTimer != null) window.clearTimeout(activityTimer);

@@ -642,7 +642,7 @@
 /* Settings */
 .settings-panel { width: min(28rem, 94vw); padding: 1.1rem 1.2rem; display: flex; flex-direction: column; gap: 0.75rem; }
 .settings-panel h2 { font-family: var(--font-decorative); margin: 0; color: #ecdcae; }
-.settings-row { display: flex; gap: 0.7rem; align-items: flex-start; cursor: pointer; }
+.settings-row { display: flex; flex-direction: row; gap: 0.7rem; align-items: flex-start; cursor: pointer; text-align: left; }
 .settings-row input { accent-color: #3fae74; width: 1.1rem; height: 1.1rem; margin-top: 0.2rem; }
 .settings-row span { display: flex; flex-direction: column; }
 .settings-row strong { font-family: var(--font-display); color: #ecdcae; font-weight: 600; }
@@ -725,4 +725,84 @@
 @media (max-width: 640px) {
   .ladder-list li { grid-template-columns: 1.8rem 1fr auto; }
   .ladder-pts, .ladder-list li > .ladder-wl { display: none; }
+}
+
+/* ---- Polish 3: install the grimoire ---- */
+.settings-install-btn { align-self: flex-start; display: inline-flex; gap: 0.45rem; align-items: center; }
+.settings-install-note { margin: 0.35rem 0 0; color: #b9a881; font-size: 0.82rem; line-height: 1.45; }
+.settings-install-note strong { color: #ecdcae; }
+.settings-install-ios { display: flex; flex-direction: column; }
+.menu-install-btn { border-color: rgba(63, 174, 116, 0.55); box-shadow: 0 0 10px rgba(63, 174, 116, 0.25); }
+
+/* ---- Polish 3: loading lore on aged paper ---- */
+.lore-paper {
+  position: relative;
+  margin: 0;
+  max-width: min(30rem, 92vw);
+  padding: 1rem 1.25rem 0.85rem;
+  color: #3a2814;
+  font-family: var(--font-body, 'Libre Baskerville', serif);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(120, 72, 24, 0.18) 0 3%, transparent 4%),
+    radial-gradient(circle at 86% 74%, rgba(120, 72, 24, 0.14) 0 2.5%, transparent 3.5%),
+    radial-gradient(circle at 70% 12%, rgba(120, 72, 24, 0.1) 0 1.6%, transparent 2.4%),
+    radial-gradient(ellipse at 50% 50%, #ecdcb2 0%, #dfc793 55%, #c7a76a 100%);
+  border-radius: 3px 5px 4px 6px / 6px 3px 5px 4px;
+  box-shadow:
+    inset 0 0 28px rgba(92, 54, 18, 0.55),
+    inset 0 0 3px rgba(60, 34, 10, 0.6),
+    0 6px 22px rgba(0, 0, 0, 0.55);
+  transform: rotate(-0.6deg);
+}
+.lore-paper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: repeating-linear-gradient(0deg, rgba(80, 50, 20, 0.035) 0 1px, transparent 1px 3px);
+  mix-blend-mode: multiply;
+}
+.lore-paper-kicker {
+  display: block;
+  font-family: var(--font-display, 'Cinzel', serif);
+  font-size: 0.66rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #6e4a1e;
+  margin-bottom: 0.35rem;
+}
+.lore-paper-text { margin: 0; font-size: 0.95rem; line-height: 1.5; font-style: italic; }
+p.lore-paper-text { font-style: normal; }
+.lore-paper-by { margin-top: 0.5rem; text-align: right; font-size: 0.76rem; color: #5b3d18; font-family: var(--font-display, 'Cinzel', serif); }
+.lore-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: radial-gradient(ellipse at 50% 45%, rgb(22, 34, 26), rgb(8, 6, 4) 70%);
+  cursor: pointer;
+  transition: opacity 0.45s ease;
+}
+.lore-veil-fading { opacity: 0; pointer-events: none; }
+.lore-veil-label {
+  margin: 0;
+  font-family: var(--font-display, 'Cinzel', serif);
+  letter-spacing: 0.18em;
+  color: #c9b27a;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  animation: lore-breathe 1.8s ease-in-out infinite;
+}
+@keyframes lore-breathe { 50% { opacity: 0.45; } }
+.title-lore { margin: 1.1rem auto 0; font-size: 0.9em; }
+.title-lore .lore-paper-text { font-size: 0.85rem; }
+@media (prefers-reduced-motion: reduce) {
+  .lore-veil { transition: none; }
+  .lore-veil-label { animation: none; }
 }

@@ -69,6 +69,7 @@ import { readSeatState } from './net/account';
 import './App.css';
 import './polish.css';
 
+import { LoadingLoreVeil } from './components/LoadingLore';
 const Codex = lazy(() => import('./components/Codex').then((m) => ({ default: m.Codex })));
 
 type Screen =
@@ -782,6 +783,7 @@ export default function App() {
         <div id="playing-dock" className="playing-dock" />
       </nav>
 
+      {screen === 'field' && <LoadingLoreVeil key={`${matchMode}:${mapId}`} src={`/assets/maps/${mapId}.jpg`} />}
       {screen === 'field' && (
         <Battlefield
           initialMapId={mapId}

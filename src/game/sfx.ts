@@ -1,4 +1,5 @@
 /** Brass clicks, clash/gunshot SFX, stingers; moonlight menu + Soulsborne match bed. */
+import { haptic } from './haptics';
 
 export type MusicBed = 'none' | 'menu' | 'match';
 
@@ -322,6 +323,7 @@ export function nextCoinMoveNote(): string {
 
 /** Wooden knock when a coin (unit) moves or is deployed: the song's next note. Fails silently. */
 export function coinMoveSfx(): void {
+  haptic('tick');
   try {
     unlockAudio();
     const pool = getKnockPool(nextCoinMoveNote());
@@ -625,6 +627,7 @@ export function preloadBattleSfx(): void {
 
 /** A coin cracks: split-wood knock, falling cursed glass, ember hiss. */
 export function unitDeathSfx(): void {
+  haptic('death');
   // Lands just behind the clash / shot so the two layer instead of masking.
   playSample(`${SFX}/unit-death.mp3`, 0.5, 0.03, 110);
 }
@@ -651,11 +654,13 @@ export function softKnockSfx(): void {
 
 /** Victory: a rising low choir on a gong. */
 export function victoryStinger() {
+  haptic('victory');
   playSample(`${SFX}/victory.mp3`, 0.55);
 }
 
 /** Defeat: a deep bell tolls three times. */
 export function defeatStinger() {
+  haptic('defeat');
   playSample(`${SFX}/defeat.mp3`, 0.6);
 }
 
@@ -885,3 +890,4 @@ export function currentMusicBed(): MusicBed {
 export function sharedAudioContext(): AudioContext | null {
   return getAC();
 }
+

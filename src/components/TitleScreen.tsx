@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { unlockAudio, enterCircleSfx, preloadEnterCircleSfx } from '../game/sfx';
+import { LorePaper } from './LoadingLore';
 
 type Props = {
   onEnter: () => void;
@@ -61,6 +62,7 @@ export function TitleScreen({ onEnter, dailyGranted = 0 }: Props) {
         >
           Enter the circle
         </button>
+        <LorePaper className="title-lore" />
       </div>
     </div>
   );

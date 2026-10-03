@@ -1,6 +1,6 @@
 /**
  * Small local preferences (this device only): leader voices, weather on the
- * field, the swelling battle choir. Kept apart from the profile so a cloud
+ * field, the swelling battle choir, phone haptics. Kept apart from the profile so a cloud
  * copy never flips another device's sound.
  */
 import { useEffect, useState } from 'react';
@@ -12,20 +12,22 @@ export type Settings = {
   weather: boolean;
   /** The choir layer that swells when a match tips. */
   choir: boolean;
+  /** Phone vibration on deploys, deaths, captures, victory and defeat. */
+  haptics: boolean;
 };
 
 export const SETTINGS_KEY = 'occult-wars.settings.v1';
 const SETTINGS_EVENT = 'ow:settings';
-const DEFAULTS: Settings = { voice: true, weather: true, choir: true };
+const DEFAULTS: Settings = { voice: true, weather: true, choir: true, haptics: true };
 
 export function readSettings(): Settings {
   try {
     const raw = JSON.parse(window.localStorage.getItem(SETTINGS_KEY) ?? '{}') as Partial<Settings>;
-    return {
-      voice: typeof raw.voice === 'boolean' ? raw.voice : DEFAULTS.voice,
-      weather: typeof raw.weather === 'boolean' ? raw.weather : DEFAULTS.weather,
-      choir: typeof raw.choir === 'boolean' ? raw.choir : DEFAULTS.choir,
-    };
+    const out = { ...DEFAULTS };
+    for (const k of Object.keys(DEFAULTS) as (keyof Settings)[]) {
+      if (typeof raw[k] === 'boolean') out[k] = raw[k] as boolean;
+    }
+    return out;
   } catch {
     return { ...DEFAULTS };
   }

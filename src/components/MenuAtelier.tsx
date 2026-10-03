@@ -38,6 +38,7 @@ import { aiDifficultyLabel, type AiDifficulty } from '../game/ai';
 import { TarotPop } from './TarotPop';
 import { MenuAtmosphere } from './MenuAtmosphere';
 import { brassClick, copSirenSfx, metalRiffSfx, setMusicBed, spellCastSfx, unlockAudio } from '../game/sfx';
+import { InstallGrimoire } from './SettingsPanel';
 
 type Props = {
   profile: Profile;
@@ -343,6 +344,7 @@ export function MenuAtelier({
                   Settings
                 </button>
               )}
+              <InstallGrimoire compact />
               {signedOut && onTakeSeat && (
                 <button
                   type="button"
