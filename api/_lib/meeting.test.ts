@@ -13,8 +13,8 @@ import {
   spamReason,
   type Poster,
 } from './meeting.js';
-import { handleMeeting } from '../meeting.js';
-import { handleAccount } from '../account.js';
+import { handleMeeting } from '../_routes/meeting.js';
+import { handleAccount } from '../_routes/account.js';
 
 const guest = (mark: string, ip = '1.1.1.1'): Poster => ({ owner: false, seatId: null, seatName: null, mark, ip });
 const M1 = 'aaaaaaaaaaaaaaaa';

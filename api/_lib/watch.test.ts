@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { memoryStore, redisStore, setStoreForTests, type Store } from './store.js';
 import { FRAME_MAX, LIVE_MS, isOwner, listLive, reportLive, sendCode, viewMatch } from './watch.js';
-import { handleWatch } from '../watch.js';
-import { handleTable } from '../table.js';
-import { handleAccount } from '../account.js';
+import { handleWatch } from '../_routes/watch.js';
+import { handleTable } from '../_routes/table.js';
+import { handleAccount } from '../_routes/account.js';
 
 const ID = 'abcdefghij0123456789';
 const KEY = 'k'.repeat(40);

@@ -3,10 +3,10 @@
  * Body: { op: 'beat' | 'issue' | 'accept' | 'cancel', mark, room?, country? }
  *       { op: 'live', mark, id, key, summary, frame? }  (a match reporting to the Portal)
  */
-import { getStore } from './_lib/store.js';
-import { HttpError, fail, headerCountry, json, readJson } from './_lib/http.js';
-import { MARK_RE, ROOM_RE, accept, beat, cancel, cleanCountry, issue } from './_lib/table.js';
-import { FRAME_MAX, WatchError, reportLive } from './_lib/watch.js';
+import { getStore } from '../_lib/store.js';
+import { HttpError, fail, headerCountry, json, readJson } from '../_lib/http.js';
+import { MARK_RE, ROOM_RE, accept, beat, cancel, cleanCountry, issue } from '../_lib/table.js';
+import { FRAME_MAX, WatchError, reportLive } from '../_lib/watch.js';
 
 export async function handleTable(req: Request, now = Date.now()): Promise<Response> {
   try {

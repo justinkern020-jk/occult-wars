@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { memoryStore, setStoreForTests } from './store.js';
-import { handleAccount } from '../account.js';
+import { handleAccount } from '../_routes/account.js';
 
 describe('account bearer seat', () => {
   afterEach(() => {

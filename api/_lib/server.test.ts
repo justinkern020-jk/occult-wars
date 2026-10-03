@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { memoryStore, redisStore, setStoreForTests, type Store } from './store.js';
 import { CHALLENGE_MS, SEEN_WINDOW_MS, accept, beat, cancel, issue } from './table.js';
-import { handleTable } from '../table.js';
-import { handleAccount } from '../account.js';
+import { handleTable } from '../_routes/table.js';
+import { handleAccount } from '../_routes/account.js';
 
 const A = 'aaaaaaaaaaaaaaaa';
 const B = 'bbbbbbbbbbbbbbbb';

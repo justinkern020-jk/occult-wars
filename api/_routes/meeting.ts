@@ -4,11 +4,11 @@
  *   { op: 'post', mark, text, name? } → { ok, msg }
  *   { op: 'delete', id }              → owner only (else 404)
  */
-import { getStore } from './_lib/store.js';
-import { HttpError, clientIp, fail, json, readJson } from './_lib/http.js';
-import { tokenFrom } from './_lib/accounts.js';
-import { isOwner } from './_lib/watch.js';
-import { MeetingError, deleteMeeting, listMeeting, postMeeting, posterFor } from './_lib/meeting.js';
+import { getStore } from '../_lib/store.js';
+import { HttpError, clientIp, fail, json, readJson } from '../_lib/http.js';
+import { tokenFrom } from '../_lib/accounts.js';
+import { isOwner } from '../_lib/watch.js';
+import { MeetingError, deleteMeeting, listMeeting, postMeeting, posterFor } from '../_lib/meeting.js';
 
 const MARK_RE = /^[a-z0-9]{16}$/;
 

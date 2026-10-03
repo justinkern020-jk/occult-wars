@@ -13,8 +13,8 @@
  * Needs a durable store (Upstash Redis). On instance memory the book stays
  * shut (503) rather than inventing accounts that vanish on a cold start.
  */
-import { getStore, type Store } from './_lib/store.js';
-import { HttpError, clientIp, fail, json, readJson } from './_lib/http.js';
+import { getStore, type Store } from '../_lib/store.js';
+import { HttpError, clientIp, fail, json, readJson } from '../_lib/http.js';
 import {
   SESSION_COOKIE,
   SESSION_SEC,
@@ -31,7 +31,7 @@ import {
   tokenFrom,
   userForToken,
   writeCloudProfile,
-} from './_lib/accounts.js';
+} from '../_lib/accounts.js';
 
 function sessionCookie(token: string | null): string {
   const base = `${SESSION_COOKIE}=${token ?? ''}; Path=/; HttpOnly; Secure; SameSite=Lax`;

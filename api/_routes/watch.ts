@@ -6,9 +6,9 @@
  *   { op: 'code', id, side, code }         → { ok, cmd }
  * Anyone else gets a bare 404 so the door is not advertised.
  */
-import { getStore } from './_lib/store.js';
-import { HttpError, fail, json, readJson } from './_lib/http.js';
-import { WatchError, isOwner, listLive, sendCode, viewMatch } from './_lib/watch.js';
+import { getStore } from '../_lib/store.js';
+import { HttpError, fail, json, readJson } from '../_lib/http.js';
+import { WatchError, isOwner, listLive, sendCode, viewMatch } from '../_lib/watch.js';
 
 export async function handleWatch(req: Request, now = Date.now()): Promise<Response> {
   try {
