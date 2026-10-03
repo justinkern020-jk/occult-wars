@@ -12,8 +12,8 @@
       "crown"
     ],
     "text": "Tithe. Lamp. While she stands, your bank yields +1. Adjacent units you control strike for +1 Power. A country doctor of the sidhe. She diagnoses the fairy stroke and invoices the hedge.",
-    "quote": "The cure is milk, iron, and a name said backwards.",
-    "quoted": "The Whitethorn Coven",
+    "quote": "The most celebrated fairy doctors are sometimes people the fairies loved and carried away, and kept with them for seven years.",
+    "quoted": "W. B. Yeats, Fairy and Folk Tales of the Irish Peasantry (1888)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -31,8 +31,8 @@
       "gills"
     ],
     "text": "Ranged Strike. Gills. The washer at the ford. Her keen reaches 2 circles in a straight line, never the diagonal, and is not answered.",
-    "quote": "If you see her beating a shirt, ask whose.",
-    "quoted": "The Whitethorn Coven",
+    "quote": "He saw a winding-shroud creeping on a walking healthful person's legs till it came to the knee... and at last over the head.",
+    "quoted": "Robert Kirk, The Secret Commonwealth (1691)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -50,8 +50,8 @@
       "veiled"
     ],
     "text": "Fast Attack. Untargetable. Strikes first. Strikes and rites pass over him. A black horse-man of the Irish road who will not be named.",
-    "quote": "Take the ride. You will not choose where it ends.",
-    "quoted": "The Whitethorn Coven",
+    "quote": "On solitary mountains and among old ruins he lives, \"grown monstrous with much solitude,\" and is of the race of the nightmare.",
+    "quoted": "W. B. Yeats, Fairy and Folk Tales of the Irish Peasantry (1888)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -69,8 +69,8 @@
       "fast"
     ],
     "text": "Fast Attack. Relay. Strikes first. When you muster another unit, draw 1. She left the feather-skin on the bank. Whoever holds it holds the next plate.",
-    "quote": "Do not hide the skin. She will find the house.",
-    "quoted": "The Whitethorn Coven",
+    "quote": "Among what rushes will they build, by what lake's edge or pool delight men's eyes when I awake some day to find they have flown away?",
+    "quoted": "W. B. Yeats, The Wild Swans at Coole (1917)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -88,8 +88,8 @@
       "hearth"
     ],
     "text": "Greater Tithe. Hearth. Your bank yields +2 while he stands, and a resource he stands on banks twice. The cellar fairy who guards the cask and charges rent.",
-    "quote": "He is loyal to the wine, not to you.",
-    "quoted": "The Whitethorn Coven",
+    "quote": "Inspiring bold John Barleycorn! What dangers thou canst make us scorn!",
+    "quoted": "Robert Burns, Tam o' Shanter (1791)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -107,8 +107,8 @@
       "blooded"
     ],
     "text": "Fast Attack. If it survives a battle it struck in, it gains power. Your double, arrived early. It strikes first, and living makes the copy heavier.",
-    "quote": "If you meet it at noon, sit down.",
-    "quoted": "The Whitethorn Coven",
+    "quote": "They call this Reflex-man a coimimeadh or Co-walker, every way like the man, as a twin-brother and companion, haunting him as his shadow.",
+    "quoted": "Robert Kirk, The Secret Commonwealth (1691)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -126,8 +126,8 @@
       "tithe"
     ],
     "text": "Hearth. Tithe. A resource it stands on banks twice, and your bank yields +1. The small person of the stair who works the night and leaves when you offer a wage.",
-    "quote": "A bowl of cream. Never a coin.",
-    "quoted": "The Whitethorn Coven",
+    "quote": "Tells how the drudging goblin sweat to earn his cream-bowl duly set, when in one night, ere glimpse of morn, his shadowy flail hath threshed the corn.",
+    "quoted": "John Milton, L'Allegro (1645)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -145,8 +145,8 @@
       "tough"
     ],
     "text": "Gills. Toughness. The first point of any blow is refused. The skin is the person. Fold it and the sea cannot take them. Unfold it and they are gone.",
-    "quote": "Lock the chest. Lose the marriage.",
-    "quoted": "The Whitethorn Coven",
+    "quote": "I am a man upon the land, and I am a silkie in the sea.",
+    "quoted": "The Great Silkie of Sule Skerry, Orkney ballad",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -164,8 +164,8 @@
       "tough"
     ],
     "text": "Root. Toughness. The hunger grass. Enemy plates beside it cannot move or strike, and the first point of any blow is refused. Step on it and you are held until you are eaten by standing still.",
-    "quote": "The field looks ordinary. That is the trap.",
-    "quoted": "The Whitethorn Coven",
+    "quote": "There be many places called Fairie-hills, which the mountain people think impious and dangerous to peel or discover, by taking earth or wood from them.",
+    "quoted": "Robert Kirk, The Secret Commonwealth (1691)",
     "power": 4,
     "legacyAttack": 4,
     "legacyHealth": 4
@@ -183,8 +183,8 @@
       "seep"
     ],
     "text": "Gills. Seep. At the start of your rite, deal 1 to each adjacent enemy. The mermaid of the Irish coast, red cap, green hair, a net of names.",
-    "quote": "She keeps the drowned in a pocket of the sea.",
-    "quoted": "The Whitethorn Coven",
+    "quote": "Full fathom five thy father lies; of his bones are coral made; those are pearls that were his eyes.",
+    "quoted": "William Shakespeare, The Tempest (1611)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -203,8 +203,8 @@
       "ranged"
     ],
     "text": "Cryptid. Fast Attack. Ranged Strike. The host of the unforgiven dead, flying west to east. It strikes first. The shot is a straight line and is not answered.",
-    "quote": "Shut the west window. They come from that side.",
-    "quoted": "The Whitethorn Coven",
+    "quote": "The spirits fly about in great clouds, up and down the face of the world like the starlings, and come back to the scenes of their earthly transgressions.",
+    "quoted": "Alexander Carmichael, Carmina Gadelica (1900)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -222,8 +222,8 @@
       "veiled"
     ],
     "text": "Cryptid. Untargetable. The pressing spirit of the mound. Strikes and rites pass over it. You wake with the weight and no one to blame.",
-    "quote": "It sits on the chest. It does not sit on the list.",
-    "quoted": "The Whitethorn Coven",
+    "quote": "This is the hag, when maids lie on their backs, that presses them and learns them first to bear.",
+    "quoted": "William Shakespeare, Romeo and Juliet (1597)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -238,8 +238,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Name a unit. It cannot move or attack on its next rite. A whitethorn tied on the named plate. The hedge holds the appointment.",
-    "quote": "The bush is the lock.",
-    "quoted": "The Whitethorn Coven",
+    "quote": "They have planted thorn-trees for pleasure here and there. Is any man so daring as dig them up in spite, he shall find their sharpest thorns in his bed at night.",
+    "quoted": "William Allingham, The Fairies (1850)",
     "aim": true,
     "effect": {
       "op": "lock"
@@ -255,8 +255,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Name a unit and return it to the hand it came from. The good people are finished with the guest.",
-    "quote": "The door is the way you came.",
-    "quoted": "The Whitethorn Coven",
+    "quote": "They stole little Bridget for seven years long; when she came down again her friends were all gone.",
+    "quoted": "William Allingham, The Fairies (1850)",
     "aim": true,
     "effect": {
       "op": "bounce"
@@ -272,8 +272,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Name a unit. Deal 2 damage. A nail dropped in the pan. The fairy thing drinks and remembers it is not welcome.",
-    "quote": "Hospitality has a mineral.",
-    "quoted": "The Whitethorn Coven",
+    "quote": "All uncouth, unknown wights are terrified by nothing earthly so much as by cold iron.",
+    "quoted": "Robert Kirk, The Secret Commonwealth (1691)",
     "aim": true,
     "effect": {
       "op": "smite",
@@ -290,8 +290,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Device. Bank 1 resources and draw 1 card. Leave it on the step. Something drinks, and a plate is paid back.",
-    "quote": "Never watch them drink it.",
-    "quoted": "The Whitethorn Coven",
+    "quote": "These Siths, or Fairies, they call Sleagh Maith, or the Good People, it would seem, to prevent the dint of their ill attempts.",
+    "quoted": "Robert Kirk, The Secret Commonwealth (1691)",
     "effect": {
       "op": "bank_draw"
     }
@@ -306,8 +306,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Leader. Once in a sitting: pay 3. Name a unit you own. It gains Fast Attack and may act at once. The queen of the hawthorn puts the green on someone and they move before the hour does.",
-    "quote": "I am not a parish. I am the month the hedge is dangerous.",
-    "quoted": "The May Queen",
+    "quote": "For I'm to be Queen o' the May, mother, I'm to be Queen o' the May.",
+    "quoted": "Alfred, Lord Tennyson, The May Queen (1833)",
     "leaderPower": {
       "op": "haste"
     }
@@ -324,8 +324,8 @@
       "tithe2"
     ],
     "text": "Greater Tithe. While the suit is on the circle, your bank yields +2. An interwar diver of the luminiferous aether. The helmet should not work. The patent says it does.",
-    "quote": "He came back with frost on the inside of the glass.",
-    "quoted": "The Helix Bureau",
+    "quote": "There can be no doubt that the interplanetary and interstellar spaces are not empty, but are occupied by a material substance or body.",
+    "quoted": "James Clerk Maxwell, \"Ether,\" Encyclopaedia Britannica (1878)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -343,8 +343,8 @@
       "blooded"
     ],
     "text": "Fast Attack. If it survives a battle it struck in, it gains power. A mad anatomist in a mirror-bright apron. Strikes first. The operation that lives becomes the next instrument.",
-    "quote": "He does not sew. He upgrades.",
-    "quoted": "The Helix Bureau",
+    "quote": "I collected bones from charnel-houses and disturbed, with profane fingers, the tremendous secrets of the human frame.",
+    "quoted": "Mary Shelley, Frankenstein (1818)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -362,8 +362,8 @@
       "shutter"
     ],
     "text": "Ranged Strike. Shutter. A shot reaches 2 circles in a straight line, never the diagonal, and is not answered. Ranged strikes cannot choose this plate. An occult optic that sees the decade after this one.",
-    "quote": "The reticule is not aimed at anything you can name.",
-    "quoted": "The Helix Bureau",
+    "quote": "If I have seen further it is by standing on the shoulders of Giants.",
+    "quoted": "Isaac Newton, letter to Robert Hooke (1676)",
     "power": 4,
     "legacyAttack": 4,
     "legacyHealth": 4
@@ -382,8 +382,8 @@
       "crown"
     ],
     "text": "Slow Attack. Toughness. Lamp. It strikes last. The first point of any blow is refused. Adjacent units you control strike for +1 Power. A dynamo that stood up and went to work.",
-    "quote": "The floor hums when it clocks in.",
-    "quoted": "The Helix Bureau",
+    "quote": "He began to feel the forty-foot dynamos as a moral force, much as the early Christians felt the Cross.",
+    "quoted": "Henry Adams, The Education of Henry Adams (1907)",
     "power": 5,
     "legacyAttack": 5,
     "legacyHealth": 5
@@ -401,8 +401,8 @@
       "crown"
     ],
     "text": "Fast Attack. Lamp. Strikes first. Adjacent units you control strike for +1 Power. She smells of lightning and filing cabinets. The bureau gave her a rank the army does not have.",
-    "quote": "Breathe after she passes. Not during.",
-    "quoted": "The Helix Bureau",
+    "quote": "As soon as any of the thunder clouds come over the kite, the pointed wire will draw the electric fire from them.",
+    "quoted": "Benjamin Franklin, Pennsylvania Gazette (1752)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -420,8 +420,8 @@
       "tithe"
     ],
     "text": "Relay. Tithe. When you muster another unit, draw 1. Your bank yields +1 while he stands. His cuffs glow. The ledger glows. He does not notice.",
-    "quote": "He files the living under Miscellaneous.",
-    "quoted": "The Helix Bureau",
+    "quote": "When you can measure what you are speaking about, and express it in numbers, you know something about it.",
+    "quoted": "Lord Kelvin, Electrical Units of Measurement (1883)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -439,8 +439,8 @@
       "shutter"
     ],
     "text": "Toughness. Shutter. The first point of any blow is refused. Ranged strikes cannot choose him. A chaplain of the spinning compass. His vestments are ball bearings and black wool.",
-    "quote": "The sermon is a rate of turn.",
-    "quoted": "The Helix Bureau",
+    "quote": "The terrestrial globe itself is a great magnet.",
+    "quoted": "William Gilbert, De Magnete (1600)",
     "power": 4,
     "legacyAttack": 4,
     "legacyHealth": 4
@@ -457,8 +457,8 @@
       "ranged"
     ],
     "text": "Ranged Strike. The confession is a straight exposure, 2 circles, never the diagonal, and it is not answered. He sees the bone and the secret in the same plate.",
-    "quote": "Hold still. The sin develops in the darkroom.",
-    "quoted": "The Helix Bureau",
+    "quote": "I did not think; I investigated.",
+    "quoted": "Wilhelm Röntgen, to McClure's Magazine (1896)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -476,8 +476,8 @@
       "tough"
     ],
     "text": "Slow Attack. Toughness. It strikes last. The first point of any blow is refused. A golem filed at the bureau in 1927, stamped, witnessed, and wound with copper instead of a shem.",
-    "quote": "The name on its forehead is a registration number.",
-    "quoted": "The Helix Bureau",
+    "quote": "Rava created a man and sent him to Rabbi Zeira. Rabbi Zeira spoke to him, but he did not answer. He said: You are from the magicians; return to your dust.",
+    "quoted": "Babylonian Talmud, Sanhedrin 65b",
     "power": 5,
     "legacyAttack": 5,
     "legacyHealth": 5
@@ -495,8 +495,8 @@
       "crown"
     ],
     "text": "Relay. Lamp. When you muster another unit, draw 1. Adjacent units you control strike for +1 Power. A tower that repeats your muster to the whole yard.",
-    "quote": "It does not play music. It plays orders.",
-    "quoted": "The Helix Bureau",
+    "quote": "What hath God wrought.",
+    "quoted": "Samuel Morse, first long-distance telegraph message (1844)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -515,8 +515,8 @@
       "tough"
     ],
     "text": "Cryptid. Greater Tithe. Toughness. A machine the bureau never approved. Your bank yields +2. The first point of any blow is refused. It runs anyway.",
-    "quote": "There is no plate on the boiler. There is a pulse.",
-    "quoted": "The Helix Bureau",
+    "quote": "I sell here, Sir, what all the world desires to have — POWER.",
+    "quoted": "Matthew Boulton, in Boswell's Life of Johnson (1791)",
     "power": 4,
     "legacyAttack": 4,
     "legacyHealth": 4
@@ -535,8 +535,8 @@
       "shutter"
     ],
     "text": "Cryptid. Ranged Strike. Shutter. A medical engine that learned to aim. The shot is a straight line and is not answered. Ranged strikes cannot choose it.",
-    "quote": "It breathes for whoever is inside. Then it chooses.",
-    "quoted": "The Helix Bureau",
+    "quote": "Respiration is thus nothing but a slow combustion of carbon and hydrogen.",
+    "quoted": "Antoine Lavoisier, Memoir on the Respiration of Animals (1789)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -551,8 +551,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Name a unit. Deal 3 damage. The bureau throws the helix past the red line. The named plate takes the whole arc.",
-    "quote": "The meter melts. That is the receipt.",
-    "quoted": "The Helix Bureau",
+    "quote": "I have lately made an experiment in electricity that I desire never to repeat.",
+    "quoted": "Benjamin Franklin, letter to John Franklin (1750)",
     "aim": true,
     "effect": {
       "op": "smite",
@@ -569,8 +569,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Name a unit. It cannot move or attack on its next rite. A docket of quiet. The plate is pending and may not act.",
-    "quote": "Stamped. Held. Not destroyed.",
-    "quoted": "The Helix Bureau",
+    "quote": "The eternal silence of these infinite spaces frightens me.",
+    "quoted": "Blaise Pascal, Pensées (1670)",
     "aim": true,
     "effect": {
       "op": "lock"
@@ -586,8 +586,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Deal 2 damage to every enemy unit with Ranged Strike. The bureau buys the guns as scrap and pours them the same afternoon.",
-    "quote": "Ordnance is an ore.",
-    "quoted": "The Helix Bureau",
+    "quote": "Every gun that is made, every warship launched, every rocket fired signifies, in the final sense, a theft from those who hunger and are not fed.",
+    "quoted": "Dwight D. Eisenhower, The Chance for Peace (1953)",
     "effect": {
       "op": "snuff_guns"
     }
@@ -602,8 +602,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Device. Bank 1 resources and draw 1 card. One coil left in the cage, still warm from a test that was not logged.",
-    "quote": "Do not touch both ends.",
-    "quoted": "The Helix Bureau",
+    "quote": "It has not escaped our notice that the specific pairing we have postulated immediately suggests a possible copying mechanism for the genetic material.",
+    "quoted": "James Watson and Francis Crick, Nature (1953)",
     "effect": {
       "op": "bank_draw"
     }
@@ -618,8 +618,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Leader. Once in a sitting: pay 2. Name a unit. It gains Shutter and Toughness. The chief of the bureau puts a patent on a body. Ranged strikes cannot choose it, and the first point of any blow is refused.",
-    "quote": "I do not invent the future. I license it.",
-    "quoted": "Chief Adler",
+    "quote": "Knowledge itself is power.",
+    "quoted": "Francis Bacon, Meditationes Sacrae (1597)",
     "leaderPower": {
       "op": "snuff"
     }
@@ -636,8 +636,8 @@
       "tithe2"
     ],
     "text": "Greater Tithe. While he stands, your bank yields +2. Master of the salt that fixes a spirit in the flesh. The college pays him in resources and he pays them in what remains of the soul.",
-    "quote": "Nothing volatile survives his office.",
-    "quoted": "The Monad Faculty",
+    "quote": "Its force or power is entire if it be converted into earth.",
+    "quoted": "The Emerald Tablet, tr. Isaac Newton",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -655,8 +655,8 @@
       "tough"
     ],
     "text": "Slow Attack. Toughness. It strikes last. The first point of any blow is refused. A soul that acquired weight and will not settle until both sides have moved.",
-    "quote": "You may turn away. The one remains.",
-    "quoted": "The Monad Faculty",
+    "quote": "It is written in the language of mathematics, and its characters are triangles, circles, and other geometric figures.",
+    "quoted": "Galileo Galilei, The Assayer (1623)",
     "power": 5,
     "legacyAttack": 5,
     "legacyHealth": 5
@@ -673,8 +673,8 @@
       "fast"
     ],
     "text": "Fast Attack. Strikes first. A junior who sends his subtle body ahead of his flesh. If the blow kills, it is not answered.",
-    "quote": "The shade arrives before the man.",
-    "quoted": "The Monad Faculty",
+    "quote": "Withdraw into yourself and look.",
+    "quoted": "Plotinus, Enneads",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -692,8 +692,8 @@
       "tough"
     ],
     "text": "Hearth. Toughness. A resource he stands on banks twice. The first point of any blow is refused. He keeps the furnace that never goes out. The faculty is a temperature.",
-    "quote": "Do not open the door to see if it is done.",
-    "quoted": "The Monad Faculty",
+    "quote": "It was ever, is now, and ever shall be an ever-living Fire, with measures of it kindling, and measures going out.",
+    "quoted": "Heraclitus, Fragments",
     "power": 4,
     "legacyAttack": 4,
     "legacyHealth": 4
@@ -711,8 +711,8 @@
       "delay"
     ],
     "text": "Slow muster. Relay. It cannot move or attack the rite it arrives. When you muster another unit, draw 1. A student still learning to see with the inner eye.",
-    "quote": "The first night is the slow one.",
-    "quoted": "The Monad Faculty",
+    "quote": "There is no royal road to geometry.",
+    "quoted": "Euclid, to Ptolemy I, as told by Proclus",
     "power": 1,
     "legacyAttack": 1,
     "legacyHealth": 1
@@ -730,8 +730,8 @@
       "tithe"
     ],
     "text": "Lamp. Tithe. Adjacent units you control strike for +1 Power. Your bank yields +1. A small sun that makes every neighboring soul hit harder.",
-    "quote": "Behold it. The rest follows.",
-    "quoted": "The Monad Faculty",
+    "quote": "They supposed the elements of numbers to be the elements of all things, and the whole heaven to be a musical scale and a number.",
+    "quoted": "Aristotle, on the Pythagoreans, Metaphysics",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -748,8 +748,8 @@
       "relay"
     ],
     "text": "Relay. When you muster another unit, draw 1. She keeps the homunculi in labeled glass and already knows which plate you meant to draw.",
-    "quote": "The catalogue is alive. She pretends it is not.",
-    "quoted": "The Monad Faculty",
+    "quote": "Each portion of matter may be conceived as like a garden full of plants and like a pond full of fishes.",
+    "quoted": "Gottfried Wilhelm Leibniz, Monadology (1714)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -767,8 +767,8 @@
       "shutter"
     ],
     "text": "Ranged Strike. Shutter. A shot of cold light, 2 circles, straight, never the diagonal, unanswered. Ranged strikes cannot choose it. An astronomer who nailed a star to the yard.",
-    "quote": "It does not wander. Neither does the wound.",
-    "quoted": "The Monad Faculty",
+    "quote": "Two things fill the mind with ever new and increasing admiration and awe: the starry heavens above and the moral law within.",
+    "quoted": "Immanuel Kant, Critique of Practical Reason (1788)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -786,8 +786,8 @@
       "sprout"
     ],
     "text": "Lamp. If it is still standing at the end of its rite, it gains 1 power. Adjacent units you control strike for +1 Power. A saint of the inward fire. Every rite it survives, the light climbs.",
-    "quote": "Flame, not reckoning.",
-    "quoted": "The Monad Faculty",
+    "quote": "FIRE. God of Abraham, God of Isaac, God of Jacob, not of the philosophers and of the learned.",
+    "quoted": "Blaise Pascal, Memorial (1654)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -805,8 +805,8 @@
       "blooded"
     ],
     "text": "Fast Attack. If it survives a battle it struck in, it gains power. The name the college would not speak. It strikes first, and the unsaid part grows teeth.",
-    "quote": "Leave the last name unsaid. It will finish itself.",
-    "quoted": "The Monad Faculty",
+    "quote": "Whereof one cannot speak, thereof one must be silent.",
+    "quoted": "Ludwig Wittgenstein, Tractatus Logico-Philosophicus (1921)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -825,8 +825,8 @@
       "crown"
     ],
     "text": "Cryptid. Untargetable. Lamp. A face the college forbids novices to look at. Strikes pass over it. Adjacent units you control strike for +1 Power.",
-    "quote": "Shut your eyes. It is still there.",
-    "quoted": "The Monad Faculty",
+    "quote": "Out of nothing I have created a strange new universe.",
+    "quoted": "János Bolyai, letter to his father (1823)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -845,8 +845,8 @@
       "shutter"
     ],
     "text": "Cryptid. Toughness. Shutter. A presence that should not have a body. The first point of any blow is refused. Ranged strikes cannot choose it.",
-    "quote": "Do not name it. It is already here.",
-    "quoted": "The Monad Faculty",
+    "quote": "There was yet a fifth combination which God used in the delineation of the universe.",
+    "quoted": "Plato, Timaeus",
     "power": 4,
     "legacyAttack": 4,
     "legacyHealth": 4
@@ -861,8 +861,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Name a unit and return it to the hand it came from. The name is withdrawn. The plate goes back unsaid.",
-    "quote": "Unsay it. Do not burn it.",
-    "quoted": "The Monad Faculty",
+    "quote": "I frame no hypotheses.",
+    "quoted": "Isaac Newton, Principia, General Scholium (1713)",
     "aim": true,
     "effect": {
       "op": "bounce"
@@ -878,8 +878,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Draw 2 cards. Two visions, already finished, laid in the hand.",
-    "quote": "The long way was vanity.",
-    "quoted": "The Monad Faculty",
+    "quote": "I have made this longer than usual because I have not had time to make it shorter.",
+    "quoted": "Blaise Pascal, Provincial Letters (1657)",
     "effect": {
       "op": "draw",
       "n": 2
@@ -895,8 +895,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Name a unit. Deal 2 damage. Strong water of the retort. The faculty calls it a reagent. The plate calls it a hole.",
-    "quote": "Nitrate. Then silence.",
-    "quoted": "The Monad Faculty",
+    "quote": "To divide each of the difficulties under examination into as many parts as possible, and as might be necessary for its adequate solution.",
+    "quoted": "René Descartes, Discourse on Method (1637)",
     "aim": true,
     "effect": {
       "op": "smite",
@@ -913,8 +913,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Device. Bank 1 resources and draw 1 card. The college advances a coin and a plate against a working you have not opened.",
-    "quote": "The debt comes due in the next rite.",
-    "quoted": "The Monad Faculty",
+    "quote": "Money exists not by nature but by law.",
+    "quoted": "Aristotle, Nicomachean Ethics",
     "effect": {
       "op": "bank_draw"
     }
@@ -929,8 +929,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Leader. Once in a sitting: pay 2. Name a unit you own. It gains +1 power, and you draw a card. The rector lays a word on a living body and keeps the vision.",
-    "quote": "We do not pray. We behold.",
-    "quoted": "Rector of the Monad",
+    "quote": "The Monads have no windows, through which anything could come in or go out.",
+    "quoted": "Gottfried Wilhelm Leibniz, Monadology (1714)",
     "leaderPower": {
       "op": "empower_draw",
       "n": 1
@@ -949,8 +949,8 @@
       "tough"
     ],
     "text": "Fast Attack. Toughness. Strikes first. The first point of any blow is refused. A monk of the lavra who left the rule and kept the shoulders. He hits before the troparion ends.",
-    "quote": "The cowl is torn. The arm is not.",
-    "quoted": "The Iconostasy",
+    "quote": "A time is coming when men will go mad, and when they see someone who is not mad, they will attack him saying, \"You are mad, you are not like us.\"",
+    "quoted": "Abba Anthony, Sayings of the Desert Fathers",
     "power": 4,
     "legacyAttack": 4,
     "legacyHealth": 4
@@ -968,8 +968,8 @@
       "tithe"
     ],
     "text": "Hearth. Tithe. A resource it stands on banks twice, and your bank yields +1. The barn spirit. Black as a kiln. Leave the first sheaf or it burns the second.",
-    "quote": "The threshing floor has a landlord.",
-    "quoted": "The Iconostasy",
+    "quote": "Except a corn of wheat fall into the ground and die, it abideth alone: but if it die, it bringeth forth much fruit.",
+    "quoted": "John 12:24, epigraph to The Brothers Karamazov (1880)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -986,8 +986,8 @@
       "veiled"
     ],
     "text": "Untargetable. The night-hag of the cradle. Strikes and rites pass over her. She cannot be named. You hear the breath. You do not get a target.",
-    "quote": "She sits where the child was going to sleep.",
-    "quoted": "The Iconostasy",
+    "quote": "Sleep, my beautiful baby, bayushki-bayu. Quietly the clear moon looks into your cradle.",
+    "quoted": "Mikhail Lermontov, Cossack Lullaby (1838)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -1005,8 +1005,8 @@
       "crown"
     ],
     "text": "Ranged Strike. Lamp. The prophetic bird of the Slavic east, a woman-face and a wingspan of omen. The cry reaches 2 circles in a straight line and is not answered. Adjacent units you control strike for +1 Power.",
-    "quote": "She speaks the future. The future is a wound.",
-    "quoted": "The Iconostasy",
+    "quote": "On the smooth of endless waters, clothed in purple by the sunset, she prophesies and sings, unable to lift her troubled wings.",
+    "quoted": "Alexander Blok, Gamayun, the Prophetic Bird (1899)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -1024,8 +1024,8 @@
       "blooded"
     ],
     "text": "Fast Attack. If it survives a battle it struck in, it gains power. One-eyed misfortune. It strikes first, and if it lives the bad luck gets larger.",
-    "quote": "Do not look it in the only eye.",
-    "quoted": "The Iconostasy",
+    "quote": "Do not wake Likho while it sleeps quietly.",
+    "quoted": "Russian proverb",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -1043,8 +1043,8 @@
       "fast"
     ],
     "text": "Fast Attack. Relay. Strikes first. When you muster another unit, draw 1. A holy-fool minstrel the church threw out and the village kept. His song is a muster list.",
-    "quote": "Laugh. Then draw.",
-    "quoted": "The Iconostasy",
+    "quote": "We are fools for Christ's sake.",
+    "quoted": "1 Corinthians 4:10",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -1062,8 +1062,8 @@
       "crown"
     ],
     "text": "Lamp. If it is still standing at the end of its rite, it gains 1 power. Adjacent units you control strike for +1 Power. The midsummer fire that the shaman will not let go out.",
-    "quote": "Jump it if you are brave. Feed it if you are wise.",
-    "quoted": "The Iconostasy",
+    "quote": "If you will, you can become all flame.",
+    "quoted": "Abba Joseph of Panephysis, Sayings of the Desert Fathers",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -1081,8 +1081,8 @@
       "tough"
     ],
     "text": "Hearth. Toughness. A resource it stands on banks twice. The first point of any blow is refused. The yard spirit, grudging, hairy, loyal to the gate and not to guests.",
-    "quote": "He knows which chicken is yours.",
-    "quoted": "The Iconostasy",
+    "quote": "Attentiveness is the heart's stillness, unbroken by any thought.",
+    "quoted": "Hesychios the Priest, On Watchfulness and Holiness, Philokalia",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -1100,8 +1100,8 @@
       "tough"
     ],
     "text": "Slow Attack. Toughness. He strikes last. The first point of any blow is refused. A starets who painted himself into the dark of an icon and then stepped out of it, late.",
-    "quote": "He arrives after you have spent your breath.",
-    "quoted": "The Iconostasy",
+    "quote": "I exist in your imagination, and your imagination is part of nature, so I exist in nature.",
+    "quoted": "Anton Chekhov, The Black Monk (1894)",
     "power": 5,
     "legacyAttack": 5,
     "legacyHealth": 5
@@ -1118,8 +1118,8 @@
       "tithe2"
     ],
     "text": "Greater Tithe. The bird whose song makes a man forget his labor. While she sings, your bank yields +2. The work gets done by somebody who was not listening.",
-    "quote": "Cover your ears if you still want the wage.",
-    "quoted": "The Iconostasy",
+    "quote": "Silence is a mystery of the age to come, but words are instruments of this world.",
+    "quoted": "Isaac the Syrian, Ascetical Homilies",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -1138,8 +1138,8 @@
       "seep"
     ],
     "text": "Cryptid. Gills. Seep. The great pike under the mill. At the start of your rite, deal 1 to each adjacent enemy. A shaman bargained with it. The bargain is still swimming.",
-    "quote": "By the pike, by my wish. Then pay.",
-    "quoted": "The Iconostasy",
+    "quote": "By the pike's command, by my own wish.",
+    "quoted": "Russian folktale formula, Emelya the Fool",
     "power": 4,
     "legacyAttack": 4,
     "legacyHealth": 4
@@ -1157,8 +1157,8 @@
       "veiled"
     ],
     "text": "Cryptid. Untargetable. A light on a Slavic grave that cannot be named or shot. Strikes pass over it. Follow it and you are in the wrong yard.",
-    "quote": "It is not a soul. It is a bill.",
-    "quoted": "The Iconostasy",
+    "quote": "The mysteries of God's Word lie simple, absolute and unchangeable in the brilliant darkness of a hidden silence.",
+    "quoted": "Pseudo-Dionysius the Areopagite, The Mystical Theology",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -1173,8 +1173,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Name a unit. It cannot move or attack on its next rite. A shaman ties white bark around a name. The plate stands in the grove.",
-    "quote": "Three strips. One road, closed.",
-    "quoted": "The Iconostasy",
+    "quote": "Lord Jesus Christ, Son of God, have mercy on me, a sinner.",
+    "quoted": "The Jesus Prayer, The Way of a Pilgrim",
     "aim": true,
     "effect": {
       "op": "lock"
@@ -1190,8 +1190,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Name a unit. Deal 3 damage. The mad monk breaks an icon across a plate. The gold leaf cuts.",
-    "quote": "Even a saint can be swung.",
-    "quoted": "The Iconostasy",
+    "quote": "I do not worship matter; I worship the Creator of matter who became matter for my sake.",
+    "quoted": "John of Damascus, On the Divine Images",
     "aim": true,
     "effect": {
       "op": "smite",
@@ -1208,8 +1208,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Name a unit and return it to the hand it came from. The dvorovoi wants the guest off the yard before the stove cools.",
-    "quote": "Boots by the door. You are done.",
-    "quoted": "The Iconostasy",
+    "quote": "Go, sit in your cell, and your cell will teach you everything.",
+    "quoted": "Abba Moses, Sayings of the Desert Fathers",
     "aim": true,
     "effect": {
       "op": "bounce"
@@ -1225,8 +1225,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Device. Bank 1 resources and draw 1 card. The stove pays a coal and deals a plate. The hut keeps its oath.",
-    "quote": "Sit on the warm side.",
-    "quoted": "The Iconostasy",
+    "quote": "The principal thing is to stand before the Lord with the mind in the heart.",
+    "quoted": "Theophan the Recluse, The Art of Prayer",
     "effect": {
       "op": "bank_draw"
     }
@@ -1241,8 +1241,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Leader. Once in a sitting: pay 3. Name a unit you own. It gains +3 power. The mad monk nails the last icon to a living chest and calls it armor.",
-    "quote": "Pray after. First, do not die.",
-    "quoted": "Father of the Last Icon",
+    "quote": "Beauty will save the world.",
+    "quoted": "Fyodor Dostoevsky, The Idiot (1869)",
     "leaderPower": {
       "op": "bulwark"
     }
@@ -1260,8 +1260,8 @@
       "crown"
     ],
     "text": "Toughness. Lamp. The first point of any blow is refused. Adjacent units you control strike for +1 Power. She is the winter witch of the hedge, not a court magician. The thorn beside her hits harder.",
-    "quote": "The hill goes white when she stands up.",
-    "quoted": "The Briar Sidhe",
+    "quote": "The host is riding from Knocknarea and over the grave of Clooth-na-Bare.",
+    "quoted": "W. B. Yeats, The Hosting of the Sidhe (1899)",
     "power": 4,
     "legacyAttack": 4,
     "legacyHealth": 4
@@ -1278,8 +1278,8 @@
       "fast"
     ],
     "text": "Fast Attack. Strikes first. A rider out of the hollow hill. If the blow kills, it is not answered.",
-    "quote": "He does not duel. He arrives.",
-    "quoted": "The Briar Sidhe",
+    "quote": "And if any gaze on our rushing band, we come between him and the deed of his hand, we come between him and the hope of his heart.",
+    "quoted": "W. B. Yeats, The Hosting of the Sidhe (1899)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -1296,8 +1296,8 @@
       "veiled"
     ],
     "text": "Untargetable. Strikes and rites pass over him. He cannot be named. The gate laughs and is not there to be hit.",
-    "quote": "Call him and you are calling a hedge.",
-    "quoted": "The Briar Sidhe",
+    "quote": "Lord, what fools these mortals be!",
+    "quoted": "William Shakespeare, A Midsummer Night's Dream (1595)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -1314,8 +1314,8 @@
       "tithe2"
     ],
     "text": "Greater Tithe. While she stands, your bank yields +2. The muse of the well does not sing for free. She invoices in hawthorn.",
-    "quote": "Drink, and pay the green.",
-    "quoted": "The Briar Sidhe",
+    "quote": "She is the Gaelic muse, for she gives inspiration to those she persecutes.",
+    "quoted": "W. B. Yeats, Fairy and Folk Tales of the Irish Peasantry (1888)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -1333,8 +1333,8 @@
       "fast"
     ],
     "text": "Fast Attack. Gills. Strikes first. The horse in the ford is a fairy law, not a spell with a hat.",
-    "quote": "The bridle is wet. The rider is not coming back the same.",
-    "quoted": "The Briar Sidhe",
+    "quote": "When thowes dissolve the snawy hoord, an' float the jinglin' icy boord, then water-kelpies haunt the foord.",
+    "quoted": "Robert Burns, Address to the Deil (1786)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -1352,8 +1352,8 @@
       "tough"
     ],
     "text": "Slow Attack. Toughness. He strikes last, and the first point of any blow is refused. The headless rider of the Irish road. His whip is a spine.",
-    "quote": "He holds his own face up like a lantern.",
-    "quoted": "The Briar Sidhe",
+    "quote": "Because I could not stop for Death, he kindly stopped for me; the carriage held but just ourselves and Immortality.",
+    "quoted": "Emily Dickinson, Because I could not stop for Death (1890)",
     "power": 5,
     "legacyAttack": 5,
     "legacyHealth": 5
@@ -1370,8 +1370,8 @@
       "relay"
     ],
     "text": "Relay. When you muster another unit, draw 1. The cradle at the door has the wrong child in it, and the wrong child knows your next plate.",
-    "quote": "They left a song where the baby was.",
-    "quoted": "The Briar Sidhe",
+    "quote": "Come away, O human child! To the waters and the wild with a faery, hand in hand, for the world's more full of weeping than you can understand.",
+    "quoted": "W. B. Yeats, The Stolen Child (1886)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -1389,8 +1389,8 @@
       "blooded"
     ],
     "text": "Fast Attack. If it survives a battle it struck in, it gains power. A border goblin in a dyed cap. It strikes first, and living makes it worse.",
-    "quote": "The cap stays red. He sees to that.",
-    "quoted": "The Briar Sidhe",
+    "quote": "It will have blood; they say, blood will have blood.",
+    "quoted": "William Shakespeare, Macbeth (1606)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -1409,8 +1409,8 @@
       "tough"
     ],
     "text": "Toughness. Hearth. If he is still standing at the end of its rite, he gains 1 power. A resource he stands on banks twice. The face in the oak is a parish, not a wizard.",
-    "quote": "Leaves in the mouth. Rent in the roots.",
-    "quoted": "The Briar Sidhe",
+    "quote": "The tree which moves some to tears of joy is in the eyes of others only a green thing that stands in the way.",
+    "quoted": "William Blake, letter to John Trusler (1799)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -1427,8 +1427,8 @@
       "ranged"
     ],
     "text": "Ranged Strike. The keen reaches 2 circles in a straight line, never the diagonal, and is not answered. She does not duel. She names the death from the mound.",
-    "quote": "Someone in the house has already heard her.",
-    "quoted": "The Briar Sidhe",
+    "quote": "The banshee is an attendant fairy that follows the old families, and none but them, and wails before a death.",
+    "quoted": "W. B. Yeats, Fairy and Folk Tales of the Irish Peasantry (1888)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -1447,8 +1447,8 @@
       "fast"
     ],
     "text": "Cryptid. Fast Attack. Gills. The water-horse of the Highlands. It strikes first, and the ford does not give the body back.",
-    "quote": "Do not mount what came out of the loch wearing a smile.",
-    "quoted": "The Briar Sidhe",
+    "quote": "The undiscover'd country from whose bourn no traveller returns.",
+    "quoted": "William Shakespeare, Hamlet (1601)",
     "power": 4,
     "legacyAttack": 4,
     "legacyHealth": 4
@@ -1466,8 +1466,8 @@
       "veiled"
     ],
     "text": "Cryptid. Untargetable. A light on the bog that cannot be named or shot. Strikes pass over it. Follow it and you are off the path.",
-    "quote": "The lamp is not yours. The path is not a path.",
-    "quoted": "The Briar Sidhe",
+    "quote": "Hovering and blazing with delusive light, misleads th' amazed night-wanderer from his way to bogs and mires.",
+    "quoted": "John Milton, Paradise Lost (1667)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -1482,8 +1482,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Name a unit. It cannot move or attack on its next rite. A whitethorn sprig on the door. The named plate waits in the hedge.",
-    "quote": "Iron is rude. Thorn is law.",
-    "quoted": "The Briar Sidhe",
+    "quote": "O see ye not yon narrow road, so thick beset wi' thorns and briers? That is the path of righteousness, though after it but few inquires.",
+    "quoted": "Thomas the Rhymer, Border ballad",
     "aim": true,
     "effect": {
       "op": "lock"
@@ -1499,8 +1499,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Name a unit and return it to its owner’s hand. The sidhe are polite. They send the guest home before the meal.",
-    "quote": "You were never invited to stay.",
-    "quoted": "The Briar Sidhe",
+    "quote": "If we shadows have offended, think but this, and all is mended, that you have but slumber'd here while these visions did appear.",
+    "quoted": "William Shakespeare, A Midsummer Night's Dream (1595)",
     "aim": true,
     "effect": {
       "op": "bounce"
@@ -1516,8 +1516,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Name a unit. Deal 2 damage. Milk for the house. Iron for the thing that should not have crossed the stile.",
-    "quote": "One for the cow. One for the nail.",
-    "quoted": "The Briar Sidhe",
+    "quote": "Gold is for the mistress, silver for the maid, copper for the craftsman cunning at his trade... But Iron, Cold Iron, is master of them all.",
+    "quoted": "Rudyard Kipling, Cold Iron (1910)",
     "aim": true,
     "effect": {
       "op": "smite",
@@ -1534,8 +1534,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Device. Bank 1 resources and draw 1 card. A rowan peg in the lintel. The house pays, and a plate comes to the hand.",
-    "quote": "Hang it where the good people knock.",
-    "quoted": "The Briar Sidhe",
+    "quote": "Rowan-tree and red thread put the witches to their speed.",
+    "quoted": "Scottish rhyme, in Chambers' Popular Rhymes of Scotland (1826)",
     "effect": {
       "op": "bank_draw"
     }
@@ -1550,8 +1550,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Leader. Once in a sitting: pay 2. Name a unit you own. It stands back up and gains +1 power. The queen of the hedge puts her own back on their feet.",
-    "quote": "I do not curse. I grow the door shut behind you.",
-    "quoted": "The Whitethorn Queen",
+    "quote": "I am but the queen of fair Elfland, that am hither come to visit thee.",
+    "quoted": "Thomas the Rhymer, Border ballad",
     "leaderPower": {
       "op": "mend"
     }
@@ -1569,8 +1569,8 @@
       "ranged"
     ],
     "text": "Lamp. Ranged Strike. Adjacent units you control strike for +1 Power. The shot is a straight line of coiled light, two circles, never the diagonal, and it is not answered. An interwar saint of the transformer yard.",
-    "quote": "She blesses the grid. The grid answers in white.",
-    "quoted": "The Mercury Works",
+    "quote": "Nothing is too wonderful to be true, if it be consistent with the laws of nature.",
+    "quoted": "Michael Faraday, laboratory diary (1849)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -1588,8 +1588,8 @@
       "shutter"
     ],
     "text": "Tithe. Shutter. While he stands, your bank yields +1. Ranged strikes cannot choose him. The mask is a patent. The fog is a product.",
-    "quote": "Do not ask what the canister was for.",
-    "quoted": "The Mercury Works",
+    "quote": "Gas! GAS! Quick, boys! An ecstasy of fumbling, fitting the clumsy helmets just in time.",
+    "quoted": "Wilfred Owen, Dulce et Decorum Est (1920)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -1607,8 +1607,8 @@
       "fast"
     ],
     "text": "Fast Attack. Relay. Strikes first. When you muster another unit, draw 1. A boy in a workshop apron who learned the tube before he learned the prayer.",
-    "quote": "The glass glows. He glows with it.",
-    "quoted": "The Mercury Works",
+    "quote": "We have actually touched the border-land where matter and force seem to merge into one another, the shadowy realm between known and unknown.",
+    "quoted": "William Crookes, On Radiant Matter (1879)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -1625,8 +1625,8 @@
       "ranged"
     ],
     "text": "Ranged Strike. A patent rifle. The shot reaches 2 circles in a straight line, never the diagonal, and is not answered. Interwar infantry for a war that has not been declared.",
-    "quote": "He does not aim at a man. He aims at a frequency.",
-    "quoted": "The Mercury Works",
+    "quote": "It was sweeping round swiftly and steadily, this flaming death, this invisible, inevitable sword of heat.",
+    "quoted": "H. G. Wells, The War of the Worlds (1898)",
     "power": 4,
     "legacyAttack": 4,
     "legacyHealth": 4
@@ -1644,8 +1644,8 @@
       "slow"
     ],
     "text": "Slow Attack. Toughness. It strikes last. The first point of any blow is refused. A walking lathe from a works that should not have the decade yet.",
-    "quote": "It does not tire. It does not enlist. It clocks in.",
-    "quoted": "The Mercury Works",
+    "quote": "The human body is a machine which winds its own springs. It is the living image of perpetual movement.",
+    "quoted": "Julien Offray de La Mettrie, Man a Machine (1747)",
     "power": 5,
     "legacyAttack": 5,
     "legacyHealth": 5
@@ -1662,8 +1662,8 @@
       "tithe2"
     ],
     "text": "Greater Tithe. While it hangs over the circle, your bank yields +2. A black envelope with a laboratory in the gondola. The patent is older than the sky it flies in.",
-    "quote": "They filed the clouds in 1924.",
-    "quoted": "The Mercury Works",
+    "quote": "Saw the heavens fill with commerce, argosies of magic sails, pilots of the purple twilight, dropping down with costly bales.",
+    "quoted": "Alfred, Lord Tennyson, Locksley Hall (1842)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -1681,8 +1681,8 @@
       "blooded"
     ],
     "text": "Fast Attack. If it survives a battle it struck in, it gains power. The clerk opens the living like a schematic. Strikes first. Coming back from the cut makes the next cut worse.",
-    "quote": "Label the nerve. Then use it.",
-    "quoted": "The Mercury Works",
+    "quote": "I profess both to learn and to teach anatomy, not from books but from dissections; not from the positions of philosophers but from the fabric of nature.",
+    "quoted": "William Harvey, De Motu Cordis (1628)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -1700,8 +1700,8 @@
       "delay"
     ],
     "text": "Slow muster. Hearth. It cannot move or attack the rite it arrives. A resource it stands on banks twice. The machine is doing a sum the faculty is not allowed to see.",
-    "quote": "It clicks when a man would have prayed.",
-    "quoted": "The Mercury Works",
+    "quote": "The Analytical Engine weaves algebraical patterns just as the Jacquard-loom weaves flowers and leaves.",
+    "quoted": "Ada Lovelace, Notes on the Analytical Engine (1843)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -1719,8 +1719,8 @@
       "crown"
     ],
     "text": "Toughness. Lamp. The first point of any blow is refused. Adjacent units you control strike for +1 Power. She paints the dials. The dials paint her hands. Everyone beside her hits brighter.",
-    "quote": "The glow does not wash off.",
-    "quoted": "The Mercury Works",
+    "quote": "One of our joys was to go into our workroom at night. The glowing tubes looked like faint, fairy lights.",
+    "quoted": "Marie Curie, Autobiographical Notes (1923)",
     "power": 4,
     "legacyAttack": 4,
     "legacyHealth": 4
@@ -1738,8 +1738,8 @@
       "shutter"
     ],
     "text": "Relay. Shutter. When you muster another unit, draw 1. Ranged strikes cannot choose it. A set that should be a decade away, already taking orders from the mud.",
-    "quote": "The voice in the headset is not on your side of the year.",
-    "quoted": "The Mercury Works",
+    "quote": "Mr. Watson, come here, I want to see you.",
+    "quoted": "Alexander Graham Bell, first telephone call (1876)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -1758,8 +1758,8 @@
       "ranged"
     ],
     "text": "Cryptid. Lamp. Ranged Strike. A lamp that grew legs in the works. Adjacent units you control strike for +1. The shot is a straight line and is not answered.",
-    "quote": "Do not follow the light into the yard after whistle.",
-    "quoted": "The Mercury Works",
+    "quote": "Hail, holy Light, offspring of Heav'n first-born.",
+    "quoted": "John Milton, Paradise Lost (1667)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -1778,8 +1778,8 @@
       "shutter"
     ],
     "text": "Cryptid. Toughness. Shutter. The first point of any blow is refused. Ranged strikes cannot choose it. An armored saint with no crew and no decade it belongs to.",
-    "quote": "The hatch does not open from this side of the war.",
-    "quoted": "The Mercury Works",
+    "quote": "Supreme excellence consists in breaking the enemy's resistance without fighting.",
+    "quoted": "Sun Tzu, The Art of War",
     "power": 5,
     "legacyAttack": 5,
     "legacyHealth": 5
@@ -1794,8 +1794,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Name a unit. Deal 3 damage. The works throws the switch past the red line. The named plate takes the whole discharge.",
-    "quote": "The meter does not have a number for this.",
-    "quoted": "The Mercury Works",
+    "quote": "Any one who expects a source of power from the transformation of these atoms is talking moonshine.",
+    "quoted": "Ernest Rutherford, British Association address (1933)",
     "aim": true,
     "effect": {
       "op": "smite",
@@ -1812,8 +1812,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Name a unit. It cannot move or attack on its next rite. A filed darkness. The plate is off the grid until the next rite.",
-    "quote": "We own the hour the lights go out.",
-    "quoted": "The Mercury Works",
+    "quote": "The lamps are going out all over Europe; we shall not see them lit again in our life-time.",
+    "quoted": "Sir Edward Grey, Twenty-Five Years (1925)",
     "aim": true,
     "effect": {
       "op": "lock"
@@ -1829,8 +1829,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Deal 2 damage to every enemy unit with Ranged Strike. The works buys their barrels and melts them in the same shift.",
-    "quote": "Guns are a raw material.",
-    "quoted": "The Mercury Works",
+    "quote": "Nothing from nothing ever yet was born.",
+    "quoted": "Lucretius, On the Nature of Things",
     "effect": {
       "op": "snuff_guns"
     }
@@ -1845,8 +1845,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Device. Bank 1 resources and draw 1 card. One tube left in the drawer, already warm.",
-    "quote": "Do not drop it. It knows your name.",
-    "quoted": "The Mercury Works",
+    "quote": "The magnet has a soul in it because it moves the iron.",
+    "quoted": "Thales, as reported by Aristotle, On the Soul",
     "effect": {
       "op": "bank_draw"
     }
@@ -1861,8 +1861,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Leader. Once in a sitting: pay 3. Name a unit you own. It gains Fast Attack and may act at once. She throws the switch on a living body and the body clocks in early.",
-    "quote": "The future is a patent. I hold the paper.",
-    "quoted": "Director Voss",
+    "quote": "Beware; for I am fearless, and therefore powerful.",
+    "quoted": "Mary Shelley, Frankenstein (1818)",
     "leaderPower": {
       "op": "haste"
     }
@@ -1879,8 +1879,8 @@
       "crown"
     ],
     "text": "Lamp. Adjacent units you control strike for +1 Power. She sees the blow in the dark before it is thrown. The next plate beside her hits on her seeing.",
-    "quote": "The veil was here before the room.",
-    "quoted": "The Closed Proof",
+    "quote": "I beg you, do not disturb this.",
+    "quoted": "Archimedes, as told by Valerius Maximus",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -1897,8 +1897,8 @@
       "fast"
     ],
     "text": "Fast Attack. Strikes first. A junior of the retort who moves like the metal he keeps in his teeth. If the blow kills, it is not answered.",
-    "quote": "He does not sit for the portrait. The portrait has to catch him.",
-    "quoted": "The Closed Proof",
+    "quote": "In a race, the quickest runner can never overtake the slowest, since the pursuer must first reach the point whence the pursued started.",
+    "quoted": "Zeno of Elea, as told by Aristotle, Physics",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -1915,8 +1915,8 @@
       "relay"
     ],
     "text": "Relay. When you muster another unit, draw 1. A little man grown in a flask to file the faculty’s letters. He already knows the next plate.",
-    "quote": "He signs in a hand smaller than the law.",
-    "quoted": "The Closed Proof",
+    "quote": "This we call a homunculus; and it should be afterwards educated with the greatest care and zeal, until it grows up and begins to display intelligence.",
+    "quoted": "Paracelsus, De Natura Rerum (1537)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -1934,8 +1934,8 @@
       "shutter"
     ],
     "text": "Ranged Strike. Shutter. A shot of green glass reaches 2 circles in a straight line, never the diagonal, and is not answered. Ranged strikes cannot choose her. She reads the burn the way other people read a page.",
-    "quote": "The stain on the cuff is a citation.",
-    "quoted": "The Closed Proof",
+    "quote": "Some books are to be tasted, others to be swallowed, and some few to be chewed and digested.",
+    "quoted": "Francis Bacon, Of Studies (1625)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -1953,8 +1953,8 @@
       "slow"
     ],
     "text": "Slow Attack. Toughness. It strikes last. The first point of any blow is refused. A presence that stood up out of the body and will not sit until the work is done.",
-    "quote": "You may refuse. It has already arrived.",
-    "quoted": "The Closed Proof",
+    "quote": "We must know. We will know.",
+    "quoted": "David Hilbert, Königsberg address (1930)",
     "power": 5,
     "legacyAttack": 5,
     "legacyHealth": 5
@@ -1971,8 +1971,8 @@
       "tithe2"
     ],
     "text": "Greater Tithe. While he stands, your bank yields +2. He teaches the solvent that opens a soul. The tuition is paid in resources.",
-    "quote": "The vessel drinks the fire and wants more.",
-    "quoted": "The Closed Proof",
+    "quote": "To know, to dare, to will, to keep silence: these are the four words of the Magus.",
+    "quoted": "Eliphas Levi, Transcendental Magic (1856)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -1990,8 +1990,8 @@
       "crown"
     ],
     "text": "Tithe. Lamp. Your bank yields +1 while she stands. Adjacent units you control strike for +1 Power. A master of the living soul. What stands beside her strikes harder.",
-    "quote": "She does not measure. She consecrates.",
-    "quoted": "The Closed Proof",
+    "quote": "All things which from the very first original being of things have been framed and made do appear to be formed by the reason of numbers.",
+    "quoted": "John Dee, Mathematical Preface to Euclid (1570)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -2009,8 +2009,8 @@
       "hearth"
     ],
     "text": "Toughness. Hearth. The first point of any blow is refused. A resource he stands on banks twice. He keeps the furnace and the furnace keeps the faculty.",
-    "quote": "No one opens the vessel while he is watching the color.",
-    "quoted": "The Closed Proof",
+    "quote": "Ora, lege, lege, lege, relege, labora et invenies. Pray, read, read, read, reread, work, and you will find.",
+    "quoted": "Mutus Liber (1677)",
     "power": 4,
     "legacyAttack": 4,
     "legacyHealth": 4
@@ -2028,8 +2028,8 @@
       "sprout"
     ],
     "text": "Slow muster. It cannot move or attack the rite it arrives. If it is still standing at the end of its rite, it gains 1 power. A sealed spark that learns a body.",
-    "quote": "Do not break the seal on the first night. Let it quicken.",
-    "quoted": "The Closed Proof",
+    "quote": "I have discovered a truly marvellous proof of this, which this margin is too narrow to contain.",
+    "quoted": "Pierre de Fermat, marginal note (1637)",
     "power": 1,
     "legacyAttack": 1,
     "legacyHealth": 1
@@ -2047,8 +2047,8 @@
       "blooded"
     ],
     "text": "Fast Attack. If it survives a battle it struck in, it gains power. A name struck from the book that stood up anyway. It strikes first, and what it does not end is taken into the dark.",
-    "quote": "What is hidden does not leave.",
-    "quoted": "The Closed Proof",
+    "quote": "That miracle of analysis, monster of the ideal world, almost an amphibian between being and not-being, which we call the imaginary root.",
+    "quoted": "Gottfried Wilhelm Leibniz, Acta Eruditorum (1702)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -2067,8 +2067,8 @@
       "shutter"
     ],
     "text": "Cryptid. Toughness. Shutter. A presence the college forbids and the laboratory kept anyway. The first point is refused. Ranged strikes cannot choose it.",
-    "quote": "It stands where no body should stand.",
-    "quoted": "The Closed Proof",
+    "quote": "Mathematics may be defined as the subject in which we never know what we are talking about, nor whether what we are saying is true.",
+    "quoted": "Bertrand Russell, Mysticism and Logic (1917)",
     "power": 4,
     "legacyAttack": 4,
     "legacyHealth": 4
@@ -2087,8 +2087,8 @@
       "crown"
     ],
     "text": "Cryptid. Fast Attack. Lamp. It strikes first. Adjacent units you control strike for +1 Power. The veil has a body under it, and a following.",
-    "quote": "Do not speak its name. Walk behind it.",
-    "quoted": "The Closed Proof",
+    "quote": "All things excellent are as difficult as they are rare.",
+    "quoted": "Baruch Spinoza, Ethics (1677)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -2103,8 +2103,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Name a unit and return it to its owner’s hand. The name does not belong in this working. Send it back unsaid.",
-    "quote": "Take it off the tongue. Not out of the world.",
-    "quoted": "The Closed Proof",
+    "quote": "The name that can be named is not the enduring and unchanging name.",
+    "quoted": "Laozi, Tao Te Ching",
     "aim": true,
     "effect": {
       "op": "bounce"
@@ -2120,8 +2120,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Draw 2 cards. Two visions, already finished, laid in the hand.",
-    "quote": "The long way was vanity.",
-    "quoted": "The Closed Proof",
+    "quote": "Eureka! Eureka!",
+    "quoted": "Archimedes, as told by Vitruvius, On Architecture",
     "effect": {
       "op": "draw",
       "n": 2
@@ -2137,8 +2137,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Name a unit. Deal 2 damage. Green oil of the retort. The faculty calls it a reagent. The plate calls it a wound.",
-    "quote": "Visit the interior of the earth. Rectify.",
-    "quoted": "The Closed Proof",
+    "quote": "War is the father of all and the king of all.",
+    "quoted": "Heraclitus, Fragments",
     "aim": true,
     "effect": {
       "op": "smite",
@@ -2155,8 +2155,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Device. Bank 1 resources and draw 1 card. The college advances you a plate and a coin against a working you have not yet opened.",
-    "quote": "The debt is due in the next rite.",
-    "quoted": "The Closed Proof",
+    "quote": "Nothing, Lucilius, is ours, except time.",
+    "quoted": "Seneca, Letters to Lucilius",
     "effect": {
       "op": "bank_draw"
     }
@@ -2171,8 +2171,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Leader. Once in a sitting: pay 2. Name a unit you own. It gains +1 power, and you draw a card. The provost lays a hand on a living body and takes the vision that follows.",
-    "quote": "We do not believe. We behold.",
-    "quoted": "Provost of the Azoth",
+    "quote": "It is brought to birth in the soul on a sudden, as light that is kindled by a leaping spark, and thereafter it nourishes itself.",
+    "quoted": "Plato, Seventh Letter",
     "leaderPower": {
       "op": "empower_draw",
       "n": 1
@@ -2191,8 +2191,8 @@
       "tithe"
     ],
     "text": "Lamp. Tithe. Adjacent units you control strike for +1 Power. While he stands, your bank yields +1. A grizzled shaman of the white trees. He does not wear a wizard’s hat. He wears bark and a knife.",
-    "quote": "He speaks to the grove. The grove answers in rent.",
-    "quoted": "The Birch Vigil",
+    "quote": "The wise men fear not mighty lords, and have no need of princely gifts; truthful and free is their prophetic tongue, and friendly with the will of heaven.",
+    "quoted": "Alexander Pushkin, The Song of Oleg the Wise (1822)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -2210,8 +2210,8 @@
       "root"
     ],
     "text": "Toughness. Root. The first point of any blow is refused. Enemy plates beside him cannot move or strike. The master of the forest. One shoe, one height, and the path belongs to him.",
-    "quote": "You were tall when you entered. You will not leave tall.",
-    "quoted": "The Birch Vigil",
+    "quote": "There are wonders there: there the leshy roams, a rusalka sits among the branches.",
+    "quoted": "Alexander Pushkin, Ruslan and Lyudmila (1828)",
     "power": 4,
     "legacyAttack": 4,
     "legacyHealth": 4
@@ -2229,8 +2229,8 @@
       "seep"
     ],
     "text": "Gills. Seep. At the start of your rite, deal 1 to each adjacent enemy. The drowned girl in the willow. The river is her parish.",
-    "quote": "She combs her hair with a bone and the bank listens.",
-    "quoted": "The Birch Vigil",
+    "quote": "A rusalka swam down the blue river, lit by the full moon, and strove to splash up to the moon the silvery foam of the wave.",
+    "quoted": "Mikhail Lermontov, The Rusalka (1832)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -2248,8 +2248,8 @@
       "tithe"
     ],
     "text": "Hearth. Tithe. A resource he stands on banks twice, and your bank yields +1 besides. The grandfather behind the stove. Leave him bread or he hides the matches.",
-    "quote": "The house is a body. He is the cough.",
-    "quoted": "The Birch Vigil",
+    "quote": "Unseen protector of this peaceful estate, I pray to you, my kindly domovoi: guard the village, the wood, my wild little garden.",
+    "quoted": "Alexander Pushkin, To the Domovoi (1819)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -2267,8 +2267,8 @@
       "tough"
     ],
     "text": "Shutter. Toughness. Ranged strikes cannot choose him. The first point of any blow is refused. The spirit of the bathhouse, naked, sooty, and older than the soap.",
-    "quote": "Do not bathe third. The third turn is his.",
-    "quoted": "The Birch Vigil",
+    "quote": "They make of the act not a mere washing but a veritable torment.",
+    "quoted": "The Russian Primary Chronicle (c. 1113)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -2286,8 +2286,8 @@
       "blooded"
     ],
     "text": "Fast Attack. If it survives a battle it struck in, it gains power. The bird of the Slavic tale. It strikes first, and a feather left in the ash is a promotion.",
-    "quote": "Catch it and the tsar’s garden burns happier.",
-    "quoted": "The Birch Vigil",
+    "quote": "There is one bird which renews and re-sows itself: the Assyrians call it the phoenix.",
+    "quoted": "Ovid, Metamorphoses",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -2305,8 +2305,8 @@
       "fast"
     ],
     "text": "Fast Attack. Toughness. Strikes first. The first point of any blow is refused. A mad monk built like a gate. He hits before the prayer is finished.",
-    "quote": "The cowl does not make him small.",
-    "quoted": "The Birch Vigil",
+    "quote": "\"How long, archpriest, will these torments last?\" \"Markovna, until death itself.\" \"So be it, Petrovich; then let us plod on.\"",
+    "quoted": "Archpriest Avvakum, The Life of Archpriest Avvakum (1672)",
     "power": 4,
     "legacyAttack": 4,
     "legacyHealth": 4
@@ -2323,8 +2323,8 @@
       "veiled"
     ],
     "text": "Untargetable. Strikes and rites pass over her. She cannot be named. The woman who spins in the cellar at the wrong hour. You hear the wheel. You do not get to point at it.",
-    "quote": "If the thread is wet, she is already in the house.",
-    "quoted": "The Birch Vigil",
+    "quote": "My peace is gone, my heart is heavy; I shall find it never and nevermore.",
+    "quoted": "Johann Wolfgang von Goethe, Faust (1808)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -2342,8 +2342,8 @@
       "hearth"
     ],
     "text": "Hearth. If he is still standing at the end of its rite, he gains 1 power. A resource he stands on banks twice. The field spirit, black as noon-soil, who counts the sheaves.",
-    "quote": "Noon is when he is tallest. Do not sleep in the furrow.",
-    "quoted": "The Birch Vigil",
+    "quote": "I durst not, Shepherd, O I durst not pipe at noontide; fearing Pan, who at that hour rests from the toils of hunting.",
+    "quoted": "Theocritus, Idylls",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -2361,8 +2361,8 @@
       "tough"
     ],
     "text": "Slow Attack. Toughness. It strikes last. The first point of any blow is refused. A saint painted so dark the gold barely shows. It does not hurry. It arrives after you have spent yourself.",
-    "quote": "Kiss it and your mouth tastes of smoke.",
-    "quoted": "The Birch Vigil",
+    "quote": "Patience and time are my warriors, my champions.",
+    "quoted": "Leo Tolstoy, War and Peace (1869)",
     "power": 5,
     "legacyAttack": 5,
     "legacyHealth": 5
@@ -2381,8 +2381,8 @@
       "tough"
     ],
     "text": "Cryptid. Gills. Toughness. The mill-pond master: frog-mouthed, algae in the beard, a grudge against millers. The first point of any blow is refused.",
-    "quote": "He drowns what the river was going to spare.",
-    "quoted": "The Birch Vigil",
+    "quote": "In still waters the devils dwell.",
+    "quoted": "Russian proverb",
     "power": 4,
     "legacyAttack": 4,
     "legacyHealth": 4
@@ -2401,8 +2401,8 @@
       "blooded"
     ],
     "text": "Cryptid. Fast Attack. If it survives a battle it struck in, it gains power. The Slavic dead that will not stay under the chapel floor. It strikes first, and a meal makes it heavier.",
-    "quote": "Stake the rumor. The body already left.",
-    "quoted": "The Birch Vigil",
+    "quote": "Lift up my eyelids: I cannot see!",
+    "quoted": "Nikolai Gogol, Viy (1835)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -2417,8 +2417,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Name a unit. It cannot move or attack on its next rite. A shaman’s knot in a white branch. The named plate stands in the grove and does not get to leave.",
-    "quote": "Three strips of bark. One name. No road.",
-    "quoted": "The Birch Vigil",
+    "quote": "In the field a birch tree stood; in the field a curly one stood.",
+    "quoted": "Russian folk song, Vo pole beryoza stoyala",
     "aim": true,
     "effect": {
       "op": "lock"
@@ -2434,8 +2434,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Name a unit. Deal 3 damage. The mad monk breaks a face. The face was a plate, and the gold leaf cuts.",
-    "quote": "Even a saint can be used as a stone.",
-    "quoted": "The Birch Vigil",
+    "quote": "There are more idols than realities in the world.",
+    "quoted": "Friedrich Nietzsche, Twilight of the Idols (1889)",
     "aim": true,
     "effect": {
       "op": "smite",
@@ -2452,8 +2452,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Name a unit and return it to its owner’s hand. The domovoi wants the guest out of the house before the stove cools.",
-    "quote": "Shoes by the door. You are done here.",
-    "quoted": "The Birch Vigil",
+    "quote": "Visiting is good, but home is better.",
+    "quoted": "Russian proverb",
     "aim": true,
     "effect": {
       "op": "bounce"
@@ -2469,8 +2469,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Device. Bank 1 resources and draw 1 card. The hut’s stove pays a coal and deals a plate. Baba’s house is an oath, not a costume.",
-    "quote": "Sit on the warm side. The cold side belongs to her.",
-    "quoted": "The Birch Vigil",
+    "quote": "Little hut, little hut, stand the old way, as your mother placed you: your back to the forest, your front to me.",
+    "quoted": "Russian folktale formula, Afanasyev's Russian Fairy Tales (1855)",
     "effect": {
       "op": "bank_draw"
     }
@@ -2485,8 +2485,8 @@
     "oath": 0,
     "keywords": [],
     "text": "Leader. Once in a sitting: pay 3. Name a unit you own. It gains +3 power. The mad monk nails a black icon to a living chest and calls it armor.",
-    "quote": "Pray later. First, do not die.",
-    "quoted": "The Mad Starets",
+    "quote": "Pray to God, but row for the shore.",
+    "quoted": "Russian proverb",
     "leaderPower": {
       "op": "bulwark"
     }
