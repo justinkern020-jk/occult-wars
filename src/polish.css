@@ -862,8 +862,19 @@ p.lore-paper-text { font-style: normal; }
 .story-replay { font-size: 0.8rem; }
 @keyframes story-in { from { opacity: 0; transform: rotate(-0.25deg) translateY(8px); } }
 @keyframes story-drift { from { transform: scale(1.06) translate(1%, 1%); } to { transform: scale(1) translate(0, 0); } }
+/* A soft dark pool behind the narration box so it reads over any painting. */
+.story-panel::after {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 62% 48% at 18% 12%, rgba(8, 5, 2, 0.62), rgba(8, 5, 2, 0.28) 55%, transparent 80%);
+}
+.story-caption { z-index: 2; }
 @media (max-width: 640px) {
-  .story-panel { aspect-ratio: 4 / 5; }
+  .story-panel { aspect-ratio: 1 / 1; }
+  .story-panel::after { background: linear-gradient(0deg, rgba(8, 5, 2, 0.78), rgba(8, 5, 2, 0.35) 32%, transparent 55%); }
   .story-caption { left: 0.5rem; right: 0.5rem; top: auto; bottom: 0.5rem; max-width: none; }
 }
 @media (prefers-reduced-motion: reduce) {

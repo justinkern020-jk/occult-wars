@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { existsSync } from 'node:fs';
+import { existsSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { allStoryPanels, panelsForStage } from './storyPanels';
+import { allStoryPanels, panelsForStage, storyArt } from './storyPanels';
 import { LEADEN_STAGES, JUSTIN_EPILOGUE, FULCANELLI_WARNING } from './campaign';
 
 describe('campaign story panels', () => {
@@ -27,5 +27,12 @@ describe('campaign story panels', () => {
     expect(text).not.toMatch(/Kern|Fulcanelli|Bergier|radiation|gadget/i);
     expect(JUSTIN_EPILOGUE.title).toBe('Justin Kern Answers');
     expect(FULCANELLI_WARNING.attribution).toMatch(/June 1937/);
+  });
+  it('every painted panel has its plate on disk, small enough for phones', () => {
+    for (const p of allStoryPanels().filter((x) => x.paint !== false)) {
+      const f = resolve(process.cwd(), 'public' + storyArt(p.id));
+      expect(existsSync(f), p.id).toBe(true);
+      expect(statSync(f).size, p.id).toBeLessThanOrEqual(330_000);
+    }
   });
 });
