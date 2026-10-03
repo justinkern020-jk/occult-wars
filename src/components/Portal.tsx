@@ -7,8 +7,10 @@ import {
   OWNER_KEY_STORAGE,
   portalOpen,
   normalizeFrame,
+  readAccounts,
   readWho,
   sendPortalCode,
+  type AccountLine,
   viewMatch,
   type HandLine,
   type MatchFrame,
@@ -106,6 +108,18 @@ export function onlineFor(ms: number): string {
   return `${Math.floor(min / 60)} h ${min % 60} min`;
 }
 
+/** A seat date in the reader's own time, e.g. "Oct 3, 2026, 8:41 AM". */
+export function seatDate(ms: number): string {
+  if (!ms) return 'at an unknown hour';
+  return new Date(ms).toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
 /** The owner's door in the battle count. Renders nothing for anyone else. */
 export function PortalDoor() {
   const [open, setOpen] = useState(false);
@@ -114,6 +128,18 @@ export function PortalDoor() {
   const [hands, setHands] = useState<HandLine[] | null>(null);
   const [build, setBuild] = useState('');
   const [now, setNow] = useState(() => Date.now());
+  const [accounts, setAccounts] = useState<{ accounts: AccountLine[]; truncated: boolean } | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    let alive = true;
+    void readAccounts().then((r) => {
+      if (alive && r) setAccounts(r);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!hasOwnerProof()) return;
@@ -217,6 +243,29 @@ export function PortalDoor() {
               </li>
             );
           })}
+        </ol>
+      )}
+      <h3 className="portal-roll-title" data-testid="portal-accounts-title">
+        Accounts{accounts ? ` (${accounts.accounts.length}${accounts.truncated ? '+' : ''})` : ''}
+      </h3>
+      {accounts == null ? (
+        <p className="portal-quiet">Reading the book of names…</p>
+      ) : accounts.accounts.length === 0 ? (
+        <p className="portal-quiet">No one has taken a name yet.</p>
+      ) : (
+        <ol className="portal-roll" data-testid="portal-accounts">
+          {accounts.accounts.map((a) => (
+            <li key={a.username} className="portal-hand" data-testid="portal-account">
+              <span className="portal-hand-name">
+                <b>{a.username}</b>
+              </span>
+              <span className="portal-hand-meta">
+                Seated {seatDate(a.createdAt)}
+                {a.lastSignInAt ? ` · last in ${seatDate(a.lastSignInAt)}` : ''}
+                {a.country ? ` · ${countryName(a.country)}` : ''}
+              </span>
+            </li>
+          ))}
         </ol>
       )}
       {watching &&

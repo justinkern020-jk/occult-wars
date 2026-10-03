@@ -5,11 +5,13 @@
  *   { op: 'who' }                          → { hands, matches, build } (everyone at the table now)
  *   { op: 'view', id }                     → { summary, frame }
  *   { op: 'code', id, side, code }         → { ok, cmd }
+ *   { op: 'accounts' }                     → { accounts, truncated } (names + dates; never emails)
  * Anyone else gets a bare 404 so the door is not advertised.
  */
 import { getStore } from '../_lib/store.js';
 import { HttpError, fail, json, readJson } from '../_lib/http.js';
 import { listHands, serverBuild } from '../_lib/table.js';
+import { listAccounts } from '../_lib/accounts.js';
 import { WatchError, isOwner, listLive, sendCode, viewMatch } from '../_lib/watch.js';
 
 export async function handleWatch(req: Request, now = Date.now()): Promise<Response> {
@@ -30,6 +32,7 @@ export async function handleWatch(req: Request, now = Date.now()): Promise<Respo
     }
     if (op === 'view') return json({ ok: true, ...(await viewMatch(store, String(body.id ?? ''))) });
     if (op === 'code') return json({ ok: true, cmd: await sendCode(store, { id: body.id, side: body.side, code: body.code }, now) });
+    if (op === 'accounts') return json({ ok: true, ...(await listAccounts(store)) });
     throw new HttpError(400, 'Unknown op.');
   } catch (err) {
     if (err instanceof WatchError) return json({ ok: false, error: err.message }, err.status);

@@ -251,6 +251,19 @@ export function memoryStore(now: () => number = Date.now): Store {
       }
       case 'ZCARD':
         return zset(k, false)?.size ?? 0;
+      case 'SCAN': {
+        // SCAN cursor [MATCH glob] [COUNT n]: one pass returns every live match (cursor '0').
+        let match = '*';
+        for (let i = 1; i < a.length; i++) {
+          const f = String(a[i]).toUpperCase();
+          if (f === 'MATCH') match = String(a[++i]);
+          else if (f === 'COUNT') i++;
+        }
+        const re = new RegExp(
+          `^${match.split('*').map((x) => x.replace(/[.+?^${}()|[\]\\]/g, '\\$&')).join('.*')}$`,
+        );
+        return ['0', [...db.keys()].filter((key) => re.test(key) && live(key))];
+      }
       default:
         throw new Error(`memory store: unsupported ${op}`);
     }

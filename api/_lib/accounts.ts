@@ -274,6 +274,67 @@ export async function readBook(store: Store): Promise<BookRow[]> {
   return rows;
 }
 
+/** One row of the owner's account roll: never an email, hash, salt or token. */
+export type AccountRow = {
+  username: string;
+  createdAt: number;
+  lastSignInAt: number | null;
+  country: string | null;
+};
+
+/** At most this many name keys are read for the owner's roll. */
+export const ACCOUNTS_CAP = 5_000;
+
+/**
+ * Every claimed ledger name (ow:u:name:*), newest account first. There is no
+ * index, so SCAN the name keys (COUNT 200 per step, capped) and read the seats.
+ */
+export async function listAccounts(
+  store: Store,
+  cap = ACCOUNTS_CAP,
+): Promise<{ accounts: AccountRow[]; truncated: boolean }> {
+  const keys: string[] = [];
+  let cursor = '0';
+  let truncated = false;
+  for (let step = 0; step < 1_000; step++) {
+    const [res] = await store.pipe([['SCAN', cursor, 'MATCH', K.name('*'), 'COUNT', 200]]);
+    const [next, batch] = (Array.isArray(res) ? res : ['0', []]) as [unknown, unknown];
+    for (const k of Array.isArray(batch) ? batch : []) if (typeof k === 'string') keys.push(k);
+    cursor = String(next ?? '0');
+    if (keys.length >= cap) {
+      truncated = cursor !== '0' || keys.length > cap;
+      break;
+    }
+    if (cursor === '0') break;
+  }
+  const names = [...new Set(keys)].slice(0, cap);
+  const rows: AccountRow[] = [];
+  for (let i = 0; i < names.length; i += 200) {
+    const chunk = names.slice(i, i + 200);
+    const [ids] = await store.pipe([['MGET', ...chunk]]);
+    const idList = ((ids as (string | null)[]) ?? []).filter((x): x is string => typeof x === 'string');
+    if (idList.length === 0) continue;
+    const [raws] = await store.pipe([['MGET', ...idList.map(K.user)]]);
+    for (const raw of (raws as (string | null)[]) ?? []) {
+      if (typeof raw !== 'string') continue;
+      try {
+        const u = JSON.parse(raw) as User & { lastSignInAt?: unknown; country?: unknown };
+        if (!u.username) continue;
+        rows.push({
+          username: u.username,
+          createdAt: Number(u.createdAt) || 0,
+          lastSignInAt: typeof u.lastSignInAt === 'number' ? u.lastSignInAt : null,
+          country: typeof u.country === 'string' ? u.country : null,
+        });
+      } catch {
+        /* skip a broken seat */
+      }
+    }
+  }
+  rows.sort((a, b) => b.createdAt - a.createdAt || a.username.localeCompare(b.username));
+  return { accounts: rows, truncated };
+}
+
 export async function readCloudProfile(store: Store, user: User): Promise<unknown | null> {
   const [raw] = await store.pipe([['GET', K.profile(user.id)]]);
   if (typeof raw !== 'string') return null;

@@ -177,6 +177,20 @@ export async function readWho(): Promise<{ hands: HandLine[]; matches: MatchSumm
   return { hands: r.hands ?? [], matches: r.matches ?? [], build: r.build ?? '' };
 }
 
+/** One claimed name on the owner's account roll (no email). */
+export type AccountLine = {
+  username: string;
+  createdAt: number;
+  lastSignInAt: number | null;
+  country: string | null;
+};
+
+export async function readAccounts(): Promise<{ accounts: AccountLine[]; truncated: boolean } | null> {
+  const r = await watchCall<{ accounts?: AccountLine[]; truncated?: boolean }>({ op: 'accounts' });
+  if (!r) return null;
+  return { accounts: r.accounts ?? [], truncated: !!r.truncated };
+}
+
 export async function viewMatch(
   id: string,
 ): Promise<{ summary: MatchSummary | null; frame: MatchFrame | null } | null> {
