@@ -1906,7 +1906,7 @@ export function Battlefield({
           { ...here, r: defR, c: defC },
         )
       ) {
-        pushLog('That foe cannot be struck (out of reach, shuttered, or veiled).');
+        pushLog('That foe cannot be struck (out of reach, behind Shutter, or Untargetable).');
         return false;
       }
       const ctx = buildEffectCtx(atk.unit.side);

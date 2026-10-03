@@ -74,7 +74,7 @@ export function UnitCoin({
       onClick?.();
     }
   };
-  const veilTitle = veiled ? ' · veiled · untargetable' : '';
+  const veilTitle = veiled ? ' · Untargetable' : '';
   return (
     <div
       key={clash ? `clash-${clash.key}` : undefined}
@@ -104,7 +104,7 @@ export function UnitCoin({
         onInspect();
       }}
       title={`${unit.name} · Power ${unit.power} · Resources ${unit.loyalty}${fast ? ' · Fast Attack' : ''}${veilTitle}${canStep && !selected ? ' · ready to move' : ''} · tap to move · double-tap to inspect`}
-      aria-label={`${unit.name}, Power ${unit.power}, Resources ${unit.loyalty}${fast ? ', Fast Attack' : ''}${veiled ? ', veiled and untargetable' : ''}`}
+      aria-label={`${unit.name}, Power ${unit.power}, Resources ${unit.loyalty}${fast ? ', Fast Attack' : ''}${veiled ? ', Untargetable' : ''}`}
     >
       <CardArt name={unit.name} className="stone-face" />
       <span className="coin-stat coin-loyalty" title="Resources · muster cost">

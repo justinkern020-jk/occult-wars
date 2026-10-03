@@ -740,7 +740,7 @@ export function resolveLeaderPower(
     target.tough = true;
     if (!target.keywords.includes('shutter')) target.keywords = [...target.keywords, 'shutter'];
     if (!target.keywords.includes('tough')) target.keywords = [...target.keywords, 'tough'];
-    pushLog(ctx, `${target.name} is shuttered and toughened.`);
+    pushLog(ctx, `${target.name} gains Shutter and Toughness.`);
     return null;
   }
 

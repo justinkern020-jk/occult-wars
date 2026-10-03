@@ -193,8 +193,9 @@ describe('card audit: keywords', () => {
     [/\bRanged Strike\b/, 'ranged'],
     [/\bShutter\b/, 'shutter'],
     [/^Lamp\b|\. Lamp\b/, 'crown'],
-    [/\bGills\b/, 'gills'],
-    [/\bSeep\b/, 'seep'],
+    [/\bUndine\b/, 'gills'],
+    // "Seep cannot wound it" (Undine) is not the Seep keyword itself.
+    [/(?:^|\. )Seep\./, 'seep'],
     [/^Relay\b|\. Relay\b/, 'relay'],
     [/\bSlow muster\b/, 'delay'],
     [/\bCryptid\b/, 'cryptid'],

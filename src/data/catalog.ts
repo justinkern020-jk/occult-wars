@@ -22,8 +22,24 @@ export const CARDS: Card[] = raw as Card[];
 
 export const UNITS: Card[] = CARDS.filter((c) => c.kind === 'unit');
 
+/**
+ * Plates re-made as new characters (Oct 2026 card-fit pass). Old saves,
+ * decks, friend loadouts and portal frames may still carry the old id.
+ */
+export const CARD_ID_RENAMES: Readonly<Record<string, string>> = {
+  diagram_clerk: 'galvanic_hound',
+  chromium_surgeon: 'chromium_fencer',
+  the_minus_sign: 'azoth_swordsman',
+};
+
+/** Current id for a plate id (follows renames; unknown ids pass through). */
+export function canonicalCardId(id: string): string {
+  return CARD_ID_RENAMES[id] ?? id;
+}
+
 export function cardById(id: string): Card | undefined {
-  return CARDS.find((c) => c.id === id);
+  const want = canonicalCardId(id);
+  return CARDS.find((c) => c.id === want);
 }
 
 export function unitsByFaction(faction: string): Card[] {

@@ -96,7 +96,7 @@ describe("Lion's Mask / False Vintage: power becomes N and abilities are lost", 
 describe('Carve the Seal: +2 power and cannot move or attack on its next rite', () => {
   it('own unit keeps this rite, sits out the next', () => {
     const ctx = ctx0();
-    put(ctx, 'devoted_clerk', 'a', 'blue', 2, 2);
+    put(ctx, 'sotted_greenhand', 'a', 'blue', 2, 2);
     expect(cast(ctx, 'carve_the_seal', 'a')).toBeNull();
     expect(ctx.units.a.power).toBe(6);
     expect(ctx.units.a.moved).toBeFalsy();

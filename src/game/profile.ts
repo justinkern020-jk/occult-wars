@@ -3,6 +3,7 @@
 import {
   BLACK_MONDAY_ID,
   CARDS,
+  canonicalCardId,
   cardById,
   isExcludedPlateId,
   isLossInjectId,
@@ -136,6 +137,11 @@ export function saveProfile(p: Profile): void {
  * Second Hour plates — Blackout Wardens, Drowned Parish, Numbers Station, Dust
  * Ballot — are stripped) and must not be an excluded plate.
  */
+/** Follow plate renames so old saves keep their re-made plates. */
+function renamedIds(list: unknown[]): unknown[] {
+  return list.map((id) => (typeof id === 'string' ? canonicalCardId(id) : id));
+}
+
 function isKeepablePlateId(id: unknown): id is string {
   return typeof id === 'string' && !!cardById(id) && !isExcludedPlateId(id);
 }
@@ -153,7 +159,7 @@ function eraWorking(
       ? heroCard.id
       : null;
   const cards = Array.isArray(cardsRaw)
-    ? cardsRaw.filter(
+    ? renamedIds(cardsRaw).filter(
         (c): c is string =>
           isKeepablePlateId(c) && isLegalForOrder(order, cardById(c)!.faction),
       )
@@ -188,7 +194,7 @@ export function migrateProfile(raw: Partial<Profile> & Record<string, unknown>):
         ? Math.max(0, Math.floor(raw.alchemicalShards))
         : base.alchemicalShards,
     collection: Array.isArray(raw.collection)
-      ? raw.collection.filter(isKeepablePlateId)
+      ? renamedIds(raw.collection).filter(isKeepablePlateId)
       : [],
     customDecks: migrateDecks(raw.customDecks),
     seenPrimer: !!raw.seenPrimer && raw.primerVersion === 3,
@@ -216,8 +222,8 @@ function migrateDecks(raw: unknown): CustomDeck[] {
     .map((d) => ({
       id: d.id,
       name: String(d.name ?? 'Untitled working').slice(0, 32),
-      heroId: String(d.heroId ?? ''),
-      cards: Array.isArray(d.cards) ? d.cards.filter(isKeepablePlateId) : [],
+      heroId: canonicalCardId(String(d.heroId ?? '')),
+      cards: Array.isArray(d.cards) ? renamedIds(d.cards).filter(isKeepablePlateId) : [],
     }));
 }
 

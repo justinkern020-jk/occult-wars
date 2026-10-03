@@ -1,5 +1,5 @@
 import type { Card, Rarity } from '../game/types';
-import { KEYWORDS } from '../game/keywords';
+import { KEYWORDS, keywordLabel } from '../game/keywords';
 import { cardGeneratesResources } from '../data/catalog';
 import { CardArt } from './CardArt';
 
@@ -101,11 +101,11 @@ export function CardView({
           {card.keywords.length > 0 && (
             <ul className="tarot-keywords">
               {card.keywords.map((k) => (
-                <li key={k} title={KEYWORDS[k]?.title ?? k}>
+                <li key={k} title={KEYWORDS[k]?.title ?? keywordLabel(k)}>
                   {KEYWORDS[k]?.glyph ? (
                     <abbr>{KEYWORDS[k].glyph}</abbr>
                   ) : null}{' '}
-                  {k}
+                  {keywordLabel(k)}
                   {combatKw.includes(k) ? ' ✦' : ''}
                 </li>
               ))}

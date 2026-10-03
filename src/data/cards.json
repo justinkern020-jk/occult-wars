@@ -30,7 +30,7 @@
       "ranged",
       "gills"
     ],
-    "text": "Ranged Strike. Gills. The washer at the ford. Her keen reaches 2 circles in a straight line, never the diagonal, and is not answered.",
+    "text": "Ranged Strike. Undine. Seep cannot wound it. The washer at the ford. Her keen reaches 2 circles in a straight line, never the diagonal, and is not answered.",
     "quote": "He saw a winding-shroud creeping on a walking healthful person's legs till it came to the knee... and at last over the head.",
     "quoted": "Robert Kirk, The Secret Commonwealth (1691)",
     "power": 3,
@@ -106,7 +106,7 @@
       "fast",
       "blooded"
     ],
-    "text": "Fast Attack. If it survives a battle it struck in, it gains power. Your double, arrived early. It strikes first, and living makes the copy heavier.",
+    "text": "Fast Attack. If it strikes and survives, it gains +2 power. Your double, arrived early. It strikes first, and living makes the copy heavier.",
     "quote": "They call this Reflex-man a coimimeadh or Co-walker, every way like the man, as a twin-brother and companion, haunting him as his shadow.",
     "quoted": "Robert Kirk, The Secret Commonwealth (1691)",
     "power": 2,
@@ -144,7 +144,7 @@
       "gills",
       "tough"
     ],
-    "text": "Gills. Toughness. The first point of any blow is refused. The skin is the person. Fold it and the sea cannot take them. Unfold it and they are gone.",
+    "text": "Undine. Seep cannot wound it. Toughness. The first point of any blow is refused. The skin is the person. Fold it and the sea cannot take them. Unfold it and they are gone.",
     "quote": "I am a man upon the land, and I am a silkie in the sea.",
     "quoted": "The Great Silkie of Sule Skerry, Orkney ballad",
     "power": 3,
@@ -182,7 +182,7 @@
       "gills",
       "seep"
     ],
-    "text": "Gills. Seep. At the start of your rite, deal 1 to each adjacent enemy. The mermaid of the Irish coast, red cap, green hair, a net of names.",
+    "text": "Undine. Seep cannot wound it. Seep. At the start of your rite, deal 1 to each adjacent enemy. The mermaid of the Irish coast, red cap, green hair, a net of names.",
     "quote": "Full fathom five thy father lies; of his bones are coral made; those are pearls that were his eyes.",
     "quoted": "William Shakespeare, The Tempest (1611)",
     "power": 3,
@@ -331,8 +331,8 @@
     "legacyHealth": 3
   },
   {
-    "id": "chromium_surgeon",
-    "name": "Chromium Surgeon",
+    "id": "chromium_fencer",
+    "name": "The Chromium Fencer",
     "faction": "The Helix Bureau",
     "kind": "unit",
     "rarity": "uncommon",
@@ -342,9 +342,9 @@
       "fast",
       "blooded"
     ],
-    "text": "Fast Attack. If it survives a battle it struck in, it gains power. A mad anatomist in a mirror-bright apron. Strikes first. The operation that lives becomes the next instrument.",
-    "quote": "I collected bones from charnel-houses and disturbed, with profane fingers, the tremendous secrets of the human frame.",
-    "quoted": "Mary Shelley, Frankenstein (1818)",
+    "text": "Fast Attack. Strikes first. If it strikes and survives, it gains +2 power. The bureau's fencing master, masked in mirror-bright chrome, his épée wired to the scoring box. Every bout he walks away from sharpens the next.",
+    "quote": "He fights as you sing prick-song, keeps time, distance, and proportion. He rests his minim rest, one, two, and the third in your bosom.",
+    "quoted": "William Shakespeare, Romeo and Juliet (1597)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -785,7 +785,7 @@
       "crown",
       "sprout"
     ],
-    "text": "Lamp. If it is still standing at the end of its rite, it gains 1 power. Adjacent units you control strike for +1 Power. A saint of the inward fire. Every rite it survives, the light climbs.",
+    "text": "Lamp. If it is still standing at the end of its rite, it gains 1 power. If it survives a battle, it gains 1 power. Adjacent units you control strike for +1 Power. A saint of the inward fire. Every rite it survives, the light climbs.",
     "quote": "FIRE. God of Abraham, God of Isaac, God of Jacob, not of the philosophers and of the learned.",
     "quoted": "Blaise Pascal, Memorial (1654)",
     "power": 3,
@@ -804,7 +804,7 @@
       "fast",
       "blooded"
     ],
-    "text": "Fast Attack. If it survives a battle it struck in, it gains power. The name the college would not speak. It strikes first, and the unsaid part grows teeth.",
+    "text": "Fast Attack. If it strikes and survives, it gains +2 power. The name the college would not speak. It strikes first, and the unsaid part grows teeth.",
     "quote": "Whereof one cannot speak, thereof one must be silent.",
     "quoted": "Ludwig Wittgenstein, Tractatus Logico-Philosophicus (1921)",
     "power": 2,
@@ -1023,7 +1023,7 @@
       "fast",
       "blooded"
     ],
-    "text": "Fast Attack. If it survives a battle it struck in, it gains power. One-eyed misfortune. It strikes first, and if it lives the bad luck gets larger.",
+    "text": "Fast Attack. If it strikes and survives, it gains +2 power. One-eyed misfortune. It strikes first, and if it lives the bad luck gets larger.",
     "quote": "Do not wake Likho while it sleeps quietly.",
     "quoted": "Russian proverb",
     "power": 2,
@@ -1061,7 +1061,7 @@
       "sprout",
       "crown"
     ],
-    "text": "Lamp. If it is still standing at the end of its rite, it gains 1 power. Adjacent units you control strike for +1 Power. The midsummer fire that the shaman will not let go out.",
+    "text": "Lamp. If it is still standing at the end of its rite, it gains 1 power. If it survives a battle, it gains 1 power. Adjacent units you control strike for +1 Power. The midsummer fire that the shaman will not let go out.",
     "quote": "If you will, you can become all flame.",
     "quoted": "Abba Joseph of Panephysis, Sayings of the Desert Fathers",
     "power": 3,
@@ -1137,7 +1137,7 @@
       "gills",
       "seep"
     ],
-    "text": "Cryptid. Gills. Seep. The great pike under the mill. At the start of your rite, deal 1 to each adjacent enemy. A shaman bargained with it. The bargain is still swimming.",
+    "text": "Cryptid. Undine. Seep cannot wound it. Seep. The great pike under the mill. At the start of your rite, deal 1 to each adjacent enemy. A shaman bargained with it. The bargain is still swimming.",
     "quote": "By the pike's command, by my own wish.",
     "quoted": "Russian folktale formula, Emelya the Fool",
     "power": 4,
@@ -1332,7 +1332,7 @@
       "gills",
       "fast"
     ],
-    "text": "Fast Attack. Gills. Strikes first. The horse in the ford is a fairy law, not a spell with a hat.",
+    "text": "Fast Attack. Undine. Seep cannot wound it. Strikes first. The horse in the ford is a fairy law, not a spell with a hat.",
     "quote": "When thowes dissolve the snawy hoord, an' float the jinglin' icy boord, then water-kelpies haunt the foord.",
     "quoted": "Robert Burns, Address to the Deil (1786)",
     "power": 3,
@@ -1388,7 +1388,7 @@
       "fast",
       "blooded"
     ],
-    "text": "Fast Attack. If it survives a battle it struck in, it gains power. A border goblin in a dyed cap. It strikes first, and living makes it worse.",
+    "text": "Fast Attack. If it strikes and survives, it gains +2 power. A border goblin in a dyed cap. It strikes first, and living makes it worse.",
     "quote": "It will have blood; they say, blood will have blood.",
     "quoted": "William Shakespeare, Macbeth (1606)",
     "power": 2,
@@ -1408,7 +1408,7 @@
       "hearth",
       "tough"
     ],
-    "text": "Toughness. Hearth. If he is still standing at the end of its rite, he gains 1 power. A resource he stands on banks twice. The face in the oak is a parish, not a wizard.",
+    "text": "Toughness. Hearth. If he is still standing at the end of its rite, he gains 1 power. If he survives a battle, he gains 1 power. A resource he stands on banks twice. The face in the oak is a parish, not a wizard.",
     "quote": "The tree which moves some to tears of joy is in the eyes of others only a green thing that stands in the way.",
     "quoted": "William Blake, letter to John Trusler (1799)",
     "power": 3,
@@ -1446,7 +1446,7 @@
       "gills",
       "fast"
     ],
-    "text": "Cryptid. Fast Attack. Gills. The water-horse of the Highlands. It strikes first, and the ford does not give the body back.",
+    "text": "Cryptid. Fast Attack. Undine. Seep cannot wound it. The water-horse of the Highlands. It strikes first, and the ford does not give the body back.",
     "quote": "The undiscover'd country from whose bourn no traveller returns.",
     "quoted": "William Shakespeare, Hamlet (1601)",
     "power": 4,
@@ -1604,9 +1604,9 @@
     "oath": 0,
     "keywords": [
       "relay",
-      "fast"
+      "hearth"
     ],
-    "text": "Fast Attack. Relay. Strikes first. When you muster another unit, draw 1. A boy in a workshop apron who learned the tube before he learned the prayer.",
+    "text": "Relay. Hearth. When you muster another unit, draw 1. A resource he stands on banks twice. A boy in a workshop apron who learned the tube before he learned the prayer, and keeps the bench stove lit.",
     "quote": "We have actually touched the border-land where matter and force seem to merge into one another, the shadowy realm between known and unknown.",
     "quoted": "William Crookes, On Radiant Matter (1879)",
     "power": 2,
@@ -1669,8 +1669,8 @@
     "legacyHealth": 3
   },
   {
-    "id": "diagram_clerk",
-    "name": "Diagram Clerk",
+    "id": "galvanic_hound",
+    "name": "The Galvanic Hound",
     "faction": "The Mercury Works",
     "kind": "unit",
     "rarity": "uncommon",
@@ -1680,9 +1680,9 @@
       "fast",
       "blooded"
     ],
-    "text": "Fast Attack. If it survives a battle it struck in, it gains power. The clerk opens the living like a schematic. Strikes first. Coming back from the cut makes the next cut worse.",
-    "quote": "I profess both to learn and to teach anatomy, not from books but from dissections; not from the positions of philosophers but from the fabric of nature.",
-    "quoted": "William Harvey, De Motu Cordis (1628)",
+    "text": "Fast Attack. Strikes first. If it strikes and survives, it gains +2 power. A works guard-dog with copper in its collar and current in its teeth. Every fight it walks away from charges it further.",
+    "quote": "Let your plans be dark and impenetrable as night, and when you move, fall like a thunderbolt.",
+    "quoted": "Sun Tzu, The Art of War (tr. Lionel Giles, 1910)",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
@@ -1715,13 +1715,13 @@
     "cost": 4,
     "oath": 0,
     "keywords": [
-      "tough",
-      "crown"
+      "crown",
+      "seep"
     ],
-    "text": "Toughness. Lamp. The first point of any blow is refused. Adjacent units you control strike for +1 Power. She paints the dials. The dials paint her hands. Everyone beside her hits brighter.",
+    "text": "Lamp. Seep. Adjacent units you control strike for +1 Power. At the start of your rite, deal 1 to each adjacent enemy. She paints the dials. The dials paint her hands. The glow gets into everyone beside her.",
     "quote": "One of our joys was to go into our workroom at night. The glowing tubes looked like faint, fairy lights.",
     "quoted": "Marie Curie, Autobiographical Notes (1923)",
-    "power": 4,
+    "power": 3,
     "legacyAttack": 4,
     "legacyHealth": 4
   },
@@ -1894,9 +1894,9 @@
     "cost": 2,
     "oath": 0,
     "keywords": [
-      "fast"
+      "shutter"
     ],
-    "text": "Fast Attack. Strikes first. A junior of the retort who moves like the metal he keeps in his teeth. If the blow kills, it is not answered.",
+    "text": "Shutter. Ranged strikes cannot choose him. A junior of the retort, quick as the metal he keeps in his teeth; no shot can settle on him.",
     "quote": "In a race, the quickest runner can never overtake the slowest, since the pursuer must first reach the point whence the pursued started.",
     "quoted": "Zeno of Elea, as told by Aristotle, Physics",
     "power": 3,
@@ -2027,7 +2027,7 @@
       "delay",
       "sprout"
     ],
-    "text": "Slow muster. It cannot move or attack the rite it arrives. If it is still standing at the end of its rite, it gains 1 power. A sealed spark that learns a body.",
+    "text": "Slow muster. It cannot move or attack the rite it arrives. If it is still standing at the end of its rite, it gains 1 power. If it survives a battle, it gains 1 power. A sealed spark that learns a body.",
     "quote": "I have discovered a truly marvellous proof of this, which this margin is too narrow to contain.",
     "quoted": "Pierre de Fermat, marginal note (1637)",
     "power": 1,
@@ -2035,8 +2035,8 @@
     "legacyHealth": 1
   },
   {
-    "id": "the_minus_sign",
-    "name": "The Hidden Adept",
+    "id": "azoth_swordsman",
+    "name": "The Azoth Swordsman",
     "faction": "The Closed Proof",
     "kind": "unit",
     "rarity": "common",
@@ -2046,9 +2046,9 @@
       "fast",
       "blooded"
     ],
-    "text": "Fast Attack. If it survives a battle it struck in, it gains power. A name struck from the book that stood up anyway. It strikes first, and what it does not end is taken into the dark.",
-    "quote": "That miracle of analysis, monster of the ideal world, almost an amphibian between being and not-being, which we call the imaginary root.",
-    "quoted": "Gottfried Wilhelm Leibniz, Acta Eruditorum (1702)",
+    "text": "Fast Attack. Strikes first. If it strikes and survives, it gains +2 power. A wandering adept who keeps the Azoth in the pommel of his sword, as Paracelsus did. What he does not end, he distills.",
+    "quote": "Let no man be another's who is able to be his own.",
+    "quoted": "Paracelsus, his motto (Hirschvogel portrait, 1538)",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
@@ -2228,7 +2228,7 @@
       "gills",
       "seep"
     ],
-    "text": "Gills. Seep. At the start of your rite, deal 1 to each adjacent enemy. The drowned girl in the willow. The river is her parish.",
+    "text": "Undine. Seep cannot wound it. Seep. At the start of your rite, deal 1 to each adjacent enemy. The drowned girl in the willow. The river is her parish.",
     "quote": "A rusalka swam down the blue river, lit by the full moon, and strove to splash up to the moon the silvery foam of the wave.",
     "quoted": "Mikhail Lermontov, The Rusalka (1832)",
     "power": 3,
@@ -2285,7 +2285,7 @@
       "fast",
       "blooded"
     ],
-    "text": "Fast Attack. If it survives a battle it struck in, it gains power. The bird of the Slavic tale. It strikes first, and a feather left in the ash is a promotion.",
+    "text": "Fast Attack. If it strikes and survives, it gains +2 power. The bird of the Slavic tale. It strikes first, and a feather left in the ash is a promotion.",
     "quote": "There is one bird which renews and re-sows itself: the Assyrians call it the phoenix.",
     "quoted": "Ovid, Metamorphoses",
     "power": 3,
@@ -2341,7 +2341,7 @@
       "sprout",
       "hearth"
     ],
-    "text": "Hearth. If he is still standing at the end of its rite, he gains 1 power. A resource he stands on banks twice. The field spirit, black as noon-soil, who counts the sheaves.",
+    "text": "Hearth. If he is still standing at the end of its rite, he gains 1 power. If he survives a battle, he gains 1 power. A resource he stands on banks twice. The field spirit, black as noon-soil, who counts the sheaves.",
     "quote": "I durst not, Shepherd, O I durst not pipe at noontide; fearing Pan, who at that hour rests from the toils of hunting.",
     "quoted": "Theocritus, Idylls",
     "power": 2,
@@ -2380,7 +2380,7 @@
       "gills",
       "tough"
     ],
-    "text": "Cryptid. Gills. Toughness. The mill-pond master: frog-mouthed, algae in the beard, a grudge against millers. The first point of any blow is refused.",
+    "text": "Cryptid. Undine. Seep cannot wound it. Toughness. The mill-pond master: frog-mouthed, algae in the beard, a grudge against millers. The first point of any blow is refused.",
     "quote": "In still waters the devils dwell.",
     "quoted": "Russian proverb",
     "power": 4,
@@ -2400,7 +2400,7 @@
       "fast",
       "blooded"
     ],
-    "text": "Cryptid. Fast Attack. If it survives a battle it struck in, it gains power. The Slavic dead that will not stay under the chapel floor. It strikes first, and a meal makes it heavier.",
+    "text": "Cryptid. Fast Attack. If it strikes and survives, it gains +2 power. The Slavic dead that will not stay under the chapel floor. It strikes first, and a meal makes it heavier.",
     "quote": "Lift up my eyelids: I cannot see!",
     "quoted": "Nikolai Gogol, Viy (1835)",
     "power": 3,
@@ -3024,9 +3024,11 @@
     "rarity": "common",
     "cost": 3,
     "oath": 0,
-    "keywords": [],
-    "text": "Stamina. The clerk has four wounds in him before the stamp slips.",
-    "power": 4,
+    "keywords": [
+      "tithe"
+    ],
+    "text": "Tithe. While he stands, your bank yields +1. The clerk keeps the parish books, and the parish pays him for it.",
+    "power": 3,
     "legacyAttack": 1,
     "legacyHealth": 4,
     "quote": "Work is love made visible.",
@@ -3084,7 +3086,7 @@
     "keywords": [
       "tough"
     ],
-    "text": "Toughness. The first point of damage from any strike is refused.",
+    "text": "Toughness. A spirit guides his hand and turns the first blow aside. The first point of damage from any strike is refused.",
     "power": 3,
     "legacyAttack": 2,
     "legacyHealth": 3,
@@ -3513,7 +3515,7 @@
     "cost": 3,
     "oath": 0,
     "keywords": [],
-    "text": "Stamina. Drunk on sap, and it takes four wounds to put him in the hedge.",
+    "text": "Drunk on sap, and it takes four wounds to put him in the hedge.",
     "power": 4,
     "legacyAttack": 2,
     "legacyHealth": 4,
@@ -3981,10 +3983,10 @@
     "cost": 3,
     "oath": 2,
     "keywords": [
-      "tithe",
+      "tough",
       "delay"
     ],
-    "text": "Slow muster. It cannot act the rite it arrives. While this unit stands, your bank yields +1.",
+    "text": "Slow muster. Toughness. It cannot act the rite it arrives. The first point of any strike is refused. He keeps the furnace door, and nothing gets past the first blow.",
     "power": 3,
     "legacyAttack": 2,
     "legacyHealth": 3,
@@ -4112,8 +4114,10 @@
     "rarity": "common",
     "cost": 5,
     "oath": 0,
-    "keywords": [],
-    "text": "A servant poured, not born. Four and four, and no small talk.",
+    "keywords": [
+      "relay"
+    ],
+    "text": "Relay. When you muster another unit, draw 1. A servant poured, not born. He announces every guest and forgets none.",
     "power": 4,
     "legacyAttack": 4,
     "legacyHealth": 4,
@@ -4696,15 +4700,17 @@
     "rarity": "common",
     "cost": 3,
     "oath": 2,
-    "keywords": [
-      "tough"
-    ],
-    "text": "Toughness. A Lakota medicine chief who carries the old cures. The first point of any strike is refused.",
-    "power": 4,
+    "keywords": [],
+    "text": "Exhaust: a unit gains +1 power. A Lakota medicine chief who carries the old cures.",
+    "power": 3,
     "legacyAttack": 2,
     "legacyHealth": 4,
     "quote": "Of course it was not I who cured. It was the power from the outer world, and the visions and ceremonies had only made me like a hole through which the power could come to the two-leggeds.",
-    "quoted": "Black Elk, Black Elk Speaks (1932)"
+    "quoted": "Black Elk, Black Elk Speaks (1932)",
+    "act": {
+      "op": "tap-mend",
+      "aim": true
+    }
   },
   {
     "id": "wardenclyffe_adept",
@@ -4733,9 +4739,9 @@
     "cost": 3,
     "oath": 2,
     "keywords": [
-      "fast"
+      "ranged"
     ],
-    "text": "Fast Attack. He lands the blow before the reply. If they are unmade, they deal nothing.",
+    "text": "Ranged Strike. His rockets reach 2 tiles in a straight line and take no counterblow.",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 2,
@@ -5100,7 +5106,7 @@
   },
   {
     "id": "green_man",
-    "name": "Green Man",
+    "name": "Jack-in-the-Green",
     "faction": "Sons of the Green Lion",
     "kind": "unit",
     "rarity": "rare",
@@ -5110,7 +5116,7 @@
       "cryptid",
       "tithe"
     ],
-    "text": "Cryptid. Tithe +1. The face in the oak. Where he stands, the rite grows richer.",
+    "text": "Cryptid. Tithe +1. The leaf-clad man of the May procession. Where he walks, the rite grows richer.",
     "power": 5,
     "legacyAttack": 3,
     "legacyHealth": 5,

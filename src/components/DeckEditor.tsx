@@ -1,3 +1,4 @@
+import { keywordLabel } from '../game/keywords';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CARDS, cardById, isExcludedPlateId } from '../data/catalog';
 import {
@@ -84,7 +85,7 @@ export function editorPool(
       (c) =>
         !q ||
         c.name.toLowerCase().includes(q) ||
-        c.keywords.some((k) => k.includes(q)) ||
+        c.keywords.some((k) => keywordLabel(k).toLowerCase().includes(q)) ||
         c.faction.toLowerCase().includes(q),
     )
     .sort((a, b) => a.cost - b.cost || a.name.localeCompare(b.name));

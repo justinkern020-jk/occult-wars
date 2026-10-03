@@ -178,7 +178,7 @@ export type RiteHurt = { uid: string; r: number; c: number; damage: number };
 /**
  * Start-of-rite upkeep for `side`: Airships leak 1, Tax units take 2
  * resources or sit unpaid, Seep units deal 1 to each adjacent enemy
- * (Gills refuse it). Units at 0 are cleaned up by the caller.
+ * (Undine refuse it). Units at 0 are cleaned up by the caller.
  */
 export function riteOpenUpkeep<U extends RulesUnit>(
   board: RulesBoard<U>,
@@ -614,13 +614,13 @@ export function resolveStrike(
   if (ctxRooted(ctx, atk.side, from.r, from.c)) {
     return outcome(`${atk.name} is rooted and cannot move or strike.`);
   }
-  if (def.side === atk.side) return outcome('That foe cannot be struck (out of reach, shuttered, or veiled).');
+  if (def.side === atk.side) return outcome('That foe cannot be struck (out of reach, behind Shutter, or Untargetable).');
   const dist = manhattan(from.r, from.c, r, c);
   if (dist > 1 && from.r !== r && from.c !== c) {
     return outcome('Ranged strikes do not shoot on a diagonal.');
   }
   if (!canBeStruck(atk, def, dist, from, { r, c })) {
-    return outcome('That foe cannot be struck (out of reach, shuttered, or veiled).');
+    return outcome('That foe cannot be struck (out of reach, behind Shutter, or Untargetable).');
   }
   const ranged = dist > 1 && hasKeyword(atk, 'ranged');
   const slideOf = (): StrikeSlide | null => {

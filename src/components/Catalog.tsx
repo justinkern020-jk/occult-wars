@@ -1,3 +1,4 @@
+import { keywordLabel } from '../game/keywords';
 import { useMemo, useState } from 'react';
 import { CARDS, isExcludedPlateId } from '../data/catalog';
 import {
@@ -90,7 +91,7 @@ export function Catalog({ profile, onUpdate }: Props) {
         (c) =>
           c.name.toLowerCase().includes(n) ||
           c.text.toLowerCase().includes(n) ||
-          c.keywords.some((k) => k.includes(n)),
+          c.keywords.some((k) => keywordLabel(k).toLowerCase().includes(n)),
       );
     }
     return rows;

@@ -1,3 +1,4 @@
+import { keywordLabel } from '../game/keywords';
 import { useMemo, useState } from 'react';
 import {
   SEALED_CENTURY_ORDERS,
@@ -97,7 +98,7 @@ export function NightCounter({ profile, onUpdate, onBack, counter = 'night', onD
       if (!q) return true;
       return (
         c.name.toLowerCase().includes(q) ||
-        c.keywords.some((k) => k.includes(q)) ||
+        c.keywords.some((k) => keywordLabel(k).toLowerCase().includes(q)) ||
         c.text.toLowerCase().includes(q)
       );
     });
