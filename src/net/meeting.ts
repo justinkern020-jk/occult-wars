@@ -170,3 +170,29 @@ export function writeMeetingName(name: string): void {
     /* private mode */
   }
 }
+
+/** Split text into plain runs and http(s) links (rendered as text or <a>; never HTML). */
+export function linkParts(text: string): ({ text: string } | { href: string; text: string })[] {
+  const out: ({ text: string } | { href: string; text: string })[] = [];
+  const re = /\bhttps?:\/\/[^\s<>"'`]+/gi;
+  let last = 0;
+  for (const m of text.matchAll(re)) {
+    let raw = m[0];
+    // Leave closing punctuation to the sentence.
+    while (/[.,!?;:)\]}'"]$/.test(raw)) raw = raw.slice(0, -1);
+    const at = m.index ?? 0;
+    let href: string | null = null;
+    try {
+      const u = new URL(raw);
+      href = u.protocol === 'http:' || u.protocol === 'https:' ? u.href : null;
+    } catch {
+      href = null;
+    }
+    if (!href) continue;
+    if (at > last) out.push({ text: text.slice(last, at) });
+    out.push({ href, text: raw });
+    last = at + raw.length;
+  }
+  if (last < text.length) out.push({ text: text.slice(last) });
+  return out;
+}

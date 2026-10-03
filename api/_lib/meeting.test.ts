@@ -12,7 +12,6 @@ import {
   cleanText,
   deleteMeeting,
   listMeeting,
-  maskProfanity,
   postMeeting,
   spamReason,
   type Poster,
@@ -25,21 +24,13 @@ const M1 = 'aaaaaaaaaaaaaaaa';
 const M2 = 'bbbbbbbbbbbbbbbb';
 
 describe('meeting text', () => {
-  it('cleans, caps and masks', () => {
+  it('cleans and caps, and does not censor', () => {
     expect(cleanText('  hi\u0000 \t there \n\n\n\nfriend ')).toBe('hi there \n\nfriend');
     expect(cleanText('x'.repeat(900))).toHaveLength(TEXT_MAX);
-    expect(maskProfanity('well fuck that, Shitty luck')).toBe('well f✶✶✶ that, S✶✶✶✶✶ luck');
-    expect(maskProfanity('Scunthorpe classic assess')).toBe('Scunthorpe classic assess');
     expect(cleanText('<script>alert(1)</script>')).toBe('<script>alert(1)</script>'); // stored as text, rendered as text
-  });
-  it('refuses links, shouting and stretched letters (not for the owner)', () => {
-    expect(spamReason('visit https://spam.example', false)).toMatch(/Links/);
-    expect(spamReason('join discord.gg/abc', false)).toMatch(/Links/);
-    expect(spamReason('cheap at freecoins.xyz', false)).toMatch(/Links/);
-    expect(spamReason('aaaaaaaaaaaaaaaaaaaa', false)).toBeTruthy();
-    expect(spamReason('THIS IS A VERY LOUD MESSAGE INDEED', false)).toMatch(/shout/);
-    expect(spamReason('Good game. The Rune Colonel is strong.', false)).toBeNull();
-    expect(spamReason('see https://occult-wars.vercel.app', true)).toBeNull();
+    expect(spamReason('')).toMatch(/Say something/);
+    expect(spamReason('well shit, see https://example.com and discord.gg/abc')).toBeNull();
+    expect(spamReason('THIS IS A VERY LOUD MESSAGE INDEED aaaaaaaaaaaaaaaaaa')).toBeNull();
   });
   it('names: letters and numbers; reserved names refused for guests', () => {
     expect(cleanName('  Ada  Lovelace ')).toBe('Ada Lovelace');

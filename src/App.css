@@ -5134,3 +5134,12 @@ input[type='search'] {
   font-style: italic;
   text-align: center;
 }
+.meeting-link {
+  color: #e8c870;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+.meeting-link:hover {
+  color: #ffe2a0;
+}

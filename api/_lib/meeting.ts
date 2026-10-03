@@ -3,8 +3,8 @@
  *
  * Messages are plain text (never HTML; the client renders them as text) kept
  * in a sorted index of sequential ids, the newest ~200 retained. Posting is
- * rate-limited per hand and per address; links and repeated-character spam
- * are refused and a short list of slurs and profanity is masked. The owner
+ * rate-limited per hand and per address and capped in length; words, links
+ * and images are not filtered (by the owner's choice). The owner
  * (server-verified: OWNER_KEY / OWNER_EMAILS / OWNER_IDS) posts with a Grand
  * Master badge and may strike any message.
  */
@@ -52,15 +52,6 @@ export class MeetingError extends Error {
   }
 }
 
-// Kept short and whole-word so ordinary words are not caught.
-const MASK = [
-  'fuck', 'fucking', 'fucker', 'motherfucker', 'shit', 'shitty', 'bullshit', 'cunt', 'bitch',
-  'bastard', 'asshole', 'dick', 'dickhead', 'cock', 'pussy', 'whore', 'slut', 'wanker', 'twat',
-  'nigger', 'nigga', 'faggot', 'fag', 'retard', 'kike', 'spic', 'chink', 'tranny',
-];
-const MASK_RE = new RegExp(`\\b(${MASK.join('|')})(s|es|ed|ing)?\\b`, 'gi');
-const LINK_RE =
-  /(https?:\/\/|www\.|\b[a-z0-9-]{2,}\.(com|net|org|io|gg|xyz|ru|cn|ly|me|co|app|dev|info|biz|tk|top|site|online|link|click|shop)\b|discord\.gg|t\.me\/)/i;
 const NAME_RE = /^[\p{L}\p{N}][\p{L}\p{N} ._'’-]{0,23}$/u;
 const RESERVED_RE = /grand\s*master|owner|admin|moderator|justin\s*kern|occult\s*wars/i;
 
@@ -77,21 +68,9 @@ export function cleanText(raw: unknown): string {
   return s.slice(0, TEXT_MAX);
 }
 
-export function maskProfanity(text: string): string {
-  return text.replace(MASK_RE, (w) => w[0] + '✶'.repeat(Math.max(2, w.length - 1)));
-}
-
-/** Refusal reason, or null when the message may be posted. */
-export function spamReason(text: string, owner: boolean): string | null {
-  if (!text) return 'Say something first.';
-  if (owner) return null;
-  if (LINK_RE.test(text)) return 'Links are not read aloud at the meeting.';
-  if (/(.)\1{11,}/u.test(text)) return 'That is one letter shouted many times.';
-  const letters = text.replace(/[^\p{L}]/gu, '');
-  if (letters.length >= 24 && letters === letters.toUpperCase() && letters !== letters.toLowerCase()) {
-    return 'The meeting asks you not to shout.';
-  }
-  return null;
+/** Refusal reason, or null when the message may be posted. The meeting is not censored. */
+export function spamReason(text: string): string | null {
+  return text ? null : 'Say something first.';
 }
 
 export function cleanName(raw: unknown): string | null {
@@ -255,7 +234,7 @@ export async function postMeeting(
 ): Promise<MeetingMessage> {
   const text = cleanText(input.text);
   const image = parseImage(input.image);
-  const why = image && !text ? null : spamReason(text, who.owner);
+  const why = image && !text ? null : spamReason(text);
   if (why) throw new MeetingError(400, why);
   let name: string;
   let badge: Badge;
@@ -293,7 +272,7 @@ export async function postMeeting(
   }
   const [n] = await store.pipe([['INCR', MK.n]]);
   const id = Number(n);
-  const msg: MeetingMessage = { id, at: now, name, text: who.owner ? text : maskProfanity(text), badge };
+  const msg: MeetingMessage = { id, at: now, name, text, badge };
   if (image) msg.img = await saveImage(store, id, image, env);
   // The board keeps the newest KEEP: the one that falls off goes with its image.
   const gone = id - KEEP;

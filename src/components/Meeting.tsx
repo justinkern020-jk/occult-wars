@@ -10,6 +10,7 @@ import {
   readMeetingName,
   strikeMeeting,
   writeMeetingName,
+  linkParts,
   writeSeenMeeting,
   type MeetingMessage,
   type MeetingUpload,
@@ -167,8 +168,8 @@ export function Meeting({ onBack, guestName }: Props) {
       <p className="plate-kicker">By candlelight, all hands</p>
       <h1 className="meeting-title">The Occultist Meeting</h1>
       <p className="meeting-lead">
-        Everyone at the table reads this board. Speak plainly; links are not read aloud. Images
-        are shrunk before they are pinned.
+        Everyone at the table reads this board. Words, links and images are pinned as they come;
+        images are shrunk first.
       </p>
       {store === 'memory' && loaded && (
         <p className="meeting-faint" data-testid="meeting-faint">
@@ -229,7 +230,25 @@ export function Meeting({ onBack, guestName }: Props) {
                     </button>
                   )}
                 </div>
-                {m.text && <p className="meeting-text">{m.text}</p>}
+                {m.text && (
+                  <p className="meeting-text">
+                    {linkParts(m.text).map((part, i) =>
+                      'href' in part ? (
+                        <a
+                          key={i}
+                          href={part.href}
+                          target="_blank"
+                          rel="noopener noreferrer nofollow ugc"
+                          className="meeting-link"
+                        >
+                          {part.text}
+                        </a>
+                      ) : (
+                        <span key={i}>{part.text}</span>
+                      ),
+                    )}
+                  </p>
+                )}
                 {m.img && (
                   <button
                     type="button"

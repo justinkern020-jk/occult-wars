@@ -26,3 +26,17 @@ describe('meeting images (client)', () => {
     expect(fitWithin(300, 200)).toEqual({ w: 300, h: 200 });
   });
 });
+
+import { linkParts } from './meeting';
+
+describe('linkParts', () => {
+  it('turns http(s) links into links and leaves the rest as text', () => {
+    expect(linkParts('see https://example.com/a?b=1, then talk')).toEqual([
+      { text: 'see ' },
+      { href: 'https://example.com/a?b=1', text: 'https://example.com/a?b=1' },
+      { text: ', then talk' },
+    ]);
+    expect(linkParts('javascript:alert(1) <b>hi</b>')).toEqual([{ text: 'javascript:alert(1) <b>hi</b>' }]);
+    expect(linkParts('(http://x.io).')).toEqual([{ text: '(' }, { href: 'http://x.io/', text: 'http://x.io' }, { text: ').' }]);
+  });
+});
