@@ -32,7 +32,74 @@ export type TableView = {
   store: 'redis' | 'memory';
   /** Newest Occultist Meeting message id. */
   meet: number;
+  /** The deployed build ('' when unknown). */
+  build: string;
 };
+
+/* ---- what this hand is doing (owner's roll only) and which build it runs ---- */
+
+declare const __OW_BUILD__: string | undefined;
+export const CLIENT_BUILD: string = typeof __OW_BUILD__ === 'string' ? __OW_BUILD__ : '';
+const RELOADED_KEY = 'occult-wars.reloaded-for';
+/** Screens where a reload loses nothing (no match, no half-typed post). */
+const SAFE_TO_RELOAD = new Set(['title', 'menu', 'archive', 'ledger', 'shop', 'allegiance']);
+
+export type Activity = {
+  where: string;
+  mode?: string;
+  era?: string;
+  map?: string;
+  match?: string;
+  name?: string;
+};
+let activity: Activity = { where: 'title' };
+let newerBuild = '';
+let activityTimer: number | null = null;
+
+export function setActivity(patch: Partial<Activity>): void {
+  const next = { ...activity, ...patch };
+  const moved = next.where !== activity.where || next.match !== activity.match || next.mode !== activity.mode;
+  activity = next;
+  maybeReload();
+  // Tell the table promptly when the hand moves (one beat, debounced).
+  if (moved && started && typeof window !== 'undefined') {
+    if (activityTimer != null) window.clearTimeout(activityTimer);
+    activityTimer = window.setTimeout(() => {
+      activityTimer = null;
+      beatNow();
+    }, 600);
+  }
+}
+export function readActivity(): Activity {
+  return activity;
+}
+
+function signedIn(): boolean {
+  try {
+    return !!localStorage.getItem('occult-wars.seat-token');
+  } catch {
+    return false;
+  }
+}
+
+/** A new deploy is out: reload once, but only where nothing is lost. */
+function maybeReload(): void {
+  if (!newerBuild || !CLIENT_BUILD || newerBuild === CLIENT_BUILD) return;
+  if (!SAFE_TO_RELOAD.has(activity.where)) return;
+  if (typeof window === 'undefined' || typeof sessionStorage === 'undefined') return;
+  try {
+    if (sessionStorage.getItem(RELOADED_KEY) === newerBuild) return;
+    sessionStorage.setItem(RELOADED_KEY, newerBuild);
+  } catch {
+    return;
+  }
+  window.location.reload();
+}
+export function noteServerBuild(build: string): void {
+  if (!build || build === CLIENT_BUILD) return;
+  newerBuild = build;
+  maybeReload();
+}
 
 const MARK_RE = /^[a-z0-9]{16}$/;
 
@@ -70,6 +137,7 @@ export function parseTableView(raw: unknown): TableView | null {
       : [],
     store: r.store === 'redis' ? 'redis' : 'memory',
     meet: Number(r.meet) || 0,
+    build: typeof r.build === 'string' && /^[a-z0-9]{1,12}$/.test(r.build) ? r.build : '',
   };
 }
 
@@ -84,7 +152,7 @@ async function post(body: Record<string, unknown>): Promise<unknown> {
 }
 
 export function beatTable(): Promise<TableView | null> {
-  return post({ op: 'beat' })
+  return post({ op: 'beat', who: { ...activity, build: CLIENT_BUILD, seat: signedIn() } })
     .then(parseTableView)
     .catch(() => null);
 }
@@ -163,6 +231,7 @@ export function beatNow(): void {
       return;
     }
     failures = 0;
+    noteServerBuild(view.build);
     if (view.playing >= steadyPlaying || dips >= 2) {
       steadyPlaying = view.playing;
       dips = 0;

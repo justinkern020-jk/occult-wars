@@ -153,6 +153,30 @@ export async function listMatches(): Promise<MatchSummary[] | null> {
   return r ? r.matches ?? [] : null;
 }
 
+/** One hand at the table, as the owner's roll sees it. */
+export type HandLine = {
+  id: string;
+  name: string;
+  seat: boolean;
+  country: string | null;
+  where: string;
+  mode: string;
+  era: string;
+  map: string;
+  match: string;
+  build: string;
+  since: number;
+  last: number;
+  /** False for a page too old to say what it is doing. */
+  known: boolean;
+};
+
+export async function readWho(): Promise<{ hands: HandLine[]; matches: MatchSummary[]; build: string } | null> {
+  const r = await watchCall<{ hands?: HandLine[]; matches?: MatchSummary[]; build?: string }>({ op: 'who' });
+  if (!r) return null;
+  return { hands: r.hands ?? [], matches: r.matches ?? [], build: r.build ?? '' };
+}
+
 export async function viewMatch(
   id: string,
 ): Promise<{ summary: MatchSummary | null; frame: MatchFrame | null } | null> {

@@ -249,8 +249,9 @@ export function MenuAtelier({
           </div>
           <h1 className="menu-title">Occult Wars</h1>
           <p className="menu-lede">
-            Six orders. One leaden hour. Cabals dual-Power — vitality and damage
-            as one number. Resources bank the muster.
+            A secret war of occult orders across a century of hidden history.
+            Gather Resources, muster your occultists, cryptids and rites, and seize
+            the field before the leaden hour strikes.
           </p>
 
           <div className="menu-occultist-socket">

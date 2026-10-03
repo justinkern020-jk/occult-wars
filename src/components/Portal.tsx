@@ -5,13 +5,15 @@ import { PORTAL_CODE_LABEL, portalCodeFor } from '../game/portalCodes';
 import { readSeatToken } from '../net/account';
 import {
   OWNER_KEY_STORAGE,
-  listMatches,
   portalOpen,
+  readWho,
   sendPortalCode,
   viewMatch,
+  type HandLine,
   type MatchFrame,
   type MatchSummary,
 } from '../net/watch';
+import { countryName } from '../net/table';
 import { UnitCoin, type BoardUnit } from './UnitCoin';
 
 const SIDE_NAME = { blue: 'Azure', red: 'Crimson' } as const;
@@ -60,11 +62,57 @@ function RuneRing({ small }: { small?: boolean }) {
   );
 }
 
+const VS_AI: Record<string, string> = {
+  training: 'Practice vs AI (training)',
+  campaign: 'Practice vs AI (The Leaden Hour)',
+  second: 'Practice vs AI (Second Hour yard)',
+  old: 'Practice vs AI (Sealed Century)',
+};
+const SCREEN_NAME: Record<string, string> = {
+  title: 'At the title',
+  menu: 'Menu',
+  allegiance: 'Swearing an order',
+  archive: 'Collection',
+  deck: 'Deck editor',
+  pack: 'Opening packs',
+  campaign: 'The Leaden Hour (choosing a stage)',
+  friend: 'Friend Working (finding a friend)',
+  second: 'Second Hour (in the yard)',
+  old: 'Sealed Century (choosing a map)',
+  shop: 'Shop',
+  ledger: 'Ledger',
+  meeting: 'Occultist Meeting',
+  sandbox: 'Sandbox',
+};
+
+export function activityLine(h: HandLine): string {
+  if (!h.known) return 'On an older page (cannot say)';
+  if (h.where !== 'field') return SCREEN_NAME[h.where] ?? h.where;
+  const era = ERA_NAME[h.era] ?? '';
+  const what =
+    h.mode === 'friend'
+      ? 'Friend match'
+      : h.mode === 'hotseat'
+        ? 'Pass the Grimoire (one board)'
+        : (VS_AI[h.mode] ?? 'On a field');
+  return [what, era, h.map].filter(Boolean).join(' · ');
+}
+
+export function onlineFor(ms: number): string {
+  const min = Math.floor(Math.max(0, ms) / 60_000);
+  if (min < 1) return 'under a minute';
+  if (min < 60) return `${min} min`;
+  return `${Math.floor(min / 60)} h ${min % 60} min`;
+}
+
 /** The owner's door in the battle count. Renders nothing for anyone else. */
 export function PortalDoor() {
   const [open, setOpen] = useState(false);
   const [matches, setMatches] = useState<MatchSummary[] | null>(null);
   const [watching, setWatching] = useState<string | null>(null);
+  const [hands, setHands] = useState<HandLine[] | null>(null);
+  const [build, setBuild] = useState('');
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     if (!hasOwnerProof()) return;
@@ -81,8 +129,12 @@ export function PortalDoor() {
     if (!open || watching) return;
     let alive = true;
     const read = () =>
-      void listMatches().then((m) => {
-        if (alive && m) setMatches(m);
+      void readWho().then((r) => {
+        if (!alive || !r) return;
+        setMatches(r.matches);
+        setHands(r.hands);
+        setBuild(r.build);
+        setNow(Date.now());
       });
     read();
     const t = window.setInterval(read, 4_000);
@@ -128,6 +180,42 @@ export function PortalDoor() {
               </button>
             </li>
           ))}
+        </ol>
+      )}
+      <h3 className="portal-roll-title">Hands at the table</h3>
+      {hands == null ? null : hands.length === 0 ? (
+        <p className="portal-quiet">No one is at the table.</p>
+      ) : (
+        <ol className="portal-roll" data-testid="portal-roll">
+          {hands.map((h) => {
+            const live = h.match && matches?.some((m) => m.id === h.match && !m.over) ? h.match : '';
+            const oldBuild = !!(h.known && build && h.build !== build);
+            return (
+              <li key={h.id} className="portal-hand" data-testid="portal-hand" data-where={h.where} data-mode={h.mode}>
+                <span className="portal-hand-name">
+                  <b>{h.name || (h.known ? 'Unnamed hand' : 'Unknown hand')}</b>
+                  {h.known && <i className="portal-hand-badge">{h.seat ? 'account' : 'guest'}</i>}
+                </span>
+                <span className="portal-hand-meta">
+                  {h.country ? countryName(h.country) : 'Unknown land'} · online {onlineFor(now - h.since)}
+                </span>
+                <span className="portal-hand-where" data-testid="portal-hand-where">
+                  {activityLine(h)}
+                  {oldBuild ? ' · older build (refreshes at the menu)' : ''}
+                </span>
+                {live && (
+                  <button
+                    type="button"
+                    className="brass-btn portal-hand-watch"
+                    data-testid="portal-hand-watch"
+                    onClick={() => setWatching(live)}
+                  >
+                    Watch
+                  </button>
+                )}
+              </li>
+            );
+          })}
         </ol>
       )}
       {watching &&

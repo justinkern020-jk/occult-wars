@@ -5151,3 +5151,54 @@ input[type='search'] {
 .account-close summary {
   cursor: pointer;
 }
+
+/* The owner's roll: every hand at the table now. */
+.portal-roll-title {
+  position: relative;
+  margin: 1rem 0 0.4rem;
+  font-family: var(--font-display, serif);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  color: #e3c98a;
+}
+.portal-roll {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+  text-align: left;
+}
+.portal-hand {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.1rem 0.6rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 0.55rem;
+  background: #1a1316cc;
+  box-shadow: inset 0 0 0 1px #c6a15b33;
+}
+.portal-hand-name { color: #f0dcae; }
+.portal-hand-badge {
+  margin-left: 0.45rem;
+  font-size: 0.72rem;
+  font-style: normal;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b9a37a;
+}
+.portal-hand-meta,
+.portal-hand-where {
+  grid-column: 1;
+  font-size: 0.82rem;
+  color: #cbb994;
+}
+.portal-hand-where { color: #e6d6b4; }
+.portal-hand-watch {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  align-self: center;
+  padding: 0.35rem 0.9rem;
+}

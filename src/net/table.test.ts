@@ -16,6 +16,7 @@ describe('parseTableView', () => {
       ],
       store: 'redis',
       meet: 12,
+      build: '',
     });
     expect(v).toEqual({
       playing: 3,
@@ -25,6 +26,7 @@ describe('parseTableView', () => {
       checkins: [{ country: 'US', n: 2 }],
       store: 'redis',
       meet: 12,
+      build: '',
     });
   });
 

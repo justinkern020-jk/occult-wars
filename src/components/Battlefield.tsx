@@ -93,6 +93,7 @@ import {
   type MatchFrame,
   type PortalCode,
 } from '../net/watch';
+import { setActivity } from '../net/table';
 import {
   RulesPrimer,
   hasSeenPrimer,
@@ -2492,6 +2493,11 @@ export function Battlefield({
       over: !!matchOver,
     };
   }, [mode, aiDifficulty, profile?.username, gameMap, turn, side, phase, blueFaction, redFaction, blueHero, redHero, matchOver]);
+  // Tell the table which field this hand is on (the owner's roll links it to the Portal).
+  useEffect(() => {
+    setActivity({ match: portalIds?.id, era: gameMap.era ?? 'first', map: gameMap.name });
+    return () => setActivity({ match: undefined, era: undefined, map: undefined });
+  }, [portalIds, gameMap.era, gameMap.name]);
   const portalLatest = useRef({ frame: portalFrame, summary: portalSummary });
   useEffect(() => {
     portalLatest.current = { frame: portalFrame, summary: portalSummary };
@@ -2548,10 +2554,20 @@ export function Battlefield({
       schedule(Math.max(0, 600 - since));
     };
     schedule(1_500);
+    // Left the field (or closed the page): one last word so the Portal drops it quickly.
+    let said = false;
+    const bye = () => {
+      if (said) return;
+      said = true;
+      void reportLive({ id: ids.id, key: ids.key, summary: { ...portalLatest.current.summary, over: true } });
+    };
+    window.addEventListener('pagehide', bye);
     return () => {
       stopped = true;
       window.clearTimeout(timer);
+      window.removeEventListener('pagehide', bye);
       portalPoke.current = () => undefined;
+      bye();
     };
   }, [portalIds]);
   // While watched, a changed field goes through promptly.

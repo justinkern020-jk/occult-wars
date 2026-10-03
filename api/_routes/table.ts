@@ -5,7 +5,7 @@
  */
 import { getStore } from '../_lib/store.js';
 import { HttpError, fail, headerCountry, json, readJson } from '../_lib/http.js';
-import { MARK_RE, ROOM_RE, accept, beat, cancel, cleanCountry, issue } from '../_lib/table.js';
+import { MARK_RE, ROOM_RE, accept, beat, cancel, cleanActivity, cleanCountry, issue, serverBuild } from '../_lib/table.js';
 import { FRAME_MAX, WatchError, reportLive } from '../_lib/watch.js';
 
 export async function handleTable(req: Request, now = Date.now()): Promise<Response> {
@@ -18,7 +18,7 @@ export async function handleTable(req: Request, now = Date.now()): Promise<Respo
     const op = String(body.op ?? 'beat');
     if (op === 'beat') {
       const country = cleanCountry(headerCountry(req)) ?? cleanCountry(body.country);
-      return json(await beat(store, mark, country, now));
+      return json(await beat(store, mark, country, now, cleanActivity(body.who), serverBuild()));
     }
     if (op === 'live') {
       // A match reporting itself to the Portal (frames only while watched).

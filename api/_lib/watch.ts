@@ -11,7 +11,10 @@ import { timingSafeEqual, createHash } from 'node:crypto';
 import type { Store } from './store.js';
 import { tokenFrom, userForToken } from './accounts.js';
 
-export const LIVE_MS = 30_000;
+/** Long enough to ride out a background tab's throttled timers (about once a minute). */
+export const LIVE_MS = 90_000;
+/** A finished (or left) match lingers briefly, marked over. */
+const OVER_MS = 15_000;
 export const WATCH_MS = 12_000;
 const CMD_MS = 60_000;
 const KEY_SEC = 6 * 60 * 60;
@@ -133,7 +136,7 @@ export async function reportLive(
   if (claimed !== 'OK' && held !== key) throw new WatchError(403, 'Not your match.');
   const summary = cleanSummary(id, input.summary, now);
   const cmds: (string | number)[][] = [
-    ['SET', K.sum(id), JSON.stringify(summary), 'PX', LIVE_MS],
+    ['SET', K.sum(id), JSON.stringify(summary), 'PX', summary.over ? OVER_MS : LIVE_MS],
     ['ZADD', K.idx, now, id],
     ['ZREMRANGEBYSCORE', K.idx, '-inf', now - LIVE_MS],
     ['EXPIRE', K.key(id), KEY_SEC],

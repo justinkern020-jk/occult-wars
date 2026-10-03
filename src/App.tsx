@@ -13,6 +13,7 @@ import { Ledger } from './components/Ledger';
 import { Meeting } from './components/Meeting';
 import {
   TABLE_CHALLENGE_EVENT,
+  setActivity,
   setTableState,
   type TableChallengeDetail,
 } from './net/table';
@@ -115,6 +116,11 @@ export default function App() {
     role: FriendRole;
     room: string;
   } | null>(null);
+
+  // What this hand is doing, for the owner's roll (and the safe-reload check).
+  useEffect(() => {
+    setActivity({ where: screen, mode: screen === 'field' ? matchMode : undefined, name: profile.username });
+  }, [screen, matchMode, profile.username]);
 
   // Seated in a two-hand match: no knocks at the table.
   useEffect(() => {
