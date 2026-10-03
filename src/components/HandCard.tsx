@@ -92,6 +92,17 @@ export function HandCard({
         const dy = e.clientY - startPos.current.y;
         if (Math.hypot(dx, dy) < 10) return;
         clearPress();
+        // In a hand that slides, a sideways swipe scrolls the hand (the row and the
+        // browser take it); only an up/down drag lifts the plate to muster.
+        const slides = !!(e.currentTarget as HTMLElement).closest?.('.hand-scroller.is-overflowing');
+        if (slides && Math.abs(dx) > Math.abs(dy)) {
+          startPos.current = null;
+          dragged.current = true;
+          window.setTimeout(() => {
+            dragged.current = false;
+          }, 0);
+          return;
+        }
         if (canDrag && !dragged.current) {
           dragged.current = true;
           startPos.current = null;

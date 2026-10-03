@@ -6,6 +6,7 @@ import { noteFirstHourWin } from '../game/secretHints';
 import { FortuneReveal } from './FortuneReveal';
 import { foilMask } from '../game/foil';
 import { SeatInvite } from './SeatInvite';
+import { HandScroller } from './HandScroller';
 import {
   aiDifficultyLabel,
   aiStepCap,
@@ -3739,7 +3740,7 @@ export function Battlefield({
 
       <div className="hand-rail">
         <p className="hand-kicker">
-          {sideLabel(inputSide)} hand · drag units to muster · tap coins to move · Call power on the coin · rites & devices speak
+          {sideLabel(inputSide)} hand · drag a unit up to muster · swipe to slide the hand · tap coins to move · Call power on the coin · rites & devices speak
           {friend && !friendSynced
             ? ' · syncing with host…'
             : friend && side !== mySide
@@ -3748,7 +3749,7 @@ export function Battlefield({
                 ? ' · Crimson is working…'
                 : ''}
         </p>
-        <div className="hand-row" ref={handRowRef}>
+        <HandScroller rowRef={handRowRef}>
           {activeHero && (
             <button
               type="button"
@@ -3806,7 +3807,7 @@ export function Battlefield({
               />
             );
           })}
-        </div>
+        </HandScroller>
       </div>
 
       <div className="bf-occultist-socket" data-testid="battle-occultist">

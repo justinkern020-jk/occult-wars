@@ -5965,3 +5965,138 @@ input[type='search'] {
 .battle-count-played small {
   color: var(--color-muted, #a89a80);
 }
+
+/* ——— Hand slider: swipe / wheel / drag the hand; gold-and-emerald rail under it ——— */
+.hand-scroller {
+  position: relative;
+}
+.hand-scroller-view {
+  position: relative;
+}
+.hand-row.hand-row-slide {
+  /* Room for a lifted (selected / hovered) plate; the native bar gives way to the slider. */
+  padding-top: 0.5rem;
+  margin-top: -0.35rem;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.hand-row.hand-row-slide::-webkit-scrollbar {
+  display: none;
+}
+/* In a hand that slides, a sideways swipe pans it; an upward drag still lifts a plate to muster. */
+.hand-scroller.is-overflowing .hand-card.is-draggable {
+  touch-action: pan-x;
+}
+.hand-scroller.is-overflowing .hand-row-slide {
+  cursor: grab;
+}
+/* Soft fade at an edge that hides more plates */
+.hand-scroller.is-overflowing .hand-scroller-view::before,
+.hand-scroller.is-overflowing .hand-scroller-view::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2.2rem;
+  pointer-events: none;
+  z-index: 4;
+  transition: opacity 0.2s;
+}
+.hand-scroller.is-overflowing .hand-scroller-view::before {
+  left: 0;
+  background: linear-gradient(90deg, #050403e6, transparent);
+}
+.hand-scroller.is-overflowing .hand-scroller-view::after {
+  right: 0;
+  background: linear-gradient(270deg, #050403e6, transparent);
+}
+.hand-scroller.at-start .hand-scroller-view::before,
+.hand-scroller.at-end .hand-scroller-view::after {
+  opacity: 0;
+}
+.hand-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 5;
+  width: 2.1rem;
+  height: 2.1rem;
+  margin-top: -1.05rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid #c6a15b;
+  background: radial-gradient(circle at 40% 35%, #2a2116, #0b0907 75%);
+  color: #f0d78a;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px #0c0907, 0 4px 12px #000b, 0 0 10px #3cff7a33;
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+}
+.hand-arrow[hidden] {
+  display: none;
+}
+.hand-arrow span {
+  margin-top: -0.12rem;
+}
+.hand-arrow:hover,
+.hand-arrow:focus-visible {
+  transform: scale(1.08);
+  box-shadow: 0 0 0 1px #0c0907, 0 4px 12px #000b, 0 0 14px #3cff7a88;
+  color: #fff6d8;
+}
+.hand-arrow-left {
+  left: -0.55rem;
+}
+.hand-arrow-right {
+  right: -0.55rem;
+}
+.hand-slider {
+  position: relative;
+  height: 1.25rem; /* generous hit area; the rail itself is thin */
+  margin: 0.35rem 0.2rem 0;
+  cursor: pointer;
+  touch-action: none;
+  outline: none;
+}
+.hand-slider-rail {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 6px;
+  margin-top: -3px;
+  border-radius: 999px;
+  background: linear-gradient(#0c0907, #1d160f);
+  box-shadow: inset 0 0 0 1px #8c6d3299, inset 0 1px 2px #000c, 0 1px #ffecc81a;
+}
+.hand-slider-thumb {
+  position: absolute;
+  top: 50%;
+  height: 10px;
+  margin-top: -5px;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, transparent 0 calc(50% - 4px), #3cff7a calc(50% - 4px) calc(50% + 4px), transparent calc(50% + 4px)) center / 100% 2px no-repeat,
+    linear-gradient(180deg, #f6e2a4, #c6a15b 55%, #8c6d32);
+  box-shadow: 0 0 0 1px #2a1e10, 0 0 8px #3cff7a66, 0 2px 4px #000a;
+  transition: box-shadow 0.15s;
+  pointer-events: none;
+}
+.hand-slider:hover .hand-slider-thumb,
+.hand-slider:focus-visible .hand-slider-thumb,
+.hand-slider:active .hand-slider-thumb {
+  box-shadow: 0 0 0 1px #2a1e10, 0 0 14px #3cff7aaa, 0 2px 4px #000a;
+}
+@media (max-width: 640px) {
+  .hand-arrow {
+    width: 1.9rem;
+    height: 1.9rem;
+    margin-top: -0.95rem;
+  }
+  .hand-arrow-left { left: -0.4rem; }
+  .hand-arrow-right { right: -0.4rem; }
+}
