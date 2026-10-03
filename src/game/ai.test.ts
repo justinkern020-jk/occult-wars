@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { pickTrainingAction, type AiSnapshot, type AiUnit } from './ai';
+import { pickTrainingAction, scoredCandidates, type AiSnapshot, type AiUnit } from './ai';
 import { canDeployOn, initialControl, paintTile } from './control';
 import { mapById } from './maps';
 import { applyBank, bankFromHoldings, countHoldings } from './scoring';
@@ -126,7 +126,7 @@ describe('AI activated abilities', () => {
   const map = mapById('leaden-court');
   const control = initialControl(map.tiles);
 
-  it('picks sacrifice-bank when bank is thin', () => {
+  it('offers sacrifice-bank when it unlocks a muster', () => {
     const board = emptyBoard();
     board[2][2] = {
       uid: 'coil',
@@ -144,17 +144,16 @@ describe('AI activated abilities', () => {
       tiles: map.tiles,
       control,
       board,
-      hand: [],
+      hand: [unitCard({ id: 'big', name: 'Big', cost: 5, power: 5 })],
       loyalty: 2,
     };
-    const action = pickTrainingAction(snap);
-    expect(action.type).toBe('act');
-    if (action.type === 'act') {
-      expect(action.uid).toBe('coil');
-    }
+    // grok scoring: bank 3, and the 5-cost muster comes within reach (+14).
+    const act = scoredCandidates(snap).find((x) => x.action.type === 'act');
+    expect(act?.action).toMatchObject({ type: 'act', uid: 'coil' });
+    expect(act!.score).toBeGreaterThan(0);
   });
 
-  it('picks wail when only foes are adjacent', () => {
+  it('offers wail when only foes are adjacent', () => {
     const board = emptyBoard();
     board[2][2] = {
       uid: 'wail',
@@ -186,8 +185,9 @@ describe('AI activated abilities', () => {
       hand: [],
       loyalty: 4,
     };
-    const action = pickTrainingAction(snap);
-    expect(action.type).toBe('act');
-    if (action.type === 'act') expect(action.uid).toBe('wail');
+    // Wail is offered at full worth (an adjacent P4 foe, no friends hurt).
+    const act = scoredCandidates(snap).find((x) => x.action.type === 'act');
+    expect(act?.action).toMatchObject({ type: 'act', uid: 'wail' });
+    expect(act!.score).toBeGreaterThan(20);
   });
 });
