@@ -12,6 +12,7 @@ export function TarotPop({
   onClose,
   caption,
   closeOnBackdrop = true,
+  foil = false,
 }: {
   card: Card;
   power?: number;
@@ -19,6 +20,8 @@ export function TarotPop({
   caption?: string;
   /** When false, only Close / Esc dismiss (after arm). Default true. */
   closeOnBackdrop?: boolean;
+  /** Show the foil face (an owned foil copy). */
+  foil?: boolean;
 }) {
   const closeArmed = useRef(false);
   const onCloseRef = useRef(onClose);
@@ -62,7 +65,7 @@ export function TarotPop({
         className="tarot-pop-card"
         onClick={(e) => e.stopPropagation()}
       >
-        <CardView card={card} power={power} />
+        <CardView card={card} power={power} foil={foil} />
         {caption && <p className="tarot-pop-caption">{caption}</p>}
         <button
           type="button"

@@ -21,6 +21,8 @@ import { strongestBySims, strongestDeck } from '../game/autoDeck';
 import { brassClick } from '../game/sfx';
 import { readHourOpen } from '../game/hourUnlock';
 import { CardArt } from './CardArt';
+import { FoilSheen } from './CardFx';
+import { foilCount } from '../game/foil';
 import { TarotPop } from './TarotPop';
 import type { Card } from '../game/types';
 
@@ -463,15 +465,19 @@ export function DeckEditor({ profile, onSave, onDelete, onBack, initialEra, retu
               const have = counts[c.id] ?? 0;
               const cap = Math.min(3, owned[c.id] ?? 0);
               return (
-                <article key={c.id} className={`deck-plate rarity-${c.rarity}`}>
+                <article
+                  key={c.id}
+                  className={`deck-plate rarity-${c.rarity}${foilCount(profile.foils, c.id) > 0 ? ' is-foil' : ''}`}
+                >
                   <button
                     type="button"
                     className="deck-plate-look"
                     data-peek-card={c.id}
                     onClick={() => setInspect(c)}
-                    title={`Own ${owned[c.id] ?? 0} · in working ${have} · tap to read`}
+                    title={`Own ${owned[c.id] ?? 0}${foilCount(profile.foils, c.id) > 0 ? ` (${foilCount(profile.foils, c.id)} foil)` : ''} · in working ${have} · tap to read`}
                   >
                     <CardArt name={c.name} className="deck-plate-art" />
+                    {foilCount(profile.foils, c.id) > 0 && <FoilSheen />}
                     <span className="deck-plate-name">{c.name}</span>
                   </button>
                   <span className="deck-plate-stats">
@@ -590,7 +596,9 @@ export function DeckEditor({ profile, onSave, onDelete, onBack, initialEra, retu
           {returnLabel}
         </button>
       </div>
-      {inspect && <TarotPop card={inspect} onClose={() => setInspect(null)} />}
+      {inspect && (
+        <TarotPop card={inspect} foil={foilCount(profile.foils, inspect.id) > 0} onClose={() => setInspect(null)} />
+      )}
     </section>
   );
 }

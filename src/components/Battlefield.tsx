@@ -4,6 +4,7 @@ import { createOnceGate } from '../game/onceGate';
 import { shardGainFor } from '../game/fortune';
 import { noteFirstHourWin } from '../game/secretHints';
 import { FortuneReveal } from './FortuneReveal';
+import { foilMask } from '../game/foil';
 import {
   aiDifficultyLabel,
   aiStepCap,
@@ -3145,6 +3146,11 @@ export function Battlefield({
 
   const playerWon = matchOver ? matchOver.winner === PLAYER : false;
   const activeHand = hand[inputSide];
+  /** Foil copies shine in the hand that is this profile's own working. */
+  const handFoil =
+    (hotseat ? inputSide === 'blue' : inputSide === PLAYER) && profile?.foils
+      ? foilMask(activeHand.map((c) => c.id), profile.foils)
+      : [];
   const activeHero = inputSide === 'blue' ? blueHero : redHero;
   const foeHero = inputSide === 'blue' ? redHero : blueHero;
   /** Pass the Grimoire: turn the circle toward Crimson's chair on Crimson's rite. */
@@ -3734,6 +3740,7 @@ export function Battlefield({
                 key={`${card.id}-${i}`}
                 card={card}
                 handIndex={i}
+                foil={!!handFoil[i]}
                 selected={selectedHand === i || dragHand === i}
                 disabled={inputLocked || tooCostly}
                 onClick={() => {

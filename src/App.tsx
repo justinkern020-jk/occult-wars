@@ -58,6 +58,7 @@ import type { StageOutcome } from './game/campaign';
 import { isMainGameMap } from './game/maps';
 import { AI_DIFFICULTY_KEY, readAiDifficulty, type AiDifficulty } from './game/ai';
 import './App.css';
+import './polish.css';
 
 type Screen =
   | 'title'

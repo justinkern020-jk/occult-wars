@@ -10,6 +10,7 @@ import {
 import { CardView } from './CardView';
 import { CardArt } from './CardArt';
 import { TarotPop } from './TarotPop';
+import { foilCount } from '../game/foil';
 import {
   FIRST_HOUR_ORDERS,
   SEALED_CENTURY_ORDERS,
@@ -130,7 +131,8 @@ export function Catalog({ profile, onUpdate }: Props) {
   function ownershipLabel(id: string): string {
     if (isExcludedPlateId(id)) return 'Archive · never owned';
     const n = owned[id] ?? 0;
-    if (n > 0) return `Owned ×${n}`;
+    const f = foilCount(profile?.foils, id);
+    if (n > 0) return `Owned ×${n}${f > 0 ? ` · ${f} foil` : ''}`;
     return 'Locked';
   }
 
@@ -257,7 +259,7 @@ export function Catalog({ profile, onUpdate }: Props) {
             .join(' ');
           return (
             <div key={`${c.faction}-${c.id}`} className={wrapCls} data-peek-card={c.id}>
-              <CardView card={c} onClick={() => setInspect(c)} />
+              <CardView card={c} foil={foilCount(profile?.foils, c.id) > 0} onClick={() => setInspect(c)} />
               {profile && (
                 <p
                   className={`owned-count${locked ? ' owned-locked' : ''}${
@@ -271,7 +273,13 @@ export function Catalog({ profile, onUpdate }: Props) {
           );
         })}
       </div>
-      {inspect && <TarotPop card={inspect} onClose={() => setInspect(null)} />}
+      {inspect && (
+        <TarotPop
+          card={inspect}
+          foil={foilCount(profile?.foils, inspect.id) > 0}
+          onClose={() => setInspect(null)}
+        />
+      )}
     </section>
   );
 }

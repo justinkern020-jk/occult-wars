@@ -2,6 +2,7 @@ import { useRef, type PointerEvent as ReactPointerEvent } from 'react';
 import type { Card } from '../game/types';
 import { cardGeneratesResources } from '../data/catalog';
 import { CardArt } from './CardArt';
+import { ArtMotion, FoilSheen, useFoilPointer } from './CardFx';
 
 /** Compact hand strip card — Resources left, Power right (Cabals). */
 export function HandCard({
@@ -12,6 +13,7 @@ export function HandCard({
   onInspect,
   onDragDeployStart,
   handIndex,
+  foil = false,
 }: {
   card: Card;
   selected?: boolean;
@@ -22,7 +24,10 @@ export function HandCard({
   onDragDeployStart?: (e: ReactPointerEvent<HTMLButtonElement>) => void;
   /** Position in the hand row — lets the row scroll the chosen card into view. */
   handIndex?: number;
+  /** This copy is foil (sheen follows the pointer; no tilt — the card drags). */
+  foil?: boolean;
 }) {
+  const foilFx = useFoilPointer(foil, false);
   const pressTimer = useRef<number | null>(null);
   const startPos = useRef<{ x: number; y: number } | null>(null);
   const dragged = useRef(false);
@@ -39,7 +44,7 @@ export function HandCard({
   return (
     <button
       type="button"
-      className={`hand-card kind-${card.kind} ${selected ? 'is-selected' : ''} ${disabled ? 'is-disabled' : ''} ${canDrag ? 'is-draggable' : ''}`}
+      className={`hand-card kind-${card.kind} ${selected ? 'is-selected' : ''} ${disabled ? 'is-disabled' : ''} ${canDrag ? 'is-draggable' : ''}${foil ? ' is-foil' : ''}`}
       // aria-disabled (not disabled): a too-costly plate must still be readable
       // (hover peek, double-click inspect); taps on it do nothing.
       aria-disabled={disabled || undefined}
@@ -64,6 +69,7 @@ export function HandCard({
         onInspect?.();
       }}
       onPointerDown={(e) => {
+        foilFx.onPointerDown?.();
         if (e.button !== 0) return;
         dragged.current = false;
         startPos.current = { x: e.clientX, y: e.clientY };
@@ -80,6 +86,7 @@ export function HandCard({
         }
       }}
       onPointerMove={(e) => {
+        foilFx.onPointerMove?.(e);
         if (!startPos.current) return;
         const dx = e.clientX - startPos.current.x;
         const dy = e.clientY - startPos.current.y;
@@ -95,7 +102,10 @@ export function HandCard({
         clearPress();
         startPos.current = null;
       }}
-      onPointerLeave={clearPress}
+      onPointerLeave={(e) => {
+        foilFx.onPointerLeave?.(e);
+        clearPress();
+      }}
       onPointerCancel={() => {
         clearPress();
         startPos.current = null;
@@ -106,6 +116,8 @@ export function HandCard({
         {card.cost}
       </span>
       <CardArt name={card.name} />
+      <ArtMotion card={card} />
+      {foil && <FoilSheen />}
       {cardGeneratesResources(card) && (
         <span
           className="hand-card-resource-jewel"

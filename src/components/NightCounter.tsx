@@ -19,6 +19,7 @@ import { brassClick } from '../game/sfx';
 import type { Card } from '../game/types';
 import { CardArt } from './CardArt';
 import { TarotPop } from './TarotPop';
+import { PackOpening, type PackItem } from './PackOpening';
 
 const KIND_LABEL: Record<Card['kind'], string> = {
   unit: 'Unit',
@@ -82,6 +83,8 @@ export function NightCounter({ profile, onUpdate, onBack, counter = 'night', onD
   const [note, setNote] = useState<string | null>(null);
   const [noteIsError, setNoteIsError] = useState(false);
   const [inspect, setInspect] = useState<Card | null>(null);
+  /** A purchase comes wrapped: the envelope opens over the counter. */
+  const [opening, setOpening] = useState<PackItem[] | null>(null);
   // The sealed counter also counts the sworn order's starter working (the editor seats it too).
   const owned = useMemo(
     () => (counter === 'sealed' ? ownedForEra(profile, 'old') : countOwned(profile.collection)),
@@ -114,11 +117,12 @@ export function NightCounter({ profile, onUpdate, onBack, counter = 'night', onD
     const n = (owned[id] ?? 0) + 1;
     const fits = counter === 'sealed' && sworn && isLegalForOrder(sworn, r.card.faction);
     setNote(
-      `${r.card.name} is wrapped · ${n}/${shopCopyLimit(r.card)}.${fits ? ' It waits in the deck editor.' : ''}`,
+      `${r.card.name}${r.foil ? ' (foil)' : ''} is wrapped · ${n}/${shopCopyLimit(r.card)}.${fits ? ' It waits in the deck editor.' : ''}`,
     );
     setNoteIsError(false);
     brassClick();
     onUpdate(r.profile);
+    setOpening([{ card: r.card, foil: r.foil }]);
   }
 
   return (
@@ -243,6 +247,14 @@ export function NightCounter({ profile, onUpdate, onBack, counter = 'night', onD
         {cfg.back}
       </button>
       {inspect && <TarotPop card={inspect} onClose={() => setInspect(null)} />}
+      {opening && (
+        <PackOpening
+          items={opening}
+          label={cfg.kicker}
+          wax={counter === 'sealed' ? 'emerald' : 'crimson'}
+          onClose={() => setOpening(null)}
+        />
+      )}
     </section>
   );
 }

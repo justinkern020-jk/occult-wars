@@ -1,0 +1,541 @@
+/* ───────────── Polish batch 2: card motion, foil, pack opening ───────────── */
+
+/* ── 1. Motion layers over rare / patron / leader art ── */
+.art-motion {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+  mix-blend-mode: screen;
+}
+.art-motion i {
+  position: absolute;
+  display: block;
+  will-change: transform, opacity;
+}
+/* Sparks: a coil's stray discharge; crackles hard on hover. */
+.art-sparks .spark {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #e9fff6;
+  box-shadow: 0 0 6px 2px #5fffc0cc, 0 0 14px 4px #7ab8ff66;
+  opacity: 0;
+  animation: ow-spark 2.6s steps(1, end) infinite;
+}
+.art-sparks .s1 { left: 22%; top: 30%; animation-delay: 0.2s; }
+.art-sparks .s2 { left: 68%; top: 22%; animation-delay: 1.1s; }
+.art-sparks .s3 { left: 48%; top: 58%; animation-delay: 1.7s; }
+.art-sparks .s4 { left: 78%; top: 66%; animation-delay: 0.6s; }
+.art-sparks .arc {
+  left: 18%;
+  top: 34%;
+  width: 64%;
+  height: 26%;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, #c9fff0 20%, #fff 50%, #a8d8ff 80%, transparent);
+  clip-path: polygon(0 50%, 12% 30%, 22% 62%, 35% 28%, 47% 70%, 58% 34%, 70% 66%, 82% 30%, 92% 58%, 100% 46%, 100% 52%, 92% 64%, 82% 36%, 70% 72%, 58% 40%, 47% 76%, 35% 34%, 22% 68%, 12% 36%, 0 56%);
+  filter: drop-shadow(0 0 4px #5fffc0);
+}
+@keyframes ow-spark {
+  0%, 100% { opacity: 0; transform: scale(0.6); }
+  4% { opacity: 1; transform: scale(1.4) translate(2px, -1px); }
+  8% { opacity: 0.2; transform: scale(0.8) translate(-3px, 2px); }
+  11% { opacity: 0.9; transform: scale(1.1); }
+  15% { opacity: 0; }
+}
+@keyframes ow-arc {
+  0%, 100% { opacity: 0; }
+  6% { opacity: 0.85; transform: scaleY(1); }
+  9% { opacity: 0.1; transform: scaleY(-1); }
+  12% { opacity: 0.7; }
+  16% { opacity: 0; }
+}
+.tarot:hover .art-sparks .spark,
+.hand-card:hover .art-sparks .spark,
+.pack-slot.is-up:hover .art-sparks .spark {
+  animation-duration: 0.7s;
+}
+.tarot:hover .art-sparks .arc,
+.hand-card:hover .art-sparks .arc,
+.pack-slot.is-up:hover .art-sparks .arc {
+  animation: ow-arc 0.9s steps(1, end) infinite;
+}
+
+/* Candle: a warm breathing glow, two embers lifting. */
+.art-candle .candle-glow {
+  left: 15%;
+  right: 15%;
+  bottom: -10%;
+  height: 70%;
+  background: radial-gradient(ellipse at 50% 70%, #ffbf6a55, #ff8a3a22 40%, transparent 70%);
+  animation: ow-flicker 3.1s ease-in-out infinite;
+}
+.art-candle .ember {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #ffd08a;
+  box-shadow: 0 0 6px 2px #ff9a4a99;
+  bottom: 12%;
+  opacity: 0;
+  animation: ow-ember 5.5s linear infinite;
+}
+.art-candle .e1 { left: 40%; }
+.art-candle .e2 { left: 62%; animation-delay: 2.7s; animation-duration: 6.4s; }
+@keyframes ow-flicker {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  18% { opacity: 0.95; transform: scale(1.04, 1.07); }
+  31% { opacity: 0.62; }
+  47% { opacity: 0.9; transform: scale(0.98, 1.02); }
+  63% { opacity: 0.75; }
+  78% { opacity: 1; transform: scale(1.03, 1.06); }
+}
+@keyframes ow-ember {
+  0% { opacity: 0; transform: translate(0, 0); }
+  10% { opacity: 0.9; }
+  60% { opacity: 0.5; transform: translate(6px, -60%); }
+  100% { opacity: 0; transform: translate(-4px, -900%); }
+}
+
+/* Fog: two slow banks of graveyard mist. */
+.art-motion .fog {
+  left: -60%;
+  width: 220%;
+  height: 46%;
+  bottom: -6%;
+  background:
+    radial-gradient(ellipse 30% 55% at 25% 60%, #cfe3d655, transparent 70%),
+    radial-gradient(ellipse 26% 50% at 62% 55%, #b8d4c444, transparent 70%),
+    radial-gradient(ellipse 22% 45% at 88% 65%, #d8e6dc40, transparent 70%);
+  filter: blur(4px);
+  opacity: 0.55;
+  animation: ow-fog 22s linear infinite;
+}
+.art-motion .f2 {
+  bottom: 18%;
+  height: 36%;
+  opacity: 0.32;
+  animation-duration: 31s;
+  animation-direction: reverse;
+}
+@keyframes ow-fog {
+  from { transform: translateX(0); }
+  to { transform: translateX(27%); }
+}
+
+/* Eyes: something in the dark opens its eyes now and then. */
+.art-eyes .eye-pair {
+  left: 41%;
+  top: 33%;
+  width: 18%;
+  height: 4%;
+  background:
+    radial-gradient(circle at 18% 50%, #c8ffb0 0 9%, #5fe08a88 16%, transparent 34%),
+    radial-gradient(circle at 82% 50%, #c8ffb0 0 9%, #5fe08a88 16%, transparent 34%);
+  filter: blur(0.6px) drop-shadow(0 0 4px #5fe08a);
+  opacity: 0;
+  animation: ow-eyes 9s ease-in-out infinite;
+}
+@keyframes ow-eyes {
+  0%, 62%, 100% { opacity: 0; transform: scaleY(0.2); }
+  68% { opacity: 0.75; transform: scaleY(1); }
+  80% { opacity: 0.7; transform: scaleY(1); }
+  82% { opacity: 0.05; transform: scaleY(0.1); }
+  84% { opacity: 0.7; transform: scaleY(1); }
+  92% { opacity: 0; transform: scaleY(0.3); }
+}
+.tarot:hover .art-eyes .eye-pair,
+.hand-card:hover .art-eyes .eye-pair {
+  animation-duration: 3s;
+}
+
+/* Frost: a few flakes falling past the plate. */
+.art-frost .flake {
+  top: -6%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #f3fbff;
+  box-shadow: 0 0 4px #dff4ffcc;
+  opacity: 0.8;
+  animation: ow-flake 7s linear infinite;
+}
+.art-frost .k1 { left: 20%; }
+.art-frost .k2 { left: 55%; animation-delay: 2.4s; animation-duration: 8.5s; }
+.art-frost .k3 { left: 80%; animation-delay: 4.6s; animation-duration: 6.2s; }
+@keyframes ow-flake {
+  from { transform: translate(0, 0); }
+  50% { transform: translate(8px, 1300%); }
+  to { transform: translate(-6px, 2700%); }
+}
+
+/* ── 2. Foil copies: emerald-and-gold sheen that follows the pointer ── */
+.tarot.is-foil {
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.18s ease-out, box-shadow 0.2s;
+  box-shadow:
+    inset 0 0 0 3px #120e0b,
+    inset 0 0 0 4px #5fe0a0aa,
+    0 0 22px #3fd08a55,
+    0 0 40px #c6a15b44,
+    0 18px 36px #00000073;
+}
+.foil-holo {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  mix-blend-mode: color-dodge;
+  opacity: 0.5;
+  background:
+    radial-gradient(
+      circle at calc((var(--mx, 0.5) + var(--foil-ox, 0) * 0.4) * 100%)
+        calc((var(--my, 0.35) + var(--foil-oy, 0) * 0.4) * 100%),
+      #fffbe8aa 0%,
+      #fff3 18%,
+      transparent 42%
+    ),
+    repeating-linear-gradient(
+      115deg,
+      transparent 0 5%,
+      #3fe0a066 8%,
+      #f3d27a66 11%,
+      #9ff5d055 13%,
+      transparent 16% 22%
+    );
+  background-size: 100% 100%, 260% 260%;
+  background-position:
+    0 0,
+    calc((var(--mx, 0.5) + var(--foil-ox, 0)) * 80%) calc((var(--my, 0.5) + var(--foil-oy, 0)) * 80%);
+  animation: ow-foil-idle 7s ease-in-out infinite alternate;
+}
+.foil-live .foil-holo,
+.foil-live.foil-holo {
+  animation: none;
+  opacity: 0.68;
+}
+@keyframes ow-foil-idle {
+  from { background-position: 0 0, 10% 20%; }
+  to { background-position: 0 0, 90% 70%; }
+}
+.foil-mark {
+  position: absolute;
+  z-index: 3;
+  right: 0.3rem;
+  bottom: 0.3rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #0c1a12;
+  background: linear-gradient(120deg, #9ff5d0, #f3d27a 55%, #5fe0a0);
+  box-shadow: 0 0 8px #3fd08a99;
+  pointer-events: none;
+}
+.hand-card.is-foil {
+  border-color: #7fe8b8;
+  box-shadow: 0 6px 14px #0007, 0 0 10px #3fd08a77, inset 0 0 0 1px #0c0907;
+}
+.hand-card .foil-mark {
+  top: 1.75rem;
+  bottom: auto;
+  right: 0.2rem;
+  font-size: 0.42rem;
+  padding: 0 0.3rem;
+}
+.deck-plate.is-foil {
+  border-color: #7fe8b8;
+  box-shadow: 0 0 12px #3fd08a55, inset 0 0 0 2px #5fe0a055;
+}
+.deck-plate.is-foil .deck-plate-look {
+  position: relative;
+  overflow: hidden;
+}
+.deck-plate.is-foil .foil-holo {
+  bottom: auto;
+  aspect-ratio: 1;
+}
+.deck-plate.is-foil .foil-mark {
+  bottom: auto;
+  top: 0.25rem;
+}
+.pack-pull.is-foil {
+  border-color: #7fe8b8;
+  box-shadow: 0 0 14px #3fd08a88;
+}
+
+/* ── 3. Pack opening: envelope, wax seal, plates turning ── */
+.pack-open {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: safe center;
+  gap: 1rem;
+  padding: 1rem;
+  background:
+    radial-gradient(ellipse at 50% 45%, #1d2a2066, transparent 60%),
+    radial-gradient(ellipse at 50% 50%, #0b0907ee, #050403f8 70%);
+  overflow-y: auto;
+  animation: ow-fade-in 0.35s ease-out;
+}
+@keyframes ow-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.pack-open-kicker {
+  margin: 0;
+  font-family: var(--font-display);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  color: #c6a15b;
+}
+.pack-open-hint {
+  margin: 0;
+  min-height: 1.4em;
+  color: #d9ccb0;
+  font-style: italic;
+  text-align: center;
+}
+.pack-open-actions {
+  display: flex;
+  gap: 0.75rem;
+  min-height: 2.6rem;
+}
+.pack-envelope {
+  position: relative;
+  width: min(22rem, 84vw);
+  aspect-ratio: 1.55;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  filter: drop-shadow(0 22px 30px #000c);
+  transition: transform 0.6s cubic-bezier(0.5, 0, 0.3, 1), opacity 0.6s;
+}
+.pack-envelope-back {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  background:
+    radial-gradient(ellipse at 30% 20%, #ffffff10, transparent 50%),
+    repeating-linear-gradient(8deg, #0000 0 3px, #5a432208 3px 4px),
+    linear-gradient(160deg, #d9c49a, #b89a68 55%, #8f7347);
+  box-shadow: inset 0 0 30px #5a3e1a88, inset 0 0 0 1px #6b5230;
+}
+.pack-envelope-flap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 58%;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  background: linear-gradient(180deg, #c9b182, #a88b5a);
+  transform-origin: 50% 0;
+  transition: transform 0.55s ease-in;
+  box-shadow: inset 0 -10px 20px #0002;
+}
+.pack-envelope-tear {
+  position: absolute;
+  left: 0;
+  top: 18%;
+  height: 3px;
+  width: calc(var(--tear, 0) * 100%);
+  background: repeating-linear-gradient(90deg, #f6ead0 0 6px, #3a2a14 6px 8px);
+  box-shadow: 0 0 6px #fff6;
+  opacity: 0.9;
+}
+.pack-envelope-count {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 9%;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #5a4122;
+}
+.pack-seal {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  width: 4.6rem;
+  height: 4.6rem;
+  margin: -2.3rem 0 0 -2.3rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  z-index: 2;
+}
+.pack-seal-half {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #e0605a, #9e1f1f 52%, #5c0e0e 82%);
+  box-shadow: inset 0 0 0 4px #7a1616, inset 0 -6px 10px #0005, 0 3px 6px #0008;
+  transition: transform 0.5s ease-in, opacity 0.5s;
+}
+.wax-emerald .pack-seal-half {
+  background: radial-gradient(circle at 38% 32%, #7fe8b0, #1f8a55 52%, #0d4a2c 82%);
+  box-shadow: inset 0 0 0 4px #126b3e, inset 0 -6px 10px #0005, 0 3px 6px #0008, 0 0 18px #3fd08a66;
+}
+.pack-seal-half.l { clip-path: polygon(0 0, 54% 0, 44% 30%, 56% 55%, 46% 100%, 0 100%); }
+.pack-seal-half.r { clip-path: polygon(54% 0, 100% 0, 100% 100%, 46% 100%, 56% 55%, 44% 30%); }
+.pack-seal-sigil {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  color: #00000055;
+  text-shadow: 0 1px #ffffff33;
+  transition: opacity 0.3s;
+}
+.pack-seal:hover .pack-seal-half,
+.pack-seal:focus-visible .pack-seal-half {
+  filter: brightness(1.15);
+}
+.pack-envelope.is-torn .pack-envelope-flap { transform: rotateX(180deg) translateY(-2px); }
+.pack-envelope.is-torn .pack-seal-half.l { transform: translate(-1.4rem, 1.2rem) rotate(-28deg); opacity: 0; }
+.pack-envelope.is-torn .pack-seal-half.r { transform: translate(1.4rem, 1.4rem) rotate(24deg); opacity: 0; }
+.pack-envelope.is-torn .pack-seal-sigil { opacity: 0; }
+.pack-envelope.is-torn { transform: translateY(14vh) scale(0.92); opacity: 0.2; }
+
+.pack-fan {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  width: min(64rem, 100%);
+  perspective: 1200px;
+}
+.pack-slot {
+  position: relative;
+  width: clamp(8.5rem, 17vw, 11.5rem);
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  animation: ow-rise 0.5s ease-out both;
+}
+.pack-fan .pack-slot:nth-child(2) { animation-delay: 0.06s; }
+.pack-fan .pack-slot:nth-child(3) { animation-delay: 0.12s; }
+.pack-fan .pack-slot:nth-child(4) { animation-delay: 0.18s; }
+.pack-fan .pack-slot:nth-child(5) { animation-delay: 0.24s; }
+@keyframes ow-rise {
+  from { transform: translateY(30vh) scale(0.8); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+.pack-slot-inner {
+  position: relative;
+  display: block;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.3, 0.7, 0.3, 1.2);
+}
+.pack-slot.is-up .pack-slot-inner { transform: rotateY(180deg); }
+.pack-slot-back,
+.pack-slot-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 0.85rem;
+}
+.pack-slot-back {
+  display: grid;
+  place-items: center;
+  border: 1px solid #8c6d32;
+  background:
+    radial-gradient(circle at 50% 50%, #3fd08a22, transparent 45%),
+    repeating-linear-gradient(45deg, #1a140d 0 6px, #140f0a 6px 12px);
+  box-shadow: inset 0 0 0 4px #0c0907, inset 0 0 0 5px #c6a15b77, 0 12px 24px #000a;
+}
+.pack-slot-sigil {
+  font-size: 2.4rem;
+  color: #c6a15b88;
+  text-shadow: 0 0 12px #3fd08a55;
+}
+.pack-slot:not(.is-up):hover .pack-slot-back { filter: brightness(1.2); }
+.pack-slot-face {
+  position: relative;
+  inset: auto;
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+}
+.pack-slot-face .tarot { flex: 1; }
+.pack-slot-rarity {
+  margin-top: 0.3rem;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #d9ccb0;
+  text-align: center;
+}
+.pack-slot-glow {
+  position: absolute;
+  inset: -12%;
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: ow-glow-in 0.9s ease-out both;
+}
+.pack-slot.rarity-common .pack-slot-glow { background: radial-gradient(circle, #d9ccb022, transparent 65%); }
+.pack-slot.rarity-uncommon .pack-slot-glow { background: radial-gradient(circle, #8fd4b855, transparent 65%); }
+.pack-slot.rarity-rare .pack-slot-glow { background: radial-gradient(circle, #e7c46a88, transparent 65%); }
+.pack-slot.rarity-patron .pack-slot-glow { background: radial-gradient(circle, #ffd88aaa, #c0405a44 45%, transparent 68%); }
+.pack-slot.is-foil-pull .pack-slot-glow { background: radial-gradient(circle, #5fffc0aa, #f3d27a55 40%, transparent 68%); }
+.pack-slot.is-up.rarity-rare .pack-slot-rarity { color: #f3d27a; }
+.pack-slot.is-up.rarity-patron .pack-slot-rarity { color: #ffe4aa; text-shadow: 0 0 8px #e4b84a; }
+.pack-slot.is-up.is-foil-pull .pack-slot-rarity { color: #9ff5d0; text-shadow: 0 0 8px #3fd08a; }
+.pack-slot.is-last.is-up { animation: ow-last 1.1s ease-out; }
+@keyframes ow-glow-in {
+  from { opacity: 0; transform: scale(0.5); }
+  45% { opacity: 1; transform: scale(1.15); }
+  to { opacity: 0.85; transform: scale(1); }
+}
+@keyframes ow-last {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+@media (max-width: 640px) {
+  .pack-fan { gap: 0.45rem; }
+  .pack-slot { width: calc(50% - 0.3rem); max-width: 10.5rem; }
+  .pack-slot-rarity { font-size: 0.56rem; letter-spacing: 0.08em; }
+  .pack-envelope { width: 88vw; }
+}
+
+/* ── Reduced motion: still art, no tilt, no flight ── */
+@media (prefers-reduced-motion: reduce) {
+  .art-motion i,
+  .foil-holo,
+  .pack-slot,
+  .pack-slot-glow,
+  .pack-open {
+    animation: none !important;
+  }
+  .art-motion .fog { opacity: 0.25; }
+  .art-sparks .spark,
+  .art-candle .ember,
+  .art-frost .flake,
+  .art-eyes .eye-pair,
+  .art-sparks .arc { display: none; }
+  .tarot.is-foil { transform: none; }
+  .pack-slot-inner,
+  .pack-envelope,
+  .pack-envelope-flap,
+  .pack-seal-half { transition: none; }
+}
+.pack-open.is-still .pack-slot-inner { transition: none; }

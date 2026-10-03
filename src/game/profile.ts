@@ -30,6 +30,7 @@ import {
   type FirstHourOrder,
 } from './orders';
 import { buildOrderAllyWorkingIds, buildWorkingIds } from './deck';
+import { addFoils, migrateFoils, rollFoil, type FoilBook } from './foil';
 
 export const PROFILE_KEY = 'occult-wars.profile.v1';
 export const PACK_COST = 150;
@@ -94,6 +95,8 @@ export type Profile = {
   xp: number;
   /** The Day's Rites: today's three quests and their progress. */
   daily: DailyState | null;
+  /** Foil copies per plate id (shop pulls only; older copies stay plain). */
+  foils?: FoilBook;
 };
 
 export function defaultProfile(): Profile {
@@ -233,7 +236,17 @@ export function migrateProfile(raw: Partial<Profile> & Record<string, unknown>):
         ? Math.max(0, Math.min(10_000_000, Math.floor(raw.xp)))
         : 0,
     daily: migrateDaily(raw.daily),
+    ...polishFields(raw),
   };
+}
+
+/** Polish-batch fields (foils, …): kept only when sane, absent otherwise. */
+function polishFields(raw: Partial<Profile> & Record<string, unknown>): Partial<Profile> {
+  const collection = Array.isArray(raw.collection)
+    ? renamedIds(raw.collection).filter(isKeepablePlateId)
+    : [];
+  const foils = migrateFoils(raw.foils, collection);
+  return Object.keys(foils).length ? { foils } : {};
 }
 
 /** The orders this adept has sworn (a "win with" rite only names these). */
@@ -394,7 +407,8 @@ export function packPool(order: string | null, biasOrder: boolean): Card[] {
 export function breakSeal(
   p: Profile,
   rand = Math.random,
-): { error: string } | { profile: Profile; pulls: Card[] } {
+  foilRand: () => number = Math.random,
+): { error: string } | { profile: Profile; pulls: Card[]; foil: boolean[] } {
   if (p.alchemicalShards < PACK_COST) {
     return { error: 'A booster asks 150 shards.' };
   }
@@ -405,13 +419,17 @@ export function breakSeal(
     const card = pool[Math.floor(rand() * pool.length)];
     if (card) pulls.push(card);
   }
+  const foil = pulls.map(() => rollFoil(foilRand));
+  const shiny = pulls.filter((_, i) => foil[i]).map((c) => c.id);
   return {
     profile: {
       ...p,
       alchemicalShards: p.alchemicalShards - PACK_COST,
       collection: [...p.collection, ...pulls.map((c) => c.id)],
+      ...(shiny.length ? { foils: addFoils(p.foils, shiny) } : {}),
     },
     pulls,
+    foil,
   };
 }
 
@@ -474,7 +492,8 @@ export function buyPlate(
   p: Profile,
   id: string,
   counter: ShopCounter = 'night',
-): { error: string } | { profile: Profile; card: Card } {
+  foilRand: () => number = Math.random,
+): { error: string } | { profile: Profile; card: Card; foil: boolean } {
   const card = cardById(id);
   if (!card || !isShopPlate(card, counter)) {
     return {
@@ -495,12 +514,15 @@ export function buyPlate(
   if (p.alchemicalShards < price) {
     return { error: `${card.name} asks ${price} shards.` };
   }
+  const foil = rollFoil(foilRand);
   return {
     card,
+    foil,
     profile: {
       ...p,
       alchemicalShards: p.alchemicalShards - price,
       collection: [...p.collection, card.id],
+      ...(foil ? { foils: addFoils(p.foils, [card.id]) } : {}),
     },
   };
 }

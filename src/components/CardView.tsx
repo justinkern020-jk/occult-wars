@@ -2,6 +2,7 @@ import type { Card, Rarity } from '../game/types';
 import { KEYWORDS, keywordLabel } from '../game/keywords';
 import { cardGeneratesResources } from '../data/catalog';
 import { CardArt } from './CardArt';
+import { ArtMotion, FoilSheen, useFoilPointer } from './CardFx';
 
 const KIND_LABEL: Record<string, string> = {
   unit: 'Unit',
@@ -25,6 +26,8 @@ export type CardViewProps = {
   power?: number;
   className?: string;
   onClick?: () => void;
+  /** A foil copy: pointer-follow sheen and tilt. */
+  foil?: boolean;
 };
 
 /**
@@ -38,11 +41,13 @@ export function CardView({
   power,
   className = '',
   onClick,
+  foil = false,
 }: CardViewProps) {
+  const foilHandlers = useFoilPointer(foil);
   const shownPower = power ?? card.power;
   const combatKw = card.keywords.filter((k) => KEYWORDS[k]?.combat);
   const cls =
-    `tarot rarity-${card.rarity}${compact ? ' tarot-compact' : ''} ${className}`.trim();
+    `tarot rarity-${card.rarity}${compact ? ' tarot-compact' : ''}${foil ? ' is-foil' : ''} ${className}`.trim();
 
   const body = (
     <>
@@ -69,7 +74,9 @@ export function CardView({
 
       <div className="tarot-window">
         <CardArt name={card.name} className="tarot-art" alt="" />
+        <ArtMotion card={card} />
         <span className="tarot-foil" aria-hidden />
+        {foil && <FoilSheen />}
         {cardGeneratesResources(card) && (
           <span
             className="tarot-resource-jewel"
@@ -134,7 +141,9 @@ export function CardView({
         data-faction={card.faction}
         data-rarity={card.rarity}
         data-testid={compact ? 'tarot-compact' : 'tarot-card'}
+        data-foil={foil || undefined}
         onClick={onClick}
+        {...foilHandlers}
       >
         {body}
       </button>
@@ -148,6 +157,8 @@ export function CardView({
       data-faction={card.faction}
       data-rarity={card.rarity}
       data-testid={compact ? 'tarot-compact' : 'tarot-card'}
+      data-foil={foil || undefined}
+      {...foilHandlers}
     >
       {body}
     </article>

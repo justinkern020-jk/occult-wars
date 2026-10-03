@@ -4,6 +4,7 @@ import { PACK_COST, breakSeal, type Profile } from '../game/profile';
 import { brassClick } from '../game/sfx';
 import { CardArt } from './CardArt';
 import { TarotPop } from './TarotPop';
+import { PackOpening, type PackItem } from './PackOpening';
 
 type Props = {
   profile: Profile;
@@ -13,6 +14,9 @@ type Props = {
 
 export function PackBreak({ profile, onUpdate, onBack }: Props) {
   const [pulls, setPulls] = useState<Card[] | null>(null);
+  const [pullFoil, setPullFoil] = useState<boolean[]>([]);
+  /** The sealed envelope being opened (the reel shows once it is put away). */
+  const [opening, setOpening] = useState<PackItem[] | null>(null);
   const [reveal, setReveal] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [inspect, setInspect] = useState<Card | null>(null);
@@ -27,15 +31,10 @@ export function PackBreak({ profile, onUpdate, onBack }: Props) {
     setError(null);
     onUpdate(result.profile);
     setPulls(result.pulls);
-    setReveal(0);
-    const tick = () => {
-      setReveal((r) => {
-        if (r + 1 >= result.pulls.length) return result.pulls.length;
-        setTimeout(tick, 280);
-        return r + 1;
-      });
-    };
-    setTimeout(tick, 200);
+    setPullFoil(result.foil);
+    // The reel behind the envelope is already turned: Skip / Keep shows it whole.
+    setReveal(result.pulls.length);
+    setOpening(result.pulls.map((card, i) => ({ card, foil: !!result.foil[i] })));
   }
 
   return (
@@ -59,19 +58,19 @@ export function PackBreak({ profile, onUpdate, onBack }: Props) {
           Break a Seal · {PACK_COST} shards
         </button>
       ) : (
-        <div className="pack-reel" data-testid="pack-reel">
+        <div className="pack-reel" data-testid="pack-reel" style={opening ? { display: "none" } : undefined}>
           {pulls.map((c, i) => (
             <button
               key={`${c.id}-${i}`}
               type="button"
-              className={`pack-pull ${i < reveal ? 'is-shown' : 'is-sealed'}`}
+              className={`pack-pull ${i < reveal ? 'is-shown' : 'is-sealed'}${pullFoil[i] ? ' is-foil' : ''}`}
               onClick={() => i < reveal && setInspect(c)}
             >
               {i < reveal ? (
                 <>
                   <CardArt name={c.name} className="pack-pull-art" />
                   <span>{c.name}</span>
-                  <em>{c.rarity}</em>
+                  <em>{pullFoil[i] ? `foil · ${c.rarity}` : c.rarity}</em>
                 </>
               ) : (
                 <span className="pack-wax">✦</span>
@@ -95,7 +94,16 @@ export function PackBreak({ profile, onUpdate, onBack }: Props) {
         Return to the atelier
       </button>
 
-      {inspect && <TarotPop card={inspect} onClose={() => setInspect(null)} />}
+      {inspect && (
+        <TarotPop
+          card={inspect}
+          foil={!!pulls && pullFoil[pulls.indexOf(inspect)]}
+          onClose={() => setInspect(null)}
+        />
+      )}
+      {opening && (
+        <PackOpening items={opening} label="Five assorted plates" onClose={() => setOpening(null)} />
+      )}
     </section>
   );
 }
