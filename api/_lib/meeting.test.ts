@@ -1,8 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { memoryStore, setStoreForTests, type Store } from './store.js';
 import {
+  IMG_MAX,
   IP_PER_10S,
   KEEP,
+  parseImage,
+  readImage,
+  sniffImage,
   TEXT_MAX,
   cleanName,
   cleanText,
@@ -151,5 +155,64 @@ describe('/api/meeting handler', () => {
     expect(again.msgs).toHaveLength(2);
     const quiet = (await (await call({ op: 'list', since: 3, rev: list.rev + 1 })).json()) as { full: boolean; msgs: unknown[] };
     expect(quiet).toMatchObject({ full: false, msgs: [] });
+  });
+});
+
+describe('meeting images', () => {
+  // A 1×1 PNG.
+  const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+  const image = { data: PNG, w: 1, h: 1 };
+  let t = 2_000_000;
+  let store: Store;
+  beforeEach(() => {
+    t = 2_000_000;
+    store = memoryStore(() => t);
+  });
+
+  it('sniffs real types and refuses others, oversized or junk', () => {
+    expect(sniffImage(Buffer.from(PNG, 'base64'))).toBe('image/png');
+    expect(sniffImage(Buffer.from([0xff, 0xd8, 0xff, 0xe0]))).toBe('image/jpeg');
+    expect(sniffImage(Buffer.from('GIF89a'))).toBe('image/gif');
+    expect(sniffImage(Buffer.from('RIFF\0\0\0\0WEBPVP8 '))).toBe('image/webp');
+    expect(sniffImage(Buffer.from('<svg onload=alert(1)>'))).toBeNull();
+    expect(() => parseImage({ data: Buffer.from('<svg/>').toString('base64') })).toThrow(/PNG, JPEG/);
+    expect(() => parseImage({ data: 'A'.repeat(IMG_MAX * 2) })).toThrow(/too large/);
+    expect(() => parseImage({ data: 'not base64!!' })).toThrow();
+    expect(parseImage({ data: `data:image/png;base64,${PNG}`, w: 1, h: 1 })?.type).toBe('image/png');
+    expect(parseImage(undefined)).toBeNull();
+  });
+
+  it('posts an image (text optional), one per 30 s, and serves it', async () => {
+    const m = await postMeeting(store, guest(M1), { text: '', name: 'Ada', image }, t, {});
+    expect(m.img).toEqual({ src: `/api/meeting?img=${m.id}`, w: 1, h: 1, type: 'image/png' });
+    expect((await readImage(store, m.id))?.bytes.equals(Buffer.from(PNG, 'base64'))).toBe(true);
+    t += 5_001;
+    await expect(postMeeting(store, guest(M1), { text: 'again', name: 'Ada', image }, t, {})).rejects.toMatchObject({ status: 429 });
+    // Words alone still pass.
+    await postMeeting(store, guest(M1), { text: 'words', name: 'Ada' }, t, {});
+    t += 30_001;
+    await postMeeting(store, guest(M1), { text: 'and a picture', name: 'Ada', image }, t, {});
+  });
+
+  it('a strike or falling off the board takes the image with it', async () => {
+    const owner = { ...guest(M1), owner: true };
+    const first = await postMeeting(store, owner, { text: '', name: '', image }, t, {});
+    await deleteMeeting(store, first.id, {});
+    expect(await readImage(store, first.id)).toBeNull();
+    const kept = await postMeeting(store, owner, { text: '', name: '', image }, t, {});
+    for (let i = 0; i < KEEP; i++) await postMeeting(store, owner, { text: `m${i}`, name: '' }, t, {});
+    expect(await readImage(store, kept.id)).toBeNull();
+  });
+
+  it('GET serves kept images with a cache and a sandbox', async () => {
+    setStoreForTests(store);
+    const m = await postMeeting(store, guest(M1), { text: 'look', name: 'Ada', image }, t, {});
+    const res = await handleMeeting(new Request(`https://x/api/meeting?img=${m.id}`));
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toBe('image/png');
+    expect(res.headers.get('cache-control')).toMatch(/s-maxage/);
+    expect(res.headers.get('x-content-type-options')).toBe('nosniff');
+    expect((await handleMeeting(new Request('https://x/api/meeting?img=999'))).status).toBe(404);
+    setStoreForTests(null);
   });
 });

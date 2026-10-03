@@ -12,7 +12,9 @@ import {
   writeMeetingName,
   writeSeenMeeting,
   type MeetingMessage,
+  type MeetingUpload,
 } from '../net/meeting';
+import { ACCEPT, ImageRefused, prepareImage } from '../net/meetingImage';
 
 type Props = { onBack: () => void; guestName: string };
 
@@ -42,6 +44,11 @@ export function Meeting({ onBack, guestName }: Props) {
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [now, setNow] = useState(() => Date.now());
+  const [upload, setUpload] = useState<MeetingUpload | null>(null);
+  const [shrinking, setShrinking] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const [enlarged, setEnlarged] = useState<MeetingMessage | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const cursor = useRef({ head: 0, rev: -1 });
   const listRef = useRef<HTMLOListElement>(null);
   const stick = useRef(true);
@@ -85,9 +92,40 @@ export function Meeting({ onBack, guestName }: Props) {
       ? seat.username || seat.displayName || 'Occultist'
       : null;
 
+  async function attach(file: File | null | undefined) {
+    if (!file) return;
+    setNote('');
+    setShrinking(true);
+    try {
+      setUpload(await prepareImage(file));
+    } catch (err) {
+      setNote(err instanceof ImageRefused ? err.message : 'That image could not be read.');
+    } finally {
+      setShrinking(false);
+    }
+  }
+
+  function firstImage(list: DataTransferItemList | FileList | null | undefined): File | null {
+    if (!list) return null;
+    for (const it of Array.from(list as ArrayLike<DataTransferItem | File>)) {
+      const f = it instanceof File ? it : it.kind === 'file' ? it.getAsFile() : null;
+      if (f && ACCEPT.includes(f.type)) return f;
+    }
+    return null;
+  }
+
+  useEffect(() => {
+    if (!enlarged) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setEnlarged(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [enlarged]);
+
   async function send() {
     const text = draft.trim();
-    if (!text || busy) return;
+    if ((!text && !upload) || busy || shrinking) return;
     if (!speaker && !name.trim()) {
       setNote('Choose a name to speak under.');
       return;
@@ -96,8 +134,13 @@ export function Meeting({ onBack, guestName }: Props) {
     setNote('');
     try {
       if (!seat && !owner) writeMeetingName(name.trim());
-      const msg = await postMeeting(text, owner ? ownerName.trim() || 'Grand Master' : name.trim());
+      const msg = await postMeeting(
+        text,
+        owner ? ownerName.trim() || 'Grand Master' : name.trim(),
+        upload,
+      );
       setDraft('');
+      setUpload(null);
       stick.current = true;
       setMsgs((have) => mergeMeeting(have, { msgs: [msg], full: false }));
       cursor.current.head = Math.max(cursor.current.head, msg.id);
@@ -124,7 +167,8 @@ export function Meeting({ onBack, guestName }: Props) {
       <p className="plate-kicker">By candlelight, all hands</p>
       <h1 className="meeting-title">The Occultist Meeting</h1>
       <p className="meeting-lead">
-        Everyone at the table reads this board. Speak plainly; links are not read aloud.
+        Everyone at the table reads this board. Speak plainly; links are not read aloud. Images
+        are shrunk before they are pinned.
       </p>
       {store === 'memory' && loaded && (
         <p className="meeting-faint" data-testid="meeting-faint">
@@ -185,14 +229,48 @@ export function Meeting({ onBack, guestName }: Props) {
                     </button>
                   )}
                 </div>
-                <p className="meeting-text">{m.text}</p>
+                {m.text && <p className="meeting-text">{m.text}</p>}
+                {m.img && (
+                  <button
+                    type="button"
+                    className="meeting-thumb"
+                    data-testid="meeting-thumb"
+                    aria-label={`Enlarge the image from ${m.name}`}
+                    onClick={() => setEnlarged(m)}
+                  >
+                    <img
+                      src={m.img.src}
+                      alt={`Image from ${m.name}`}
+                      width={m.img.w}
+                      height={m.img.h}
+                      loading="lazy"
+                      decoding="async"
+                      onLoad={() => {
+                        const el = listRef.current;
+                        if (el && stick.current) el.scrollTop = el.scrollHeight;
+                      }}
+                    />
+                  </button>
+                )}
               </li>
             ))
           )}
         </ol>
 
         <form
-          className="meeting-form"
+          className={`meeting-form${dragging ? ' is-dragging' : ''}`}
+          onDragOver={(e) => {
+            if (Array.from(e.dataTransfer.types).includes('Files')) {
+              e.preventDefault();
+              setDragging(true);
+            }
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragging(false);
+            void attach(firstImage(e.dataTransfer.files));
+          }}
           onSubmit={(e) => {
             e.preventDefault();
             void send();
@@ -225,6 +303,13 @@ export function Meeting({ onBack, guestName }: Props) {
             placeholder="Speak to the meeting…"
             aria-label="Message to the meeting"
             onChange={(e) => setDraft(e.target.value)}
+            onPaste={(e) => {
+              const f = firstImage(e.clipboardData?.items);
+              if (f) {
+                e.preventDefault();
+                void attach(f);
+              }
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -232,15 +317,58 @@ export function Meeting({ onBack, guestName }: Props) {
               }
             }}
           />
+          {(upload || shrinking) && (
+            <div className="meeting-pending" data-testid="meeting-pending">
+              {upload ? (
+                <>
+                  <img src={upload.preview} alt="Image to send" />
+                  <span>
+                    {upload.w}×{upload.h} · {Math.round(upload.bytes / 1024)} KB
+                  </span>
+                  <button
+                    type="button"
+                    className="meeting-strike"
+                    data-testid="meeting-unattach"
+                    onClick={() => setUpload(null)}
+                  >
+                    Remove
+                  </button>
+                </>
+              ) : (
+                <span>Shrinking the image…</span>
+              )}
+            </div>
+          )}
           <div className="meeting-send-row">
             <span className="meeting-count">
+              <input
+                ref={fileRef}
+                type="file"
+                accept={ACCEPT.join(',')}
+                hidden
+                data-testid="meeting-file"
+                onChange={(e) => {
+                  void attach(e.target.files?.[0]);
+                  e.target.value = '';
+                }}
+              />
+              <button
+                type="button"
+                className="meeting-attach"
+                data-testid="meeting-attach"
+                aria-label="Attach an image"
+                title="Attach an image (or paste / drop one)"
+                onClick={() => fileRef.current?.click()}
+              >
+                ⎘ Image
+              </button>
               {draft.length}/{MEETING_TEXT_MAX}
             </span>
             <button
               type="submit"
               className="brass-btn brass-btn-solid"
               data-testid="meeting-send"
-              disabled={busy || !draft.trim()}
+              disabled={busy || shrinking || (!draft.trim() && !upload)}
             >
               Speak
             </button>
@@ -252,6 +380,33 @@ export function Meeting({ onBack, guestName }: Props) {
           )}
         </form>
       </div>
+
+      {enlarged?.img && (
+        <div
+          className="meeting-lightbox"
+          data-testid="meeting-lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Image from ${enlarged.name}`}
+          onClick={() => setEnlarged(null)}
+        >
+          <figure onClick={(e) => e.stopPropagation()}>
+            <img src={enlarged.img.src} alt={`Image from ${enlarged.name}`} />
+            <figcaption>
+              {enlarged.name}
+              {enlarged.text ? ` — ${enlarged.text.slice(0, 120)}` : ''}
+            </figcaption>
+            <button
+              type="button"
+              className="brass-btn brass-btn-solid"
+              data-testid="meeting-lightbox-close"
+              onClick={() => setEnlarged(null)}
+            >
+              Close
+            </button>
+          </figure>
+        </div>
+      )}
 
       <button
         type="button"

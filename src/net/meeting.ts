@@ -12,13 +12,17 @@ const SEEN_KEY = 'occult-wars.meeting.seen';
 const NAME_KEY = 'occult-wars.meeting.name';
 
 export type MeetingBadge = 'owner' | 'seat' | 'guest';
+export type MeetingImage = { src: string; w: number; h: number; type: string };
 export type MeetingMessage = {
   id: number;
   at: number;
   name: string;
   text: string;
   badge: MeetingBadge;
+  img?: MeetingImage;
 };
+/** A compressed image ready to send (base64 without the data: prefix). */
+export type MeetingUpload = { data: string; w: number; h: number; type: string; bytes: number; preview: string };
 export type MeetingRead = {
   msgs: MeetingMessage[];
   head: number;
@@ -74,9 +78,22 @@ async function call<T>(body: Record<string, unknown>): Promise<T> {
   return data as T;
 }
 
+/** Only images the meeting itself serves: its own route, or its Vercel Blob store. */
+export function safeImageSrc(src: unknown): string | null {
+  if (typeof src !== 'string') return null;
+  if (/^\/api\/meeting\?img=\d{1,12}$/.test(src)) return src;
+  if (/^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\/meeting\/[\w.-]+$/i.test(src)) return src;
+  return null;
+}
+
 function isMessage(m: unknown): m is MeetingMessage {
   const o = m as MeetingMessage;
-  return !!o && Number.isFinite(o.id) && typeof o.text === 'string' && typeof o.name === 'string';
+  if (!o || !Number.isFinite(o.id) || typeof o.text !== 'string' || typeof o.name !== 'string') return false;
+  if (o.img) {
+    const src = safeImageSrc(o.img.src);
+    if (!src) delete o.img;
+  }
+  return true;
 }
 
 export async function readMeeting(since = 0, rev?: number): Promise<MeetingRead> {
@@ -91,8 +108,18 @@ export async function readMeeting(since = 0, rev?: number): Promise<MeetingRead>
   };
 }
 
-export async function postMeeting(text: string, name: string): Promise<MeetingMessage> {
-  const r = await call<{ msg: MeetingMessage }>({ op: 'post', mark: tableMark(), text, name });
+export async function postMeeting(
+  text: string,
+  name: string,
+  image?: MeetingUpload | null,
+): Promise<MeetingMessage> {
+  const r = await call<{ msg: MeetingMessage }>({
+    op: 'post',
+    mark: tableMark(),
+    text,
+    name,
+    ...(image ? { image: { data: image.data, w: image.w, h: image.h } } : {}),
+  });
   return r.msg;
 }
 
