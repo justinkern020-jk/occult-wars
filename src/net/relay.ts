@@ -53,10 +53,12 @@ export type Inbox = {
   start: () => void;
   stop: () => void;
   /** Poll quickly for a while (a link is live and moves are flowing). */
-  setPace: (pace: 'link' | 'wait' | 'idle') => void;
+  setPace: (pace: 'link' | 'wait' | 'idle' | 'rest') => void;
+  /** The inbox was emptied on the server (a fresh claim): read from the start. */
+  reset: () => void;
 };
 
-const PACE_MS = { link: 450, wait: 1000, idle: 2500 } as const;
+const PACE_MS = { link: 450, wait: 1000, idle: 2500, rest: 6000 } as const;
 
 /** Poll one inbox in order, handing each envelope to onItem. */
 export function pollInbox(
@@ -131,6 +133,9 @@ export function pollInbox(
       running = false;
       if (timer) clearTimeout(timer);
       timer = null;
+    },
+    reset() {
+      from = 0;
     },
     setPace(p) {
       pace = p;

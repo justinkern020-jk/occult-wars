@@ -218,6 +218,17 @@ function makeSendQueue(getConn: () => DataConnection | null) {
 
 type MsgSink = { current: ((msg: FriendMessage) => void) | null };
 
+/** The WebRTC data channel itself closed (not just the signalling socket). */
+export const CHANNEL_CLOSED = 'Peer closed the channel';
+
+/** Only the newest full state matters while a link is down. */
+function queueMsg(pending: FriendMessage[], msg: FriendMessage) {
+  if (msg.type === 'state') {
+    for (let i = pending.length - 1; i >= 0; i--) if (pending[i]!.type === 'state') pending.splice(i, 1);
+  }
+  pending.push(msg);
+}
+
 function wireConnection(
   conn: DataConnection,
   handlers: FriendHandlers,
@@ -236,7 +247,7 @@ function wireConnection(
     sink.current?.(msg);
   });
   conn.on('close', () => {
-    handlers.onClose?.('Peer closed the channel');
+    handlers.onClose?.(CHANNEL_CLOSED);
   });
   conn.on('error', (err) => {
     handlers.onError?.(err.message || 'Connection error');
@@ -617,7 +628,15 @@ export type LinkOptions = {
   p2p?: boolean;
   /** Override RELAY_AFTER_MS (tests). */
   relayAfterMs?: number;
+  /** Tests: stand-in WebRTC links. */
+  p2pHost?: (handlers: FriendHandlers) => FriendSession;
+  p2pJoin?: (handlers: FriendHandlers) => FriendSession;
+  /** Override RESCUE_MS (tests). */
+  rescueMs?: number;
 };
+
+/** A direct link that drops mid-match has this long to come back through the relay. */
+export const RESCUE_MS = 25_000;
 
 function parseEnvelopeMsg(env: RelayEnvelope): FriendMessage | null {
   return env.k === 'msg' ? parseFriendMessage(env.m) : null;
@@ -643,11 +662,34 @@ export function hostFriendSession(
   let p2pDown = opts.p2p === false;
   let p2pError: string | null = null;
   const pending: FriendMessage[] = [];
-  let relayStopTimer: ReturnType<typeof setTimeout> | null = null;
+  let rescueTimer: ReturnType<typeof setTimeout> | null = null;
 
   const deliver = (msg: FriendMessage) => {
     handlers.onMessage?.(msg);
     sink.current?.(msg);
+  };
+  /** The direct link dropped mid-match: wait for the guest on the relay. */
+  const rescue = (reason: string) => {
+    via = null;
+    try {
+      p2p?.destroy();
+    } catch {
+      /* ignore */
+    }
+    p2p = null;
+    void relayCall<{ fresh?: boolean }>({ op: 'host', room: code, hid }).then((r) => {
+      if (destroyed) return;
+      if (r && r.ok) {
+        relayUp = true;
+        if (r.fresh) inbox?.reset();
+      }
+      inbox?.start();
+      inbox?.setPace('wait');
+    });
+    if (rescueTimer) clearTimeout(rescueTimer);
+    rescueTimer = setTimeout(() => {
+      if (via === null && !destroyed) handlers.onClose?.(reason);
+    }, opts.rescueMs ?? RESCUE_MS);
   };
   const fireHosting = () => {
     if (hostingFired || destroyed) return;
@@ -671,17 +713,13 @@ export function hostFriendSession(
 
   let p2p: FriendSession | null = null;
   if (opts.p2p !== false) {
-    p2p = hostOnPeerId(peerIdForRoom(code), code, {
+    const p2pHandlers: FriendHandlers = {
       onHosting: fireHosting,
       onOpen: () => {
         if (via === 'relay') return;
         via = 'p2p';
-        // Keep an ear on the relay a little longer, in case the guest still turns to it.
-        if (relayStopTimer) clearTimeout(relayStopTimer);
-        relayStopTimer = setTimeout(() => {
-          if (via === 'p2p') inbox?.stop();
-        }, 30_000);
-        inbox?.setPace('idle');
+        // Keep a slow ear on the relay all match: a guest whose direct link drops comes back there.
+        inbox?.setPace('rest');
         flushPending();
         fireOpen();
       },
@@ -689,7 +727,8 @@ export function hostFriendSession(
         if (via === 'p2p') deliver(msg);
       },
       onClose: (reason) => {
-        if (via === 'p2p') handlers.onClose?.(reason);
+        // Only the data channel closing counts; a lost signalling socket leaves the link up.
+        if (via === 'p2p' && reason === CHANNEL_CLOSED) rescue(reason);
       },
       onError: (err) => {
         if (err === 'PEER_ID_TAKEN') {
@@ -711,7 +750,8 @@ export function hostFriendSession(
           failBoth();
         }
       },
-    });
+    };
+    p2p = opts.p2pHost ? opts.p2pHost(p2pHandlers) : hostOnPeerId(peerIdForRoom(code), code, p2pHandlers);
   }
 
   let inbox: ReturnType<typeof pollInbox> | null = null;
@@ -729,7 +769,7 @@ export function hostFriendSession(
           // The guest gave up on WebRTC: the relay carries the match.
           const wasP2P = via === 'p2p';
           via = 'relay';
-          if (relayStopTimer) clearTimeout(relayStopTimer);
+          if (rescueTimer) clearTimeout(rescueTimer);
           try {
             p2p?.destroy();
           } catch {
@@ -772,7 +812,7 @@ export function hostFriendSession(
   function send(msg: FriendMessage) {
     if (via === 'p2p' && p2p) p2p.send(msg);
     else if (via === 'relay' && guestOut && guestGid) guestOut.send({ k: 'msg', gid: guestGid, m: msg });
-    else pending.push(msg);
+    else queueMsg(pending, msg);
   }
 
   return {
@@ -786,7 +826,7 @@ export function hostFriendSession(
     destroy() {
       if (destroyed) return;
       destroyed = true;
-      if (relayStopTimer) clearTimeout(relayStopTimer);
+      if (rescueTimer) clearTimeout(rescueTimer);
       inbox?.stop();
       if (via === 'relay' && guestOut && guestGid) void guestOut.now({ k: 'bye', gid: guestGid });
       if (relayUp) void relayCall({ op: 'leave', room: code, hid });
@@ -814,6 +854,7 @@ export function joinFriendSession(
   let destroyed = false;
   let opened = false;
   let relaying = false;
+  let rescuing = false;
   let lastP2PError: string | null = null;
   const pending: FriendMessage[] = [];
   const hostOut = outbox(code, 'h');
@@ -836,7 +877,7 @@ export function joinFriendSession(
   let p2p: FriendSession | null = null;
   const fallbackTimer = setTimeout(() => toRelay(), opts.relayAfterMs ?? RELAY_AFTER_MS);
   if (opts.p2p !== false) {
-    p2p = joinOnPeerId(peerIdForRoom(code), code, {
+    const p2pHandlers: FriendHandlers = {
       onOpen: () => {
         if (via !== null || relaying) return;
         via = 'p2p';
@@ -848,8 +889,16 @@ export function joinFriendSession(
         if (via === 'p2p') deliver(msg);
       },
       onClose: (reason) => {
-        if (via === 'p2p') handlers.onClose?.(reason);
-        else if (via === null) {
+        if (via === 'p2p') {
+          // The direct link dropped mid-match: come back through the relay.
+          if (reason === CHANNEL_CLOSED) {
+            via = null;
+            relaying = false;
+            rescuing = true;
+            lastP2PError = reason;
+            toRelay();
+          }
+        } else if (via === null) {
           lastP2PError = reason ?? null;
           toRelay();
         }
@@ -861,7 +910,8 @@ export function joinFriendSession(
           toRelay();
         }
       },
-    });
+    };
+    p2p = opts.p2pJoin ? opts.p2pJoin(p2pHandlers) : joinOnPeerId(peerIdForRoom(code), code, p2pHandlers);
   } else {
     clearTimeout(fallbackTimer);
     queueMicrotask(() => toRelay());
@@ -907,8 +957,12 @@ export function joinFriendSession(
         synTimer = setTimeout(knock, 6_000);
         return;
       }
-      if (tries >= 8) {
+      if (tries >= (rescuing ? 16 : 8)) {
         inbox?.stop();
+        if (rescuing) {
+          handlers.onClose?.('Lost the link to the host.');
+          return;
+        }
         handlers.onError?.(
           r && r.nohost
             ? 'No host is waiting in that room'
@@ -924,7 +978,7 @@ export function joinFriendSession(
   function send(msg: FriendMessage) {
     if (via === 'p2p' && p2p) p2p.send(msg);
     else if (via === 'relay') hostOut.send({ k: 'msg', gid, m: msg });
-    else pending.push(msg);
+    else queueMsg(pending, msg);
   }
 
   return {

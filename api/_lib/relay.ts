@@ -63,7 +63,7 @@ export async function hostRoom(store: Store, rawRoom: unknown, rawHid: unknown) 
   ]);
   if (claimed === 'OK') {
     await store.pipe([['DEL', K.box(r, 'h')]]);
-    return { ok: true as const };
+    return { ok: true as const, fresh: true };
   }
   if (holder === hid) {
     await store.pipe([['EXPIRE', K.host(r), HOST_LEASE_SEC]]);

@@ -10,13 +10,13 @@ const GID = 'cccccccccccccccc';
 describe('relay', () => {
   it('one host per room; a fresh claim empties the inbox; leave frees it', async () => {
     const s = memoryStore();
-    expect(await hostRoom(s, 'ABCD', HID)).toEqual({ ok: true });
+    expect(await hostRoom(s, 'ABCD', HID)).toEqual({ ok: true, fresh: true });
     expect(await hostRoom(s, 'ABCD', HID)).toEqual({ ok: true });
     expect(await hostRoom(s, 'ABCD', HID2)).toEqual({ ok: false, taken: true });
     await pushItems(s, 'ABCD', 'h', [{ k: 'syn', gid: GID }]);
     await leaveRoom(s, 'ABCD', HID);
     expect(await pushItems(s, 'ABCD', 'h', [{ k: 'syn', gid: GID }])).toEqual({ ok: false, nohost: true });
-    expect(await hostRoom(s, 'ABCD', HID2)).toEqual({ ok: true });
+    expect(await hostRoom(s, 'ABCD', HID2)).toEqual({ ok: true, fresh: true });
     expect((await pullItems(s, 'ABCD', 'h', 0, HID2)).items).toEqual([]);
   });
 
