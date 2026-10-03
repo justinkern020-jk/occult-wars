@@ -1091,6 +1091,10 @@ export const EXPERT_TUNING = {
   maxDepth: 10,
   /** After the simulated reply, also play our own greedy follow-up rite. */
   followUp: true,
+  /** Penalty when the other chair has a killing line two rites out (0 = off). */
+  secondReply: 3000,
+  /** How many leading plans are re-scored against a planned reply (0 = off). */
+  refine: 6,
   /** Give the hidden foe hand two stand-in musters. */
   phantoms: true,
   matW: 0.5,
@@ -1254,6 +1258,18 @@ function searchCandidates(st: EngineState, avoid?: Set<string>): Scored[] {
     deploys.push(x);
     if (deploys.length >= 3) break;
   }
+  // Plus the most forward muster (a held gate near their door, an airship).
+  const foeHome = strongholdOf(st.tiles, foeOf(st.side));
+  if (foeHome) {
+    const forward = all
+      .filter((x) => x.action.type === 'deploy')
+      .map((x) => {
+        const a = x.action as Extract<AiAction, { type: 'deploy' }>;
+        return { x, d: manhattan(a.r, a.c, foeHome.r, foeHome.c) };
+      })
+      .sort((p, q) => p.d - q.d || q.x.score - p.x.score)[0];
+    if (forward && forward.d <= 2 && !deploys.includes(forward.x)) deploys.push(forward.x);
+  }
   return [
     ...pick(['attack'], 4, -60),
     ...pick(['move'], 5, -60),
@@ -1281,6 +1297,17 @@ function stormMoves(st: EngineState, depth: number): AiAction[] {
         out.push({ type: 'attack', uid: u.uid, targetUid: o.uid });
       }
     }
+  }
+  // Fresh musters on a held gate / airship circle next to the door can strike
+  // or step in at once (unless slow muster or a Chill foe holds them).
+  const chill = units(snap, foeOf(me)).some((f) => hasKeyword(f, 'chill'));
+  if (!chill && depth >= 2) {
+    const cells = deployCells(snap).filter((p) => manhattan(p.r, p.c, home.r, home.c) <= 1);
+    snap.hand.forEach((card, index) => {
+      if (card.kind !== 'unit' || card.power == null || card.cost > snap.loyalty) return;
+      if (card.keywords.includes('delay') || noClaim(card)) return;
+      for (const p of cells) out.push({ type: 'deploy', index, r: p.r, c: p.c });
+    });
   }
   // Strikes (incl. ranged) and removal that clear the gate or its keeper.
   for (const x of scoredCandidates(snap)) {
@@ -1347,6 +1374,55 @@ function simulateReply(st: EngineState, maxSteps = 10, endIt = true): EngineStat
   return cur;
 }
 
+/**
+ * The other chair plans its rite with a small beam (its own lethal first) and
+ * picks what it likes best; returns the state at our next rite open.
+ */
+function plannedReply(st: EngineState, me: Side, deadline: number): EngineState {
+  const them = st.side;
+  const lethal = findLethal(st, 2);
+  if (lethal) {
+    let cur = st;
+    for (const a of lethal) cur = apply(cur, a) ?? cur;
+    if (cur.winner) return cur;
+  }
+  let beam: { st: EngineState; score: number }[] = [{ st, score: 0 }];
+  let pick: { st: EngineState; score: number } | null = null;
+  const offer = (end: EngineState) => {
+    const v = end.winner ? (end.winner === them ? WIN : -WIN) : -evaluateState(end, me);
+    if (!pick || v > pick.score) pick = { st: end, score: v };
+  };
+  for (let depth = 0; depth < 8 && beam.length; depth++) {
+    const children: { st: EngineState; score: number }[] = [];
+    for (const node of beam) {
+      const ended = apply(node.st, { type: 'end' });
+      if (ended) offer(ended);
+      for (const c of topCandidates(node.st, 4)) {
+        const nx = apply(node.st, c.action);
+        if (!nx) continue;
+        if (nx.winner) {
+          offer(nx);
+          continue;
+        }
+        children.push({ st: nx, score: evaluateState(nx, them) + c.score * 0.05 });
+      }
+    }
+    if (performance.now() > deadline && pick) break;
+    const seen = new Set<string>();
+    beam = children
+      .sort((a, b) => b.score - a.score)
+      .filter((n) => {
+        const k = sigOf(n.st);
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      })
+      .slice(0, 3);
+  }
+  const chosen = pick as { st: EngineState; score: number } | null;
+  return chosen ? chosen.st : simulateReply(st);
+}
+
 type Node = { st: EngineState; plan: PlanStep[]; score: number };
 
 function sigOf(st: EngineState): string {
@@ -1396,15 +1472,28 @@ function expertPick(s: AiSnapshot, opts: PickOptions): AiAction {
   const MAX_DEPTH = EXPERT_TUNING.maxDepth;
   let beam: Node[] = [{ st: root, plan: [], score: 0 }];
   let best: { plan: PlanStep[]; score: number } | null = null;
+  const finals: { plan: PlanStep[]; score: number; after: EngineState }[] = [];
   const finish = (n: Node, after: EngineState) => {
     let score: number;
     if (after.winner) score = after.winner === me ? WIN - n.plan.length : -WIN;
     else {
       let replied = simulateReply(after);
-      if (EXPERT_TUNING.followUp && !replied.winner) replied = simulateReply(replied, 10, false);
-      score = evaluateState(replied, me);
+      if (replied.winner) {
+        // Lost to the reply: still prefer the line that leaves us best placed.
+        score = replied.winner === me ? WIN / 2 : -WIN + Math.max(-5000, Math.min(5000, evaluateState(after, me)));
+      } else {
+        if (EXPERT_TUNING.followUp) replied = simulateReply(replied, 10, false);
+        score = evaluateState(replied, me);
+        if (EXPERT_TUNING.secondReply && !replied.winner) {
+          // Two rites out: does the other chair have a killing line then?
+          const next = apply(replied, { type: 'end' });
+          if (next && next.winner && next.winner !== me) score -= 6000;
+          else if (next && !next.winner && findLethal(next, 2)) score -= EXPERT_TUNING.secondReply;
+        }
+      }
     }
     if (!best || score > best.score) best = { plan: n.plan, score };
+    finals.push({ plan: n.plan, score, after });
     if (opts.debug) opts.debug.push(`${score.toFixed(1)} ${n.plan.map((p) => actionKey(p.action)).join(' > ')}`);
   };
   for (let depth = 0; depth < MAX_DEPTH && beam.length; depth++) {
@@ -1440,7 +1529,37 @@ function expertPick(s: AiSnapshot, opts: PickOptions): AiAction {
       })
       .slice(0, BEAM);
   }
-  const chosen = best as { plan: PlanStep[]; score: number } | null;
+  let chosen = best as { plan: PlanStep[]; score: number } | null;
+  // 3) Refine the leading plans against a *planned* reply (the other chair
+  //    searching its own rite), not just a greedy one.
+  if (EXPERT_TUNING.refine > 0 && chosen && chosen.score < WIN / 2) {
+    const seen = new Set<string>();
+    const top = finals
+      .filter((f) => !f.after.winner)
+      .sort((a, b) => b.score - a.score)
+      .filter((f) => {
+        const k = sigOf(f.after);
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      })
+      .slice(0, EXPERT_TUNING.refine);
+    let refined: { plan: PlanStep[]; score: number } | null = null;
+    for (const f of top) {
+      if (performance.now() > deadline && refined) break;
+      const replied = plannedReply(f.after, me, deadline);
+      let score: number;
+      if (replied.winner) score = replied.winner === me ? WIN / 2 : -WIN + Math.max(-5000, Math.min(5000, f.score));
+      else {
+        const next = EXPERT_TUNING.followUp ? simulateReply(replied, 10, false) : replied;
+        score = evaluateState(next, me);
+      }
+      // Blend with the greedy-reply score so one odd reply cannot dominate.
+      score = score * 0.65 + f.score * 0.35;
+      if (!refined || score > refined.score) refined = { plan: f.plan, score };
+    }
+    if (refined) chosen = refined;
+  }
   if (!chosen || chosen.plan.length === 0) return pickAiAction(s, 'experienced', { rand: () => 0.5 });
   planCache = chosen.plan.slice(1);
   return chosen.plan[0].action;
