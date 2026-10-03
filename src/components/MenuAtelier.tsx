@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
 import { readTableSnapshot, subscribeTable } from '../net/table';
 import { readSeenMeeting } from '../net/meeting';
 import { MAPS, mapsForEra, type GameMap } from '../game/maps';
@@ -33,6 +33,7 @@ import { BattleCountModal } from './BattleCountModal';
 import { AiMindPicker } from './AiMindPicker';
 import { aiDifficultyLabel, type AiDifficulty } from '../game/ai';
 import { TarotPop } from './TarotPop';
+import { MenuAtmosphere } from './MenuAtmosphere';
 import { brassClick, copSirenSfx, metalRiffSfx, setMusicBed, spellCastSfx, unlockAudio } from '../game/sfx';
 
 type Props = {
@@ -235,6 +236,7 @@ export function MenuAtelier({
         style={{ backgroundImage: 'url(/assets/titles/menu-atelier.jpg)' }}
       >
         <div className="menu-veil">
+          <MenuAtmosphere />
           <div className="presents-socket menu-presents-socket" aria-label="Kern presents">
             <img
               className="presents-socket-frame"
@@ -361,7 +363,8 @@ export function MenuAtelier({
 
           <button
             type="button"
-            className="menu-door brass-btn brass-btn-solid mt-door-hero"
+            className="menu-door brass-btn brass-btn-solid mt-door-hero menu-door-era"
+            style={{ '--door-art': 'url(/assets/menu/door-training.jpg)' } as CSSProperties}
             data-testid="start-training"
             onClick={click(onTraining)}
           >
@@ -381,7 +384,8 @@ export function MenuAtelier({
           <div className="menu-doors menu-doors-2 menu-doors-cols">
             <button
               type="button"
-              className="menu-door brass-btn"
+              className="menu-door brass-btn menu-door-era"
+              style={{ '--door-art': 'url(/assets/menu/door-leaden.jpg)' } as CSSProperties}
               data-testid="open-leaden"
               onClick={click(onLeaden)}
             >
@@ -397,7 +401,8 @@ export function MenuAtelier({
             </button>
             <button
               type="button"
-              className="menu-door brass-btn"
+              className="menu-door brass-btn menu-door-era"
+              style={{ '--door-art': 'url(/assets/menu/door-sealed.jpg)' } as CSSProperties}
               data-testid="open-old-work"
               onClick={click(onOldWork)}
             >
@@ -580,7 +585,8 @@ export function MenuAtelier({
             {hourOpen ? (
               <button
                 type="button"
-                className="menu-door brass-btn"
+                className="menu-door brass-btn menu-door-era"
+                style={{ '--door-art': 'url(/assets/menu/door-second.jpg)' } as CSSProperties}
                 data-testid="open-second"
                 onClick={click(onSecond)}
               >

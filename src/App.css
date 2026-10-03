@@ -5629,3 +5629,51 @@ input[type='search'] {
 @media (prefers-reduced-motion: reduce) {
   .menu-rite-claim.brass-btn { animation: none; }
 }
+
+/* ——— Menu atmosphere: candle smoke + embers, painted era doors ——— */
+.menu-veil {
+  position: relative;
+  isolation: isolate;
+}
+.menu-atmos {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.9;
+}
+.menu-door.menu-door-era {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.menu-door.menu-door-era::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--door-art) center / cover no-repeat;
+  opacity: 0.26;
+  filter: sepia(0.3) saturate(0.8) brightness(0.95);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 38%, #000 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 38%, #000 100%);
+  transition: opacity 0.4s ease;
+}
+.menu-door.menu-door-era:hover::before,
+.menu-door.menu-door-era:focus-visible::before {
+  opacity: 0.38;
+}
+.menu-door.brass-btn-solid.menu-door-era::before {
+  mix-blend-mode: multiply;
+  opacity: 0.32;
+  filter: sepia(0.5) saturate(0.6) brightness(1.05);
+}
+.menu-door.brass-btn-solid.menu-door-era:hover::before {
+  opacity: 0.42;
+}
+@media (prefers-reduced-motion: reduce) {
+  .menu-door.menu-door-era::before { transition: none; }
+}
