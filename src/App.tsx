@@ -341,7 +341,10 @@ export default function App() {
         onSecond={() => {
           if (readHourOpen()) setScreen('second');
         }}
-        onShop={() => setScreen('shop')}
+        onShop={() => {
+          // The Night Counter stays shut until the Second Hour is opened by its code.
+          if (readHourOpen()) setScreen('shop');
+        }}
         onOldWork={() => setScreen('old')}
         onAllegiance={() => setScreen('allegiance')}
         onSandbox={() => setScreen('sandbox')}
@@ -519,6 +522,12 @@ export default function App() {
         <Ledger onBack={() => setScreen('menu')} />
       </div>
     );
+  }
+
+  if (screen === 'shop' && !readHourOpen()) {
+    // Never show the Night Counter before the Second Hour is unlocked.
+    queueMicrotask(() => setScreen('menu'));
+    return null;
   }
 
   if (screen === 'shop') {

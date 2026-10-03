@@ -29,7 +29,7 @@ export interface BoardUnit {
   once?: boolean;
   /** Turns remaining this unit cannot move (Arrest). */
   arrest?: number;
-  /** Lasting power earned in play (shown as +N on the coin). */
+  /** Lasting power earned in play (already counted in power; tooltip only). */
   gained?: number;
 }
 
@@ -114,16 +114,16 @@ export function UnitCoin({
       <span className="coin-power-slot">
         <span
           className={`coin-stat coin-power ${hurt ? 'coin-hurt' : ''}`}
-          title="Power · vitality and damage"
+          title={
+            gained > 0
+              ? `Power ${unit.power} · vitality and damage (includes +${gained} earned in play)`
+              : 'Power · vitality and damage'
+          }
         >
           <abbr>P</abbr>
+          {/* Earned power is already part of power: show the total only. */}
           {unit.power}
         </span>
-        {gained > 0 && (
-          <span className="coin-gained" title={`Earned power +${gained}. It stays.`}>
-            +{gained}
-          </span>
-        )}
       </span>
       {hits?.map((h) => (
         <span key={h.id} className="coin-dmg-float" aria-hidden>

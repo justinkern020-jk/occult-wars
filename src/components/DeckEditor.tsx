@@ -15,6 +15,7 @@ import {
 import { buildOrderAllyWorkingIds, validateDeck } from '../game/deck';
 import { strongestBySims, strongestDeck } from '../game/autoDeck';
 import { brassClick } from '../game/sfx';
+import { readHourOpen } from '../game/hourUnlock';
 import { CardArt } from './CardArt';
 import { TarotPop } from './TarotPop';
 import type { Card } from '../game/types';
@@ -172,7 +173,7 @@ export function DeckEditor({ profile, onSave, onDelete, onBack }: Props) {
     const quick = strongestDeck(faction, owned);
     if (quick.short > 0) {
       patch({ cards: quick.cards });
-      setNote({ text: `You own only ${quick.cards.length} plates this working may hold — it needs 30. Break a seal or visit the night counter.` });
+      setNote({ text: `You own only ${quick.cards.length} plates this working may hold — it needs 30. Break a seal${readHourOpen() ? ' or visit the night counter' : ''}.` });
       return;
     }
     // Let the candidate lists spar in short slices so the page stays live.
@@ -430,7 +431,7 @@ export function DeckEditor({ profile, onSave, onDelete, onBack }: Props) {
             <p className="lede">
               {filter.trim()
                 ? 'No owned plate matches that.'
-                : 'You do not own a plate that can sit in this working yet. Break a seal, or visit the night counter.'}
+                : `You do not own a plate that can sit in this working yet. Break a seal${readHourOpen() ? ', or visit the night counter' : ''}.`}
             </p>
           )}
           <div className="deck-pool-grid">

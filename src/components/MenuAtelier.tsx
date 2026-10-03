@@ -309,7 +309,9 @@ export function MenuAtelier({
             </span>
           </button>
 
-          <div className="menu-doors menu-doors-2">
+          {/* Column-major on wide screens: the Sealed Century sits directly
+              below the Leaden Hour (and on phones, straight after it). */}
+          <div className="menu-doors menu-doors-2 menu-doors-cols">
             <button
               type="button"
               className="menu-door brass-btn"
@@ -329,6 +331,22 @@ export function MenuAtelier({
             <button
               type="button"
               className="menu-door brass-btn"
+              data-testid="open-old-work"
+              onClick={click(onOldWork)}
+            >
+              <span className="menu-door-glyph" aria-hidden>
+                †
+              </span>
+              <span className="menu-door-copy">
+                <span className="menu-door-title">The Sealed Century</span>
+                <span className="menu-door-sub">
+                  The prequel. Four orders: Sidhe and witches, the mercury works, the closed proof, the birch vigil.
+                </span>
+              </span>
+            </button>
+            <button
+              type="button"
+              className="menu-door brass-btn"
               data-testid="open-hotseat"
               onClick={click(onHotseat)}
             >
@@ -340,9 +358,6 @@ export function MenuAtelier({
                 <span className="menu-door-sub">Two chairs, one working</span>
               </span>
             </button>
-          </div>
-
-          <div className="menu-doors menu-doors-2">
             <button
               type="button"
               className="menu-door brass-btn"
@@ -357,6 +372,9 @@ export function MenuAtelier({
                 <span className="menu-door-sub">quick match or room code</span>
               </span>
             </button>
+          </div>
+
+          <div className="menu-doors">
             <button
               type="button"
               className="menu-door brass-btn"
@@ -454,43 +472,26 @@ export function MenuAtelier({
             </button>
           </div>
 
-          <div className="menu-doors">
-            <button
-              type="button"
-              className="menu-door brass-btn brass-btn-solid"
-              data-testid="open-shop"
-              onClick={click(onShop)}
-            >
-              <span className="menu-door-glyph" aria-hidden>
-                ◇
-              </span>
-              <span className="menu-door-copy">
-                <span className="menu-door-title">Night Counter</span>
-                <span className="menu-door-sub">
-                  Second Hour plates · the seals do not carry them
+          {hourOpen && (
+            <div className="menu-doors">
+              <button
+                type="button"
+                className="menu-door brass-btn brass-btn-solid"
+                data-testid="open-shop"
+                onClick={click(onShop)}
+              >
+                <span className="menu-door-glyph" aria-hidden>
+                  ◇
                 </span>
-              </span>
-            </button>
-          </div>
-
-          <div className="menu-doors">
-            <button
-              type="button"
-              className="menu-door brass-btn"
-              data-testid="open-old-work"
-              onClick={click(onOldWork)}
-            >
-              <span className="menu-door-glyph" aria-hidden>
-                †
-              </span>
-              <span className="menu-door-copy">
-                <span className="menu-door-title">The Sealed Century</span>
-                <span className="menu-door-sub">
-                  Four orders. Sidhe and witches, the mercury works, the closed proof, the birch vigil.
+                <span className="menu-door-copy">
+                  <span className="menu-door-title">Night Counter</span>
+                  <span className="menu-door-sub">
+                    Second Hour plates · the seals do not carry them
+                  </span>
                 </span>
-              </span>
-            </button>
-          </div>
+              </button>
+            </div>
+          )}
 
           <div className="menu-doors menu-doors-2">
             <button
