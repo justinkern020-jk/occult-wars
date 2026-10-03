@@ -4,8 +4,8 @@
  * table; frames are only streamed while the owner is actually watching.
  *
  * Gate (server-side): a signed-in seat whose email is in OWNER_EMAILS or id in
- * OWNER_IDS. Only while no durable account store exists, an OWNER_KEY header
- * may stand in for the seat.
+ * OWNER_IDS (durable store only), or the OWNER_KEY secret (≥16 chars) sent in
+ * the x-ow-owner-key header from the owner's device.
  */
 import { timingSafeEqual, createHash } from 'node:crypto';
 import type { Store } from './store.js';
@@ -67,9 +67,9 @@ export async function isOwner(req: Request, store: Store, env: Env = process.env
       return true;
     }
   }
-  // No account system live: a long secret key may stand in for the seat.
+  // A long secret owner key, kept on the owner's device, always opens it too.
   const key = env.OWNER_KEY ?? '';
-  if (!store.durable && key.length >= 16) {
+  if (key.length >= 16) {
     const sent = req.headers.get('x-ow-owner-key') ?? '';
     if (sent && sameSecret(sent, key)) return true;
   }

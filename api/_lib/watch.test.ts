@@ -111,7 +111,7 @@ describe('portal gate', () => {
     delete process.env.OWNER_KEY;
   });
 
-  it('owner key opens the door only while no durable account store exists', async () => {
+  it('owner key opens the door on any store; wrong, missing or short keys do not', async () => {
     const env = { OWNER_KEY: 'a-very-long-owner-secret' };
     const mem = memoryStore();
     const with_ = watchReq({}, { 'x-ow-owner-key': env.OWNER_KEY });
@@ -119,7 +119,9 @@ describe('portal gate', () => {
     expect(await isOwner(watchReq({}, { 'x-ow-owner-key': 'a-very-long-owner-secreT' }), mem, env)).toBe(false);
     expect(await isOwner(watchReq({}), mem, env)).toBe(false);
     expect(await isOwner(with_, mem, { OWNER_KEY: 'short' })).toBe(false);
-    expect(await isOwner(with_, durable(), env)).toBe(false);
+    expect(await isOwner(with_, durable(), env)).toBe(true);
+    expect(await isOwner(watchReq({}), durable(), env)).toBe(false);
+    expect(await isOwner(with_, durable(), {})).toBe(false);
   });
 
   it('a signed-in owner seat opens it on a durable store; others get a bare 404', async () => {
@@ -179,5 +181,16 @@ describe('portal gate', () => {
     ).json()) as { watched: boolean; cmds: { side: string; code: string }[] };
     expect(back.watched).toBe(true);
     expect(back.cmds.map((c) => [c.side, c.code])).toEqual([['red', 'seth']]);
+  });
+});
+
+describe('redis env names', () => {
+  it('reads the plain, Upstash and prefixed Marketplace names', async () => {
+    const { redisEnv } = await import('./store.js');
+    expect(redisEnv({ KV_REST_API_URL: 'https://a.io/', KV_REST_API_TOKEN: 't' })).toEqual({ url: 'https://a.io', token: 't' });
+    expect(redisEnv({ UPSTASH_REDIS_REST_URL: 'https://b.io', UPSTASH_REDIS_REST_TOKEN: 'u' })).toEqual({ url: 'https://b.io', token: 'u' });
+    expect(redisEnv({ STORAGE_KV_REST_API_URL: 'https://c.io', STORAGE_KV_REST_API_TOKEN: 'v' })).toEqual({ url: 'https://c.io', token: 'v' });
+    expect(redisEnv({ STORAGE_KV_REST_API_URL: 'https://c.io' })).toBeNull();
+    expect(redisEnv({})).toBeNull();
   });
 });

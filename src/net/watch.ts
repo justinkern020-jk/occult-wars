@@ -6,8 +6,8 @@
  * frames and receives codes sent through the portal.
  *
  * Owner: /api/watch, gated server-side. The owner proves themselves with a
- * signed-in seat (OWNER_EMAILS / OWNER_IDS) or, while no account store is
- * live, an owner key opened once via `#owner-key=…` and kept on this device.
+ * signed-in seat (OWNER_EMAILS / OWNER_IDS) or an owner key opened once via
+ * `#owner-key=…` and kept on this device.
  */
 import { seatHeaders } from './account';
 import { tableMark } from './table';

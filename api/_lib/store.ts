@@ -27,8 +27,21 @@ export interface Store {
 type Env = Record<string, string | undefined>;
 
 export function redisEnv(env: Env): { url: string; token: string } | null {
-  const url = env.KV_REST_API_URL || env.UPSTASH_REDIS_REST_URL;
-  const token = env.KV_REST_API_TOKEN || env.UPSTASH_REDIS_REST_TOKEN;
+  let url = env.KV_REST_API_URL || env.UPSTASH_REDIS_REST_URL;
+  let token = env.KV_REST_API_TOKEN || env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) {
+    // The Marketplace integration may add a custom prefix (e.g. STORAGE_KV_REST_API_URL).
+    for (const [k, v] of Object.entries(env)) {
+      const m = /^(.+_)?(KV_REST_API|UPSTASH_REDIS_REST)_URL$/.exec(k);
+      if (!m || !v) continue;
+      const t = env[`${m[1] ?? ''}${m[2]}_TOKEN`];
+      if (t) {
+        url = v;
+        token = t;
+        break;
+      }
+    }
+  }
   if (!url || !token) return null;
   return { url: url.replace(/\/+$/, ''), token };
 }
