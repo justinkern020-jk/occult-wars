@@ -1,4 +1,5 @@
-import { unlockAudio, brassClick } from '../game/sfx';
+import { useEffect } from 'react';
+import { unlockAudio, enterCircleSfx, preloadEnterCircleSfx } from '../game/sfx';
 
 type Props = {
   onEnter: () => void;
@@ -8,6 +9,9 @@ type Props = {
 const COVER = '/assets/titles/app-cover.jpg';
 
 export function TitleScreen({ onEnter, dailyGranted = 0 }: Props) {
+  useEffect(() => {
+    preloadEnterCircleSfx();
+  }, []);
   return (
     <div className="title-screen" data-testid="title-screen">
       <img
@@ -50,7 +54,8 @@ export function TitleScreen({ onEnter, dailyGranted = 0 }: Props) {
           data-testid="enter-circle"
           onClick={() => {
             unlockAudio();
-            brassClick();
+            // Its own sting (not the brass click): bell, choir, the circle igniting.
+            enterCircleSfx();
             onEnter();
           }}
         >

@@ -14,3 +14,5 @@ power-call.mp3 — a unit's called power: hollow knock and a low rune chime
 victory.mp3 — victory: rising low choir (D minor, B-flat, D major) on a gong
 defeat.mp3 — defeat: a deep bell tolls three times
   All six: original synthesis (no samples) in the knock + crystalline chime palette, synth_battle.py. Free to use.
+enter-circle.mp3 — title screen "Enter the circle": a low bronze bell swelling into a dark D-minor choir and bowed-glass shimmer, then the whoosh of a circle igniting (3.4 s)
+  Original synthesis (no samples), /workspace/sfx/enter_circle/synth.py. Free to use. Played nowhere else.

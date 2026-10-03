@@ -73,6 +73,96 @@ function beep(
   o.stop(t0 + dur + 0.02);
 }
 
+/** Sound off for this device (localStorage `occult-wars-muted` = "1"). */
+const MUTE_KEY = 'occult-wars-muted';
+export function isSoundMuted(): boolean {
+  try {
+    return typeof localStorage !== 'undefined' && localStorage.getItem(MUTE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+export function setSoundMuted(muted: boolean): void {
+  try {
+    if (muted) localStorage.setItem(MUTE_KEY, '1');
+    else localStorage.removeItem(MUTE_KEY);
+  } catch {
+    /* private mode */
+  }
+}
+
+/* Music ducking: a sting can push the menu bed down for a moment, then let it swell back. */
+const MENU_BED_VOLUME = 0.45;
+const DUCK_LEVEL = 0.22;
+const DUCK_RELEASE_MS = 1600;
+let duckUntil = 0;
+let menuBedEl: HTMLAudioElement | null = null;
+let duckRaf = 0;
+
+function duckGain(now: number): number {
+  if (now < duckUntil) return DUCK_LEVEL;
+  const k = (now - duckUntil) / DUCK_RELEASE_MS;
+  if (k >= 1) return 1;
+  // ease back in
+  return DUCK_LEVEL + (1 - DUCK_LEVEL) * (1 - (1 - k) ** 2);
+}
+
+function runDuck(): void {
+  if (typeof window === 'undefined' || duckRaf) return;
+  const tick = () => {
+    duckRaf = 0;
+    const now = performance.now();
+    const g = duckGain(now);
+    if (menuBedEl) menuBedEl.volume = MENU_BED_VOLUME * g;
+    if (g < 1 && menuBedEl) duckRaf = requestAnimationFrame(tick);
+  };
+  duckRaf = requestAnimationFrame(tick);
+}
+
+/** Hold the menu bed low for `holdMs` (also covers a bed that starts during the hold). */
+export function duckMusic(holdMs: number): void {
+  if (typeof performance === 'undefined') return;
+  duckUntil = Math.max(duckUntil, performance.now() + holdMs);
+  runDuck();
+}
+
+const ENTER_CIRCLE_SRC = '/assets/audio/sfx/enter-circle.mp3';
+let enterCircleEl: HTMLAudioElement | null = null;
+
+/** Warm the title sting so the click plays it at once. */
+export function preloadEnterCircleSfx(): void {
+  if (typeof Audio === 'undefined' || enterCircleEl) return;
+  try {
+    enterCircleEl = new Audio(ENTER_CIRCLE_SRC);
+    enterCircleEl.preload = 'auto';
+    enterCircleEl.load();
+  } catch {
+    enterCircleEl = null;
+  }
+}
+
+/**
+ * "Enter the circle": a low bell swelling into a dark choir and the whoosh of a
+ * circle igniting (~3.4 s). Played only from the title button's click (a user
+ * gesture, so autoplay allows it). The Moonlight menu bed that starts beneath it
+ * is ducked while it rings, then swells back.
+ */
+export function enterCircleSfx(): void {
+  if (isSoundMuted()) return;
+  try {
+    unlockAudio();
+    preloadEnterCircleSfx();
+    const a = enterCircleEl ?? new Audio(ENTER_CIRCLE_SRC);
+    a.pause();
+    a.currentTime = 0;
+    a.volume = 0.85;
+    void a.play().catch(() => {});
+    duckMusic(2300);
+  } catch {
+    /* fail silently */
+  }
+}
+
 export function brassClick() {
   unlockAudio();
   beep(440, 0.05, 'triangle', 0.1);
@@ -746,12 +836,15 @@ function startMenuTheme(): { stop: () => void } {
   unlockAudio();
   const a = new Audio('/assets/audio/moonlight.mp3');
   a.loop = true;
-  a.volume = 0.45;
+  a.volume = MENU_BED_VOLUME * duckGain(performance.now());
+  menuBedEl = a;
   void a.play().catch(() => {});
+  runDuck();
   return {
     stop: () => {
       a.pause();
       a.src = '';
+      if (menuBedEl === a) menuBedEl = null;
     },
   };
 }
