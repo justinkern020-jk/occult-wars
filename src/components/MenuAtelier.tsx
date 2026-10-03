@@ -249,9 +249,9 @@ export function MenuAtelier({
           </div>
           <h1 className="menu-title">Occult Wars</h1>
           <p className="menu-lede">
-            A secret war of occult orders across a century of hidden history.
-            Gather Resources, muster your occultists, cryptids and rites, and seize
-            the field before the leaden hour strikes.
+            A war of secret occultists using esoteric rites, alchemy, magic, technology,
+            &amp; brute force to impose their will on the world... choose your allegiance
+            &amp; fight.
           </p>
 
           <div className="menu-occultist-socket">
