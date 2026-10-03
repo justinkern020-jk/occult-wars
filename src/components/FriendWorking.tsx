@@ -17,6 +17,12 @@ import {
 } from '../net/friendLoadout';
 import { cardById } from '../data/catalog';
 import type { CustomDeck } from '../game/profile';
+import {
+  CHALLENGE_CLEARED_EVENT,
+  CHALLENGE_POSTED_EVENT,
+  cancelChallenge,
+  issueChallenge,
+} from '../net/table';
 
 export type FriendReadyPayload = {
   room: string;
@@ -31,6 +37,8 @@ type Props = {
   customDecks: CustomDeck[];
   /** Sworn first-hour order for loadout faction. */
   allegiance: string | null;
+  /** A table challenge to host (issued) or join (answered) on mount. */
+  tableChallenge?: { role: FriendRole; room: string } | null;
   onReady: (payload: FriendReadyPayload) => void;
   onBack: () => void;
 };
@@ -45,6 +53,7 @@ const LOADOUT_MAX_ATTEMPTS = 40;
 export function FriendWorking({
   customDecks,
   allegiance,
+  tableChallenge = null,
   onReady,
   onBack,
 }: Props) {
@@ -69,6 +78,8 @@ export function FriendWorking({
   const handshakeTimer = useRef<number | null>(null);
   const localLoadoutRef = useRef(localLoadout);
   localLoadoutRef.current = localLoadout;
+  /** A challenge of ours is on the table and not yet answered. */
+  const challengeOut = useRef(false);
 
   const clearHandshakeTimer = useCallback(() => {
     if (handshakeTimer.current != null) {
@@ -87,7 +98,29 @@ export function FriendWorking({
     readySent.current = false;
   }, [clearHandshakeTimer]);
 
-  useEffect(() => () => cleanup(), [cleanup]);
+  const clearChallenge = useCallback(() => {
+    if (!challengeOut.current) return;
+    challengeOut.current = false;
+    void cancelChallenge();
+    window.dispatchEvent(new CustomEvent(CHALLENGE_CLEARED_EVENT));
+  }, []);
+
+  useEffect(
+    () => () => {
+      cleanup();
+      clearChallenge();
+    },
+    [cleanup, clearChallenge],
+  );
+
+  // Table challenge: host the room we posted, or join the room we answered.
+  const challengeKey = tableChallenge ? `${tableChallenge.role}:${tableChallenge.room}` : '';
+  useEffect(() => {
+    if (!tableChallenge) return;
+    if (tableChallenge.role === 'host') beginHost(tableChallenge.room, true);
+    else beginGuest(tableChallenge.room);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [challengeKey]);
 
   function finishReady(
     session: FriendSession,
@@ -97,6 +130,11 @@ export function FriendWorking({
     if (readySent.current) return;
     readySent.current = true;
     handedOff.current = true;
+    if (challengeOut.current) {
+      // Answered — the table already struck it off; just drop the banner.
+      challengeOut.current = false;
+      window.dispatchEvent(new CustomEvent(CHALLENGE_CLEARED_EVENT));
+    }
     clearHandshakeTimer();
     session.setOnMessage(null);
     sessionRef.current = null;
@@ -184,6 +222,7 @@ export function FriendWorking({
 
   function beginQuickMatch() {
     brassClick();
+    clearChallenge();
     cleanup();
     handedOff.current = false;
     setFailed(false);
@@ -227,13 +266,14 @@ export function FriendWorking({
     );
   }
 
-  function beginHost() {
+  function beginHost(forRoom?: string, challenge = false) {
     brassClick();
-    const code = normalizeRoomCode(room);
+    const code = normalizeRoomCode(forRoom ?? room);
     if (!code) {
       setStatus('Room needs exactly 4 letters (A–Z).');
       return;
     }
+    if (!challenge) clearChallenge();
     cleanup();
     handedOff.current = false;
     setFailed(false);
@@ -242,12 +282,38 @@ export function FriendWorking({
     setBusy(true);
     setRole('host');
     setRoom(code);
-    setStatus(`Waiting for guest… share code ${code}`);
+    setStatus(
+      challenge
+        ? `Issuing a challenge to everyone playing… room ${code}`
+        : `Waiting for guest… share code ${code}`,
+    );
+    const postFailed = () => {
+      if (!challenge) return;
+      window.dispatchEvent(new CustomEvent(CHALLENGE_POSTED_EVENT, { detail: { ok: false } }));
+    };
     try {
       let session!: FriendSession;
       session = hostFriendSession(code, {
+        onHosting: () => {
+          if (!challenge) return;
+          challengeOut.current = true;
+          void issueChallenge(code).then((ok) => {
+            if (readySent.current) return;
+            if (!ok) {
+              challengeOut.current = false;
+              postFailed();
+              setStatus('One challenge is already out. Wait for it to finish.');
+              return;
+            }
+            window.dispatchEvent(
+              new CustomEvent(CHALLENGE_POSTED_EVENT, { detail: { ok: true, room: code } }),
+            );
+            setStatus(`Challenge issued. Waiting for another occultist. Room ${code}.`);
+          });
+        },
         onOpen: () => beginHandshake(session),
         onError: (err) => {
+          postFailed();
           setBusy(false);
           setFailed(true);
           const msg =
@@ -268,6 +334,7 @@ export function FriendWorking({
       });
       sessionRef.current = session;
     } catch (err) {
+      postFailed();
       setBusy(false);
       setFailed(true);
       setStatus(
@@ -276,13 +343,14 @@ export function FriendWorking({
     }
   }
 
-  function beginGuest() {
+  function beginGuest(forRoom?: string) {
     brassClick();
-    const code = normalizeRoomCode(room);
+    const code = normalizeRoomCode(forRoom ?? room);
     if (!code) {
       setStatus('Enter the host’s 4-letter room code first.');
       return;
     }
+    clearChallenge();
     cleanup();
     handedOff.current = false;
     setFailed(false);
@@ -405,7 +473,7 @@ export function FriendWorking({
           className="brass-btn brass-btn-solid"
           data-testid="friend-host"
           disabled={busy || linked || customDecks.length === 0}
-          onClick={beginHost}
+          onClick={() => beginHost()}
         >
           Host the field
         </button>
@@ -414,7 +482,7 @@ export function FriendWorking({
           className="brass-btn"
           data-testid="friend-guest"
           disabled={busy || linked || customDecks.length === 0}
-          onClick={beginGuest}
+          onClick={() => beginGuest()}
         >
           Join as guest
         </button>
@@ -437,6 +505,7 @@ export function FriendWorking({
           className="brass-btn brass-btn-ghost"
           onClick={() => {
             brassClick();
+            clearChallenge();
             cleanup();
             handedOff.current = false;
             setRole(null);
@@ -456,6 +525,7 @@ export function FriendWorking({
         type="button"
         className="brass-btn brass-btn-ghost mt-door"
         onClick={() => {
+          clearChallenge();
           cleanup();
           onBack();
         }}

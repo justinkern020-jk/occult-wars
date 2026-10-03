@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Battlefield, type MatchMode } from './components/Battlefield';
 import { CombatDemo } from './components/CombatDemo';
 import { Catalog } from './components/Catalog';
@@ -9,6 +9,13 @@ import { DeckEditor } from './components/DeckEditor';
 import { PackBreak } from './components/PackBreak';
 import { CampaignHour } from './components/CampaignHour';
 import { FriendWorking } from './components/FriendWorking';
+import { Ledger } from './components/Ledger';
+import {
+  TABLE_CHALLENGE_EVENT,
+  setTableState,
+  type TableChallengeDetail,
+} from './net/table';
+import { recordMatch } from './net/account';
 import type { FriendRole, FriendSession } from './net/friendSession';
 import {
   resolveFriendMatchLoadouts,
@@ -55,6 +62,7 @@ type Screen =
   | 'second'
   | 'old'
   | 'shop'
+  | 'ledger'
   | 'sandbox';
 
 /** Pick a rival order for training (not self / not ally preferred). */
@@ -100,6 +108,39 @@ export default function App() {
   const [friendRole, setFriendRole] = useState<FriendRole | null>(null);
   const [friendSession, setFriendSession] = useState<FriendSession | null>(null);
   const [blackMondayReveal, setBlackMondayReveal] = useState<Card | null>(null);
+  /** A table challenge waiting for Friend Working (issued = host, answered = guest). */
+  const [tableChallenge, setTableChallenge] = useState<{
+    role: FriendRole;
+    room: string;
+  } | null>(null);
+
+  // Seated in a two-hand match: no knocks at the table.
+  useEffect(() => {
+    setTableState(
+      screen === 'field' && (matchMode === 'friend' || matchMode === 'hotseat') ? 'live' : 'open',
+    );
+  }, [screen, matchMode]);
+
+  // <PlayingNow /> (mounted beside the app) asks to issue / answer / call off.
+  const onChallenge = useRef<(d: TableChallengeDetail) => void>(() => undefined);
+  onChallenge.current = (d) => {
+    if (d.action === 'cancel') {
+      setTableChallenge(null);
+      if (screen === 'friend') setScreen('menu');
+      return;
+    }
+    if (!/^[A-Z]{4}$/.test(d.room)) return;
+    setTableChallenge({ role: d.action === 'accept' ? 'guest' : 'host', room: d.room });
+    ensureSworn(() => setScreen('friend'));
+  };
+  useEffect(() => {
+    const on = (e: Event) => {
+      const d = (e as CustomEvent<TableChallengeDetail>).detail;
+      if (d) onChallenge.current(d);
+    };
+    window.addEventListener(TABLE_CHALLENGE_EVENT, on);
+    return () => window.removeEventListener(TABLE_CHALLENGE_EVENT, on);
+  }, []);
 
   const working = profile.customDecks[0] as CustomDeck | undefined;
 
@@ -132,6 +173,8 @@ export default function App() {
         return 'Swear an Order';
       case 'sandbox':
         return 'Rites desk';
+      case 'ledger':
+        return 'The Ledger';
       default:
         return 'Atelier';
     }
@@ -247,9 +290,16 @@ export default function App() {
         <AllegianceScreen
           onSwear={(order: FirstHourOrder) => {
             update(swearAllegiance(profile, order));
-            setScreen('menu');
+            setScreen(tableChallenge ? 'friend' : 'menu');
           }}
-          onBack={firstHourAllegiance() ? () => setScreen('menu') : undefined}
+          onBack={
+            firstHourAllegiance()
+              ? () => {
+                  setTableChallenge(null);
+                  setScreen('menu');
+                }
+              : undefined
+          }
         />
       </div>
     );
@@ -270,7 +320,11 @@ export default function App() {
         onPack={() => ensureSworn(() => setScreen('pack'))}
         onLeaden={() => ensureSworn(() => setScreen('campaign'))}
         onHotseat={startHotseat}
-        onFriend={() => ensureSworn(() => setScreen('friend'))}
+        onFriend={() => {
+          setTableChallenge(null);
+          ensureSworn(() => setScreen('friend'));
+        }}
+        onLedger={() => setScreen('ledger')}
         onSecond={() => {
           if (readHourOpen()) setScreen('second');
         }}
@@ -329,7 +383,10 @@ export default function App() {
           <button
             type="button"
             className="brass-btn brass-btn-ghost shell-back"
-            onClick={() => setScreen('menu')}
+            onClick={() => {
+              setTableChallenge(null);
+              setScreen('menu');
+            }}
           >
             Return to the atelier
           </button>
@@ -337,14 +394,21 @@ export default function App() {
             <span>Occult Wars</span>
             <em>Friend Working</em>
           </p>
+          <div id="playing-dock" className="playing-dock" />
         </nav>
         <FriendWorking
+          key={tableChallenge ? `${tableChallenge.role}-${tableChallenge.room}` : 'friend'}
           customDecks={profile.customDecks}
           allegiance={firstHourAllegiance()}
-          onReady={({ room, role, session, hostLoadout, guestLoadout }) =>
-            startFriend(room, role, session, hostLoadout, guestLoadout)
-          }
-          onBack={() => setScreen('menu')}
+          tableChallenge={tableChallenge}
+          onReady={({ room, role, session, hostLoadout, guestLoadout }) => {
+            setTableChallenge(null);
+            startFriend(room, role, session, hostLoadout, guestLoadout);
+          }}
+          onBack={() => {
+            setTableChallenge(null);
+            setScreen('menu');
+          }}
         />
       </div>
     );
@@ -428,6 +492,14 @@ export default function App() {
     );
   }
 
+  if (screen === 'ledger') {
+    return (
+      <div className="app app-shell">
+        <Ledger onBack={() => setScreen('menu')} />
+      </div>
+    );
+  }
+
   if (screen === 'shop') {
     return (
       <div className="app app-shell">
@@ -473,6 +545,7 @@ export default function App() {
           <span>Occult Wars</span>
           <em>{shellTitle}</em>
         </p>
+        <div id="playing-dock" className="playing-dock" />
       </nav>
 
       {screen === 'field' && (
@@ -505,6 +578,8 @@ export default function App() {
             );
           }}
           onMatchEnd={({ playerWon, kind }) => {
+            // The Ledger: live-table and practice results (a passed grimoire is neither).
+            if (matchMode !== 'hotseat') void recordMatch(playerWon, matchMode === 'friend');
             const modeKey =
               matchMode === 'campaign'
                 ? 'campaign'
@@ -552,6 +627,12 @@ export default function App() {
               ],
             });
             setScreen('menu');
+          }}
+          onDelete={(id) => {
+            update((p) => ({
+              ...p,
+              customDecks: p.customDecks.filter((d) => d.id !== id),
+            }));
           }}
           onBack={() => setScreen('menu')}
         />

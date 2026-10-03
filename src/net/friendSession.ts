@@ -67,6 +67,8 @@ export type FriendMessage =
   | { v: 1; type: 'error'; message: string };
 
 export type FriendHandlers = {
+  /** Host only: the room id is claimed on the signalling server. */
+  onHosting?: () => void;
   onOpen?: () => void;
   onMessage?: (msg: FriendMessage) => void;
   onClose?: (reason?: string) => void;
@@ -272,6 +274,9 @@ export function hostOnPeerId(
   const queue = makeSendQueue(() => conn);
   const peer = new Peer(peerId, peerOptions());
 
+  peer.on('open', () => {
+    handlers.onHosting?.();
+  });
   peer.on('connection', (c) => {
     if (conn && conn.open) {
       c.close();

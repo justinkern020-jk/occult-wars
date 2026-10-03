@@ -1,14 +1,41 @@
+import { useEffect, useSyncExternalStore } from 'react';
 import { readVisitCount } from '../game/visits';
+import { beatNow, countryName, readTableSnapshot, subscribeTable } from '../net/table';
 
 type Props = {
   onClose: () => void;
 };
 
-/** Local sittings + shut remote tally — grok "Besides you" without server API. */
+/** Live tally from /api/table plus this device's sittings (grok "Besides you"). */
 export function BattleCountModal({ onClose }: Props) {
   const first = readVisitCount('first');
   const second = readVisitCount('second');
   const old = readVisitCount('old');
+  const snap = useSyncExternalStore(subscribeTable, readTableSnapshot, readTableSnapshot);
+
+  // Read the table while the book is open.
+  useEffect(() => {
+    beatNow();
+    const t = window.setInterval(beatNow, 6_000);
+    return () => window.clearInterval(t);
+  }, []);
+
+  const wait = snap.status === 'wait' && !snap.view;
+  const shut = snap.status === 'shut' && !snap.view;
+  const view = snap.view;
+  const playing = view ? view.playing : null;
+  const others = playing == null ? null : Math.max(0, playing - 1);
+  const names = (view?.others ?? []).map(countryName).filter((c) => c !== 'Unknown');
+  const where = wait
+    ? '…'
+    : shut
+      ? '—'
+      : others === 0
+        ? 'No one else is seated'
+        : names.length > 0
+          ? [...new Set(names)].join(', ')
+          : 'Not known yet';
+  const checkins = view?.checkins ?? [];
 
   return (
     <div
@@ -25,6 +52,20 @@ export function BattleCountModal({ onClose }: Props) {
         </h1>
 
         <dl className="battle-count-grid">
+          <div className="battle-count-stat battle-count-stat-wide">
+            <dt>Playing now</dt>
+            <dd data-testid="battle-count-playing">{wait ? '…' : shut ? '—' : playing}</dd>
+          </div>
+          <div className="battle-count-stat battle-count-stat-wide">
+            <dt>Besides you</dt>
+            <dd data-testid="battle-count-others">{wait ? '…' : shut ? '—' : others}</dd>
+          </div>
+          <div className="battle-count-stat battle-count-stat-wide">
+            <dt>Their country</dt>
+            <dd data-testid="battle-count-country" className="battle-count-where">
+              {where}
+            </dd>
+          </div>
           <div className="battle-count-stat">
             <dt>First Hour sittings</dt>
             <dd data-testid="battle-count-first">{first}</dd>
@@ -39,9 +80,41 @@ export function BattleCountModal({ onClose }: Props) {
           </div>
         </dl>
 
-        <p className="battle-count-shut" data-testid="battle-count-remote">
-          Other hands · The tally is shut.
-        </p>
+        {shut ? (
+          <p className="battle-count-shut" data-testid="battle-count-remote">
+            At the table · The tally is shut.
+          </p>
+        ) : wait ? (
+          <p className="battle-count-live" data-testid="battle-count-remote">
+            Counting the hands at the table.
+          </p>
+        ) : (
+          <p className="battle-count-live" data-testid="battle-count-remote">
+            {playing === 1
+              ? 'You are the only one seated. The count includes you.'
+              : `${playing} hands are seated, counting yours. ${others} ${
+                  others === 1 ? 'other hand is' : 'other hands are'
+                } at the table.`}
+          </p>
+        )}
+
+        <section className="battle-count-analytics" data-testid="battle-count-analytics">
+          <h2>Countries checked in</h2>
+          {wait ? (
+            <p>Reading the stored list.</p>
+          ) : checkins.length === 0 ? (
+            <p>No country has checked in yet.</p>
+          ) : (
+            <ol>
+              {checkins.map((c) => (
+                <li key={c.country}>
+                  <span>{countryName(c.country)}</span>
+                  <b>{c.n}</b>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
 
         <button
           type="button"

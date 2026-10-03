@@ -3964,3 +3964,530 @@ input[type='search'] {
   line-height: 1.1;
   overflow: hidden;
 }
+
+/* ── Ported from grok.me: playing now, challenges, battle count, the Ledger, leaders ── */
+.hand-leader {
+  border-color: #f3e2b8;
+  box-shadow:
+    0 0 0 1px #c6a15b,
+    0 6px 14px #0007;
+}
+.hand-leader-tag {
+  z-index: 4;
+  color: #f3e2b8;
+  font-family: var(--font-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: #1a140ee6;
+  border-radius: 999px;
+  padding: 0.08rem 0.32rem;
+  font-size: 0.48rem;
+  position: absolute;
+  top: 0.28rem;
+  left: 0.28rem;
+}
+.leader-tray {
+  flex: 100%;
+  gap: 0.45rem;
+  min-width: 0;
+  display: flex;
+}
+.leader-plate {
+  text-align: left;
+  color: #f3e6c8;
+  cursor: pointer;
+  background: #1a140ee6;
+  border: 1px solid #8a6a32;
+  border-radius: 0.65rem;
+  flex: 1;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+  padding: 0.28rem 0.4rem;
+  display: flex;
+}
+.leader-plate.is-foe {
+  border-color: #8a4040;
+}
+.leader-plate-art {
+  object-fit: cover;
+  border-radius: 0.28rem;
+  flex: none;
+  width: 2.35rem;
+  height: 3.15rem;
+}
+.leader-plate-copy {
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+  display: flex;
+}
+.leader-plate-copy strong {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.78rem;
+  line-height: 1.15;
+  overflow: hidden;
+}
+.leader-plate-copy em {
+  color: #d9c49a;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  font-size: 0.68rem;
+  font-style: normal;
+  line-height: 1.28;
+  display: -webkit-box;
+  overflow: hidden;
+}
+.playing-dock {
+  flex: none;
+  margin-left: auto;
+}
+.playing-now.is-docked {
+  z-index: 1;
+  max-width: 11.5rem;
+  position: relative;
+  top: auto;
+  right: auto;
+}
+.campaign-memory {
+  text-align: left;
+  color: #b3a48c;
+  gap: 0.45rem;
+  max-width: 34rem;
+  margin: 0.8rem auto 1rem;
+  padding: 0;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  list-style: none;
+  display: grid;
+}
+.campaign-memory strong {
+  color: #f3ead7;
+  font-weight: 600;
+}
+.battle-count-stat-wide {
+  grid-column: 1/-1;
+}
+.battle-count-live {
+  letter-spacing: 0.06em;
+  color: #c6a15b;
+  margin: 0 0 1.1rem;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.78rem;
+}
+.battle-count-analytics {
+  text-align: left;
+  border-top: 1px solid #c6a15b44;
+  margin: 0 0 1.1rem;
+  padding-top: 0.85rem;
+}
+.battle-count-analytics h2 {
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #c6a15b;
+  text-align: center;
+  margin: 0 0 0.55rem;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.68rem;
+}
+.battle-count-analytics p {
+  text-align: center;
+  color: #8a7a58;
+  margin: 0;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.72rem;
+}
+.battle-count-analytics ol {
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+}
+.battle-count-analytics li {
+  color: #f3ead7;
+  border-bottom: 1px solid #3a3428;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.35rem 0.15rem;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.82rem;
+  display: flex;
+}
+.battle-count-analytics b {
+  font-variant-numeric: tabular-nums;
+  color: #c6a15b;
+}
+.battle-count-secret {
+  letter-spacing: 0.08em;
+  color: #8a7a58;
+  margin: -0.45rem 0 1rem;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.68rem;
+}
+.playing-now {
+  z-index: 120;
+  color: #e7d7a4;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  pointer-events: none;
+  background: #120e0ae6;
+  border: 1px solid #c6a15b66;
+  border-radius: 0.7rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.38rem;
+  max-width: min(16rem, 100% - 1rem);
+  margin: 0;
+  padding: 0.28rem 0.55rem 0.35rem 0.48rem;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.62rem;
+  display: flex;
+  position: fixed;
+  top: 0.55rem;
+  right: 0.55rem;
+  box-shadow: 0 6px 18px #0009;
+}
+.playing-now-count {
+  font-variant-numeric: tabular-nums;
+  color: #f3ead7;
+}
+.playing-now-challenge {
+  pointer-events: auto;
+  color: #f3e6c8;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  background: #1a140e;
+  border: 1px solid #c6a15b;
+  border-radius: 999px;
+  flex: 1 0 100%;
+  margin: 0.15rem 0 0;
+  padding: 0.28rem 0.4rem;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.58rem;
+}
+.playing-now-challenge:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+.challenge-issued {
+  z-index: 130;
+  color: #f3ead7;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  background: #120e0af2;
+  border: 1px solid #c6a15b;
+  border-radius: 0.7rem;
+  width: min(16rem, 100% - 1.1rem);
+  margin: 0;
+  padding: 0.75rem 0.8rem 0.7rem;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  position: fixed;
+  top: 6.4rem;
+  right: 0.55rem;
+  box-shadow: 0 10px 24px #000c;
+}
+.challenge-issued p {
+  margin: 0 0 0.65rem;
+}
+.challenge-issued .brass-btn {
+  width: 100%;
+}
+.playing-now-note {
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: #c6a15b;
+  flex: 1 0 100%;
+}
+.challenge-interrupt {
+  z-index: 200;
+  pointer-events: auto;
+  background: #070605d4;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  display: flex;
+  position: fixed;
+  inset: 0;
+}
+.challenge-interrupt-plate {
+  text-align: center;
+  width: min(92vw, 26rem);
+  padding: 1.4rem 1.2rem 1.2rem;
+}
+.challenge-interrupt-title {
+  color: #f3ead7;
+  margin: 0.4rem 0 1.1rem;
+  font-family: Cinzel, Georgia, serif;
+  font-size: clamp(1.35rem, 4vw, 1.8rem);
+  line-height: 1.25;
+}
+.challenge-interrupt-actions {
+  justify-content: center;
+  gap: 0.6rem;
+  display: flex;
+}
+.playing-now-dot {
+  background: #7dff9a;
+  border-radius: 999px;
+  width: 0.42rem;
+  height: 0.42rem;
+  animation: 2.4s ease-in-out infinite playing-pulse;
+  box-shadow: 0 0 8px #7dff9a;
+}
+@media (prefers-reduced-motion: reduce) {
+  .playing-now-dot {
+    animation: none;
+  }
+}
+.bf-scores.is-seat-flip {
+  flex-direction: row-reverse;
+}
+.battlefield.is-seat-flip .bf-board-socket {
+  animation: 0.45s seat-turn;
+}
+@media (prefers-reduced-motion: reduce) {
+  .battlefield.is-seat-flip .bf-board-socket {
+    animation: none;
+  }
+}
+.account-page {
+  background: #0c0b09;
+  place-items: center;
+  min-height: 100dvh;
+  padding: 1.25rem;
+  display: grid;
+}
+.account-plate,
+.ledger {
+  width: min(40rem, 100%);
+  margin: 0 auto;
+}
+.account-title,
+.ledger-title {
+  color: #f3ead7;
+  margin: 0.2rem 0 0.6rem;
+  font-family: Cinzel, Georgia, serif;
+  font-size: clamp(2rem, 6vw, 2.8rem);
+}
+.account-lead,
+.ledger-lead {
+  color: #b3a48c;
+  margin: 0 0 1rem;
+  line-height: 1.5;
+}
+.account-providers,
+.account-form {
+  gap: 0.55rem;
+  margin: 0 0 0.9rem;
+  display: grid;
+}
+.account-form label {
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #c6a15b;
+  text-align: left;
+  gap: 0.28rem;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.68rem;
+  display: grid;
+}
+.account-form input {
+  color: #f3ead7;
+  letter-spacing: 0;
+  text-transform: none;
+  background: #100c09;
+  border: 1px solid #c6a15b88;
+  border-radius: 0.45rem;
+  min-height: 2.6rem;
+  padding: 0.4rem 0.7rem;
+  font-family:
+    Libre Baskerville,
+    Georgia,
+    serif;
+  font-size: 1rem;
+}
+.account-note,
+.ledger-wait {
+  color: #c6a15b;
+  margin: 0 0 0.7rem;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.82rem;
+}
+.account-back {
+  color: #c6a15b;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 0.4rem;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.72rem;
+  display: inline-block;
+}
+.ledger {
+  gap: 0.85rem;
+  padding-bottom: 2rem;
+  display: grid;
+}
+.ledger-gate,
+.ledger-self,
+.ledger-book {
+  text-align: left;
+}
+.ledger-gate p,
+.ledger-self-head {
+  margin: 0 0 0.75rem;
+}
+.ledger-self-head {
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  display: flex;
+}
+.ledger-self-head .plate-kicker {
+  margin: 0;
+}
+.ledger-record {
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin: 0.2rem 0 0;
+  display: grid;
+}
+.ledger-record dt {
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #c6a15b;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.62rem;
+}
+.ledger-record dd {
+  color: #f3ead7;
+  margin: 0.2rem 0 0;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 1.35rem;
+}
+.ledger-record dd span {
+  letter-spacing: 0.08em;
+  color: #8a7a58;
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  display: block;
+}
+.ledger-list {
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+}
+.ledger-list li {
+  color: #f3ead7;
+  border-bottom: 1px solid #3a3428;
+  grid-template-columns: 1.6rem 1fr auto;
+  align-items: baseline;
+  gap: 0.55rem;
+  padding: 0.4rem 0;
+  font-family: Cinzel, Georgia, serif;
+  display: grid;
+}
+.ledger-rank,
+.ledger-score small {
+  color: #8a7a58;
+  font-size: 0.72rem;
+}
+.ledger-score {
+  text-align: right;
+}
+.ledger-score small {
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  display: block;
+}
+@keyframes playing-pulse {
+  0%,
+  to {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+@keyframes seat-turn {
+  0% {
+    transform: rotate(-10deg) scale(0.97);
+  }
+  to {
+    transform: none;
+  }
+}
+.playing-now-dot.is-shut {
+  background: #8a7a62;
+  box-shadow: none;
+  animation: none;
+}
+.ledger-gate {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.9rem 1rem;
+}
+.ledger-gate p {
+  margin: 0;
+}
+.account-note {
+  margin: 0.4rem 0 0;
+  color: #f0b38a;
+  font-size: 0.85rem;
+}
+.account-switch {
+  background: none;
+  border: 0;
+  padding: 0.2rem 0;
+  color: #d8c7a4;
+  font: inherit;
+  font-size: 0.82rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  opacity: 0.8;
+}
+.account-switch:hover {
+  opacity: 1;
+}
+.account-switch:disabled {
+  cursor: wait;
+}
+.account-who {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.account-initial {
+  display: grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 999px;
+  background: #ffffff1a;
+  font-weight: 600;
+}
+.account-name {
+  font-size: 0.9rem;
+}
+.battle-count-where {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  opacity: 0.8;
+}
+.leader-shelf {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0.5rem 0 1rem;
+}
+.leader-shelf .leader-plate {
+  cursor: pointer;
+}
