@@ -2147,21 +2147,34 @@ input[type='search'] {
   text-transform: uppercase;
   color: var(--color-brass);
 }
-.field-picker .map-grid {
+.field-picker .map-grid,
+.old-map-grid {
   display: grid;
   gap: 0.75rem;
   margin-top: 1rem;
   grid-template-columns: 1fr;
 }
 @media (min-width: 560px) {
-  .field-picker .map-grid {
+  .field-picker .map-grid,
+  .old-map-grid {
     grid-template-columns: 1fr 1fr;
   }
 }
 @media (min-width: 960px) {
-  .field-picker .map-grid {
+  .field-picker .map-grid,
+  .old-map-grid {
     grid-template-columns: repeat(4, 1fr);
   }
+}
+/* The Sealed Century's own picker: art cards, room for the epithet. */
+.old-map-grid {
+  margin-bottom: 1rem;
+}
+.old-map-grid .map-card {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  justify-content: flex-start;
 }
 .map-group + .map-group {
   margin-top: 1.4rem;

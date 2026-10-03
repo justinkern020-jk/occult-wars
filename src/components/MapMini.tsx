@@ -1,9 +1,12 @@
 import type { GameMap } from '../game/maps';
 
-/** Tiny 5×5 glyph of a field's shape (voids, seals, gates, strongholds). */
-export function MapMini({ map }: { map: GameMap }) {
+/**
+ * Tiny 5×5 glyph of a field's shape (voids, seals, gates, strongholds).
+ * `overlay` sits it in the corner of a `.map-thumb` art card (as on the main menu).
+ */
+export function MapMini({ map, overlay = false }: { map: GameMap; overlay?: boolean }) {
   return (
-    <span className="map-mini map-mini-plain" aria-hidden>
+    <span className={overlay ? 'map-mini' : 'map-mini map-mini-plain'} aria-hidden>
       {map.tiles.flat().map((t, i) => (
         <span
           key={i}

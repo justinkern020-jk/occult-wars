@@ -135,19 +135,26 @@ export function SealedCentury({
         <strong data-testid="old-field-working">{field?.name ?? 'your starter working'}</strong>.
       </p>
       {onAiDifficulty && <AiMindPicker value={aiDifficulty} onChange={onAiDifficulty} />}
-      <div className="map-grid">
+      <div className="map-grid old-map-grid" data-testid="old-map-grid">
         {grounds.map((m) => (
           <button
             key={m.id}
             type="button"
             className="map-card brass-btn brass-btn-solid"
             data-testid={`old-map-${m.id}`}
+            title={m.epithet}
             onClick={() => {
               brassClick();
               onEnter(m.id, sworn, rival);
             }}
           >
-            <MapMini map={m} />
+            {/* The same painted art card as the main menu's field picker. */}
+            <span
+              className="map-thumb"
+              style={{ backgroundImage: `url(/assets/maps/${m.id}.jpg)` }}
+            >
+              <MapMini map={m} overlay />
+            </span>
             <span className="map-card-name">{m.name}</span>
             <span className="map-card-sub">{m.epithet}</span>
           </button>
