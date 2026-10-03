@@ -1,8 +1,11 @@
 /**
- * The Codex: a short note of real history or folklore behind a plate.
- * Written only from attested sources; where a plate is the game's own
- * invention, the page says only what its order draws on and where its
- * epigraph comes from (see codexBlurb). Nothing here is made up history.
+ * The Codex: a short note behind every plate (Justin and Seth Kern excepted).
+ * Real figures, creatures and legends get the attested history or folklore;
+ * plates that are the game's own invention (clerks, bureau agents and the
+ * like) get in-world lore that fits their name, order, ability and epigraph,
+ * with real-world claims kept to the attested source of that epigraph.
+ * Every note is its own: codexLore.test.ts fails if two share a sentence or
+ * read too alike.
  */
 import type { Card } from '../game/types';
 
@@ -39,17 +42,17 @@ export const ORDER_LORE: Record<string, string> = {
   Unaligned: 'An unaligned plate belongs to no order.',
 };
 
-/** Plate-specific notes (2–3 sentences, from the attested record). */
+/** Plate-specific notes, one per Codex plate (2–3 sentences each). */
 export const CARD_LORE: Record<string, string> = {
   // ── The Whitethorn Coven ──
   fairy_doctor:
-    "In nineteenth-century rural Ireland a 'fairy doctor' was a local healer, often an old woman, trusted to cure illness blamed on the fairies with herbs and charms. The most famous, Biddy Early of County Clare, died in 1872.",
+    "In nineteenth-century rural Ireland a 'fairy doctor' was a local healer, often an old woman, trusted to cure illness blamed on the fairies with herbs and charms. The most famous, Biddy Early of County Clare, was said to see her cures in a dark blue bottle, and died in 1874.",
   bean_nighe:
     'The bean-nighe, "washer woman", of Scottish Highland lore is seen at a lonely ford washing the grave-clothes of someone about to die. She was said to be the ghost of a woman who died in childbirth.',
   the_pooka:
     'The púca is a shape-shifting spirit of Irish folklore, most often a dark horse with burning eyes that takes riders on wild night journeys. Blackberries left on the bush after Samhain were said to be spoiled by it.',
   swan_maiden:
-    "Swan maidens appear in folklore across Europe: women who lay aside swan skins to bathe and are bound to whoever steals one. In Irish legend the Children of Lir were turned into swans for nine hundred years.",
+    'Swan maidens appear in folklore across Europe: women who lay aside swan skins to bathe and are bound to whoever steals one. In Irish legend the Children of Lir were turned into swans for nine hundred years.',
   clurichaun:
     'The clurichaun is a solitary Irish fairy, kin to the leprechaun, said to haunt wine cellars and drink himself merry. Thomas Crofton Croker described him in Fairy Legends and Traditions of the South of Ireland (1825).',
   the_fetch:
@@ -61,7 +64,7 @@ export const CARD_LORE: Record<string, string> = {
   fear_gortach:
     "Irish folklore tells of the féar gortach, 'hungry grass', a cursed patch of ground that strikes whoever crosses it with a sudden, deadly hunger. It was often said to grow where famine dead lay unburied.",
   the_merrow:
-    'The merrow, Irish murúch, is a sea-woman who wears a red cap to pass beneath the waves; steal it and she cannot go home. Croker\'s "The Soul Cages" (1825) tells of a male merrow who kept drowned sailors\' souls in lobster pots.',
+    "The merrow, Irish murúch, is a sea-woman who wears a red cap to pass beneath the waves; steal it and she cannot go home. Croker's \"The Soul Cages\" (1825) tells of a male merrow who kept drowned sailors' souls in lobster pots.",
   the_sluagh:
     'The sluagh were the host of the restless dead in Highland and Irish belief, flying in flocks out of the west to carry off the souls of the dying. Alexander Carmichael recorded these beliefs in Carmina Gadelica (1900).',
   night_mare_of_the_barrow:
@@ -75,14 +78,18 @@ export const CARD_LORE: Record<string, string> = {
   the_good_peoples_cup:
     "People in Ireland and Scotland spoke of the fairies by flattering names, 'the Good People' or 'the Gentry', so as not to offend them. A drop of milk or the first of the drink was often left out for them.",
   the_may_queen:
-    'May Eve and Bealtaine were thresholds when the fairies were most abroad; villages crowned a May Queen and decked May bushes against them. Tennyson\'s "The May Queen" was one of the best-loved poems of its century.',
+    "May Eve and Bealtaine were thresholds when the fairies were most abroad; villages crowned a May Queen and decked May bushes against them. Tennyson's \"The May Queen\" was one of the best-loved poems of its century.",
   // ── The Helix Bureau ──
   aether_diver:
     'Nineteenth-century physicists believed light travelled through a luminiferous aether filling all space. The Michelson–Morley experiment of 1887 found no trace of it, and relativity made it unnecessary.',
+  chromium_fencer:
+    "The line is Mercutio mocking Tybalt in Romeo and Juliet: a duellist who fights strictly by the book, the way a singer reads prick-song, music written out note by note. Electric scoring came to the épée at the 1936 Berlin Olympics, wiring each blade to a box that lights at the touch. The Bureau's fencing master keeps both habits, the measured time and the wire.",
+  night_scope:
+    "Newton wrote of standing on the shoulders of giants to Robert Hooke in February 1676, borrowing an image already old when John of Salisbury credited it to Bernard of Chartres in the twelfth century. The Bureau's night-scope stacks its giants as lenses, brass tube inside brass tube, until the yard it watches is a decade ahead of the one you stand in.",
   walking_dynamo:
     'At the Paris Exposition of 1900 the historian Henry Adams stood among the great dynamos and felt moved to pray to them. He wrote about it in "The Dynamo and the Virgin", a chapter of The Education of Henry Adams.',
   ozone_lieutenant:
-    "Christian Friedrich Schönbein identified ozone in 1840 and named it from the Greek for 'to smell', after the sharp scent of electric sparks. Benjamin Franklin had drawn lightning down a kite string in 1752.",
+    "Christian Friedrich Schönbein identified ozone in 1840 and named it from the Greek ozein, 'to smell', after the sharp scent that hangs about electric sparks. The kite instructions on her plate are from Franklin's own account in the Pennsylvania Gazette of October 1752.",
   phosphor_clerk:
     "Hennig Brand of Hamburg discovered phosphorus in 1669 while boiling down urine in search of the philosopher's stone. The new substance glowed in the dark, and its name means 'light-bearer'.",
   gyro_priest:
@@ -90,7 +97,7 @@ export const CARD_LORE: Record<string, string> = {
   x_ray_confessor:
     "Wilhelm Röntgen discovered X-rays in November 1895; one of his first images showed the bones of his wife Anna Bertha's hand, wedding ring and all. He received the first Nobel Prize in Physics in 1901.",
   the_patent_golem:
-    "The golem of Jewish folklore is a figure of clay brought to life; the Talmud tells that Rava created a man. The best-known legend ties a golem to Rabbi Judah Loew of Prague in the sixteenth century.",
+    'The golem of Jewish folklore is a figure of clay brought to life; the Talmud tells that Rava created a man. The best-known legend ties a golem to Rabbi Judah Loew of Prague in the sixteenth century.',
   broadcast_spire:
     "Samuel Morse sent 'What hath God wrought' from Washington to Baltimore on 24 May 1844. In 1901 Guglielmo Marconi reported receiving a wireless signal across the Atlantic.",
   the_unlicensed_engine:
@@ -99,23 +106,29 @@ export const CARD_LORE: Record<string, string> = {
     'Antoine Lavoisier showed that breathing is a slow burning that consumes oxygen, and named both oxygen and hydrogen. He was guillotined in Paris in 1794.',
   discharge:
     'The Leyden jar, invented in 1745–46, stored electric charge in a glass jar, and gave its experimenters painful shocks. Franklin, who joined many jars into a battery, once stunned himself while trying to kill a turkey with one.',
+  filed_silence:
+    'Pascal left the Pensées as bundles of loose notes when he died in 1662, and his friends published a selection in 1670. The Bureau files its silences the same way, tied with tape and stamped pending, and a plate placed under one cannot move or strike until the docket is called.',
   melt_the_barrels:
-    'President Eisenhower gave his "Chance for Peace" speech on 16 April 1953, weeks after Stalin\'s death, counting the cost of every gun and warship in schools and hospitals not built.',
+    "President Eisenhower gave his \"Chance for Peace\" speech on 16 April 1953, weeks after Stalin's death, counting the cost of every gun and warship in schools and hospitals not built.",
   spare_helix:
     "James Watson and Francis Crick described the double helix of DNA in Nature on 25 April 1953. Rosalind Franklin's X-ray photograph of DNA, Photo 51, was key evidence.",
+  chief_adler:
+    "Chief Adler runs the Helix Bureau from a room of patent drawers, and holds that whatever is filed in them belongs to the Bureau, bodies included. His motto is Francis Bacon's 'ipsa scientia potestas est', from the Meditationes Sacrae of 1597. A unit he stamps cannot be picked out by a marksman, and the first point of any blow against it is lost in the paperwork.",
   // ── The Monad Faculty ──
   salt_magister:
     'The Emerald Tablet is a brief, cryptic text credited to Hermes Trismegistus and treasured by alchemists. Isaac Newton made his own English translation of it.',
   the_living_equation:
-    "Leibniz's Monadology (1714) holds that the world is made of monads, simple substances without parts, each mirroring the whole universe from its own point of view.",
+    "Galileo wrote in The Assayer (1623) that the book of the universe is written in the language of mathematics, in triangles, circles and other figures. The Faculty's Living Monad is a soul that took on weight in that language: slow to rise and hard to wound, it will not settle until both sides have moved.",
   projection_fellow:
     'Plotinus (c. 204–270) founded Neoplatonism, teaching that all things flow from the One and that the soul can return to it by turning inward. His pupil Porphyry gathered his writings as the Enneads.',
   athanor_keeper:
     "An athanor was the alchemist's furnace, built to hold a steady, gentle heat for days or weeks. The name comes through Arabic al-tannur, 'the oven'.",
   cipher_novice:
-    "Euclid's Elements, written around 300 BC, was used as a geometry textbook for more than two thousand years. Proclus tells that Euclid told King Ptolemy there was no royal road to geometry.",
+    'Proclus, the fifth-century head of the Platonic school at Athens, tells in his commentary on Euclid that the geometer told King Ptolemy there was no royal road to geometry. Novices of the Veil hear the story on their first day; they spend a rite finding their feet before they may act, and every fellow mustered after them brings them a card.',
   the_golden_lemma:
-    "The Pythagoreans held that number was the principle of all things, as Aristotle reports in the Metaphysics. They found that musical harmony follows simple ratios of whole numbers.",
+    'Aristotle reports in the Metaphysics that the Pythagoreans took the whole heaven to be a musical scale and a number. The Golden Visage is a small sun of beaten gold that the Faculty tuned to that scale, and its light lifts the bank and makes every neighbouring soul strike harder.',
+  flask_archivist:
+    "Leibniz wrote in the Monadology (1714) that every portion of matter is like a garden full of plants or a pond full of fishes, life folded inside life. The Faculty's flask archivist takes him at his word: each labelled jar on her shelves holds a homunculus, and she files them by what will be asked for next, which is how she knows the plate you meant to draw.",
   the_fixed_star:
     "The 'fixed stars' were the stars that keep their places against each other, unlike the wandering planets. Kant ended the Critique of Practical Reason (1788) with his awe at the starry heavens and the moral law.",
   abacus_saint:
@@ -123,15 +136,17 @@ export const CARD_LORE: Record<string, string> = {
   the_remainder:
     "Ludwig Wittgenstein's Tractatus Logico-Philosophicus (1921) ends with the line 'Whereof one cannot speak, thereof one must be silent.' He wrote much of it as a soldier in the First World War.",
   the_non_euclidean:
-    'In 1823 the young Hungarian János Bolyai wrote to his father that he had created a new universe: a geometry in which the parallel postulate fails. Nikolai Lobachevsky reached the same geometry independently.',
+    "In 1823 János Bolyai, a young Hungarian officer of the Austrian army engineers, wrote to his father that he had created a strange new universe out of nothing: a geometry in which the parallel postulate fails. The Closed Eye is the Faculty's name for what waits on the far side of such geometry, a face novices are forbidden to look at, which no strike can find and which makes its neighbours hit harder.",
   solid_of_the_fifth:
     "Plato's Timaeus matches four regular solids to earth, air, fire and water. The fifth, the dodecahedron, the god used for the whole cosmos.",
   strike_the_term:
-    "In the General Scholium added to the Principia in 1713, Newton wrote 'Hypotheses non fingo', I frame no hypotheses, refusing to guess at the cause of gravity.",
+    "In the General Scholium added to the Principia in 1713, Newton declined to guess at the cause of gravity, writing 'hypotheses non fingo', I frame no hypotheses. The Faculty strikes a name the same way, by refusing to assert it, and the named plate goes back unspoken to the hand it came from.",
   two_lemmas:
     "Pascal wrote his Provincial Letters (1656–57) under a false name, mocking the Jesuits' moral reasoning. The pope had them condemned, and Louis XIV had them burned.",
   aqua_fortis:
     "Aqua fortis, 'strong water', was the alchemists' name for nitric acid. Assayers used it to part silver from gold, which it cannot dissolve.",
+  faculty_advance:
+    "Aristotle notes in the Nicomachean Ethics that money is called nomisma because it exists by nomos, custom or law, and not by nature. The Faculty's bursar takes that as licence to lend against workings not yet begun, advancing a coin and a plate to any fellow who signs the book.",
   rector_of_the_monad:
     "Leibniz wrote that monads 'have no windows', nothing can enter or leave them. Each unfolds its own nature in a harmony set in advance by God.",
   // ── The Iconostasy ──
@@ -150,7 +165,7 @@ export const CARD_LORE: Record<string, string> = {
   kupala_flame:
     'Kupala Night, at midsummer, is a Slavic festival of bonfires that young people leap over and wreaths floated on rivers. Legend held that the fern blossomed only on that night.',
   dvorovoi:
-    "The dvorovoi is the yard spirit of Russian folklore, kin to the domovoi of the house. He was said to dislike animals with white fur.",
+    'The dvorovoi is the yard spirit of Russian folklore, kin to the domovoi of the house. He was said to dislike animals with white fur.',
   the_black_monk:
     "In Anton Chekhov's story \"The Black Monk\" (1894), a brilliant scholar is visited by a phantom monk who tells him he is a genius. When he is cured of the vision, he loses his joy and his gift.",
   alkonost:
@@ -158,20 +173,22 @@ export const CARD_LORE: Record<string, string> = {
   the_pike_tsar:
     "In the Russian folktale of Emelya the Fool, a lazy youth spares a magic pike, which grants his every wish 'by the pike's command'. His stove even carries him to the tsar's palace.",
   the_grave_candle:
-    "Welsh folklore tells of the canwyll corff, the corpse candle: a small light seen gliding toward the churchyard along the road a funeral will take. Its colour was said to foretell whose death was coming.",
+    "In Polish and other Slavic belief, the wandering lights seen over marshes and graveyards, the błędne ogniki, were taken for souls of the dead who could find no rest. Orthodox families still carry candles to the graves at Radonitsa, the spring day of remembering the dead after Easter. The Iconostasy's grave candle is one of those lights that never went out, and no hand or shot can find it.",
   bark_knot:
-    'The Jesus Prayer, "Lord Jesus Christ, Son of God, have mercy on me", is repeated without ceasing in Orthodox practice. The Way of a Pilgrim, a nineteenth-century Russian tale, follows a wanderer who learns it.',
+    'Birch-bark letters from medieval Novgorod, first dug up on 26 July 1951, preserve everyday notes, names and prayers scratched into white bark. The prayer on this plate is the Jesus Prayer, repeated without ceasing by the wandering hero of The Way of a Pilgrim; tied round a name in bark, it holds the named plate still for a rite.',
   break_the_face:
     'During the Byzantine Iconoclasm of the eighth and ninth centuries, emperors had icons destroyed as idols. John of Damascus wrote their defence, arguing that he worshipped the Creator, not the matter.',
+  out_of_the_house:
+    'Abba Moses the Black, a former robber who became one of the Desert Fathers, told a brother asking for a word to go and sit in his cell, for the cell would teach him everything. The yard spirit has a rougher version of the same counsel: a guest who lingers past the cooling of the stove is shown the gate and sent back to the hand he came from.',
   coals_of_the_stove:
-    "Theophan the Recluse (1815–1894) was a Russian bishop who gave up his see to live in seclusion and write on prayer. Much of his advice was gathered in The Art of Prayer.",
+    'Theophan the Recluse (1815–1894) was a Russian bishop who gave up his see to live in seclusion and write on prayer. Much of his advice was gathered in The Art of Prayer.',
   father_of_the_last_icon:
     "'Beauty will save the world' is an idea attributed to Prince Myshkin in Dostoevsky's The Idiot (1869). The novel's 'holy fool' hero is a type long honoured in Russian piety.",
   // ── The Briar Sidhe ──
   cailleach_of_the_thorn:
-    'The Cailleach is the divine hag of Irish and Scottish myth, a winter power said to have shaped mountains and to keep the deer. Yeats\'s "The Hosting of the Sidhe" (1899) calls up the fairy host riding from Knocknarea.',
+    "The Cailleach is the divine hag of Irish and Scottish myth, a winter power said to have shaped mountains and to keep the deer. Clooth-na-Bare in Yeats's line is a form of Cailleach Bhéarra, the Hag of Beara; his note says she roamed the world seeking a lake deep enough to drown her fairy life, and found it in little Lough Ia in Sligo.",
   sidhe_knight:
-    "In Irish myth the Tuatha Dé Danann withdrew into the sídhe, the hollow hills, when the Milesians took Ireland. Their descendants were the aos sí, the people of the mounds.",
+    "In the Border ballad Tam Lin (Child 39), a mortal knight held by the Queen of Fairies rides in her procession on Hallowe'en, and Janet wins him back by pulling him from his milk-white steed at Miles Cross and holding him through every shape he is turned into. The sidhe knight is one of the riders no one pulled down, and he strikes out of the hollow hill so fast that a killing blow is never answered.",
   puck_of_the_gate:
     "Puck, or Robin Goodfellow, is a mischievous sprite of English folklore who misleads travellers and plays tricks in the dairy. Shakespeare made him Oberon's servant in A Midsummer Night's Dream.",
   leanan_of_the_well:
@@ -185,30 +202,32 @@ export const CARD_LORE: Record<string, string> = {
   redcap:
     'Redcaps are murderous goblins of the Anglo-Scottish border, said to haunt ruined towers and dye their caps in the blood of travellers. William Henderson described them in 1866.',
   the_green_man:
-    "The Green Man is a carved face made of, or sprouting, leaves, found in medieval churches across Europe. The name was given to these carvings by Lady Raglan in 1939.",
+    'The Green Man is a carved face made of, or sprouting, leaves, found in medieval churches across Europe. The name was given to these carvings by Lady Raglan in 1939.',
   banshee_of_the_barrow:
-    "The banshee, bean sí, 'woman of the fairy mound', keens to foretell a death in certain old Irish families.",
+    "The banshee, bean sí, 'woman of the fairy mound', keens to foretell a death in certain old Irish families. A comb found lying by the road was best left alone, for folk tradition said it might be hers. The Briar Sidhe's banshee keens from the mound itself, and her cry reaches its mark before anyone can answer.",
   the_each_uisge:
     'The each-uisge is the Highland water-horse of sea lochs, said to be deadlier than the kelpie. It carried riders into the deep and devoured them, and only the liver washed ashore.',
   will_of_the_marsh:
     "The will-o'-the-wisp, ignis fatuus or 'foolish fire', is a faint light over marshes that was said to lead travellers astray. It is now usually put down to marsh gas igniting.",
   hawthorn_lock:
-    'Thomas of Erceldoune, a thirteenth-century Scottish laird, was said to have been carried off to Elfland by its queen and returned with the gift of prophecy. The ballad of Thomas the Rhymer tells the tale.',
+    'In the ballad of Thomas the Rhymer the Queen of Elfland shows Thomas three roads: the narrow path of righteousness thick with thorns and briars, the broad road of wickedness, and the bonny road to fair Elfland. A hawthorn lock sets the first of those roads around a plate, which stands hedged in thorn and cannot move or strike on its next rite.',
+  the_wild_courtesy:
+    "Puck speaks the epilogue of A Midsummer Night's Dream, asking the audience to think they have only slumbered and dreamed the play. Fairy hospitality in the old tales is just as double-edged, for a mortal who eats the food of the sidhe may never leave, so the courteous host sends a guest home before the meal is served.",
   milk_and_iron:
-    'Kipling\'s poem "Cold Iron" appeared in Rewards and Fairies (1910). Old belief held that fairies could not abide iron.',
+    "Kipling's 'Cold Iron' accompanies the opening story of Rewards and Fairies (1910), the sequel to Puck of Pook's Hill, in which Puck tells two Sussex children tales of England's past. Its refrain sets iron above gold, silver and copper as master of them all, and whatever crossed the stile uninvited takes two wounds from it.",
   rowan_nail:
     'In Scotland and Ireland the rowan, or mountain ash, was a charm against witches and fairies, tied with red thread over doors and byres. The Scottish rhyme says rowan and red thread put the witches to their speed.',
   the_whitethorn_queen:
     'In the ballad of Thomas the Rhymer (Child Ballad 37) the Queen of Elfland meets Thomas under the Eildon tree and takes him away for seven years.',
   // ── The Mercury Works ──
   coil_saint:
-    'Michael Faraday discovered electromagnetic induction in 1831, the principle behind every dynamo and transformer. A blacksmith\'s son with little schooling, he became the greatest experimenter of his age.',
+    "Michael Faraday discovered electromagnetic induction in 1831, the principle behind every dynamo and transformer. A blacksmith's son with little schooling, he became the greatest experimenter of his age.",
   gas_mask_chemist:
     'Chlorine gas was first used on a large scale at Ypres on 22 April 1915. Wilfred Owen, who wrote "Dulce et Decorum Est", was killed one week before the Armistice in 1918.',
   cathode_acolyte:
     'William Crookes built the vacuum tubes in which he studied the glowing "radiant matter" now known as cathode rays. He also investigated spiritualist mediums, including Florence Cook.',
   ray_rifleman:
-    "H. G. Wells gave his Martians a heat-ray in The War of the Worlds (1898). In the 1920s and 1930s several inventors, Harry Grindell Matthews among them, claimed to have built real death rays.",
+    'H. G. Wells gave his Martians a heat-ray in The War of the Worlds (1898). In the 1920s and 1930s several inventors, Harry Grindell Matthews among them, claimed to have built real death rays.',
   brass_automaton:
     "Julien Offray de La Mettrie argued in Man a Machine (1747) that the body is a self-winding mechanism. Jacques de Vaucanson's mechanical duck of 1739 appeared to eat and digest.",
   the_patent_airship:
@@ -220,7 +239,9 @@ export const CARD_LORE: Record<string, string> = {
   radium_sister:
     'Marie and Pierre Curie announced the discovery of radium in 1898. In the 1920s the American "Radium Girls" who painted luminous watch dials, licking their brushes to a point, fell gravely ill.',
   trench_radio:
-    "Alexander Graham Bell made the first telephone call on 10 March 1876. By the First World War, field telephones and wireless sets carried orders along the trenches.",
+    'Alexander Graham Bell made the first telephone call on 10 March 1876. By the First World War, field telephones and wireless sets carried orders along the trenches.',
+  the_walking_lamp:
+    "Book III of Paradise Lost opens with Milton's hymn to light, 'Hail, holy Light', written after he had gone completely blind around 1652. The Works' walking lamp is a cast-iron street standard that pulled itself out of the yard one night and now marches with the crews, firing straight down the line and brightening every fist beside it.",
   null_tank:
     'Tanks first went into battle at Flers–Courcelette on the Somme on 15 September 1916. They were called "tanks" at first to keep their purpose secret.',
   overload:
@@ -235,11 +256,11 @@ export const CARD_LORE: Record<string, string> = {
     "Mary Shelley's Frankenstein (1818) was begun at the Villa Diodati in 1816 during a ghost-story contest with Byron. Its subtitle is The Modern Prometheus.",
   // ── The Closed Proof ──
   geometer_of_the_circle:
-    "Archimedes was killed when the Romans took Syracuse in 212 BC. The story goes that he was drawing figures in the sand and told the soldier not to disturb his circles.",
+    "Valerius Maximus tells that when Syracuse fell in 212 BC, Archimedes was bent over figures in the dust and begged the Roman soldier not to disturb them. The Closed Proof's Seer of the Threshold keeps that plea as a ward; she reads a blow in the dark before it is thrown, and the plate beside her strikes on what she sees.",
   quicksilver_fellow:
     "Quicksilver, the metal mercury, was one of the alchemists' principles of all metals. Zeno of Elea's paradox claims that swift Achilles can never overtake a tortoise with a head start.",
   homunculus_clerk:
-    "A text credited to Paracelsus, De Natura Rerum (1537), gives a recipe for growing a homunculus, a tiny artificial man, in a sealed flask.",
+    'A text credited to Paracelsus, De Natura Rerum (1537), gives a recipe for growing a homunculus, a tiny artificial man, in a sealed flask.',
   vitriol_reader:
     "'Oil of vitriol' was the old name for sulphuric acid, made from the glassy crystals the alchemists called vitriols. Francis Bacon's essay Of Studies weighs which books deserve tasting and which digesting.",
   the_walking_thesis:
@@ -247,24 +268,32 @@ export const CARD_LORE: Record<string, string> = {
   azoth_lecturer:
     "Éliphas Lévi, born Alphonse Louis Constant, was the most influential French occultist of the nineteenth century; his Dogme et Rituel de la Haute Magie appeared in 1854–56. Azoth was the alchemists' name for a universal medicine or for mercury.",
   cabalist_of_number:
-    "John Dee wrote the Mathematical Preface to the first English Euclid in 1570. Mathematician and adviser to Elizabeth I, he also spent years trying to speak with angels through the scryer Edward Kelley.",
+    'John Dee wrote the Mathematical Preface to the first English Euclid in 1570. Mathematician and adviser to Elizabeth I, he also spent years trying to speak with angels through the scryer Edward Kelley.',
   retort_warden:
     'The Mutus Liber, the "Silent Book", printed at La Rochelle in 1677, tells the whole alchemical work in fifteen plates with almost no words. A retort is the long-necked flask in which matter was distilled.',
   sealed_formula:
     "Around 1637 Pierre de Fermat wrote in a margin that he had a marvellous proof which the margin was too small to hold. Fermat's Last Theorem was finally proved by Andrew Wiles in 1994.",
   azoth_swordsman:
     "Paracelsus was often portrayed with a long sword, and legend said its pommel held his 'Azoth', a secret medicine. His motto, 'let no man belong to another who can belong to himself', appears on his 1538 portrait.",
+  the_impossible_solid:
+    "Bertrand Russell's quip that in mathematics we never know what we are talking about first appeared in a 1901 essay and was reprinted in Mysticism and Logic (1917). The Closed Proof keeps its Forbidden Presence on those terms: no fellow can say what it is or whether it is there, so blows slide off its first layer and no marksman can find it.",
+  proof_that_walks:
+    "'All things excellent are as difficult as they are rare' is the closing sentence of Spinoza's Ethics, published in 1677, months after his death. The Veiled Presence is rare in that sense, seldom seen and quick to strike, and never alone, for whoever glimpses the body under the veil falls in behind it and hits harder.",
   cancel_the_term:
-    "The Tao Te Ching, credited to Laozi, opens by saying that the Tao which can be named is not the eternal Tao. Its short chapters became a founding text of Taoism.",
+    'The Tao Te Ching, credited to Laozi, opens by saying that the Tao which can be named is not the eternal Tao. Its short chapters became a founding text of Taoism.',
   the_short_proof:
     "Vitruvius tells how Archimedes, stepping into a bath, saw how to test whether King Hiero's crown was pure gold, and ran home crying 'Eureka!'",
   vitriol:
-    'Vitriol was the alchemists\' name for the sulphates and the acid made from them. The motto V.I.T.R.I.O.L., "visit the interior of the earth, and by rectifying you will find the hidden stone", was read as an acrostic of the Great Work.',
+    "Heraclitus of Ephesus, writing around 500 BC, called war the father and king of all, holding that the world is made by the strife of opposites. The alchemists drew their 'green oil' by roasting green vitriol, crystals of iron sulphate, until a fuming acid came over, and the Closed Proof throws it as a two-point wound.",
+  loan_of_the_faculty:
+    "Seneca's first letter to Lucilius warns that nothing is truly ours except time, which most people squander while guarding their money. The Closed Proof's lending office turns the advice around, advancing coin and a plate freely and collecting the interest later in hours, out of the borrower's own working.",
+  provost_of_the_azoth:
+    'In the Seventh Letter, whose authorship scholars still debate, Plato says the highest knowledge cannot be written down but is kindled in the soul all at once, like light from a leaping spark. The Provost of the Azoth teaches only that way: a hand laid on a living fellow, a sudden strengthening, and a vision the provost keeps as fee.',
   // ── The Birch Vigil ──
   volkhv_of_the_birches:
-    "The volkhvy were the pagan priest-sorcerers of early Rus. The Primary Chronicle tells how one foretold that Prince Oleg would die by his horse, the tale Pushkin retold in 1822.",
+    'The volkhvy were the pagan priest-sorcerers of early Rus. The Primary Chronicle tells how one foretold that Prince Oleg would die by his horse, the tale Pushkin retold in 1822.',
   leshy:
-    "The leshy is the lord of the forest in Slavic folklore, able to grow tall as the trees or small as a leaf, and to lead travellers in circles. Turning your clothes inside out was said to break his spell.",
+    'The leshy is the lord of the forest in Slavic folklore, able to grow tall as the trees or small as a leaf, and to lead travellers in circles. Turning your clothes inside out was said to break his spell.',
   rusalka:
     'Rusalki are water spirits of Slavic folklore, often the restless ghosts of young women who drowned. They were thought most dangerous in Rusalka Week, at the start of summer.',
   domovoi:
@@ -279,120 +308,298 @@ export const CARD_LORE: Record<string, string> = {
     'The kikimora is a female house spirit of Slavic folklore who spins at night and torments the household if it is badly kept. Anatoly Lyadov wrote a tone poem about her in 1909.',
   polevik:
     "The polevik is a field spirit of East Slavic folklore. With the poludnitsa, the 'noon lady', he was blamed for harm that came to workers in the fields at midday.",
+  the_black_icon:
+    "Old Russian icons darken over the centuries as their drying-oil varnish and candle soot build up, until the image is nearly lost; restorers in the early twentieth century began cleaning them back to the first colours. In War and Peace Tolstoy gives the old field marshal Kutuzov the faith that patience and time win wars, and the Vigil's black icon fights the same way, last and unhurried, shrugging off the first point of every blow.",
   vodyanoy:
     'The vodyanoy is the water spirit of Slavic folklore, an old man with a frog-like face and a green beard who drowns those who bathe after dark. Millers made offerings to him to protect their dams.',
   upir_of_the_chapel:
-    'Upir is the old East Slavic word for a vampire. In Gogol\'s story "Viy" (1835) a seminarian must read the psalter for three nights over a dead witch in a chapel, until the monstrous Viy is summoned.',
+    "Upir is the old East Slavic word for a vampire. In Gogol's story \"Viy\" (1835) a seminarian must read the psalter for three nights over a dead witch in a chapel, until the monstrous Viy is summoned.",
   the_birch_knot:
-    'The birch is at the heart of Slavic spring rites, when girls wove and curled its branches. The folk song "In the field a birch tree stood" appears in the finale of Tchaikovsky\'s Fourth Symphony.',
+    "The birch is at the heart of Slavic spring rites, when girls wove and curled its branches. The folk song \"In the field a birch tree stood\" appears in the finale of Tchaikovsky's Fourth Symphony.",
+  icon_smash:
+    "Nietzsche subtitled Twilight of the Idols 'How to Philosophize with a Hammer', and its preface claims the world holds more idols than realities. The Vigil's mad monk takes the hammer literally, and the gilt of a broken panel cuts deep into whatever stood in front of it.",
+  homeward:
+    "'V gostyakh khorosho, a doma luchshe', visiting is good but home is better, is one of the commonest Russian sayings, said at the end of a stay. In the Vigil's telling the domovoi has his own way of ending a visit: the stove cools, the latch lifts, and the guest finds himself back in his owner's hand.",
   stove_of_the_hut:
     "Baba Yaga's hut stands on chicken legs, and the hero bids it turn its back to the forest and its front to him. Alexander Afanasyev published his great collection of Russian folktales from 1855.",
   the_mad_starets:
     'A starets is an elder of Orthodox monasticism, sought out for spiritual counsel. Grigori Rasputin was popularly called one, though he never held any such office.',
   // ── The Vril Syndicate ──
+  coil_novice:
+    "In Plato's Theaetetus Socrates tells the young mathematician Theaetetus that wonder is where philosophy begins, and that whoever made Iris the child of Thaumas, 'Wonder', knew his genealogy. A Syndicate novice begins with a single coil lit in the chest at initiation: cheap, but enough to keep him on his feet after the first blow.",
+  gyro_rocketeer:
+    "Pappus of Alexandria credits Archimedes with the boast that, given a place to stand, he could move the earth with a lever. The Syndicate's rocketeers lean on a different fulcrum, a spinning gyroscope bolted between the shoulders, and they land the first blow because they arrive before the target has turned.",
   trench_revenants:
-    'Laurence Binyon wrote "For the Fallen" in September 1914, in the first weeks of the war. Its fourth stanza is still read at Remembrance services.',
+    "Laurence Binyon wrote 'For the Fallen' in September 1914, in the first weeks of the war, and its fourth stanza is still read at Remembrance services. The Syndicate's revenants are dead infantry held upright by coil-braced coats; they fight, but no ground they cross is ever claimed.",
+  brass_count:
+    "The saying comes from Aesop's fable of the miser who buried his gold, lost it to a thief, and was told to bury a stone in its place, since he had never meant to use the gold anyway. The Syndicate's brass counts learned the lesson, and keep every coin working in the coil yards so the bank grows each rite they stand.",
+  charged_fusilier:
+    "King Henry's 'Once more unto the breach' speech in Shakespeare's Henry V calls on his men to imitate the tiger when the blast of war blows in their ears. The real siege of Harfleur in 1415 ended after weeks of bombardment by English guns. A Syndicate fusilier carries his charge in a coil on his back, and when he falls it lets go on everyone in the next tile.",
+  rune_smith:
+    "The Sefer Yetzirah, the Book of Formation, is an early Jewish mystical text in which God creates the world by combining the twenty-two letters of the Hebrew alphabet. The Syndicate's rune smiths letter their steel on the same principle, and every fallen comrade is salvage that pays into the bank for the next plate.",
+  faustian_coilwright:
+    "Faust's cry that two souls dwell in his breast comes during the Easter walk outside the city gate in Goethe's Faust, Part One (1808), just before Mephistopheles follows him home as a black poodle. The coilwright made the same bargain with less poetry: sacrifice him, and his last equation pays out three resources.",
+  pit_mechanic:
+    "Francis Bacon's Novum Organum (1620) holds that nature, to be commanded, must be obeyed, by first learning its causes. The pit mechanic knows his engines that well, which is how he knows exactly where to drop the spanner when he decides to turn one, and himself, into a crater beside the enemy.",
   hex_banner:
     "Before the Battle of the Milvian Bridge in 312, Constantine is said to have seen a sign in the sky with the words 'in this sign you will conquer'. He won, and became the first Christian emperor.",
+  blitz_fusilier:
+    "In Lionel Giles's 1910 translation of The Art of War the line reads 'Rapidity is the essence of war', with the advice to strike where the enemy is unready. The blitz fusilier passes that rapidity on: he burns out his own coil to charge another soldier's legs, and the gift outlives the giver.",
   initiate_of_the_coil:
-    "'As above, so below' is the usual short form of a line from the Emerald Tablet, the founding text of Hermetic alchemy.",
+    "'As above, so below' compresses the Emerald Tablet's line that what is above is like what is below, a text first known from medieval Arabic sources. The Syndicate swears its lamp-bearers on it, holding that the coil lit in the chest mirrors the vril beneath the earth, and each time an initiate is fed it burns a little brighter.",
+  vault_engineer:
+    "Alexander Pope's Essay on Man (1733–34) declares that order is Heaven's first law, and that some are and must be greater than the rest. The vault engineer builds that order in riveted steel beneath the Syndicate's yards, where interest compounds behind locked doors and the bank yields two each rite he stands.",
   night_zeppelin:
     'German Zeppelins first bombed Britain in January 1915, crossing the North Sea at night. Searchlights and incendiary bullets eventually made the raids costly.',
+  coil_undersider:
+    "Marcus Aurelius wrote the Meditations as private notes, much of it on campaign, and in Book VII urges himself to dig within, where the fountain of good will always well up. The Syndicate's undersiders live in the service tunnels and surface only to fight; long practice lets them close the distance before anyone sees the hatch open.",
+  coil_berserk:
+    "Horace's line 'ira furor brevis est', anger is a brief madness, comes from his Epistles. The berserkers of Old Norse saga were warriors said to fight in a trancelike fury, their name usually read as 'bear-shirts'. The coil berserk pays for his size the same way, losing a random card from the hand as the rage comes on.",
+  night_aviator:
+    "The line is one of William Blake's Proverbs of Hell, in The Marriage of Heaven and Hell (c. 1790). The Syndicate's night aviators fly coil-lit gliders over the field and choose each pass: a shot from above that goes unanswered, or a dive into an honest fight.",
+  runed_myrmidon:
+    "Heraclitus's fragment 'ēthos anthrōpōi daimōn' is usually rendered 'character is destiny'. The Myrmidons were Achilles' warriors in the Iliad, and Ovid tells that Zeus made them from ants for King Aeacus. A Syndicate myrmidon is etched with a working alphabet that must be paid two each rite, or he stands as still as the ants he came from.",
   champion_of_the_inner_earth:
-    'In 1818 John Cleves Symmes Jr. announced that the Earth was hollow, with openings at the poles. Bulwer-Lytton set his Vril-wielding race in caverns beneath the earth.',
+    "In 1818 John Cleves Symmes Jr. announced that the Earth was hollow, with openings at the poles. The Syndicate's champion is said to come up from that hollow, and it costs a fortune to bring to the surface and ends most arguments once it gets there.",
+  amulet_of_the_coil:
+    'Paracelsus wrote in his Seven Defences (1538) that all things are poison and only the dose decides, a principle toxicology still credits to him. The amulet of the coil measures the dose in a single wearer: it burns him out completely and spends the overflow as three wounds on everyone beside him.',
+  waking_the_sleeper:
+    "Swami Vivekananda made 'Arise! Awake! and stop not till the goal is reached' a rallying cry in the 1890s, adapting a verse of the Katha Upanishad. The Syndicate's sleeper is something older, kept dormant under the coil yards; it wakes only to unmake one enemy, and rousing it costs a card from the hand.",
+  industrial_rite:
+    "'Labor omnia vincit' is a famous misquotation: Virgil's Georgics has 'labor omnia vicit improbus', relentless toil conquered everything, describing the hard work that followed the end of the Golden Age. The Syndicate's industrial rite takes the motto at face value, feeding one of its own into the works and drawing twice his cost back out.",
   chlorine_psalm:
     "'Now I am become Death, the destroyer of worlds' is J. Robert Oppenheimer's rendering of a line from the Bhagavad Gita, which he said came to him at the Trinity test of July 1945.",
-  foo_fighter:
-    "'Foo fighters' was the name Allied airmen gave to strange glowing lights that seemed to pace their aircraft over Europe and the Pacific in 1944–45. No explanation was ever settled.",
+  runaway_mint:
+    "In the Enchiridion Epictetus advises never to say of anything 'I have lost it', only 'I have given it back', since nothing was ever truly ours. The runaway mint makes both sides practise the lesson: the presses run until every bank on the table is empty, and whoever started them is left holding a single card.",
+  the_rune_colonel:
+    "Chapter 7 of the Tao Te Ching says the sage puts himself last and so comes first. The Rune Colonel commands the Syndicate's line from behind it, and his one great order costs a soldier of his own: the man is unmade, and the blast takes two from everyone beside him.",
+  the_iron_saint:
+    "Seneca's essay On Providence argues that the gods try good men with hardship as fire tries gold. The Iron Saint is the Syndicate's patron of that idea, a figure of riveted plate said to have been forged rather than born; once in a sitting the saint lays a hand on a soldier, who moves and strikes at once.",
   vril_wyrm:
     "G. K. Chesterton's essay in Tremendous Trifles (1909) defends fairy tales: children already know the dragon, the tale gives them the St. George to kill it.",
+  foo_fighter:
+    "'Foo fighters' was the name Allied airmen gave to strange glowing lights that seemed to pace their aircraft over Europe and the Pacific in 1944–45. No explanation was ever settled.",
   // ── Order of the Lead Dawn ──
+  ash_lice:
+    "Sherlock Holmes tells Watson in 'A Case of Identity' (1891) that it has long been an axiom of his that the little things are infinitely the most important. The Lead Dawn's ash-lice prove the point: grave-lice kept in a lead snuffbox, too small to be worth a blow, which bite once and will not let go.",
+  parish_tithe_lord:
+    'The tithe was a tenth of the produce of the land, owed to the parish church. In England the last of it was extinguished by the Tithe Act of 1936.',
+  candle_warden:
+    "The verse is from the Sermon on the Mount, where Jesus tells his hearers that no one lights a candle to hide it under a bushel. The Lead Dawn's candle warden sets its light at the edge of a working, and every enemy it falls on is pinned where it stands, unable to move or attack.",
   saturn_medium:
-    'In alchemy and astrology lead was the metal of Saturn, the slowest of the planets known to the ancients, ruler of melancholy and of old age.',
+    "Physicians once called lead poisoning saturnism, after the planet that ruled the metal, and the gout it brings on is still termed saturnine. The line on the plate is Prospero's, spoken in The Tempest as he breaks off the masque of spirits he has conjured. The Lead Dawn's medium speaks through a mouthful of lead shot, and spits one at a neighbour each rite.",
+  devoted_clerk:
+    "Kahlil Gibran's The Prophet (1923) gathers the sermons of the prophet Almustafa before he sails home, and its chapter on work calls work love made visible. The Lead Dawn's parish clerk keeps the books in that spirit, and the parish pays a coin into the bank each rite he stands.",
+  cellar_informant:
+    "Poor Richard's Almanack for 1735 warns that three may keep a secret, if two of them are dead. The cellar informant has never worried about the other two; he sells the plan of a house's foundations to the Lead Dawn, and every sale is scored as ground gained.",
+  ancestral_cinder:
+    'The command to honour father and mother stands among the Ten Commandments in Exodus, and Paul calls it the first commandment with a promise attached. The Lead Dawn honours its grandfathers more literally, keeping their cinders in lead urns, and once in a sitting a family coal pressed to a living fighter hardens him against the first blow.',
+  guided_confessor:
+    "Alexander Pope wrote 'To err is human, to forgive, divine' in An Essay on Criticism (1711), when he was in his early twenties. The Lead Dawn's confessor hears sins with a spirit at his shoulder, and the same unseen hand turns aside the first point of every strike aimed at him.",
   strix_widow:
     "The strix of Roman legend was a night bird of ill omen that fed on human flesh and blood. Its name survives in the Italian strega, 'witch'.",
+  feral_cantor:
+    "'Without music, life would be a mistake' is one of the short maxims near the start of Nietzsche's Twilight of the Idols (1889). The feral cantor was a Lead Dawn choirmaster who went into the woods and came back singing in no known mode, and his hymn, laid on a fighter like a hand, makes its blows land harder.",
+  hearth_imp:
+    "The Irish proverb 'Níl aon tinteán mar do thinteán féin', there's no hearth like your own hearth, is still said on coming home. The Lead Dawn's hearth imp is that saying with teeth: a sooty creature that settles on a resource and makes it bank twice for its master.",
   unblinking_penitent:
-    'In Poe\'s "The Cask of Amontillado" (1846), Montresor walls his enemy up alive in the catacombs during carnival. The last words of the victim are the plea on this plate.',
+    "In Poe's \"The Cask of Amontillado\" (1846), Montresor walls his enemy up alive in the catacombs during carnival. The last words of the victim are the plea on this plate.",
+  ridden_guard:
+    "John Heywood's book of English proverbs (1546) records that what is bred in the bone will not out of the flesh. The ridden guard is an estate watchman with something older sitting in him, wearing his coat and his habits, and whatever rides him closes on intruders faster than the man ever did.",
+  river_bride:
+    "Plato's Cratylus reports Heraclitus as saying that everything flows and that you could not step into the same river twice. The river bride of the Lead Dawn passes over ground the way water does: she can be mustered like any other, but she leaves every tile's ownership as she found it.",
   hoarfrost_saint:
     'Samuel Taylor Coleridge wrote "Frost at Midnight" in 1798 while sitting up beside his sleeping infant son.',
+  the_lead_bear:
+    "John Muir, who spent decades walking the Sierra Nevada and helped found the Sierra Club in 1892, insisted that bears were made of the same dust as people. The Lead Dawn's parish bear is cast in saturnine metal instead of dust, and its lead hide refuses the first point of any strike.",
+  the_birch_king:
+    "Joyce Kilmer published 'Trees' in 1913 and was killed in France in July 1918, during the Second Battle of the Marne. The Birch King is the wood that answered such poems by walking into the city: it preaches nothing, and trades five blows for five wounds.",
+  pallid_aurora:
+    "'We are all in the gutter, but some of us are looking at the stars' is spoken by Lord Darlington in Oscar Wilde's Lady Windermere's Fan (1892). The pallid aurora is a sickly sky-light the Lead Dawn calls down over the whole field, and everyone beneath it, friend or foe, takes a single wound.",
+  the_sunk_stroke:
+    "The verse about spring coming while one sits quietly is usually traced to the Zenrin-kushū, an anthology of Zen phrases compiled in Japan around 1500, and Alan Watts made it famous in English. The sunk stroke is the Lead Dawn's version of that stillness, a blow that lands as heaviness rather than pain, so that the target cannot bring itself to move or attack on its next rite.",
+  mind_mildew:
+    "Ambrose Bierce defined reality as the dream of a mad philosopher in The Devil's Dictionary, collected under that title in 1911 after years as a newspaper column. Mind-mildew is a damp grey spore the Lead Dawn lets settle on a thought, and a fighter it touches spends its next rite unsure that anything is real enough to fight.",
+  lapse_of_nerve:
+    "'Courage is resistance to fear, mastery of fear, not absence of fear' is one of the calendar epigrams that head the chapters of Mark Twain's Pudd'nhead Wilson (1894). A lapse of nerve is the moment that mastery fails: a spent fighter flinches one circle aside, and the Lead Dawn takes the room it gave up.",
+  birch_doll:
+    "The proverb of mighty oaks from small acorns has been current in English in one form or another for centuries. The Lead Dawn's birch doll is a twist of bark and thread tied in a fighter's likeness; slipped into a pocket, it makes the bearer stronger and harder to hurt, and a card comes with it.",
+  leaden_egg:
+    "Milton's sonnet on his blindness, written in the 1650s, ends with the consolation that they also serve who only stand and wait. The 'philosophical egg' was the sealed vessel in which alchemists slowly cooked their matter, and the Lead Dawn's leaden egg rewards the same patience with two cards and two resources when it is cracked.",
+  the_leaden_stare:
+    'Leonardo da Vinci called the eye the window of the soul in his notes comparing painting with poetry, gathered after his death into the Treatise on Painting. The Leaden Stare is a Lead Dawn patron whose gaze weighs like the metal, and once in a sitting it settles on one of its own fighters and adds three to its power.',
+  the_birch_crone:
+    "The Malian writer and ethnologist Amadou Hampâté Bâ told UNESCO in 1960 that in Africa, when an old man dies, a library burns, pleading for oral tradition to be written down. The Birch Crone is the Lead Dawn's keeper of such memory; she knows every path through the grove and can slide a spent fighter onto open ground before the enemy notices.",
   black_shuck:
     'Black Shuck is the ghostly black dog of East Anglian folklore. In August 1577 a black dog was said to have burst into the churches at Bungay and Blythburgh in a storm, killing worshippers.',
   lead_toad:
     'Old belief held that a toad carried a precious jewel, the toadstone, in its head, an antidote to poison. Shakespeare alludes to it in As You Like It.',
-  parish_tithe_lord:
-    'The tithe was a tenth of the produce of the land, owed to the parish church. In England the last of it was extinguished by the Tithe Act of 1936.',
   // ── Sons of the Green Lion ──
+  alley_inquiry:
+    "Bierce's Devil's Dictionary describes existence as a transient, horrible, fantastic dream. The alley inquiry is a gaslight detective who followed a green lane past the edge of the map, and now walks the Sons' streets inside that dream, good for exactly one blow and one wound.",
+  thorn_sprig:
+    "Nietzsche set 'what does not kill me makes me stronger' among the opening maxims of Twilight of the Idols, written in 1888. The Sons' thorn sprig lives by it, a cutting that learned to walk: every rite it survives and every fight it comes through, it puts on another ring of growth.",
+  heath_tithe_maid:
+    "'Whatsoever a man soweth, that shall he also reap' is Paul's warning in his letter to the Galatians. The heath tithe-maid gathers the tenth sheaf for the Sons of the Green Lion, and while she walks the field the bank yields one more each rite.",
+  thieving_pollen:
+    "The verse is from Ecclesiasticus, the Wisdom of Ben Sira, a Jewish book of proverbs from the early second century BC that Protestant Bibles place among the Apocrypha. The thieving pollen is a swarm of jewel-winged bees bred in the Sons' glasshouses, and once in a sitting it strips a point from anything big enough to be worth robbing.",
+  pollen_orator:
+    "Thomas Carlyle brought 'speech is silver, silence is golden' to English readers in Sartor Resartus (1833–34), citing it as a Swiss inscription. The pollen orator has never kept silent in his life, and his speech leaves a spore on the listener that swells, once in a sitting, into an extra point of strength.",
+  lion_initiate:
+    "'Audentes fortuna iuvat', fortune favours the bold, is spoken by Turnus in Book X of Virgil's Aeneid as he leads his men against the Trojan landing. The lion initiate has just been given the order's green fire, and each tile taken in its heat feeds the flame in both fists.",
+  sotted_greenhand:
+    'The Greek poet Alcaeus sang that wine reveals the truth, and Pliny the Elder notes that truth had become proverbially credited to wine. The sotted greenhand drinks fermented sap instead, which has left him so slack and stubborn that it takes four wounds to put him in the hedge.',
+  the_grazing_seven:
+    "Aristotle repeats in several works, the Politics among them, that nature does nothing in vain. The Grazing Seven are pale goats loosed by the Sons on contested ground; wherever they move, they eat the enemy's claims on the tiles around them down to dirt, sparing only strongholds.",
+  hedgerow_driver:
+    "Chapter 37 of the Tao Te Ching says the Tao does nothing, yet leaves nothing undone, the idea of wu wei. The hedgerow driver seems to wander the lanes with his cart at random, but every tile he takes pays a toll into the Sons' bank.",
+  orchard_landlord:
+    "Henry van Dyke, the American clergyman who wrote The Other Wise Man (1895), praised tree-planting as a kindness to generations not yet seen. The Sons' orchard landlord plants with the opposite motive: he owns the rows between the gaslights, and each tile he takes goes into his deed as domination.",
+  heath_maiden:
+    "In Emerson's 'Hamatreya' (1847) the earth mocks the farmers who think they own it, laughing in flowers at its boastful boys. The heath maiden speaks for that earth, crowning one fighter at a time by name, and for a price each rite the crowned one grows stronger.",
+  bog_charger:
+    "The lines are the Dauphin's boast about his horse on the night before Agincourt in Shakespeare's Henry V. The Sons' bog charger is no horse at all but something out of the wet ground, kin to the water-horses of Scottish and Irish tales, bridled in green gold; it closes hard and asks no rider's leave.",
+  briar_party:
+    "Shakespeare's Sonnet 35 forgives a friend's fault by pointing out that roses have thorns and silver fountains mud. The briar party is a band of the Sons' hedge-folk who grow bolder in numbers, and it arrives a point stronger for every ally already on the field.",
+  green_wail:
+    "Luther Standing Bear, a Lakota chief, author and actor, was among the first pupils of the Carlisle Indian School in 1879, and wrote Land of the Spotted Eagle (1933) about the life and values of his people. The green wail is the Sons' darker answer to a heart grown hard: a scream out of the hedge so loud it opens a door, and everything standing beside it goes through.",
+  cursed_verdant:
+    "Tennyson wrote In Memoriam A.H.H. over seventeen years of grief for his friend Arthur Hallam, who died in 1833, and 'Nature, red in tooth and claw' comes from its darkest cantos. The cursed verdant was a duchess who married the hedge instead of a duke; the ground feeds her now, and each tile she takes adds to her strength.",
   peat_brute:
     "Peat bogs preserve bodies for thousands of years; the Tollund Man, found in Denmark in 1950, still bore the noose he died with. Seamus Heaney wrote a sequence of 'bog poems' about such finds.",
+  the_green_kiss:
+    "Dorothy Frances Gurney, remembered for the wedding hymn 'O Perfect Love' (1883), wrote the much-quoted lines about God's heart and the garden. The green kiss is a blessing from the Sons' hedge pressed on a single fighter, which leaves a leaf-shaped mark and two more points of power.",
   opened_barrow:
-    'A barrow is an ancient burial mound. The Harper\'s Song from the tomb of King Intef, of ancient Egypt, doubts the afterlife and urges the living to enjoy their days.',
-  green_man:
-    "Jack-in-the-Green was a figure of English May Day processions: a man, often a chimney sweep, inside a tall frame covered in leaves. The custom flourished in the eighteenth and nineteenth centuries.",
-  afanc:
-    'The afanc is a monster of Welsh lakes, blamed for floods. One tale says it was lured out of the water and dragged away by a team of oxen.',
+    "A barrow is an ancient burial mound. The Harper's Song from the tomb of King Intef, of ancient Egypt, doubts the afterlife and urges the living to enjoy their days.",
+  lion_s_vigil:
+    "In chapter 18 of The Prince Machiavelli advises a ruler to be both fox and lion, the fox to see the snares and the lion to frighten the wolves. On the night of the lion's vigil the Sons keep watch beside their emblem, and every fighter they field rises one point stronger.",
+  return_to_loam:
+    "God's sentence on Adam in Genesis 3:19, 'dust thou art, and unto dust shalt thou return', echoes through the Ash Wednesday rite in many churches. Return to loam is the Sons' gentler burial: the named plate is unmade, and the earth repays its owner the full cost of the planting.",
+  lion_s_mask:
+    "Paul Laurence Dunbar, born in Dayton, Ohio, to parents who had been enslaved in Kentucky, published 'We Wear the Mask' in 1895, a poem of the smile Black Americans were forced to show the world. The Sons' lion mask works a cruder disguise: whoever wears it is healed, stripped of every gift, and set at exactly four power.",
+  cup_of_the_lion:
+    "Edward FitzGerald's English version of the Rubáiyát of Omar Khayyám (1859) made the medieval Persian astronomer's quatrains on wine and doubt famous in the West. The cup of the lion is the Sons' toast to that doubt, a draught of green wine that strengthens one fighter and sends a card to the drinker's hand.",
+  false_vintage:
+    "Phaedrus, a freedman of the emperor Augustus, put Aesop's fables into Latin verse, and warns in one of them that first appearances deceive many. The false vintage is the Sons' counterfeit wine; whoever drinks is healed to full, then finds every gift gone and a single point of power left.",
+  the_green_sovereign:
+    "Thoreau's essay 'Walking', published in the Atlantic Monthly in June 1862 just after his death, declares that in wildness is the preservation of the world. The Green Sovereign wears that wildness as a crown, and once in a sitting lays a hand on a follower, who grows stronger, while a card comes to the court.",
   queen_of_the_hedgerow:
     'Elizabeth I spoke to her troops at Tilbury in August 1588, as the Spanish Armada threatened invasion, saying she had the heart and stomach of a king.',
+  green_man:
+    'Jack-in-the-Green was a figure of English May Day processions: a man, often a chimney sweep, inside a tall frame covered in leaves. The custom flourished in the eighteenth and nineteenth centuries.',
+  afanc:
+    'The afanc is a monster of Welsh lakes, blamed for floods. One tale says it was lured out of the water and dragged away by a team of oxen.',
   // ── The Hermetic Circle ──
+  gutter_theorist:
+    "Descartes first wrote 'I think, therefore I am' in French, 'je pense, donc je suis', in the Discourse on Method (1637); the Latin cogito ergo sum came later. The Circle's gutter theorist has the proof chalked on the cobbles and nothing else to his name, and he stabs once and is gone before anyone checks his working.",
+  ruined_patron:
+    "The Devil's Dictionary began life as The Cynic's Word Book (1906), and its entry on the cynic praises the one who sees things as they are. The ruined patron once funded every working in the Circle's city and now has nothing left but the scandal, and his arrival costs the opponent two resources in cancelled credit.",
   duke_of_the_crucible:
-    "The Emerald Tablet bids the adept to separate the earth from the fire, the subtle from the gross, gently and with great skill. A crucible is the vessel in which metals are melted.",
+    'The Emerald Tablet bids the adept to separate the earth from the fire, the subtle from the gross, gently and with great skill. A crucible is the vessel in which metals are melted.',
   glass_homunculus:
-    'Paracelsus taught that man is a microcosm, a small world mirroring the great one. A text credited to him tells how a homunculus might be grown in a flask.',
+    "In Goethe's Faust, Part Two (1832), Faust's old assistant Wagner brings a homunculus to life in a glass phial; the little being glows, talks, and longs to be truly born. Paracelsus taught that man is a microcosm, a small world mirroring the great one, and the Circle's glass homunculus needs a full rite out of the retort before it can move.",
+  street_magus:
+    "The line comes from the Prelude on the Stage that opens Goethe's Faust, where a theatre director cuts short the poet's talk and demands deeds. The Circle's street magus works the cups and balls, one of the oldest conjuring tricks on record, with one real exit hidden in it: once each rite a fighter of his vanishes back to his hand.",
+  mirror_solvent:
+    "Mark Twain's warning against parting with one's illusions is one of the calendar epigrams he wrote in the 1890s. The mirror solvent is a quicksilver wash the Circle uses to borrow faces; once in a sitting it takes on an enemy's full power, having never had a shape of its own.",
   athanor_adept:
     "'Solve et coagula', dissolve and coagulate, is the alchemical maxim of breaking matter down and binding it anew. It is written on the arms of Eliphas Lévi's Baphomet.",
+  athanor_guard:
+    "Suetonius records that Augustus was fond of saying 'festina lente', make haste slowly, in its Greek form. The athanor guard keeps the door of the Circle's furnace by that rule: he takes a rite to settle at his post, and after that nothing gets past the first point of a blow.",
+  serpent_adept:
+    "Jesus tells his disciples in Matthew 10:16 that he sends them out as sheep among wolves, to be wise as serpents and harmless as doves. The Circle's serpent adept keeps only the first half of the advice, and her arrival makes the opponent drop a random card, as if bitten.",
   third_eye_disciple:
     'Meister Eckhart, the fourteenth-century German Dominican mystic, taught that the eye with which he saw God was the eye with which God saw him. Some of his teachings were condemned as heretical in 1329.',
   azoth_twin:
     "In Plato's Symposium Aristophanes tells that humans were once double creatures, cut in two by Zeus; love is each half seeking the other.",
+  sealed_assassin:
+    "In the Analects (4.24) Confucius says the gentleman wishes to be slow in speech and earnest in action. The Circle's sealed assassin carries a single blade under wax, and once in a sitting the seal is broken and one quiet wound is dealt.",
   back_alley_vitriol:
     'V.I.T.R.I.O.L. stands for "Visita interiora terrae rectificando invenies occultum lapidem": visit the interior of the earth, and by rectifying you will find the hidden stone.',
+  jeweled_homage:
+    "'A thing of beauty is a joy for ever' is the first line of Keats's Endymion (1818), a long poem savaged by the reviewers that year. The jeweled homage is an idol of the Circle that sweats gold whenever an enemy falls, and the gold buys a card.",
   quicksilver_valet:
     "Paracelsus added salt to the alchemists' sulphur and mercury, making the tria prima: mercury as spirit, sulphur as soul, salt as body.",
+  the_open_retort:
+    'Montaigne observes in his Essays that nothing is so firmly believed as what is least known. The open retort is a vessel of the Circle with its stopper pulled; anything that fights it falls into the glass and is dissolved, and its owner loses a card besides.',
   lead_golem:
-    "The word golem appears once in the Hebrew Bible, in Psalm 139:16, for the unformed substance of a body. Later folklore used it for a figure of clay brought to life.",
+    'The word golem appears once in the Hebrew Bible, in Psalm 139:16, for the unformed substance of a body before birth. The Circle pours its golem from molten lead rather than shaping it from clay, and it needs a whole rite to set before it can move.',
+  cranial_engine:
+    "The Dhammapada, a collection of the Buddha's sayings in verse, opens by declaring that all we are is made of our thoughts. The Circle's cranial engine is a brass cap of dials worn over the skull, which turns a single thought into one coin and one card.",
+  lamp_of_the_work:
+    "Al-Ghazali wrote in Deliverance from Error, around 1100, that after a crisis of doubt he was healed not by argument but by a light God cast into his breast. The lamp of the work is the Circle's reading-light for the Great Work, and three cards come to whoever kindles it.",
   trepan_rite:
     'Trepanation, boring a hole in the living skull, is one of the oldest known surgeries; healed holes are found in skulls from the Stone Age.',
   the_thirteenth_chair:
     'The Thirteenth Chair, a 1916 stage thriller by Bayard Veiller, turns on a murder committed in the dark during a séance. It was filmed in 1919 and 1929.',
   rose_of_the_shut_garden:
     'The hortus conclusus, the "garden enclosed" of the Song of Songs, became a medieval symbol of the Virgin and of the soul kept pure. Rose gardens behind walls were its painted image.',
+  carve_the_seal:
+    "The verse goes on 'for love is strong as death', and the seal in it is the signet a person wore and pressed into wax as a mark of self. Carve the seal cuts a sigil into a fighter, making it two points stronger but so heavy with the mark that it cannot move or strike on its next rite.",
+  the_mute_alchemist:
+    "Chapter 56 of the Tao Te Ching holds that those who know do not speak, and those who speak do not know. The Mute Alchemist leads the Circle without a word, and once in a sitting, at great cost, sends a fighter back to its owner's hand with a single gesture.",
+  the_gold_fraud:
+    'Alchemists who promised gold to princes risked their necks. Edward Kelley, who claimed to have transmuted metal before Emperor Rudolf II, died a prisoner in Bohemia around 1597.',
   spring_heeled_jack:
     'Spring-heeled Jack was a leaping figure reported around London from 1837, said to have clawed hands and to breathe blue flame. In 1838 Jane Alsop told magistrates he had attacked her at her door.',
   mirror_hag:
     "In the Grimms' \"Little Snow-White\" the queen asks her mirror who is fairest of all. Mirrors were long covered in houses of the dead, lest the soul be caught in them.",
-  the_gold_fraud:
-    "Alchemists who promised gold to princes risked their necks. Edward Kelley, who claimed to have transmuted metal before Emperor Rudolf II, died a prisoner in Bohemia around 1597.",
   // ── The Midnight Assembly ──
   velvet_revenant:
-    'Poe\'s "The Premature Burial" (1844) fed a real nineteenth-century terror of being buried alive; "safety coffins" with bells and air pipes were patented.',
+    "Poe's \"The Premature Burial\" (1844) fed a real nineteenth-century terror of being buried alive; \"safety coffins\" with bells and air pipes were patented.",
   speakeasy_shade:
     'Speakeasies were the illegal bars of American Prohibition, so called because patrons were told to speak softly about them. New York alone was said to have tens of thousands.',
   alley_medium:
     "In Dickens's A Christmas Carol (1843) the ghost of Jacob Marley wears the chain he forged in life, of cash-boxes, keys and ledgers.",
+  tommy_wight:
+    "Nietzsche's warning about fighting monsters comes from Beyond Good and Evil (1886), in the same aphorism as the abyss that gazes back. The Thompson submachine gun, the drum-fed 'Tommy gun', went on sale in 1921 and became the emblem of Prohibition gangland. The Assembly's Tommy Wight is a dead gunman who still carries one, and he and his target always fire at the same moment.",
+  bone_consigliere:
+    "'Nemo solus satis sapit', no one alone is wise enough, is a line from Plautus's comedy Miles Gloriosus, The Braggart Soldier. In a crime family the consigliere is the boss's counsellor, and the Assembly's bone consigliere gives his counsel with a syringe of green light, standing at three power and never sitting down.",
+  concrete_angel:
+    "Psalm 91, which promises that God will give his angels charge over the faithful, has long been recited as a prayer of protection. The Assembly's undertakers tell of the Concrete Angel, a rebar-winged figure dug out of a Lower Manhattan site on 11 September 1923 with no maker's mark and no record of who poured it. It guards whoever stands with it and refuses the first point of every strike.",
+  grave_capo:
+    "Poe first published 'The City in the Sea' in 1831 as 'The Doomed City', a poem of a drowned city where Death sits enthroned. The grave capo is the Assembly's lieutenant for funerals: a cigar in his teeth, dynamite in his coat, and a burial already booked for somebody else.",
+  midnight_don:
+    "'Uneasy lies the head that wears a crown' is the sleepless king's complaint in Shakespeare's Henry IV, Part 2. The Assembly's midnight don never rises from his chair at the back of the club; his orders travel two tiles down the room, and no one answers them.",
   last_call:
-    'In Poe\'s "The Masque of the Red Death" (1842), Prince Prospero walls himself and his courtiers in an abbey to escape a plague, which comes to the masquerade all the same.',
+    "In Poe's \"The Masque of the Red Death\" (1842), Prince Prospero walls himself and his courtiers in an abbey to escape a plague, which comes to the masquerade all the same.",
+  the_black_handshake:
+    "The Black Hand was a form of extortion in Italian immigrant neighbourhoods of American cities in the early 1900s: letters threatening violence, signed with an inked hand. New York detective Joseph Petrosino led the fight against it until he was shot dead in Palermo in 1909. The Assembly's black handshake seals a deal the old way, and whoever takes the hand comes away two points stronger.",
+  funeral_march:
+    "'Man that is born of a woman hath but a short time to live' is said at the graveside in the burial service of the Book of Common Prayer, echoing Job 14:1. New Orleans jazz funerals march to the grave behind a brass band playing dirges and come back to joyful music. The Assembly's band plays only the first half, and every unit on the field takes a wound.",
+  lead_violin:
+    "In Book III of the Republic Plato argues that rhythm and harmony sink deepest into the soul, so the young must be raised on the right music. The Assembly's lead violin case is far heavier than any instrument, and what it carries brings two cards to the hand.",
+  cement_shoes:
+    "Longfellow's 'Retribution' renders an epigram by the seventeenth-century German poet Friedrich von Logau, itself a version of an old Greek saying that the mills of the gods grind slowly. Cement shoes are the Assembly's slower justice: the named plate is fixed where it stands and cannot move or attack on its next rite.",
+  the_widowed_saint:
+    "The promise that those who mourn shall be comforted is the second of the Beatitudes as Matthew gives them in the Sermon on the Mount. The Widowed Saint is the Assembly's patron of the bereaved, a veiled figure who walks the wakes, and once in a sitting she raises one of her own back to its feet, stronger than before.",
+  the_laughing_coroner:
+    "In Book IX of the Meditations Marcus Aurelius tells himself not to despise death but to welcome it as one of the things nature wills. The Assembly's laughing coroner has signed too many certificates to take death seriously; once in a sitting he reopens the last file in the discard, hands it back, and draws another.",
+  grave_ape:
+    "Bierce, who fought for the Union at Shiloh, set 'An Occurrence at Owl Creek Bridge' (1890) at the hanging of a Confederate planter on a railroad bridge in Alabama. Potter's fields, named after the field bought with Judas's silver to bury strangers in Matthew's gospel, were the paupers' graveyards of American cities. The grave ape is the Assembly's cryptid of the potter's field, and every fight it survives makes it heavier.",
   pale_passenger:
     'The vanishing hitchhiker, a passenger who disappears from a moving car and turns out to have died years before, is one of the most widespread urban legends. The folklorist Jan Harold Brunvand made it the title of his 1981 study.',
   // ── The Columbia Lodge ──
   hydesville_rapper:
-    "In March 1848 the young sisters Kate and Margaret Fox of Hydesville, New York, claimed to talk with a spirit by raps, calling it Mr. Splitfoot. Spiritualism grew from them; in 1888 Margaret confessed they had cracked their toe joints.",
+    'In March 1848 the young sisters Kate and Margaret Fox of Hydesville, New York, claimed to talk with a spirit by raps, calling it Mr. Splitfoot. Spiritualism grew from them; in 1888 Margaret confessed they had cracked their toe joints.',
   franklin_s_key:
-    'Benjamin Franklin\'s kite experiment of 1752 drew a spark from a key tied to a kite string in a thunderstorm, showing that lightning is electricity. He went on to invent the lightning rod.',
+    "Benjamin Franklin's kite experiment of 1752 drew a spark from a key tied to a kite string in a thunderstorm, showing that lightning is electricity. He went on to invent the lightning rod.",
   high_john:
-    "High John the Conqueror is a trickster hero of African American folklore, who outwits the master and keeps hope alive. His name is also given to a root carried in hoodoo for luck and strength; Zora Neale Hurston wrote of him in 1943.",
+    'High John the Conqueror is a trickster hero of African American folklore, who outwits the master and keeps hope alive. His name is also given to a root carried in hoodoo for luck and strength; Zora Neale Hurston wrote of him in 1943.',
   appleseed_walker:
     'John Chapman, "Johnny Appleseed" (1774–1845), planted apple nurseries across Pennsylvania, Ohio and Indiana ahead of the settlers. He was also a missionary for the teachings of Emanuel Swedenborg.',
   coyote_s_laugh:
-    "Coyote is the trickster of many Native American traditions, clever, greedy and often undone by his own schemes. Mark Twain described the animal in Roughing It (1872).",
+    'Coyote is the trickster of many Native American traditions, clever, greedy and often undone by his own schemes. Mark Twain described the animal in Roughing It (1872).',
   menlo_spirit_wright:
-    'Thomas Edison built his laboratory at Menlo Park, New Jersey, in 1876. In 1920 he told interviewers he was working on a machine to talk with the dead. Twain\'s "A Ghost Story" mocks the Cardiff Giant hoax of 1869.',
+    "Newspapers called Thomas Edison 'the Wizard of Menlo Park' after he demonstrated the phonograph from his New Jersey laboratory in 1877–78. The lines on the plate are from Twain's 'A Ghost Story' (1870), in which the ghost of the Cardiff Giant, a carved-stone hoax of 1869, haunts a hotel room only to learn he has been haunting a plaster copy.",
   lily_dale_voice:
-    'Lily Dale, in western New York, was founded by Spiritualists in 1879 and still hosts mediums every summer.',
+    "Lily Dale, in western New York, was founded by Spiritualists in 1879 and still hosts mediums every summer. In 1916 the Fox sisters' Hydesville cottage was moved there as a shrine, and it stood until a fire destroyed it in 1955.",
   randolph_glass:
     'Paschal Beverly Randolph (1825–1875) was an American physician, occultist and abolitionist who taught the use of magic mirrors for scrying. He is said to have founded the Fraternitas Rosae Crucis in 1858.',
   powwow_doctor:
-    "Powwow, or Braucherei, is the folk healing of the Pennsylvania Dutch, using charms, prayers and blessings. John George Hohman's charm book The Long Lost Friend was printed in 1820.",
+    'The word powwow comes from the Narragansett and Massachusett word for a healer or spiritual leader, before it came to mean a gathering. Black Elk (1863–1950), an Oglala Lakota holy man and healer, told his visions to the poet John Neihardt for Black Elk Speaks (1932), insisting that the power to cure came through him and not from him.',
   wardenclyffe_adept:
-    "Nikola Tesla built Wardenclyffe Tower on Long Island in 1901–02 to send messages, and he hoped power, without wires. The money ran out, and the tower was demolished in 1917.",
+    'Nikola Tesla built Wardenclyffe Tower on Long Island in 1901–02 to send messages, and he hoped power, without wires. The money ran out, and the tower was demolished in 1917.',
   rocket_chemist:
     "Robert Goddard launched the world's first liquid-fuelled rocket at Auburn, Massachusetts, on 16 March 1926. It flew for about two and a half seconds.",
   poughkeepsie_seer:
@@ -414,9 +621,9 @@ export const CARD_LORE: Record<string, string> = {
   liberty_lightning:
     "Franklin's line about trading liberty for safety was written in 1755 for the Pennsylvania Assembly, in a dispute over taxes for frontier defence.",
   the_hydesville_knock:
-    'The raps heard in the Fox family cottage at Hydesville, New York, in 1848 are counted as the birth of modern Spiritualism. Within a few years séances were held across America and Europe.',
+    'At Hydesville the neighbours questioned the rapping spirit by calling out the alphabet and noting where the knocks fell, and by that method it claimed to be a murdered peddler buried in the cellar. In November 1849 the Fox sisters gave the first public demonstration of the raps, at Corinthian Hall in Rochester.',
   spirit_phone:
-    "In 1920 Thomas Edison told interviewers he hoped to build an apparatus sensitive enough to record messages from the dead. No such device was ever found among his papers.",
+    'In 1920 Thomas Edison told interviewers he hoped to build an apparatus sensitive enough to record messages from the dead. No such device was ever found among his papers.',
   mojo_hand:
     "A mojo, or mojo hand, is a small cloth charm bag of hoodoo, filled with roots, herbs and curios. Muddy Waters made 'Got My Mojo Working' famous in the late 1950s.",
   edgar_cayce:
@@ -426,17 +633,19 @@ export const CARD_LORE: Record<string, string> = {
   mothman:
     'Mothman was reported around Point Pleasant, West Virginia, in 1966 and 1967: a winged figure with glowing red eyes. The sightings ended about the time the Silver Bridge collapsed in December 1967.',
   sasquatch:
-    "The name Sasquatch comes from a Halkomelem word and was spread in the 1920s by the teacher J. W. Burns of British Columbia. The Patterson–Gimlin film of 1967 is the most famous claimed footage.",
+    'The name Sasquatch comes from a Halkomelem word and was spread in the 1920s by the teacher J. W. Burns of British Columbia. The Patterson–Gimlin film of 1967 is the most famous claimed footage.',
   // ── Unaligned ──
-  nuclear_winter:
-    'The theory of nuclear winter, that smoke from burning cities could darken the sun and chill the earth for years, was set out in 1983 by Turco, Toon, Ackerman, Pollack and Sagan.',
+  south_haven_dispatch:
+    "South Haven's precinct keeps a third radio channel that appears on no frequency list, and its dispatchers log only what calls in on it. When the siren on Channel 3 answers, every officer and everything else on the line comes running, and each fighter on your side of the field rises five points.",
   radiation_poisoning:
     'Acute radiation sickness was first studied in the survivors of Hiroshima and Nagasaki in 1945. Its symptoms come in waves, and a quiet spell can hide how badly the body has been hurt.',
+  nuclear_winter:
+    'The theory of nuclear winter, that smoke from burning cities could darken the sun and chill the earth for years, was set out in 1983 by Turco, Toon, Ackerman, Pollack and Sagan.',
   black_monday:
-    "On Black Monday, 28 October 1929, the Dow Jones fell about thirteen per cent, and the crash went on the next day. John Kenneth Galbraith told the story in The Great Crash, 1929 (1955).",
+    'On Black Monday, 28 October 1929, the Dow Jones fell about thirteen per cent, and the crash went on the next day. John Kenneth Galbraith told the story in The Great Crash, 1929 (1955).',
 };
 
-/** The Codex page text for a plate: its own note, or its order's tradition. */
+/** The Codex page text for a plate (its own note; the order text only as a last resort). */
 export function codexBlurb(card: Card): string {
   const own = CARD_LORE[card.id];
   if (own) return own;

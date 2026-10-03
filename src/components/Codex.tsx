@@ -2,7 +2,8 @@
  * The Codex: a book of every plate, filled in as the adept collects or meets
  * them. Shut pages show only a silhouette; cryptids show nothing until
  * sighted. Each open page carries the art, the epigraph and a short note of
- * the real history or folklore behind it. Justin and Seth Kern have no page.
+ * the real history or folklore behind it (in-world lore for the game's own
+ * characters). Justin and Seth Kern have no page.
  */
 import { useEffect, useMemo, useState } from 'react';
 import type { Card } from '../game/types';
