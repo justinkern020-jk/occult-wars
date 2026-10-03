@@ -2837,8 +2837,8 @@
       "op": "sacrifice_splash",
       "n": 3
     },
-    "quote": "The dose makes the poison.",
-    "quoted": "Paracelsus"
+    "quote": "All things are poison and nothing is without poison; only the dose makes a thing not a poison.",
+    "quoted": "Paracelsus, Seven Defensiones (1538)"
   },
   {
     "id": "waking_the_sleeper",
@@ -2855,7 +2855,7 @@
       "op": "destroy"
     },
     "quote": "Arise! Awake! and stop not till the goal is reached.",
-    "quoted": "Katha Upanishad",
+    "quoted": "Swami Vivekananda, after the Katha Upanishad",
     "alsoDiscard": true
   },
   {
@@ -2908,8 +2908,8 @@
       "op": "empty"
     },
     "alsoDraw": 1,
-    "quote": "Wealth consists not in having great possessions, but in having few wants.",
-    "quoted": "Epictetus"
+    "quote": "Never say of anything, \"I have lost it\"; but, \"I have restored it.\"",
+    "quoted": "Epictetus, Enchiridion"
   },
   {
     "id": "the_rune_colonel",
@@ -2924,7 +2924,7 @@
     "leaderPower": {
       "op": "martyr"
     },
-    "quote": "To lead the people, walk behind them.",
+    "quote": "Wishing to be before them, he places his person behind them.",
     "quoted": "Laozi, Tao Te Ching"
   },
   {
@@ -2940,8 +2940,8 @@
     "leaderPower": {
       "op": "haste"
     },
-    "quote": "The best steel goes through the hottest fire.",
-    "quoted": "English proverb"
+    "quote": "Fire tests gold; misfortune tests brave men.",
+    "quoted": "Seneca, On Providence"
   },
   {
     "id": "ash_lice",
@@ -3013,8 +3013,8 @@
       "pay": 1,
       "aim": true
     },
-    "quote": "The dreams are all right enough, but the art of interpreting is lost.",
-    "quoted": "Mark Twain"
+    "quote": "We are such stuff as dreams are made on, and our little life is rounded with a sleep.",
+    "quoted": "William Shakespeare, The Tempest"
   },
   {
     "id": "devoted_clerk",
@@ -3048,8 +3048,8 @@
     "act": {
       "op": "tap-crown"
     },
-    "quote": "A secret between more than two is no secret.",
-    "quoted": "Spanish proverb"
+    "quote": "Three may keep a secret, if two of them are dead.",
+    "quoted": "Benjamin Franklin, Poor Richard's Almanack (1735)"
   },
   {
     "id": "ancestral_cinder",
@@ -3107,8 +3107,8 @@
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2,
-    "quote": "Hell hath no fury like a woman scorned.",
-    "quoted": "William Congreve"
+    "quote": "Heaven has no rage like love to hatred turned, nor Hell a fury like a woman scorned.",
+    "quoted": "William Congreve, The Mourning Bride"
   },
   {
     "id": "feral_cantor",
@@ -3145,8 +3145,8 @@
     "power": 2,
     "legacyAttack": 1,
     "legacyHealth": 2,
-    "quote": "Keep the fire burning; when the hearth goes cold, the house forgets itself.",
-    "quoted": "Welsh proverb"
+    "quote": "There is no fireside like your own fireside.",
+    "quoted": "Irish proverb"
   },
   {
     "id": "unblinking_penitent",
@@ -3233,8 +3233,8 @@
     "power": 6,
     "legacyAttack": 5,
     "legacyHealth": 6,
-    "quote": "The bear is wise; he sleeps through the hard season and wakes when the earth is ready.",
-    "quoted": "Anishinaabe teaching"
+    "quote": "Bears are made of the same dust as we, and breathe the same winds and drink of the same waters.",
+    "quoted": "John Muir, journal (1871)"
   },
   {
     "id": "the_birch_king",
@@ -3356,8 +3356,8 @@
       "n": 2
     },
     "alsoBank": 2,
-    "quote": "Patience is a bitter plant, but it has sweet fruit.",
-    "quoted": "Persian proverb"
+    "quote": "They also serve who only stand and wait.",
+    "quoted": "John Milton, On His Blindness"
   },
   {
     "id": "the_leaden_stare",
@@ -3388,8 +3388,8 @@
     "leaderPower": {
       "op": "slide"
     },
-    "quote": "When an elder dies, a library burns.",
-    "quoted": "African proverb"
+    "quote": "In Africa, when an old man dies, a library burns.",
+    "quoted": "Amadou Hampâté Bâ, UNESCO address (1960)"
   },
   {
     "id": "alley_inquiry",
@@ -3422,8 +3422,8 @@
     "power": 1,
     "legacyAttack": 1,
     "legacyHealth": 1,
-    "quote": "That which does not kill us makes us stronger.",
-    "quoted": "Friedrich Nietzsche"
+    "quote": "What does not kill me makes me stronger.",
+    "quoted": "Friedrich Nietzsche, Twilight of the Idols"
   },
   {
     "id": "heath_tithe_maid",
@@ -3553,8 +3553,8 @@
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2,
-    "quote": "Nature does not hurry, yet everything is accomplished.",
-    "quoted": "Laozi"
+    "quote": "The Tao in its regular course does nothing, and so there is nothing which it does not do.",
+    "quoted": "Laozi, Tao Te Ching"
   },
   {
     "id": "orchard_landlord",
@@ -3571,8 +3571,8 @@
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2,
-    "quote": "He that planteth a tree is a servant of God.",
-    "quoted": "Thomas Fuller"
+    "quote": "He that planteth a tree is the servant of God, he provideth a kindness for many generations, and faces that he hath not seen shall bless him.",
+    "quoted": "Henry van Dyke, The Friendly Trees"
   },
   {
     "id": "heath_maiden",
@@ -3592,8 +3592,8 @@
       "pay": 2,
       "aim": true
     },
-    "quote": "The earth laughs in flowers.",
-    "quoted": "Ralph Waldo Emerson"
+    "quote": "Earth laughs in flowers, to see her boastful boys.",
+    "quoted": "Ralph Waldo Emerson, Hamatreya"
   },
   {
     "id": "bog_charger",
@@ -3608,8 +3608,8 @@
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3,
-    "quote": "The wind of heaven is that which blows between a horse's ears.",
-    "quoted": "Arabian proverb"
+    "quote": "When I bestride him, I soar, I am a hawk: he trots the air; the earth sings when he touches it.",
+    "quoted": "William Shakespeare, Henry V"
   },
   {
     "id": "briar_party",
@@ -3626,8 +3626,8 @@
     "power": 1,
     "legacyAttack": 1,
     "legacyHealth": 1,
-    "quote": "Among thorns grow the roses.",
-    "quoted": "Latin proverb"
+    "quote": "Roses have thorns, and silver fountains mud.",
+    "quoted": "William Shakespeare, Sonnet 35"
   },
   {
     "id": "green_wail",
@@ -3646,8 +3646,8 @@
       "op": "wail",
       "pay": 4
     },
-    "quote": "The land is our mother; when she cries, her children should listen.",
-    "quoted": "Haudenosaunee teaching"
+    "quote": "The old Lakota was wise. He knew that man's heart, away from nature, becomes hard.",
+    "quoted": "Luther Standing Bear, Land of the Spotted Eagle (1933)"
   },
   {
     "id": "cursed_verdant",
@@ -3680,8 +3680,8 @@
     "power": 5,
     "legacyAttack": 5,
     "legacyHealth": 5,
-    "quote": "What the bog takes, the bog keeps.",
-    "quoted": "Irish proverb"
+    "quote": "Every layer they strip seems camped on before. The wet centre is bottomless.",
+    "quoted": "Seamus Heaney, Bogland"
   },
   {
     "id": "the_green_kiss",
@@ -3715,8 +3715,8 @@
       "op": "bank",
       "n": 2
     },
-    "quote": "Speak not against the dead; they have no answer but silence.",
-    "quoted": "Ancient Egyptian teaching"
+    "quote": "None comes from there to tell of their state, to tell of their needs, to calm our hearts, until we go where they have gone!",
+    "quoted": "The Harper's Song for King Intef"
   },
   {
     "id": "lion_s_vigil",
@@ -3732,8 +3732,8 @@
       "op": "empower_all",
       "n": 1
     },
-    "quote": "The lion does not turn around when small dogs bark.",
-    "quoted": "African proverb"
+    "quote": "It is necessary to be a fox to discover the snares and a lion to terrify the wolves.",
+    "quoted": "Niccolò Machiavelli, The Prince"
   },
   {
     "id": "return_to_loam",
@@ -3804,8 +3804,8 @@
       "op": "set_power",
       "n": 1
     },
-    "quote": "Appearances are often deceiving.",
-    "quoted": "Aesop"
+    "quote": "Things are not always what they seem; the first appearance deceives many.",
+    "quoted": "Phaedrus, Fables"
   },
   {
     "id": "the_green_sovereign",
@@ -3821,8 +3821,8 @@
       "op": "empower_draw",
       "n": 1
     },
-    "quote": "The forest is the poor man's overcoat.",
-    "quoted": "New England proverb"
+    "quote": "In wildness is the preservation of the world.",
+    "quoted": "Henry David Thoreau, Walking"
   },
   {
     "id": "queen_of_the_hedgerow",
@@ -3837,8 +3837,8 @@
     "leaderPower": {
       "op": "claim"
     },
-    "quote": "A queen among thorns is still a queen.",
-    "quoted": "Irish proverb"
+    "quote": "I know I have the body of a weak and feeble woman; but I have the heart and stomach of a king.",
+    "quoted": "Elizabeth I, speech at Tilbury (1588)"
   },
   {
     "id": "gutter_theorist",
@@ -3927,8 +3927,8 @@
       "op": "recall",
       "aim": true
     },
-    "quote": "Whatever you can do, or dream you can, begin it. Boldness has genius, power and magic in it.",
-    "quoted": "Johann Wolfgang von Goethe"
+    "quote": "Enough words have been exchanged; now at last let me see some deeds!",
+    "quoted": "Johann Wolfgang von Goethe, Faust"
   },
   {
     "id": "mirror_solvent",
@@ -4046,8 +4046,8 @@
       "aim": true,
       "once": true
     },
-    "quote": "Two souls, alas, dwell within my breast.",
-    "quoted": "Johann Wolfgang von Goethe, Faust"
+    "quote": "Each of us when separated, having one side only, like a flat fish, is but the indenture of a man, and he is always looking for his other half.",
+    "quoted": "Plato, Symposium"
   },
   {
     "id": "sealed_assassin",
@@ -4067,8 +4067,8 @@
       "aim": true,
       "once": true
     },
-    "quote": "Silence is a friend who will never betray.",
-    "quoted": "Confucius"
+    "quote": "The superior man wishes to be slow in his speech and earnest in his conduct.",
+    "quoted": "Confucius, Analects"
   },
   {
     "id": "back_alley_vitriol",
@@ -4153,8 +4153,8 @@
     "power": 6,
     "legacyAttack": 6,
     "legacyHealth": 6,
-    "quote": "From the first matter all forms arise.",
-    "quoted": "Alchemical tradition"
+    "quote": "Thine eyes did see my substance, yet being unperfect.",
+    "quoted": "Psalm 139:16"
   },
   {
     "id": "cranial_engine",
@@ -4169,8 +4169,8 @@
     "effect": {
       "op": "bank_draw"
     },
-    "quote": "The mind is everything. What you think, you become.",
-    "quoted": "The Buddha"
+    "quote": "All that we are is the result of what we have thought: it is founded on our thoughts, it is made up of our thoughts.",
+    "quoted": "The Buddha, Dhammapada"
   },
   {
     "id": "lamp_of_the_work",
@@ -4186,8 +4186,8 @@
       "op": "draw",
       "n": 3
     },
-    "quote": "Knowledge is a light which God casts into the heart.",
-    "quoted": "Al-Ghazali"
+    "quote": "It was the effect of a light which God most high cast into my breast. That light is the key to the greater part of knowledge.",
+    "quoted": "Al-Ghazali, Deliverance from Error"
   },
   {
     "id": "trepan_rite",
@@ -4220,8 +4220,8 @@
     "effect": {
       "op": "bounce"
     },
-    "quote": "When the dead speak, the living should listen.",
-    "quoted": "Spiritualist maxim"
+    "quote": "There are more things in heaven and earth, Horatio, than are dreamt of in your philosophy.",
+    "quoted": "William Shakespeare, Hamlet"
   },
   {
     "id": "rose_of_the_shut_garden",
@@ -4271,8 +4271,8 @@
     "leaderPower": {
       "op": "bounce"
     },
-    "quote": "Silence is the language of God; all else is poor translation.",
-    "quoted": "Rumi"
+    "quote": "Those who know do not speak; those who speak do not know.",
+    "quoted": "Laozi, Tao Te Ching"
   },
   {
     "id": "the_gold_fraud",
@@ -4342,8 +4342,8 @@
     "power": 2,
     "legacyAttack": 1,
     "legacyHealth": 2,
-    "quote": "The spirits of the dead hallow a house, for me.",
-    "quoted": "Mark Twain"
+    "quote": "\"I wear the chain I forged in life,\" replied the Ghost.",
+    "quoted": "Charles Dickens, A Christmas Carol"
   },
   {
     "id": "tommy_wight",
@@ -4444,8 +4444,8 @@
       "op": "smite",
       "n": 3
     },
-    "quote": "Quoth the Raven, \"Nevermore.\"",
-    "quoted": "Edgar Allan Poe, The Raven"
+    "quote": "And Darkness and Decay and the Red Death held illimitable dominion over all.",
+    "quoted": "Edgar Allan Poe, The Masque of the Red Death"
   },
   {
     "id": "the_black_handshake",
@@ -4496,8 +4496,8 @@
       "op": "draw",
       "n": 2
     },
-    "quote": "Music is a higher revelation than all wisdom and philosophy.",
-    "quoted": "Ludwig van Beethoven"
+    "quote": "Rhythm and harmony find their way into the inward places of the soul.",
+    "quoted": "Plato, The Republic"
   },
   {
     "id": "cement_shoes",
@@ -4545,8 +4545,8 @@
     "leaderPower": {
       "op": "grave"
     },
-    "quote": "Death smiles at us all; all we can do is smile back.",
-    "quoted": "Marcus Aurelius"
+    "quote": "Do not despise death, but be well content with it, since this too is one of those things which nature wills.",
+    "quoted": "Marcus Aurelius, Meditations"
   },
   {
     "id": "hydesville_rapper",
@@ -4561,8 +4561,8 @@
     "power": 2,
     "legacyAttack": 1,
     "legacyHealth": 2,
-    "quote": "Knock, and it shall be opened unto you.",
-    "quoted": "Matthew 7:7"
+    "quote": "Mr. Splitfoot, do as I do!",
+    "quoted": "Kate Fox, Hydesville (1848)"
   },
   {
     "id": "franklin_s_key",
@@ -4631,8 +4631,8 @@
     "power": 2,
     "legacyAttack": 1,
     "legacyHealth": 2,
-    "quote": "Coyote was going along — and wherever Coyote goes, trouble follows laughing.",
-    "quoted": "Plateau Indian storytelling tradition"
+    "quote": "The cayote is a living, breathing allegory of Want. He is always hungry.",
+    "quoted": "Mark Twain, Roughing It"
   },
   {
     "id": "menlo_spirit_wright",
@@ -4721,8 +4721,8 @@
     "power": 3,
     "legacyAttack": 2,
     "legacyHealth": 3,
-    "quote": "If you want to find the secrets of the universe, think in terms of energy, frequency and vibration.",
-    "quoted": "Nikola Tesla"
+    "quote": "The progressive development of man is vitally dependent on invention.",
+    "quoted": "Nikola Tesla, My Inventions (1919)"
   },
   {
     "id": "rocket_chemist",
@@ -4827,8 +4827,8 @@
     "power": 5,
     "legacyAttack": 4,
     "legacyHealth": 5,
-    "quote": "The Thunder Beings speak in lightning; the earth answers in rain.",
-    "quoted": "Lakota teaching"
+    "quote": "Everything the Power of the World does is done in a circle.",
+    "quoted": "Black Elk, Black Elk Speaks (1932)"
   },
   {
     "id": "john_henry",
@@ -4930,8 +4930,8 @@
       "op": "draw",
       "n": 3
     },
-    "quote": "I do not fear death. I had been dead for billions and billions of years before I was born, and had not suffered the slightest inconvenience from it.",
-    "quoted": "Mark Twain"
+    "quote": "Annihilation has no terrors for me, because I have already tried it before I was born, a hundred million years.",
+    "quoted": "Mark Twain, Autobiography (1906)"
   },
   {
     "id": "mojo_hand",
@@ -4948,8 +4948,8 @@
       "op": "empower",
       "n": 2
     },
-    "quote": "A mojo is a prayer you can carry.",
-    "quoted": "Hoodoo tradition"
+    "quote": "Got my mojo working, but it just won't work on you.",
+    "quoted": "Muddy Waters, Got My Mojo Working"
   },
   {
     "id": "edgar_cayce",
@@ -5000,8 +5000,8 @@
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3,
-    "quote": "When omens gather, the wise prepare.",
-    "quoted": "Cherokee proverb"
+    "quote": "When beggars die, there are no comets seen; the heavens themselves blaze forth the death of princes.",
+    "quoted": "William Shakespeare, Julius Caesar"
   },
   {
     "id": "sasquatch",
@@ -5019,8 +5019,8 @@
     "power": 6,
     "legacyAttack": 4,
     "legacyHealth": 6,
-    "quote": "Walk lightly in the forest; you are never alone.",
-    "quoted": "Coast Salish teaching"
+    "quote": "We need the tonic of wildness.",
+    "quoted": "Henry David Thoreau, Walden"
   },
   {
     "id": "vril_wyrm",
@@ -5038,8 +5038,8 @@
     "power": 5,
     "legacyAttack": 3,
     "legacyHealth": 5,
-    "quote": "The dragon is not slain by fear, but by courage that looks it in the eye.",
-    "quoted": "Chinese proverb"
+    "quote": "The baby has known the dragon intimately ever since he had an imagination. What the fairy tale provides for him is a St. George to kill the dragon.",
+    "quoted": "G. K. Chesterton, Tremendous Trifles"
   },
   {
     "id": "foo_fighter",
@@ -5095,8 +5095,8 @@
     "power": 4,
     "legacyAttack": 2,
     "legacyHealth": 4,
-    "quote": "Ugly is only skin deep; the toad may hold a gem.",
-    "quoted": "English folk saying"
+    "quote": "Sweet are the uses of adversity, which, like the toad, ugly and venomous, wears yet a precious jewel in his head.",
+    "quoted": "William Shakespeare, As You Like It"
   },
   {
     "id": "green_man",
@@ -5133,8 +5133,8 @@
     "power": 5,
     "legacyAttack": 5,
     "legacyHealth": 5,
-    "quote": "Still waters run deep.",
-    "quoted": "Latin proverb"
+    "quote": "The deepest rivers flow with the least sound.",
+    "quoted": "Quintus Curtius Rufus"
   },
   {
     "id": "spring_heeled_jack",
@@ -5152,8 +5152,8 @@
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 2,
-    "quote": "The fear of death follows from the fear of life. A man who lives fully is prepared to die at any time.",
-    "quoted": "Mark Twain"
+    "quote": "Let us endeavor so to live that when we come to die even the undertaker will be sorry.",
+    "quoted": "Mark Twain, Pudd'nhead Wilson"
   },
   {
     "id": "mirror_hag",
@@ -5171,8 +5171,8 @@
     "power": 3,
     "legacyAttack": 2,
     "legacyHealth": 3,
-    "quote": "All that we see or seem is but a dream within a dream.",
-    "quoted": "Edgar Allan Poe, A Dream Within a Dream"
+    "quote": "Looking-glass, Looking-glass, on the wall, who in this land is the fairest of all?",
+    "quoted": "Brothers Grimm, Little Snow-White"
   },
   {
     "id": "grave_ape",
@@ -5209,8 +5209,8 @@
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2,
-    "quote": "One must pay Charon his fare to cross the Styx.",
-    "quoted": "Greek funerary custom"
+    "quote": "Smooth the descent, and easy is the way: but to return, and view the cheerful skies, in this the task and mighty labor lies.",
+    "quoted": "Virgil, Aeneid, tr. Dryden"
   },
   {
     "id": "seth_kern",
@@ -5282,7 +5282,7 @@
     ],
     "text": "Gas. Lingering poison blankets the field. At the start of the next turn, every unit takes 3 damage.",
     "quote": "Matter remembers the fire that unmade it. What follows is only the Geiger hymn, soft until it is not.",
-    "quoted": "Attributed to Fulcanelli, on the ash of the Great Work",
+    "quoted": "A Lead Dawn adept, on the ash of the Great Work",
     "effect": {
       "op": "field_poison",
       "n": 3
