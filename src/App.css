@@ -5677,3 +5677,119 @@ input[type='search'] {
 @media (prefers-reduced-motion: reduce) {
   .menu-door.menu-door-era::before { transition: none; }
 }
+
+/* ——— Fortune chest (match-over shard reveal) ——— */
+.fortune {
+  margin: 0.9rem 0 0;
+  text-align: center;
+}
+.fortune-art {
+  position: relative;
+  margin: 0 auto;
+  width: min(100%, 17rem);
+  aspect-ratio: 16 / 9;
+  border-radius: 0.55rem;
+  overflow: hidden;
+  border: 1px solid #8c6d3288;
+  box-shadow: 0 0 18px #3cff7a33, inset 0 0 24px #000a;
+}
+.fortune.is-win .fortune-art {
+  width: min(100%, 20rem);
+  box-shadow: 0 0 26px #3cff7a66, 0 0 48px #c9a22744, inset 0 0 24px #000a;
+  animation: fortune-breathe 2.6s ease-in-out infinite;
+}
+.fortune-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.fortune-sparks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.fortune-sparks i {
+  position: absolute;
+  bottom: 18%;
+  left: var(--x);
+  width: calc(0.42rem * var(--s));
+  height: calc(0.42rem * var(--s));
+  border-radius: 50%;
+  opacity: 0;
+  animation: fortune-rise 2.2s ease-out var(--d) infinite;
+}
+.fortune-sparks .spark-coin {
+  background: radial-gradient(circle at 35% 35%, #fff2b0, #e8c870 45%, #8c6d32);
+  box-shadow: 0 0 8px #e8c870cc;
+}
+.fortune-sparks .spark-emerald {
+  border-radius: 2px;
+  transform: rotate(45deg);
+  background: linear-gradient(135deg, #d8ffe0, #3cff7a 50%, #0f7a3a);
+  box-shadow: 0 0 9px #3cff7acc;
+}
+.fortune-line {
+  margin: 0.6rem 0 0;
+  font-family: var(--font-display);
+  letter-spacing: 0.06em;
+  font-size: 0.9rem;
+  color: var(--color-parchment);
+}
+.fortune-gain {
+  display: inline-block;
+  min-width: 3.2ch;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #b8ffc4;
+  text-shadow: 0 0 6px #7dff9acc, 0 0 14px #3cff7a99, 0 0 28px #c9a22766;
+}
+.fortune.is-done .fortune-gain {
+  animation: fortune-pop 0.5s ease-out;
+}
+.fortune.is-win.is-done .fortune-gain {
+  color: #f3e2b8;
+  text-shadow: 0 0 6px #e8c870cc, 0 0 16px #3cff7aaa, 0 0 34px #3cff7a66;
+}
+.fortune-total {
+  margin: 0.2rem 0 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+}
+.match-hint {
+  margin: 0.85rem 0 0;
+  padding: 0.55rem 0.75rem;
+  border-left: 2px solid #3cff7a66;
+  font-style: italic;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  color: #c6e8d8;
+  background: #0b140f80;
+  border-radius: 0 0.4rem 0.4rem 0;
+}
+.match-veil .match-plate {
+  max-height: calc(100vh - 2.5rem);
+  overflow-y: auto;
+}
+@keyframes fortune-rise {
+  0% { opacity: 0; transform: translateY(0) scale(0.6); }
+  15% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-5.5rem) scale(1.1); }
+}
+@keyframes fortune-breathe {
+  0%, 100% { box-shadow: 0 0 22px #3cff7a55, 0 0 44px #c9a22733, inset 0 0 24px #000a; }
+  50% { box-shadow: 0 0 34px #3cff7a88, 0 0 60px #c9a22755, inset 0 0 24px #000a; }
+}
+@keyframes fortune-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fortune.is-win .fortune-art,
+  .fortune.is-done .fortune-gain,
+  .fortune.is-win.is-done .fortune-gain {
+    animation: none;
+  }
+}

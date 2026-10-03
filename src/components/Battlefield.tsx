@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
 import { cardById } from '../data/catalog';
 import { createOnceGate } from '../game/onceGate';
+import { shardGainFor } from '../game/fortune';
+import { noteFirstHourWin } from '../game/secretHints';
+import { FortuneReveal } from './FortuneReveal';
 import {
   aiDifficultyLabel,
   aiStepCap,
@@ -466,6 +469,8 @@ export function Battlefield({
   const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);
   const dragHandRef = useRef<number | null>(null);
   const [cryptidSight, setCryptidSight] = useState<string | null>(null);
+  /** The match-over fortune chest (shards paid) and any whispered hint. */
+  const [fortune, setFortune] = useState<{ gain: number; total: number; won: boolean; hint: string | null } | null>(null);
   // Each cryptid's Sighting is announced once per match (later rites, musters and effect passes stay silent).
   const cryptidGateRef = useRef(createOnceGate());
   const announceCryptid = useCallback((name: string, ms = 2400) => {
@@ -878,6 +883,7 @@ export function Battlefield({
       setSide('blue');
       setPhase('main');
       setMatchOver(null);
+      setFortune(null);
       setSelectedHand(null);
       setSelectedUnit(null);
       setAttacker(null);
@@ -1036,6 +1042,14 @@ export function Battlefield({
         : winner === PLAYER;
       if (playerWon) victoryStinger();
       else defeatStinger();
+      const gain = shardGainFor(mode, playerWon);
+      const hint =
+        playerWon && mode !== 'hotseat' && eraRef.current === 'first' ? noteFirstHourWin() : null;
+      setFortune(
+        gain > 0 || hint
+          ? { gain, total: (profile?.alchemicalShards ?? 0) + gain, won: playerWon, hint }
+          : null,
+      );
       const tally: MatchTally = {
         ...tallyRef.current,
         finished: true,
@@ -1044,7 +1058,7 @@ export function Battlefield({
       tallyDoneRef.current = true;
       onMatchEnd?.({ winner, kind, playerWon, tally });
     },
-    [pushLog, onMatchEnd, hotseat, friend, sharedTwoPlayer, side, mySide, PLAYER, tallySide],
+    [pushLog, onMatchEnd, hotseat, friend, sharedTwoPlayer, side, mySide, PLAYER, tallySide, mode, profile],
   );
 
   const buildEffectCtx = useCallback(
@@ -3927,6 +3941,14 @@ export function Battlefield({
               Azure {domination.blue} / {DOMINATION_WIN} · Crimson{' '}
               {domination.red} / {DOMINATION_WIN}
             </p>
+            {fortune && fortune.gain > 0 && (
+              <FortuneReveal gain={fortune.gain} total={fortune.total} won={fortune.won} />
+            )}
+            {fortune?.hint && (
+              <p className="match-hint" data-testid="match-hint">
+                {fortune.hint}
+              </p>
+            )}
             <div className="match-actions">
               <button
                 type="button"
