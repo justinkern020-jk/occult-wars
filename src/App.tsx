@@ -123,16 +123,18 @@ export default function App() {
 
   // <PlayingNow /> (mounted beside the app) asks to issue / answer / call off.
   const onChallenge = useRef<(d: TableChallengeDetail) => void>(() => undefined);
-  onChallenge.current = (d) => {
-    if (d.action === 'cancel') {
-      setTableChallenge(null);
-      if (screen === 'friend') setScreen('menu');
-      return;
-    }
-    if (!/^[A-Z]{4}$/.test(d.room)) return;
-    setTableChallenge({ role: d.action === 'accept' ? 'guest' : 'host', room: d.room });
-    ensureSworn(() => setScreen('friend'));
-  };
+  useEffect(() => {
+    onChallenge.current = (d) => {
+      if (d.action === 'cancel') {
+        setTableChallenge(null);
+        if (screen === 'friend') setScreen('menu');
+        return;
+      }
+      if (!/^[A-Z]{4}$/.test(d.room)) return;
+      setTableChallenge({ role: d.action === 'accept' ? 'guest' : 'host', room: d.room });
+      ensureSworn(() => setScreen('friend'));
+    };
+  });
   useEffect(() => {
     const on = (e: Event) => {
       const d = (e as CustomEvent<TableChallengeDetail>).detail;

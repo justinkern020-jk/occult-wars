@@ -4482,12 +4482,9 @@ input[type='search'] {
   font-size: 0.82rem;
   opacity: 0.8;
 }
-.leader-shelf {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  margin: 0.5rem 0 1rem;
+.leader-shelf-wrap {
+  margin: 0.25rem 0 1rem;
 }
-.leader-shelf .leader-plate {
-  cursor: pointer;
+.leader-shelf-wrap .hand-row {
+  overflow-x: auto;
 }

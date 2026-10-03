@@ -285,6 +285,20 @@ export function CampaignHour({
             <p className="plate-kicker">The Leaden Hour · Lodge memory</p>
             <h2>{end.title}</h2>
             <p className="lede">{end.text}</p>
+            {(() => {
+              const others = progress.endings.filter(
+                (id) => id !== variantId && id in ENDINGS,
+              ) as EndingId[];
+              return others.length > 0 ? (
+                <ul className="campaign-memory" data-testid="campaign-memory">
+                  {others.map((id) => (
+                    <li key={id}>
+                      <strong>{ENDINGS[id].title}.</strong> {ENDINGS[id].text}
+                    </li>
+                  ))}
+                </ul>
+              ) : null;
+            })()}
             <p className="campaign-justin-footnote">
               Then the gadget answered. Justin Kern rules the ash.
             </p>

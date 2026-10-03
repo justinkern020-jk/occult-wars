@@ -7,6 +7,7 @@ import {
   type Profile,
 } from '../game/profile';
 import { CardView } from './CardView';
+import { CardArt } from './CardArt';
 import { TarotPop } from './TarotPop';
 import {
   FIRST_HOUR_ORDERS,
@@ -42,6 +43,28 @@ export function Catalog({ profile, onUpdate }: Props) {
     () => (profile ? countOwned(profile.collection) : {}),
     [profile],
   );
+
+  /** Every leader this occultist has sworn or seated, in that order. */
+  const leaders = useMemo(() => {
+    if (!profile) return [];
+    const ids = [
+      profile.allegiance
+        ? CARDS.find((c) => c.kind === 'hero' && c.faction === profile.allegiance)?.id
+        : null,
+      profile.secondHero,
+      profile.oldHero,
+      ...profile.customDecks.map((d) => d.heroId),
+    ];
+    const seen = new Set<string>();
+    const out: (typeof CARDS)[number][] = [];
+    for (const id of ids) {
+      if (!id || seen.has(id)) continue;
+      seen.add(id);
+      const hero = CARDS.find((c) => c.id === id && c.kind === 'hero');
+      if (hero) out.push(hero);
+    }
+    return out;
+  }, [profile]);
 
   const list = useMemo(() => {
     // First Hour complete set + Unaligned specials (secrets / nuke aftermath).
@@ -113,6 +136,26 @@ export function Catalog({ profile, onUpdate }: Props) {
   return (
     <section className="catalog plate-screen" data-testid="collection">
       <h2>The Collection</h2>
+      {leaders.length > 0 && (
+        <div className="leader-shelf-wrap" data-testid="leader-shelf">
+          <p className="lede">Your leaders. Tap a plate to read what it does.</p>
+          <div className="hand-row">
+            {leaders.map((h) => (
+              <button
+                key={h.id}
+                type="button"
+                className="hand-card kind-hero hand-leader"
+                onClick={() => setInspect(h)}
+                title={h.text}
+              >
+                <CardArt name={h.name} />
+                <span className="hand-leader-tag">Leader</span>
+                <span className="hand-card-name">{h.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       <p className="lede">
         Encyclopedia of every First Hour plate — units, rites, devices, leaders,
         cryptids, secrets, and nuke aftermath. Cabals dual-Power.
