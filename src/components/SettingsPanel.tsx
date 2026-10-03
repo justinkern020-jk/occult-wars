@@ -55,7 +55,7 @@ export function InstallGrimoire({ compact = false }: { compact?: boolean }) {
   );
 }
 
-export function SettingsPanel({ onClose }: { onClose: () => void }) {
+export function SettingsPanel({ onClose, onWardrobe }: { onClose: () => void; onWardrobe?: () => void }) {
   const s = useSettings();
   return (
     <div className="codex-page-scrim" role="dialog" aria-modal aria-label="Settings" onClick={onClose}>
@@ -82,6 +82,23 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
             </span>
           </label>
         ))}
+        {onWardrobe && (
+          <button
+            type="button"
+            className="brass-btn settings-install-btn"
+            data-testid="open-wardrobe"
+            onClick={() => {
+              brassClick();
+              onWardrobe();
+            }}
+            title="Card backs, coin skins, patron code"
+          >
+            <span className="menu-ledger-glyph" aria-hidden>
+              ♜
+            </span>
+            The Wardrobe
+          </button>
+        )}
         <InstallGrimoire />
         <button type="button" className="brass-btn" onClick={onClose}>
           Done

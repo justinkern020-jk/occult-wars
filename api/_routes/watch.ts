@@ -7,6 +7,7 @@
  *   { op: 'code', id, side, code }         → { ok, cmd }
  *   { op: 'accounts' }                     → { accounts, unnamedAccounts, total, unnamed, truncated } (names + dates; never emails)
  *   { op: 'secrets' }                      → { counts, finders } (who found each hidden code)
+ *   { op: 'patronList' | 'patronMint' (n, note) | 'patronRevoke' (code) } → patron codes
  * Anyone else gets a bare 404 so the door is not advertised.
  */
 import { getStore } from '../_lib/store.js';
@@ -15,6 +16,7 @@ import { listHands, serverBuild } from '../_lib/table.js';
 import { listAccounts } from '../_lib/accounts.js';
 import { secretCounts, secretFinders } from '../_lib/secrets.js';
 import { WatchError, isOwner, listLive, sendCode, viewMatch } from '../_lib/watch.js';
+import { PatronError, listCodes, mintCodes, revokeCode } from '../_lib/patron.js';
 
 export async function handleWatch(req: Request, now = Date.now()): Promise<Response> {
   try {
@@ -35,13 +37,19 @@ export async function handleWatch(req: Request, now = Date.now()): Promise<Respo
     if (op === 'view') return json({ ok: true, ...(await viewMatch(store, String(body.id ?? ''))) });
     if (op === 'code') return json({ ok: true, cmd: await sendCode(store, { id: body.id, side: body.side, code: body.code }, now) });
     if (op === 'accounts') return json({ ok: true, ...(await listAccounts(store)) });
+    if (op === 'patronList') return json({ ok: true, codes: await listCodes(store) });
+    if (op === 'patronMint') return json({ ok: true, minted: await mintCodes(store, body.n, body.note, now), codes: await listCodes(store) });
+    if (op === 'patronRevoke') {
+      await revokeCode(store, body.code);
+      return json({ ok: true, codes: await listCodes(store) });
+    }
     if (op === 'secrets') {
       const [counts, finders] = await Promise.all([secretCounts(store), secretFinders(store)]);
       return json({ ok: true, counts, finders });
     }
     throw new HttpError(400, 'Unknown op.');
   } catch (err) {
-    if (err instanceof WatchError) return json({ ok: false, error: err.message }, err.status);
+    if (err instanceof WatchError || err instanceof PatronError) return json({ ok: false, error: err.message }, err.status);
     return fail(err);
   }
 }

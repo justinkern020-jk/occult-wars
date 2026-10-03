@@ -33,6 +33,7 @@ import { buildOrderAllyWorkingIds, buildWorkingIds } from './deck';
 import { addFoils, migrateFoils, rollFoil, type FoilBook } from './foil';
 import { migrateAch, migrateTitle, type AchState } from './achievements';
 import { migrateCodex } from './codexUnlock';
+import { migrateWardrobe, type Wardrobe } from './wardrobe';
 
 export const PROFILE_KEY = 'occult-wars.profile.v1';
 export const PACK_COST = 150;
@@ -105,6 +106,8 @@ export type Profile = {
   title?: string;
   /** Codex pages met on the field (owned plates are open anyway). */
   codex?: string[];
+  /** Card back, coin skin and a redeemed patron code (cosmetic only). */
+  wardrobe?: Wardrobe;
 };
 
 export function defaultProfile(): Profile {
@@ -257,7 +260,9 @@ function polishFields(raw: Partial<Profile> & Record<string, unknown>): Partial<
   const ach = migrateAch(raw.ach);
   const title = ach ? migrateTitle(raw.title) : undefined;
   const codex = migrateCodex(raw.codex);
+  const wardrobe = migrateWardrobe(raw.wardrobe);
   return {
+    ...(wardrobe ? { wardrobe } : {}),
     ...(Object.keys(foils).length ? { foils } : {}),
     ...(ach ? { ach } : {}),
     ...(title ? { title } : {}),

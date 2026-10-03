@@ -198,9 +198,7 @@ export function PackOpening({ items, label, wax = 'crimson', onClose }: Props) {
                 }}
               >
                 <span className="pack-slot-inner">
-                  <span className="pack-slot-back" aria-hidden>
-                    <span className="pack-slot-sigil">✠</span>
-                  </span>
+                  <span className="pack-slot-back ow-card-back" aria-hidden />
                   <span className="pack-slot-face">
                     <CardView card={it.card} compact foil={it.foil} />
                     <span className="pack-slot-rarity">

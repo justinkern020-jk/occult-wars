@@ -100,6 +100,7 @@ import {
 } from '../net/watch';
 import { reportPlayed, setActivity } from '../net/table';
 import { haptic } from '../game/haptics';
+import { DeckPile } from './Wardrobe';
 import { reportSecretFound, secretIdForCode } from '../net/secrets';
 import {
   RulesPrimer,
@@ -3767,6 +3768,7 @@ export function Battlefield({
 
       <div className="hand-rail">
         <p className="hand-kicker">
+          <DeckPile count={deck[inputSide].length} />
           {sideLabel(inputSide)} hand · drag a unit up to muster · swipe to slide the hand · tap coins to move · Call power on the coin · rites & devices speak
           {friend && !friendSynced
             ? ' · syncing with host…'

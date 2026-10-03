@@ -10,6 +10,7 @@ import {
 } from '../game/orders';
 import type { CustomDeck } from '../game/profile';
 import { ALL_TITLES } from '../game/achievements';
+import { cleanCoinSkin } from '../game/wardrobe';
 
 /** Who sits in the chair: the name, worn title and ladder rank shown across the table. */
 export type LoadoutWho = {
@@ -18,6 +19,8 @@ export type LoadoutWho = {
   rank?: string;
   /** Ranked: the host's sitting nonce, so both seats report the same match. */
   nonce?: string;
+  /** Wardrobe coin skin, so the other chair sees your coins (known ids only). */
+  coin?: string;
 };
 
 export type FriendLoadout = {
@@ -42,8 +45,9 @@ export function sanitizeWho(raw: unknown): LoadoutWho | undefined {
     title: title && ALL_TITLES.includes(title) ? title : undefined,
     rank: shortText(r.rank, 32),
     nonce: typeof r.nonce === 'string' && /^[a-z0-9]{8,32}$/.test(r.nonce) ? r.nonce : undefined,
+    coin: cleanCoinSkin(r.coin),
   };
-  return who.name || who.title || who.rank || who.nonce ? who : undefined;
+  return who.name || who.title || who.rank || who.nonce || who.coin ? who : undefined;
 }
 
 const KNOWN_IDS = new Set(CARDS.map((c) => c.id));

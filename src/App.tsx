@@ -62,6 +62,7 @@ import { ACH_EVENT, noteMatch, noteSecret, noteSighting, settleHonours, type Ach
 import { noteEncounters } from './game/codexUnlock';
 import { Honours, TitlePicker } from './components/Honours';
 import { SettingsPanel } from './components/SettingsPanel';
+import { WardrobePanel } from './components/Wardrobe';
 import { toastHonours, toastNotice } from './components/HonourToast';
 import { Ladder, RankBadge } from './components/Ladder';
 import { beginRanked, newSittingNonce, refreshMyRank, reportRanked, useMyRank } from './net/ranked';
@@ -70,6 +71,7 @@ import './App.css';
 import './polish.css';
 
 import { LoadingLoreVeil } from './components/LoadingLore';
+import { applyFoeCoin, applyWardrobe, wornCoin } from './game/wardrobe';
 const Codex = lazy(() => import('./components/Codex').then((m) => ({ default: m.Codex })));
 
 type Screen =
@@ -138,6 +140,7 @@ export default function App() {
   /** The Ledger opened by a "Take a seat" invitation: straight to the sign-up form. */
   const [ledgerSeat, setLedgerSeat] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [wardrobeOpen, setWardrobeOpen] = useState(false);
   const myRank = useMyRank();
   /** Ranked: this table's sitting nonce (the host's) and how many sittings have finished. */
   const [sittingNonce, setSittingNonce] = useState(newSittingNonce);
@@ -211,6 +214,14 @@ export default function App() {
     role: FriendRole;
     room: string;
   } | null>(null);
+
+  // Wardrobe: the chosen card back and coin skin paint the page; the other chair's coin in a friend match.
+  useEffect(() => {
+    applyWardrobe(profile);
+  }, [profile]);
+  useEffect(() => {
+    applyFoeCoin(screen === 'field' && matchMode === 'friend' ? friendFoe?.coin : undefined);
+  }, [screen, matchMode, friendFoe]);
 
   // What this hand is doing, for the owner's roll (and the safe-reload check).
   useEffect(() => {
@@ -476,7 +487,16 @@ export default function App() {
         onSettings={() => setSettingsOpen(true)}
         onLadder={() => setScreen('ladder')}
       />
-      {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
+      {settingsOpen && (
+        <SettingsPanel
+          onClose={() => setSettingsOpen(false)}
+          onWardrobe={() => {
+            setSettingsOpen(false);
+            setWardrobeOpen(true);
+          }}
+        />
+      )}
+      {wardrobeOpen && <WardrobePanel profile={profile} onUpdate={update} onClose={() => setWardrobeOpen(false)} />}
       </>
     );
   }
@@ -581,7 +601,7 @@ export default function App() {
           customDecks={profile.customDecks}
           allegiance={firstHourAllegiance()}
           tableChallenge={tableChallenge}
-          who={{ name: profile.username || undefined, title: profile.title, rank: myRank?.rank, nonce: sittingNonce }}
+          who={{ name: profile.username || undefined, title: profile.title, rank: myRank?.rank, nonce: sittingNonce, coin: wornCoin(profile) }}
           onReady={({ room, role, session, hostLoadout, guestLoadout }) => {
             setTableChallenge(null);
             startFriend(room, role, session, hostLoadout, guestLoadout);

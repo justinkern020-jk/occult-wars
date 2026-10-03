@@ -1,3 +1,4 @@
+import { listPatronCodes, mintPatronCodes, revokePatronCode, type MintedCode } from '../net/patron';
 import { readSecretFinders, SECRET_LABEL, SECRET_ORDER } from '../net/secrets';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -289,6 +290,7 @@ export function PortalDoor() {
           ))}
         </ol>
       )}
+      <PatronBook />
       <h3 className="portal-roll-title" data-testid="portal-secrets-title">
         Secrets uncovered
       </h3>
@@ -570,5 +572,94 @@ export function PortalView({ matchId, onLeave }: { matchId: string; onLeave: () 
         </div>
       </div>
     </div>
+  );
+}
+
+/** Owner-only: mint, view and revoke patron codes (the gilt card back). */
+function PatronBook() {
+  const [codes, setCodes] = useState<MintedCode[] | null | 'wait'>('wait');
+  const [note, setNote] = useState('');
+  const [fresh, setFresh] = useState<string[]>([]);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    void listPatronCodes().then((r) => {
+      if (alive) setCodes(r);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+  return (
+    <section className="portal-patron" data-testid="portal-patron">
+      <h3 className="portal-roll-title">Patron codes</h3>
+      <div className="portal-patron-row">
+        <input
+          className="ledger-input"
+          value={note}
+          maxLength={60}
+          placeholder="Note (who it is for)"
+          aria-label="Patron code note"
+          onChange={(e) => setNote(e.target.value)}
+        />
+        <button
+          type="button"
+          className="brass-btn"
+          data-testid="portal-patron-mint"
+          disabled={busy}
+          onClick={() => {
+            setBusy(true);
+            void mintPatronCodes(1, note).then((r) => {
+              setBusy(false);
+              if (r) {
+                setFresh(r.minted);
+                setCodes(r.codes);
+                setNote('');
+              }
+            });
+          }}
+        >
+          Mint a patron code
+        </button>
+      </div>
+      {fresh.length > 0 && (
+        <p className="portal-quiet" data-testid="portal-patron-fresh">
+          New: <code>{fresh.join(', ')}</code> (the player enters it in Settings, The Wardrobe)
+        </p>
+      )}
+      {codes === 'wait' ? (
+        <p className="portal-quiet">Reading the patron book…</p>
+      ) : codes == null ? (
+        <p className="portal-quiet">The patron book is shut (needs the ledger store).</p>
+      ) : codes.length === 0 ? (
+        <p className="portal-quiet">No patron codes minted yet.</p>
+      ) : (
+        <ol className="portal-roll" data-testid="portal-patron-list">
+          {codes.map((c) => (
+            <li key={c.code} className={`portal-hand${c.revoked ? ' is-revoked' : ''}`}>
+              <span className="portal-hand-name">
+                <code>{c.code}</code>
+                {c.note ? <i> · {c.note}</i> : null}
+              </span>
+              <span className="portal-hand-meta">
+                Minted {seatDate(c.at)} · redeemed {c.used}×{c.revoked ? ' · revoked' : ''}
+              </span>
+              {!c.revoked && (
+                <button
+                  type="button"
+                  className="brass-btn brass-btn-ghost portal-hand-watch"
+                  onClick={() => {
+                    if (!window.confirm(`Revoke ${c.code}? It stops working for new redemptions.`)) return;
+                    void revokePatronCode(c.code).then((r) => r && setCodes(r));
+                  }}
+                >
+                  Revoke
+                </button>
+              )}
+            </li>
+          ))}
+        </ol>
+      )}
+    </section>
   );
 }

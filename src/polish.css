@@ -806,3 +806,266 @@ p.lore-paper-text { font-style: normal; }
   .lore-veil { transition: none; }
   .lore-veil-label { animation: none; }
 }
+
+/* ---- Polish 3: Leaden Hour story panels ---- */
+.story-panels { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; width: min(64rem, 100%); margin: 0 auto; }
+.story-kicker { margin: 0; }
+.story-panel {
+  position: relative;
+  margin: 0;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #0b0806;
+  border: 3px solid #0a0705;
+  outline: 2px solid rgba(198, 161, 91, 0.7);
+  outline-offset: 3px;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.6), 0 0 18px rgba(63, 174, 116, 0.18);
+  transform: rotate(-0.25deg);
+  animation: story-in 0.5s ease both;
+}
+.story-art, .story-art-img, .story-art-blur { position: absolute; inset: 0; width: 100%; height: 100%; }
+.story-art-img { object-fit: cover; animation: story-drift 14s ease-out both; filter: sepia(0.12) contrast(1.05); }
+.story-art.is-fallback .story-art-img { filter: sepia(0.35) contrast(1.08) saturate(0.85); }
+.story-art.is-portrait .story-art-img { object-fit: contain; animation: none; }
+.story-art-blur { object-fit: cover; filter: blur(18px) brightness(0.45) sepia(0.4); transform: scale(1.15); }
+.story-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 55%, transparent 55%, rgba(0, 0, 0, 0.55)),
+    radial-gradient(circle, rgba(0, 0, 0, 0.12) 1px, transparent 1.4px) 0 0 / 4px 4px;
+  mix-blend-mode: multiply;
+}
+.story-caption {
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  max-width: min(26rem, 70%);
+  padding: 0.6rem 0.8rem;
+  background: linear-gradient(180deg, #efdcae, #dcc38c);
+  color: #2b1d0e;
+  border: 2px solid #1a120a;
+  box-shadow: 3px 3px 0 rgba(10, 6, 2, 0.75);
+  font-family: var(--font-body, 'Libre Baskerville', serif);
+  font-size: clamp(0.82rem, 1.6vw, 1.02rem);
+  line-height: 1.45;
+  font-style: italic;
+}
+.story-controls { display: flex; align-items: center; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+.story-dots { display: inline-flex; gap: 0.35rem; }
+.story-dots span { width: 0.55rem; height: 0.55rem; border-radius: 50%; border: 1px solid #c6a15b; background: transparent; }
+.story-dots span.is-seen { background: rgba(198, 161, 91, 0.45); }
+.story-dots span.is-on { background: #3fae74; border-color: #7dffb0; box-shadow: 0 0 6px rgba(63, 174, 116, 0.8); }
+.story-replay { font-size: 0.8rem; }
+@keyframes story-in { from { opacity: 0; transform: rotate(-0.25deg) translateY(8px); } }
+@keyframes story-drift { from { transform: scale(1.06) translate(1%, 1%); } to { transform: scale(1) translate(0, 0); } }
+@media (max-width: 640px) {
+  .story-panel { aspect-ratio: 4 / 5; }
+  .story-caption { left: 0.5rem; right: 0.5rem; top: auto; bottom: 0.5rem; max-width: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .story-panel, .story-art-img { animation: none; }
+}
+
+/* ---- Polish 3: Wardrobe — card backs (CSS/SVG only) ---- */
+.ow-card-back {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 0.85rem;
+  border: 1px solid #8c6d32;
+  background:
+    radial-gradient(circle at 50% 50%, #3fd08a22, transparent 45%),
+    repeating-linear-gradient(45deg, #1a140d 0 6px, #140f0a 6px 12px);
+  box-shadow: inset 0 0 0 4px #0c0907, inset 0 0 0 5px #c6a15b77, 0 12px 24px #000a;
+}
+.ow-card-back::before {
+  content: '✠';
+  font-size: 2.4rem;
+  line-height: 1;
+  color: #c6a15b88;
+  text-shadow: 0 0 12px #3fd08a55;
+  position: relative;
+  z-index: 1;
+}
+.ow-card-back::after { content: ''; position: absolute; inset: 0; pointer-events: none; }
+
+/* Wax seal */
+.ow-card-back[data-back='wax'],
+html[data-card-back='wax'] .ow-card-back:not([data-back]) {
+  border-color: #6b4a2a;
+  background:
+    radial-gradient(circle at 50% 50%, #8e1f1f 0 17%, #6a1212 21%, #4a0b0b 24%, transparent 25.5%),
+    radial-gradient(circle at 46% 46%, #c5413a55 0 12%, transparent 18%),
+    linear-gradient(135deg, transparent 49.4%, #8a6a4033 49.6% 50.4%, transparent 50.6%),
+    linear-gradient(45deg, transparent 49.4%, #8a6a4033 49.6% 50.4%, transparent 50.6%),
+    radial-gradient(ellipse at 50% 40%, #e9dab6, #cdb688 70%, #a88c5c);
+  box-shadow: inset 0 0 0 4px #efe2c2, inset 0 0 0 5px #8a6a40, inset 0 0 26px #6b4a2a88, 0 12px 24px #000a;
+}
+.ow-card-back[data-back='wax']::before,
+html[data-card-back='wax'] .ow-card-back:not([data-back])::before {
+  content: '✠';
+  color: #3a0606cc;
+  text-shadow: 0 1px 0 #d0605588, 0 -1px 0 #1a0202;
+  font-size: 1.9rem;
+}
+
+/* Sealed Century brass */
+.ow-card-back[data-back='brass'],
+html[data-card-back='brass'] .ow-card-back:not([data-back]) {
+  border-color: #5a3f18;
+  background:
+    radial-gradient(circle at 10% 7%, #fff2c4 0 2.2%, #6d5228 3%, transparent 3.6%),
+    radial-gradient(circle at 90% 7%, #fff2c4 0 2.2%, #6d5228 3%, transparent 3.6%),
+    radial-gradient(circle at 10% 93%, #fff2c4 0 2.2%, #6d5228 3%, transparent 3.6%),
+    radial-gradient(circle at 90% 93%, #fff2c4 0 2.2%, #6d5228 3%, transparent 3.6%),
+    repeating-radial-gradient(circle at 50% 50%, #0000 0 9px, #5a3f1855 9px 10px),
+    linear-gradient(135deg, #f0d78a, #b48a3e 35%, #e3c27a 55%, #8c6d32 80%, #c9a35a);
+  box-shadow: inset 0 0 0 4px #3a2a14, inset 0 0 0 6px #e3c27a, inset 0 0 20px #3a2a14aa, 0 12px 24px #000a;
+}
+.ow-card-back[data-back='brass']::before,
+html[data-card-back='brass'] .ow-card-back:not([data-back])::before {
+  content: 'C';
+  font-family: var(--font-decorative, 'Cinzel Decorative', serif);
+  font-size: 2.3rem;
+  color: #3a2a14;
+  text-shadow: 0 1px 0 #fff2c4aa;
+}
+
+/* Laurel of Honours */
+.ow-card-back[data-back='laurel'],
+html[data-card-back='laurel'] .ow-card-back:not([data-back]) {
+  border-color: #3fae74;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%237ad09a' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M50 86 C24 80 14 58 20 32'/%3E%3Cpath d='M50 86 C76 80 86 58 80 32'/%3E%3C/g%3E%3Cg fill='%233fae74'%3E%3Cellipse cx='19' cy='44' rx='4' ry='8' transform='rotate(-20 19 44)'/%3E%3Cellipse cx='23' cy='60' rx='4' ry='8' transform='rotate(-45 23 60)'/%3E%3Cellipse cx='33' cy='74' rx='4' ry='8' transform='rotate(-65 33 74)'/%3E%3Cellipse cx='81' cy='44' rx='4' ry='8' transform='rotate(20 81 44)'/%3E%3Cellipse cx='77' cy='60' rx='4' ry='8' transform='rotate(45 77 60)'/%3E%3Cellipse cx='67' cy='74' rx='4' ry='8' transform='rotate(65 67 74)'/%3E%3C/g%3E%3C/svg%3E") center / 82% no-repeat,
+    radial-gradient(ellipse at 50% 45%, #1f4a33, #0e2418 70%, #08140d);
+  box-shadow: inset 0 0 0 4px #08140d, inset 0 0 0 5px #c6a15b99, 0 12px 24px #000a;
+}
+.ow-card-back[data-back='laurel']::before,
+html[data-card-back='laurel'] .ow-card-back:not([data-back])::before {
+  content: '✦';
+  color: #f0d78a;
+  text-shadow: 0 0 10px #f0d78a88;
+  font-size: 1.9rem;
+}
+
+/* Cryptid Watch */
+.ow-card-back[data-back='cryptid'],
+html[data-card-back='cryptid'] .ow-card-back:not([data-back]) {
+  border-color: #3b4a3a;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 150' preserveAspectRatio='none'%3E%3Cg fill='%23070b08'%3E%3Cpath d='M0 150 L0 92 L8 70 L16 92 L22 64 L30 92 L36 76 L44 96 L50 60 L58 96 L64 74 L72 94 L78 62 L86 92 L92 72 L100 90 L100 150Z'/%3E%3C/g%3E%3C/svg%3E") bottom / 100% 70% no-repeat,
+    radial-gradient(circle at 70% 22%, #e9efd055 0 5%, transparent 9%),
+    linear-gradient(180deg, #1b2a2c, #101a17 60%, #070b08);
+  box-shadow: inset 0 0 0 4px #070b08, inset 0 0 0 5px #8a9a7a77, 0 12px 24px #000a;
+}
+.ow-card-back[data-back='cryptid']::before,
+html[data-card-back='cryptid'] .ow-card-back:not([data-back])::before {
+  content: '';
+  width: 40%;
+  aspect-ratio: 3.2 / 1;
+  margin-top: 28%;
+  background:
+    radial-gradient(ellipse at 22% 50%, #ffe36a 0 22%, #ffb40055 30%, transparent 46%),
+    radial-gradient(ellipse at 78% 50%, #ffe36a 0 22%, #ffb40055 30%, transparent 46%);
+  filter: drop-shadow(0 0 6px #ffcc33);
+}
+
+/* Patron's Gilt */
+.ow-card-back[data-back='patron'],
+html[data-card-back='patron'] .ow-card-back:not([data-back]) {
+  border-color: #f0d78a;
+  background:
+    linear-gradient(135deg, #0000 0 46%, #f0d78a22 50%, #0000 54%) 0 0 / 100% 100%,
+    repeating-linear-gradient(90deg, #0000 0 14px, #c6a15b14 14px 15px),
+    radial-gradient(ellipse at 50% 40%, #1a1410, #050403 75%);
+  box-shadow:
+    inset 0 0 0 3px #050403,
+    inset 0 0 0 6px #e3c27a,
+    inset 0 0 0 8px #5a3f18,
+    inset 0 0 0 10px #f0d78a,
+    0 0 18px #f0d78a44,
+    0 12px 24px #000a;
+}
+.ow-card-back[data-back='patron']::before,
+html[data-card-back='patron'] .ow-card-back:not([data-back])::before {
+  content: '';
+  width: 30%;
+  aspect-ratio: 1;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  background: radial-gradient(circle at 42% 34%, #d8ffe8, #1ecf6a 30%, #046034 70%, #012818);
+  filter: drop-shadow(0 0 10px #3fd08a);
+  outline: 0;
+}
+.ow-card-back[data-back='patron']::after,
+html[data-card-back='patron'] .ow-card-back:not([data-back])::after {
+  inset: 18% 22%;
+  border: 1px solid #e3c27a99;
+  border-radius: 50%;
+}
+
+/* ---- Wardrobe — coin skins (the rim; the plate art stays on the face) ---- */
+.stone-coin[data-skin='obsidian'],
+html[data-coin-skin='obsidian'] .stone-coin:not(.coin-foe):not([data-skin]),
+html[data-foe-coin-skin='obsidian'] .stone-coin.coin-foe:not([data-skin]) {
+  background:
+    radial-gradient(circle at 30% 22%, #ffffffb0 0%, #ffffff00 22%),
+    radial-gradient(circle at 50% 54%, #050507 0 52%, #2a2a33 55%, #9aa0b4 61%, #16161c 68%, #050507 77%, #5a5f70 85%, #0b0b10 92%, #3a3d4a 100%);
+  filter: none;
+}
+.stone-coin[data-skin='verdigris'],
+html[data-coin-skin='verdigris'] .stone-coin:not(.coin-foe):not([data-skin]),
+html[data-foe-coin-skin='verdigris'] .stone-coin.coin-foe:not([data-skin]) {
+  background:
+    radial-gradient(circle at 32% 24%, #e6fff2c0 0%, #e6fff200 24%),
+    radial-gradient(circle at 50% 54%, #0f1f19 0 52%, #3d7a63 55%, #b9e3cc 62%, #2f5f50 70%, #12251e 77%, #8cc9ac 85%, #24493c 92%, #6fae92 100%);
+  filter: none;
+}
+.stone-coin[data-skin='bone'],
+html[data-coin-skin='bone'] .stone-coin:not(.coin-foe):not([data-skin]),
+html[data-foe-coin-skin='bone'] .stone-coin.coin-foe:not([data-skin]) {
+  background:
+    radial-gradient(circle at 32% 24%, #fffdf2e0 0%, #fffdf200 26%),
+    radial-gradient(circle at 50% 54%, #2a2216 0 52%, #a8956c 55%, #fff6e0 62%, #b9a77f 70%, #4a3c26 77%, #efe2c2 85%, #8a7650 92%, #d8c8a2 100%);
+  filter: none;
+}
+
+/* ---- Wardrobe panel ---- */
+.wardrobe-panel { width: min(46rem, 96vw); max-height: 92vh; overflow-y: auto; padding: 1.1rem 1.2rem; display: flex; flex-direction: column; gap: 0.7rem; }
+.wardrobe-panel h2 { font-family: var(--font-decorative); margin: 0; color: #ecdcae; }
+.wardrobe-h { margin: 0.4rem 0 0; font-family: var(--font-display); color: #c9b27a; font-size: 0.85rem; letter-spacing: 0.16em; text-transform: uppercase; }
+.wardrobe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(6.6rem, 1fr)); gap: 0.6rem; }
+.wardrobe-item {
+  display: flex; flex-direction: column; align-items: center; gap: 0.3rem; padding: 0.5rem 0.4rem 0.55rem;
+  background: #120d09; border: 1px solid #3a2a16; border-radius: 0.6rem; color: #ecdcae; cursor: pointer; text-align: center;
+}
+.wardrobe-item:hover:not(:disabled) { border-color: #c6a15b; }
+.wardrobe-item.is-worn { border-color: #3fae74; box-shadow: 0 0 0 1px #3fae74, 0 0 14px rgba(63, 174, 116, 0.35); }
+.wardrobe-item.is-locked { cursor: not-allowed; }
+.wardrobe-item.is-locked .wardrobe-back, .wardrobe-item.is-locked .wardrobe-coin-well { filter: grayscale(0.85) brightness(0.45); }
+.wardrobe-back { width: 4.4rem; aspect-ratio: 2 / 3; border-radius: 0.45rem; }
+.wardrobe-back::before { font-size: 1.5rem; }
+.wardrobe-name { font-family: var(--font-display); font-size: 0.74rem; font-weight: 600; line-height: 1.2; }
+.wardrobe-sub { font-size: 0.66rem; color: #9b8a6c; line-height: 1.3; }
+.wardrobe-coin-well { position: relative; width: 4rem; height: 4rem; display: block; }
+.wardrobe-coin { cursor: inherit; }
+.wardrobe-note { margin: 0; color: #9b8a6c; font-size: 0.78rem; }
+.wardrobe-patron { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.wardrobe-patron .ledger-input { flex: 1 1 14rem; font-family: ui-monospace, monospace; letter-spacing: 0.06em; }
+.wardrobe-err { flex-basis: 100%; margin: 0; color: #e07070; font-size: 0.8rem; }
+
+/* Draw pile beside the hand */
+.deck-pile { display: inline-flex; align-items: center; gap: 0.3rem; margin-right: 0.45rem; vertical-align: middle; }
+.deck-pile-back { width: 1.05rem; height: 1.55rem; border-radius: 0.18rem; box-shadow: 1px 1px 0 #0c0907, 2px 2px 0 #3a2a16, 3px 3px 0 #0c0907; }
+.deck-pile-back::before { font-size: 0.6rem; }
+.deck-pile-count { font-family: var(--font-display); color: #ecdcae; font-weight: 600; }
+
+/* Portal: patron codes */
+.portal-patron { display: flex; flex-direction: column; gap: 0.5rem; }
+.portal-patron-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.portal-patron code { font-family: ui-monospace, monospace; color: #f0d78a; user-select: all; }
+.portal-patron .is-revoked code { text-decoration: line-through; color: #8a7a5c; }

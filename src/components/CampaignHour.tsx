@@ -28,6 +28,8 @@ import { MushroomCloud } from './MushroomCloud';
 import { FalloutRain } from './FalloutRain';
 import { TarotPop } from './TarotPop';
 import { AiMindPicker } from './AiMindPicker';
+import { StoryPanels } from './StoryPanels';
+import { panelsForStage } from '../game/storyPanels';
 import type { AiDifficulty } from '../game/ai';
 
 type Props = {
@@ -42,6 +44,8 @@ type Props = {
 };
 
 /** nuke → fallout → radiation → winter → epilogue → justin → plate → Fulcanelli warning */
+const STORY_SEEN_KEY = 'occult-wars.story-seen';
+
 type CloserPhase =
   | 'nuke'
   | 'fallout'
@@ -73,6 +77,23 @@ export function CampaignHour({
   const [justinCard, setJustinCard] = useState<Card | null>(null);
   const [radiationCard, setRadiationCard] = useState<Card | null>(null);
   const [winterCard, setWinterCard] = useState<Card | null>(null);
+  /** Which arrival's story panels were already shown this visit ("stage:prev outcome"). */
+  const [storySeen, setStorySeen] = useState<string | null>(() => {
+    try {
+      return sessionStorage.getItem(STORY_SEEN_KEY);
+    } catch {
+      return null;
+    }
+  });
+  const markStorySeen = useCallback((key: string | null) => {
+    setStorySeen(key);
+    try {
+      if (key) sessionStorage.setItem(STORY_SEEN_KEY, key);
+      else sessionStorage.removeItem(STORY_SEEN_KEY);
+    } catch {
+      /* this visit only */
+    }
+  }, []);
 
   useEffect(() => {
     if (!lastOutcome || !onConsumeOutcome) return;
@@ -183,6 +204,7 @@ export function CampaignHour({
     setRadiationCard(null);
     setWinterCard(null);
     setShowCutscene(true);
+    markStorySeen(null);
   }
 
   if (done) {
@@ -358,6 +380,21 @@ export function CampaignHour({
 
   if (!stage) return null;
 
+  const prevOutcome = progress.stage > 0 ? ((progress.choices[String(progress.stage - 1)] as StageOutcome | undefined) ?? null) : null;
+  const storyKey = `${progress.stage}:${prevOutcome ?? ''}`;
+  const showStory = showCutscene && storySeen !== storyKey;
+  if (showStory) {
+    return (
+      <section className="campaign-root plate-screen" data-testid="campaign-story">
+        <StoryPanels
+          panels={panelsForStage(progress.stage, prevOutcome)}
+          kicker={`The Leaden Hour · ${stage.title} · Stage ${progress.stage + 1} / ${LEADEN_STAGES.length}`}
+          onDone={() => markStorySeen(storyKey)}
+        />
+      </section>
+    );
+  }
+
   return (
     <section className="campaign-root plate-screen" data-testid="campaign-hour">
       <p className="plate-kicker">
@@ -390,6 +427,17 @@ export function CampaignHour({
             onClick={() => speakLine(stage.cutscene.vo)}
           >
             Hear the hour (voice)
+          </button>
+          <button
+            type="button"
+            className="brass-btn brass-btn-ghost story-replay"
+            data-testid="story-replay"
+            onClick={() => {
+              brassClick();
+              markStorySeen(null);
+            }}
+          >
+            Replay the panels
           </button>
         </div>
       ) : (
