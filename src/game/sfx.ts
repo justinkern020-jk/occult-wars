@@ -141,55 +141,110 @@ export function windChimeSfx(): Promise<void> {
   });
 }
 
-/** Wooden coin-move knock ("deep hollow knock"): small preloaded pool, reused. */
-const COIN_MOVE_SRC = '/assets/audio/sfx/wood-chime-move.mp3';
-const COIN_MOVE_POOL = 3;
-let coinMovePool: HTMLAudioElement[] | null = null;
-let coinMoveNext = 0;
+/**
+ * Coin moves play a song on the wooden knock ("C: deep hollow knock"), one note
+ * per move or deploy, both sides, cycling; the step resets at each match start.
+ * Swap the tune by pointing COIN_MOVE_SONG at another array. Every note named
+ * here needs public/assets/audio/sfx/knock/knock-<note>.mp3 (# -> s, lower case),
+ * rendered by /workspace/sfx/synth_knock_melody.py.
+ */
+/**
+ * Moonlight Sonata (Beethoven Op. 27 No. 2, I), C# minor, one octave down for
+ * the knock's warm range: the opening triplets (bars 1, 3, 4), then the
+ * dotted-G# melody over its triplets through bar 12. C3 spells B#.
+ */
+export const MOONLIGHT_SONATA: readonly string[] = [
+  // bar 1 (half)            bar 3
+  'G#2', 'C#3', 'E3', 'G#2', 'C#3', 'E3', 'A2', 'C#3', 'E3', 'A2', 'D3', 'F#3',
+  // bar 4
+  'G#2', 'C3', 'F#3', 'G#2', 'C#3', 'E3', 'G#2', 'C#3', 'D#3', 'F#2', 'C3', 'D#3',
+  // bar 5: triplet, then the melody's dotted G# pickup
+  'G#2', 'C#3', 'E3', 'G#3', 'G#3',
+  // bar 6
+  'G#3', 'G#2', 'C3', 'F#3', 'G#3', 'G#3',
+  // bar 7
+  'G#3', 'G#2', 'C#3', 'E3', 'A3', 'A2', 'C#3', 'E3',
+  // bar 8
+  'G#3', 'A2', 'C#3', 'F#3', 'F#3', 'A2', 'B2', 'D#3', 'B3',
+  // bar 9
+  'E3', 'G#2', 'B2', 'E3',
+  // bar 10
+  'G2', 'B2', 'E3', 'G3', 'G3',
+  // bar 11
+  'G3', 'G2', 'B2', 'E3', 'G3', 'G3',
+  // bar 12
+  'G3', 'F#2', 'B2', 'D3', 'F#3',
+];
 
-function getCoinMovePool(): HTMLAudioElement[] {
-  if (coinMovePool) return coinMovePool;
-  coinMovePool = [];
-  if (typeof Audio === 'undefined') return coinMovePool;
-  for (let i = 0; i < COIN_MOVE_POOL; i++) {
+/** Dies Irae (the sequence chant), set in C# minor on the same knocks. Unused: an easy swap. */
+export const DIES_IRAE: readonly string[] = [
+  'E3', 'D#3', 'E3', 'C#3', 'D#3', 'B2', 'C#3', 'C#3',
+  'E3', 'E3', 'F#3', 'E3', 'D#3', 'C#3', 'B2', 'D#3', 'E3', 'D#3', 'C#3',
+];
+
+/** The tune coin moves play. */
+export const COIN_MOVE_SONG: readonly string[] = MOONLIGHT_SONATA;
+
+export function knockSrc(note: string): string {
+  return `/assets/audio/sfx/knock/knock-${note.replace('#', 's').toLowerCase()}.mp3`;
+}
+
+const KNOCK_POOL = 2;
+const knockPools = new Map<string, HTMLAudioElement[]>();
+let coinMoveStep = 0;
+
+function getKnockPool(note: string): HTMLAudioElement[] {
+  let pool = knockPools.get(note);
+  if (pool) return pool;
+  pool = [];
+  knockPools.set(note, pool);
+  if (typeof Audio === 'undefined') return pool;
+  for (let i = 0; i < KNOCK_POOL; i++) {
     try {
-      const a = new Audio(COIN_MOVE_SRC);
+      const a = new Audio(knockSrc(note));
       a.preload = 'auto';
-      coinMovePool.push(a);
+      pool.push(a);
     } catch {
       /* no audio element support */
     }
   }
-  return coinMovePool;
+  return pool;
 }
 
-/** Warm the coin-move pool so the first move doesn't lag. */
+/** Warm every knock the song needs so the first moves don't lag. */
 export function preloadCoinMoveSfx(): void {
   try {
-    getCoinMovePool().forEach((a) => a.load());
+    for (const note of new Set(COIN_MOVE_SONG)) getKnockPool(note).forEach((a) => a.load());
   } catch {
     /* fail silently */
   }
 }
 
-/** Wooden knock when a coin (unit) moves or is deployed. Fails silently. */
+/** Start the song from its first note (each match start). */
+export function resetCoinMoveSong(): void {
+  coinMoveStep = 0;
+}
+
+/** The note the next coin move will play (and advance past). */
+export function nextCoinMoveNote(): string {
+  const note = COIN_MOVE_SONG[coinMoveStep % COIN_MOVE_SONG.length]!;
+  coinMoveStep = (coinMoveStep + 1) % COIN_MOVE_SONG.length;
+  return note;
+}
+
+/** Wooden knock when a coin (unit) moves or is deployed: the song's next note. Fails silently. */
 export function coinMoveSfx(): void {
   try {
     unlockAudio();
-    const pool = getCoinMovePool();
+    const pool = getKnockPool(nextCoinMoveNote());
     if (pool.length === 0) return;
-    // Prefer an idle element; otherwise reuse round-robin.
-    let a = pool.find((x) => x.paused || x.ended);
-    if (!a) {
-      a = pool[coinMoveNext % pool.length];
-      coinMoveNext++;
-    }
+    // Prefer an idle element; otherwise restart the older one.
+    const a = pool.find((x) => x.paused || x.ended) ?? pool[0]!;
     a.pause();
     a.currentTime = 0;
     a.volume = 0.35;
-    // Let the rate nudge pitch too (subtle variation between knocks).
-    (a as HTMLAudioElement & { preservesPitch?: boolean }).preservesPitch = false;
-    a.playbackRate = 0.94 + Math.random() * 0.12;
+    // Each note is its own rendered pitch: no rate jitter (it would detune the tune).
+    a.playbackRate = 1;
     void a.play().catch(() => {});
   } catch {
     /* fail silently */

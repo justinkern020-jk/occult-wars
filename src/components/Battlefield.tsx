@@ -69,7 +69,7 @@ import {
   victoryReason,
   type VictoryKind,
 } from '../game/scoring';
-import { clashSfx, gunshotSfx, defeatStinger, victoryStinger, brassClick, coinMoveSfx, preloadCoinMoveSfx, spellCastSfx, preloadSpellCastSfx, setMusicBed, unlockAudio, sirenSfx, metalRiffSfx, nukeBoomSfx, nukemVoiceSfx, copSirenSfx } from '../game/sfx';
+import { clashSfx, gunshotSfx, defeatStinger, victoryStinger, brassClick, coinMoveSfx, preloadCoinMoveSfx, resetCoinMoveSong, spellCastSfx, preloadSpellCastSfx, setMusicBed, unlockAudio, sirenSfx, metalRiffSfx, nukeBoomSfx, nukemVoiceSfx, copSirenSfx } from '../game/sfx';
 import {
   recordMatchVisit,
   rollVisitTurn,
@@ -729,6 +729,7 @@ export function Battlefield({
   const bootMatch = useCallback(
     (id: string) => {
       resetAiPlan();
+      resetCoinMoveSong(); // the coin-move song starts over each match
       const m = mapById(id);
       const ctrl = initialControl(m.tiles);
       let dBlue = deckFor(blueFaction, blueDeckIds);

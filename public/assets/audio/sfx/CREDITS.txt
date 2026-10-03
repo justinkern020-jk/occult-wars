@@ -5,3 +5,5 @@ wood-chime-move.mp3 — coin (unit) move / deploy knock ("C: deep hollow knock")
   Original modal synthesis (no samples), synth_wood_chimes.py. Free to use.
 spell-cast.mp3 — rite / device cast ("C: crystalline rune chime")
   Original synthesis (no samples), synth_spells.py. Free to use.
+knock/knock-<note>.mp3 — coin moves play a song, one note per move (Moonlight Sonata I, Beethoven, public domain; Dies Irae chant on hand)
+  The "C: deep hollow knock" re-rendered at each pitch: original synthesis (no samples), synth_knock_melody.py. Free to use.
