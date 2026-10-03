@@ -166,3 +166,22 @@ export function withSecretHandDrop(hand: Card[], card: Card, cap = 7): { hand: C
   if (hand.length >= cap) return { hand, dropped: false };
   return { hand: [...hand, card], dropped: true };
 }
+
+/**
+ * The shuffled deck a side takes onto the field: its saved working when it holds
+ * 30+ seatable plates, else the order's auto-built working. Cryptids, nuke
+ * aftermath and secret hand-drops never shuffle in.
+ */
+export function deckForWorking(faction: string, ids?: string[]): Card[] {
+  const stripNonPlates = (cards: Card[]) =>
+    cards.filter((c) => !c.keywords.includes('cryptid') && !isExcludedPlateId(c.id));
+  if (ids && ids.length >= 30) {
+    const cleaned = stripNonPlates(cardsFromIds(ids));
+    if (cleaned.length >= 30) return shuffleInPlace(cleaned);
+  }
+  try {
+    return stripNonPlates(buildShuffledOrderWorking(faction));
+  } catch {
+    return stripNonPlates(buildShuffledWorking(faction));
+  }
+}

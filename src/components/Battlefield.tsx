@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
-import { cardById, isExcludedPlateId } from '../data/catalog';
+import { cardById } from '../data/catalog';
 import {
   aiDifficultyLabel,
   aiStepCap,
@@ -18,13 +18,10 @@ import {
   type ControlGrid,
 } from '../game/control';
 import {
-  buildShuffledOrderWorking,
-  buildShuffledWorking,
-  cardsFromIds,
   drawFromDeck,
-  shuffleInPlace,
   withSecretHandDrop,
   heroForFaction,
+  deckForWorking,
 } from '../game/deck';
 import {
   actNeedsAim,
@@ -212,19 +209,7 @@ function deckFor(
   ids?: string[],
 ): Card[] {
   // Cryptids / nuke aftermath / secret hand-drops never shuffle into workings.
-  const stripNonPlates = (cards: Card[]) =>
-    cards.filter(
-      (c) => !c.keywords.includes('cryptid') && !isExcludedPlateId(c.id),
-    );
-  if (ids && ids.length >= 30) {
-    const cleaned = stripNonPlates(cardsFromIds(ids));
-    if (cleaned.length >= 30) return shuffleInPlace(cleaned);
-  }
-  try {
-    return stripNonPlates(buildShuffledOrderWorking(faction));
-  } catch {
-    return stripNonPlates(buildShuffledWorking(faction));
-  }
+  return deckForWorking(faction, ids);
 }
 
 /** Absolute ghost that glides from one circle to the next. */

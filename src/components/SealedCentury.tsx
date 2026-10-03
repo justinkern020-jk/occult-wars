@@ -1,33 +1,33 @@
-import { useMemo, useState } from 'react';
-import { CARDS, cardById, isExcludedPlateId } from '../data/catalog';
+import { useState } from 'react';
+import { CARDS } from '../data/catalog';
 import {
   SEALED_CENTURY_ALLIES,
   SEALED_CENTURY_BLURBS,
   SEALED_CENTURY_ORDERS,
   SEALED_CENTURY_RIVALS,
-  allyOf,
-  isLegalForOrder,
   isSealedCenturyOrder,
   type SealedCenturyOrder,
 } from '../game/orders';
 import { mapsForEra } from '../game/maps';
 import { brassClick } from '../game/sfx';
-import { heroesForOrder, type Profile } from '../game/profile';
-import { buildOrderAllyWorkingIds, validateDeck } from '../game/deck';
-import type { Card } from '../game/types';
-import { CardArt } from './CardArt';
+import { SHARD_REWARDS, oldDecksForOrder, type Profile } from '../game/profile';
+import { buildOrderAllyWorkingIds } from '../game/deck';
 import { MapMini } from './MapMini';
-import { TarotPop } from './TarotPop';
 import { AiMindPicker } from './AiMindPicker';
+import { NightCounter } from './NightCounter';
 import type { AiDifficulty } from '../game/ai';
 
 type Props = {
   profile: Profile;
   onUpdate: (p: Profile) => void;
   onEnter: (mapId: string, order: SealedCenturyOrder, rival: SealedCenturyOrder) => void;
+  /** Open the deck editor on its Sealed Century tab. */
+  onDeckEditor: () => void;
   onBack: () => void;
   aiDifficulty?: AiDifficulty;
   onAiDifficulty?: (next: AiDifficulty) => void;
+  /** Open straight onto the sealed counter (e.g. returning from the editor). */
+  initialView?: 'field' | 'shop';
 };
 
 /** The Sealed Century: four loyalties of the old work, seven grounds. */
@@ -35,19 +35,23 @@ export function SealedCentury({
   profile,
   onUpdate,
   onEnter,
+  onDeckEditor,
   onBack,
   aiDifficulty = 'expert',
   onAiDifficulty,
+  initialView = 'field',
 }: Props) {
   const sworn =
     profile.oldOrder && isSealedCenturyOrder(profile.oldOrder) ? profile.oldOrder : null;
-  const [editing, setEditing] = useState(false);
+  const [view, setView] = useState<'field' | 'shop'>(initialView);
   const grounds = mapsForEra('old');
 
   function swear(order: SealedCenturyOrder) {
     brassClick();
     const hero = CARDS.find((c) => c.kind === 'hero' && c.faction === order);
-    const cards = buildOrderAllyWorkingIds(order, 30);
+    // A working saved for this order before still waits on the shelf: it takes the field.
+    const saved = oldDecksForOrder(profile, order)[0];
+    const cards = saved ? [...saved.cards] : buildOrderAllyWorkingIds(order, 30);
     const collection =
       hero && !profile.collection.includes(hero.id)
         ? [...profile.collection, hero.id]
@@ -56,7 +60,7 @@ export function SealedCentury({
       ...profile,
       collection,
       oldOrder: order,
-      oldHero: hero?.id ?? null,
+      oldHero: saved?.heroId ?? hero?.id ?? null,
       oldCards: cards,
     });
   }
@@ -97,20 +101,23 @@ export function SealedCentury({
     );
   }
 
-  if (editing) {
+  if (view === 'shop') {
     return (
-      <OldWorkingEditor
-        order={sworn}
-        heroId={profile.oldHero}
-        cardIds={profile.oldCards ?? buildOrderAllyWorkingIds(sworn, 30)}
-        onSeal={(heroId, cards) => {
-          onUpdate({ ...profile, oldHero: heroId, oldCards: cards });
-          setEditing(false);
+      <NightCounter
+        counter="sealed"
+        profile={profile}
+        onUpdate={onUpdate}
+        onDeckEditor={() => {
+          brassClick();
+          onDeckEditor();
         }}
-        onBack={() => setEditing(false)}
+        onBack={() => setView('field')}
       />
     );
   }
+
+  const field = oldDecksForOrder(profile)[0];
+  const reward = SHARD_REWARDS.old;
 
   const rival = SEALED_CENTURY_RIVALS[sworn];
   return (
@@ -121,6 +128,11 @@ export function SealedCentury({
         Ally jewel · {SEALED_CENTURY_ALLIES[sworn]}. The rival across the circle is{' '}
         {rival}. The grounds are not the same shape. Some seals sit under your
         door. Some you only reach by crossing. A shot is still a straight line.
+      </p>
+      <p className="lede" data-testid="old-purse">
+        You hold <strong>{profile.alchemicalShards}</strong> shards · a win here pays{' '}
+        {reward.win}, a loss {reward.loss}. On the field:{' '}
+        <strong data-testid="old-field-working">{field?.name ?? 'your starter working'}</strong>.
       </p>
       {onAiDifficulty && <AiMindPicker value={aiDifficulty} onChange={onAiDifficulty} />}
       <div className="map-grid">
@@ -144,10 +156,24 @@ export function SealedCentury({
       <button
         type="button"
         className="brass-btn brass-btn-solid"
-        data-testid="old-edit-working"
-        onClick={() => setEditing(true)}
+        data-testid="old-shop"
+        onClick={() => {
+          brassClick();
+          setView('shop');
+        }}
       >
-        Edit the working
+        The sealed counter · buy plates
+      </button>
+      <button
+        type="button"
+        className="brass-btn brass-btn-solid"
+        data-testid="old-edit-working"
+        onClick={() => {
+          brassClick();
+          onDeckEditor();
+        }}
+      >
+        Deck editor
       </button>
       <button
         type="button"
@@ -159,212 +185,6 @@ export function SealedCentury({
       <button type="button" className="brass-btn brass-btn-ghost" onClick={onBack}>
         Return
       </button>
-    </section>
-  );
-}
-
-function OldWorkingEditor({
-  order,
-  heroId: initialHero,
-  cardIds,
-  onSeal,
-  onBack,
-}: {
-  order: SealedCenturyOrder;
-  heroId: string | null;
-  cardIds: string[];
-  onSeal: (heroId: string, cards: string[]) => void;
-  onBack: () => void;
-}) {
-  const heroes = heroesForOrder(order);
-  const ally = allyOf(order);
-  const [heroId, setHeroId] = useState(
-    initialHero && heroes.some((h) => h.id === initialHero) ? initialHero : (heroes[0]?.id ?? ''),
-  );
-  const [selected, setSelected] = useState<string[]>(cardIds);
-  const [filter, setFilter] = useState('');
-  const [note, setNote] = useState<string | null>(null);
-  const [inspect, setInspect] = useState<Card | null>(null);
-
-  const counts = useMemo(() => {
-    const t: Record<string, number> = {};
-    for (const id of selected) t[id] = (t[id] ?? 0) + 1;
-    return t;
-  }, [selected]);
-
-  const pool = useMemo(
-    () =>
-      CARDS.filter(
-        (c) =>
-          c.kind !== 'hero' &&
-          !c.keywords.includes('cryptid') &&
-          !isExcludedPlateId(c.id) &&
-          isLegalForOrder(order, c.faction),
-      )
-        .filter((c) => {
-          const q = filter.trim().toLowerCase();
-          if (!q) return true;
-          return (
-            c.name.toLowerCase().includes(q) ||
-            c.text.toLowerCase().includes(q) ||
-            c.keywords.some((k) => k.includes(q)) ||
-            c.faction.toLowerCase().includes(q)
-          );
-        })
-        .sort((a, b) => a.cost - b.cost || a.name.localeCompare(b.name)),
-    [order, filter],
-  );
-
-  function add(id: string) {
-    if ((counts[id] ?? 0) >= 3) {
-      setNote('At most 3 copies.');
-      return;
-    }
-    if (selected.length >= 40) {
-      setNote('A working holds at most 40 plates.');
-      return;
-    }
-    brassClick();
-    setNote(null);
-    setSelected((s) => [...s, id]);
-  }
-
-  function remove(id: string) {
-    const idx = selected.lastIndexOf(id);
-    if (idx < 0) return;
-    brassClick();
-    setNote(null);
-    setSelected((s) => s.filter((_, i) => i !== idx));
-  }
-
-  function seal() {
-    const v = validateDeck(heroId, selected);
-    if (!v.ok) {
-      setNote(v.error);
-      return;
-    }
-    brassClick();
-    onSeal(heroId, selected);
-  }
-
-  return (
-    <section className="deck-editor plate-screen" data-testid="old-deck">
-      <header className="deck-editor-head">
-        <div>
-          <p className="plate-kicker">The sealed century · deck</p>
-          <h2>Ink the old working</h2>
-          <p className="lede">
-            Sworn to {order}
-            {ally ? `, with ${ally} as the ally jewel` : ''}. Spend Resources on the
-            field — the cost on a plate is what it takes to muster. 1 leader · 30–40
-            plates · max 3 copies. Cryptid sightings are not seated.
-          </p>
-        </div>
-        <div className="deck-editor-meta">
-          <label>
-            Leader
-            <select value={heroId} onChange={(e) => setHeroId(e.target.value)}>
-              {heroes.map((h) => (
-                <option key={h.id} value={h.id}>
-                  {h.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button
-            type="button"
-            className="brass-btn"
-            onClick={() => {
-              const h = cardById(heroId);
-              if (h) setInspect(h);
-            }}
-          >
-            Read the leader
-          </button>
-          <p className="deck-count" data-testid="old-deck-count">
-            {selected.length} / 30–40
-          </p>
-        </div>
-      </header>
-      {note && (
-        <p className="deck-note" role="alert">
-          {note}
-        </p>
-      )}
-      <div className="deck-editor-body">
-        <div className="deck-pool">
-          <input
-            type="search"
-            placeholder="Filter plates…"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          />
-          <div className="deck-pool-grid">
-            {pool.map((c) => {
-              const n = counts[c.id] ?? 0;
-              return (
-                <article key={c.id} className={`deck-plate rarity-${c.rarity}`}>
-                  <button type="button" className="deck-plate-look" onClick={() => setInspect(c)}>
-                    <CardArt name={c.name} className="deck-plate-art" />
-                    <span className="deck-plate-name">{c.name}</span>
-                  </button>
-                  <span className="deck-plate-stats">
-                    <em>L{c.cost}</em>
-                    {c.power == null ? <em>{c.kind}</em> : <em>P{c.power}</em>}
-                  </span>
-                  <div className="deck-stepper">
-                    <button
-                      type="button"
-                      className="brass-btn"
-                      disabled={n === 0}
-                      aria-label={`Remove one ${c.name}`}
-                      onClick={() => remove(c.id)}
-                    >
-                      −
-                    </button>
-                    <span>{n}/3</span>
-                    <button
-                      type="button"
-                      className="brass-btn brass-btn-solid"
-                      disabled={n >= 3 || selected.length >= 40}
-                      aria-label={`Seat one ${c.name}`}
-                      onClick={() => add(c.id)}
-                    >
-                      +
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </div>
-        <div className="deck-selected">
-          <h3>Working</h3>
-          <p className="lede">Tap a name to set one copy aside. Tap the portrait to read the plate.</p>
-          <ul>
-            {[...new Set(selected)].map((id) => {
-              const c = cardById(id);
-              if (!c) return null;
-              return (
-                <li key={id}>
-                  <button type="button" onClick={() => remove(id)}>
-                    {c.name} ×{counts[id]}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      </div>
-      <div className="deck-editor-actions">
-        <button type="button" className="brass-btn brass-btn-solid" onClick={seal}>
-          Seal the working
-        </button>
-        <button type="button" className="brass-btn brass-btn-ghost" onClick={onBack}>
-          Return
-        </button>
-      </div>
-      {inspect && <TarotPop card={inspect} onClose={() => setInspect(null)} />}
     </section>
   );
 }

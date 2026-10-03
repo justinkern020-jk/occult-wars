@@ -30,8 +30,12 @@ import { useProfile } from './hooks/useProfile';
 import {
   applyBlackMondayLossInject,
   awardShards,
+  deleteEraDeck,
+  saveEraDeck,
+  sealedCenturyLoadout,
   swearAllegiance,
   type CustomDeck,
+  type DeckEra,
 } from './game/profile';
 import { cardById } from './data/catalog';
 import { TarotPop } from './components/TarotPop';
@@ -80,6 +84,9 @@ function trainingFoe(order: string | null): string {
 export default function App() {
   const { profile, update, dailyGranted, clearDailyNotice } = useProfile();
   const [screen, setScreen] = useState<Screen>('title');
+  /** Deck editor: the hour tab it opens on, and the screen its Return leads back to. */
+  const [deckEra, setDeckEra] = useState<DeckEra | undefined>();
+  const [deckReturn, setDeckReturn] = useState<Screen>('menu');
   const [mapId, setMapId] = useState('ashen-cross');
   const [matchMode, setMatchMode] = useState<MatchMode>('training');
   const [aiDifficulty, setAiDifficultyState] = useState<AiDifficulty>(() => {
@@ -328,7 +335,13 @@ export default function App() {
         aiDifficulty={aiDifficulty}
         onAiDifficulty={setAiDifficulty}
         onCollection={() => setScreen('archive')}
-        onDeckEditor={() => ensureSworn(() => setScreen('deck'))}
+        onDeckEditor={() =>
+          ensureSworn(() => {
+            setDeckEra(undefined);
+            setDeckReturn('menu');
+            setScreen('deck');
+          })
+        }
         onPack={() => ensureSworn(() => setScreen('pack'))}
         onLeaden={() => ensureSworn(() => setScreen('campaign'))}
         onHotseat={startHotseat}
@@ -491,12 +504,19 @@ export default function App() {
           onUpdate={update}
           aiDifficulty={aiDifficulty}
           onAiDifficulty={setAiDifficulty}
+          onDeckEditor={() => {
+            setDeckEra('old');
+            setDeckReturn('old');
+            setScreen('deck');
+          }}
           onEnter={(mid, order, rival) => {
+            // The saved Sealed Century working (deck editor) is what the field takes.
+            const loadout = sealedCenturyLoadout(profile);
             setMapId(mid);
             setBlueFaction(order);
             setRedFaction(rival);
-            setBlueHeroId(profile.oldHero ?? undefined);
-            setBlueDeckIds(profile.oldCards ?? undefined);
+            setBlueHeroId(loadout.heroId);
+            setBlueDeckIds(loadout.deckIds);
             setRedHeroId(CARDS.find((c) => c.kind === 'hero' && c.faction === rival)?.id);
             setRedDeckIds(buildOrderAllyWorkingIds(rival, 30));
             setMatchMode('old');
@@ -557,7 +577,11 @@ export default function App() {
         <button
           type="button"
           className="brass-btn brass-btn-ghost shell-back"
-          onClick={() =>
+          onClick={() => {
+            if (screen === 'deck') {
+              setScreen(deckReturn);
+              return;
+            }
             setScreen(
               matchMode === 'campaign'
                 ? 'campaign'
@@ -566,10 +590,10 @@ export default function App() {
                   : matchMode === 'old'
                     ? 'old'
                     : 'menu',
-            )
-          }
+            );
+          }}
         >
-          Return to the atelier
+          {screen === 'deck' && deckReturn === 'old' ? 'Return to the Sealed Century' : 'Return to the atelier'}
         </button>
         <p className="shell-brand">
           <span>Occult Wars</span>
@@ -617,7 +641,9 @@ export default function App() {
                   ? 'hotseat'
                   : matchMode === 'friend'
                     ? 'pvp'
-                    : 'training';
+                    : matchMode === 'old'
+                      ? 'old'
+                      : 'training';
             let next = awardShards(profile, modeKey, playerWon);
             if (!playerWon) {
               const r = applyBlackMondayLossInject(next, {
@@ -647,29 +673,18 @@ export default function App() {
       )}
       {screen === 'deck' && (
         <DeckEditor
+          key={deckEra ?? 'any'}
           profile={profile}
-          onSave={(deck, era) => {
+          initialEra={deckEra}
+          returnLabel={deckReturn === 'old' ? 'Return to the Sealed Century' : 'Return'}
+          onSave={(deck: CustomDeck, era) => {
             // Saved = on the field for that hour. Pushed to the cloud at once when signed in.
-            update(
-              (p) =>
-                era === 'second'
-                  ? { ...p, secondHero: deck.heroId, secondCards: [...deck.cards] }
-                  : era === 'old'
-                    ? { ...p, oldHero: deck.heroId, oldCards: [...deck.cards] }
-                    : {
-                        ...p,
-                        customDecks: [deck, ...p.customDecks.filter((d) => d.id !== deck.id)],
-                      },
-              { now: true },
-            );
+            update((p) => saveEraDeck(p, deck, era), { now: true });
           }}
-          onDelete={(id) => {
-            update((p) => ({
-              ...p,
-              customDecks: p.customDecks.filter((d) => d.id !== id),
-            }));
+          onDelete={(id, era) => {
+            update((p) => deleteEraDeck(p, id, era), { now: true });
           }}
-          onBack={() => setScreen('menu')}
+          onBack={() => setScreen(deckReturn)}
         />
       )}
       {screen === 'pack' && (

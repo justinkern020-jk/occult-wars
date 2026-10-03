@@ -18,7 +18,7 @@ import {
   normalizeFaction,
   type FirstHourOrder,
 } from './orders';
-import { buildWorkingIds } from './deck';
+import { buildOrderAllyWorkingIds, buildWorkingIds } from './deck';
 
 export const PROFILE_KEY = 'occult-wars.profile.v1';
 export const PACK_COST = 150;
@@ -30,6 +30,8 @@ export type ShardRewards = {
   pvp: { win: number; loss: number };
   hotseat: { win: number; loss: number };
   campaign: { win: number; loss: number };
+  /** The Sealed Century (the prequel): shards spent at its own counter. */
+  old: { win: number; loss: number };
 };
 
 export const SHARD_REWARDS: ShardRewards = {
@@ -37,6 +39,7 @@ export const SHARD_REWARDS: ShardRewards = {
   pvp: { win: 100, loss: 30 },
   hotseat: { win: 0, loss: 0 },
   campaign: { win: 40, loss: 10 },
+  old: { win: 50, loss: 15 },
 };
 
 export type CustomDeck = {
@@ -70,6 +73,12 @@ export type Profile = {
   oldOrder: string | null;
   oldHero: string | null;
   oldCards: string[] | null;
+  /**
+   * The Sealed Century workings shelf (up to 8 per order). The first one whose
+   * leader fits the sworn order is the one on the field (mirrored in oldHero /
+   * oldCards, which the match reads).
+   */
+  oldDecks: CustomDeck[];
 };
 
 export function defaultProfile(): Profile {
@@ -90,6 +99,7 @@ export function defaultProfile(): Profile {
     oldOrder: null,
     oldHero: null,
     oldCards: null,
+    oldDecks: [],
   };
 }
 
@@ -180,16 +190,7 @@ export function migrateProfile(raw: Partial<Profile> & Record<string, unknown>):
     collection: Array.isArray(raw.collection)
       ? raw.collection.filter(isKeepablePlateId)
       : [],
-    customDecks: Array.isArray(raw.customDecks)
-      ? (raw.customDecks as CustomDeck[])
-          .filter((d) => d && typeof d.id === 'string')
-          .map((d) => ({
-            id: d.id,
-            name: String(d.name ?? 'Untitled working').slice(0, 32),
-            heroId: String(d.heroId ?? ''),
-            cards: Array.isArray(d.cards) ? d.cards.filter(isKeepablePlateId) : [],
-          }))
-      : [],
+    customDecks: migrateDecks(raw.customDecks),
     seenPrimer: !!raw.seenPrimer && raw.primerVersion === 3,
     primerVersion: 3,
     allegiance,
@@ -204,7 +205,20 @@ export function migrateProfile(raw: Partial<Profile> & Record<string, unknown>):
     oldOrder,
     oldHero: old.hero,
     oldCards: old.cards,
+    oldDecks: migrateDecks(raw.oldDecks),
   };
+}
+
+function migrateDecks(raw: unknown): CustomDeck[] {
+  if (!Array.isArray(raw)) return [];
+  return (raw as CustomDeck[])
+    .filter((d) => d && typeof d.id === 'string')
+    .map((d) => ({
+      id: d.id,
+      name: String(d.name ?? 'Untitled working').slice(0, 32),
+      heroId: String(d.heroId ?? ''),
+      cards: Array.isArray(d.cards) ? d.cards.filter(isKeepablePlateId) : [],
+    }));
 }
 
 /** Apply day-purse if lastDaily is not today. Returns [profile, granted]. */
@@ -347,9 +361,19 @@ export function shopCopyLimit(card: Card): number {
   return card.kind === 'hero' ? 1 : 3;
 }
 
-/** The night counter stocks Second Hour plates only (never cryptids or secret plates). */
-export function isShopPlate(card: Card): boolean {
-  if (!isSecondHourSociety(card.faction)) return false;
+/**
+ * Which counter: the night counter (Second Hour societies) or the sealed
+ * counter inside the Sealed Century (its four orders, plus any unaligned
+ * plate that is neither a cryptid, a secret code-drop, nuke aftermath, nor the
+ * Black Monday comeback — today none qualify).
+ */
+export type ShopCounter = 'night' | 'sealed';
+
+/** A counter stocks its era's plates only (never cryptids or secret plates). */
+export function isShopPlate(card: Card, counter: ShopCounter = 'night'): boolean {
+  if (counter === 'sealed') {
+    if (!isSealedCenturyOrder(card.faction) && card.faction !== 'Unaligned') return false;
+  } else if (!isSecondHourSociety(card.faction)) return false;
   if (card.keywords.includes('cryptid')) return false;
   if (isExcludedPlateId(card.id) || isLossInjectId(card.id)) return false;
   return (
@@ -360,8 +384,8 @@ export function isShopPlate(card: Card): boolean {
   );
 }
 
-export function shopStock(): Card[] {
-  return CARDS.filter(isShopPlate).sort(
+export function shopStock(counter: ShopCounter = 'night'): Card[] {
+  return CARDS.filter((c) => isShopPlate(c, counter)).sort(
     (a, b) =>
       a.faction.localeCompare(b.faction) ||
       a.cost - b.cost ||
@@ -369,16 +393,31 @@ export function shopStock(): Card[] {
   );
 }
 
-/** Buy one copy at the night counter. */
+/**
+ * Copies a counter counts as already held: the collection, plus (at the sealed
+ * counter) the sworn order's starter working, which the deck editor seats too.
+ */
+export function shopOwnedCount(p: Profile, id: string, counter: ShopCounter = 'night'): number {
+  if (counter === 'sealed') return ownedForEra(p, 'old')[id] ?? 0;
+  return p.collection.filter((x) => x === id).length;
+}
+
+/** Buy one copy at a counter (shards, added to the collection). */
 export function buyPlate(
   p: Profile,
   id: string,
+  counter: ShopCounter = 'night',
 ): { error: string } | { profile: Profile; card: Card } {
   const card = cardById(id);
-  if (!card || !isShopPlate(card)) {
-    return { error: 'The night counter does not stock that plate.' };
+  if (!card || !isShopPlate(card, counter)) {
+    return {
+      error:
+        counter === 'sealed'
+          ? 'The sealed counter does not stock that plate.'
+          : 'The night counter does not stock that plate.',
+    };
   }
-  const owned = p.collection.filter((x) => x === id).length;
+  const owned = shopOwnedCount(p, id, counter);
   const limit = shopCopyLimit(card);
   if (owned >= limit) {
     return {
@@ -462,15 +501,20 @@ function stripAftermathId(p: Profile, id: string): Profile {
     ? p.secondCards.filter((x) => x !== id)
     : null;
   const oldCards = p.oldCards ? p.oldCards.filter((x) => x !== id) : null;
+  const oldDecks = p.oldDecks.map((d) => ({
+    ...d,
+    cards: d.cards.filter((x) => x !== id),
+  }));
   if (
     collection.length === p.collection.length &&
     customDecks.every((d, i) => d.cards.length === p.customDecks[i]!.cards.length) &&
+    oldDecks.every((d, i) => d.cards.length === p.oldDecks[i]!.cards.length) &&
     (secondCards?.length ?? 0) === (p.secondCards?.length ?? 0) &&
     (oldCards?.length ?? 0) === (p.oldCards?.length ?? 0)
   ) {
     return p;
   }
-  return { ...p, collection, customDecks, secondCards, oldCards };
+  return { ...p, collection, customDecks, secondCards, oldCards, oldDecks };
 }
 
 /** Ensure radiation_poisoning is not a collectible plate. */
@@ -558,6 +602,70 @@ export function applyBlackMondayLossInject(
 
   if (!changed) return { profile: p, injected: false };
   return { profile: { ...p, collection, customDecks }, injected: true };
+}
+
+/* ── Era workings (shared by the deck editor, the counters, and App) ── */
+
+export type DeckEra = 'first' | 'second' | 'old';
+
+export function eraOrder(profile: Profile, era: DeckEra): string | null {
+  if (era === 'second') return profile.secondOrder;
+  if (era === 'old') return profile.oldOrder;
+  return profile.allegiance;
+}
+
+/** Copies a player may seat in an era working: the collection, plus the oath's own working for the later hours. */
+export function ownedForEra(profile: Profile, era: DeckEra): Record<string, number> {
+  const owned = countOwned(profile.collection);
+  const order = eraOrder(profile, era);
+  if (era === 'first' || !order) return owned;
+  const gift = countOwned(buildOrderAllyWorkingIds(order, 30));
+  const out = { ...owned };
+  for (const [id, n] of Object.entries(gift)) out[id] = (out[id] ?? 0) + n;
+  return out;
+}
+
+/** Sealed Century workings whose leader may sit for `order` (shelf order kept). */
+export function oldDecksForOrder(profile: Profile, order: string | null = profile.oldOrder): CustomDeck[] {
+  if (!order) return [];
+  return profile.oldDecks.filter((d) => {
+    const hero = cardById(d.heroId);
+    return !!hero && hero.kind === 'hero' && isLegalForOrder(order, hero.faction);
+  });
+}
+
+/** Save a working for an era: it goes to the front of that era's shelf and onto the field. */
+export function saveEraDeck(p: Profile, deck: CustomDeck, era: DeckEra): Profile {
+  const copy: CustomDeck = { ...deck, cards: [...deck.cards] };
+  if (era === 'second') {
+    return { ...p, secondHero: copy.heroId, secondCards: [...copy.cards] };
+  }
+  if (era === 'old') {
+    return {
+      ...p,
+      oldHero: copy.heroId,
+      oldCards: [...copy.cards],
+      oldDecks: [copy, ...p.oldDecks.filter((d) => d.id !== copy.id)],
+    };
+  }
+  return { ...p, customDecks: [copy, ...p.customDecks.filter((d) => d.id !== copy.id)] };
+}
+
+/** Drop a sealed working from an era shelf; the next one takes the field. */
+export function deleteEraDeck(p: Profile, id: string, era: DeckEra): Profile {
+  if (era === 'old') {
+    const wasField = oldDecksForOrder(p)[0]?.id === id;
+    const next = { ...p, oldDecks: p.oldDecks.filter((d) => d.id !== id) };
+    const field = wasField ? oldDecksForOrder(next)[0] : undefined;
+    return field ? { ...next, oldHero: field.heroId, oldCards: [...field.cards] } : next;
+  }
+  if (era === 'first') return { ...p, customDecks: p.customDecks.filter((d) => d.id !== id) };
+  return p;
+}
+
+/** What the Sealed Century field takes for the sworn player: the saved working. */
+export function sealedCenturyLoadout(p: Profile): { heroId?: string; deckIds?: string[] } {
+  return { heroId: p.oldHero ?? undefined, deckIds: p.oldCards ? [...p.oldCards] : undefined };
 }
 
 export { FIRST_HOUR_ORDERS };
