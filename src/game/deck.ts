@@ -157,3 +157,12 @@ export function validateDeck(
   }
   return { ok: true };
 }
+
+/**
+ * One-shot secret hand drop (code unlock): append the plate to the hand if
+ * there is room. Returns the same hand when sealed (HAND_CAP 7).
+ */
+export function withSecretHandDrop(hand: Card[], card: Card, cap = 7): { hand: Card[]; dropped: boolean } {
+  if (hand.length >= cap) return { hand, dropped: false };
+  return { hand: [...hand, card], dropped: true };
+}

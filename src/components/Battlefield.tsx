@@ -15,6 +15,7 @@ import {
   cardsFromIds,
   drawFromDeck,
   shuffleInPlace,
+  withSecretHandDrop,
   heroForFaction,
 } from '../game/deck';
 import {
@@ -1279,11 +1280,11 @@ export function Battlefield({
   function dropJustinIntoHand(seat: Side): string {
     const jk = cardById('justin_kern');
     if (!jk) return 'Justin Kern is missing from the catalogue.';
-    const cur = liveRef.current.hand[seat];
-    if (cur.length >= HAND_CAP) {
+    const drop = withSecretHandDrop(liveRef.current.hand[seat], jk, HAND_CAP);
+    if (!drop.dropped) {
       return "The hand is sealed — Justin Kern cannot enter.";
     }
-    const nextHand = { ...liveRef.current.hand, [seat]: [...cur, jk] };
+    const nextHand = { ...liveRef.current.hand, [seat]: drop.hand };
     setHand(nextHand);
     liveRef.current = { ...liveRef.current, hand: nextHand };
     if (profile && onUpdateProfile) {
@@ -1295,11 +1296,11 @@ export function Battlefield({
   function dropSethIntoHand(seat: Side): string {
     const sk = cardById('seth_kern');
     if (!sk) return 'Seth Kern is missing from the catalogue.';
-    const cur = liveRef.current.hand[seat];
-    if (cur.length >= HAND_CAP) {
+    const drop = withSecretHandDrop(liveRef.current.hand[seat], sk, HAND_CAP);
+    if (!drop.dropped) {
       return "The hand is sealed — Seth Kern cannot enter.";
     }
-    const nextHand = { ...liveRef.current.hand, [seat]: [...cur, sk] };
+    const nextHand = { ...liveRef.current.hand, [seat]: drop.hand };
     setHand(nextHand);
     liveRef.current = { ...liveRef.current, hand: nextHand };
     if (profile && onUpdateProfile) {
@@ -1313,11 +1314,11 @@ export function Battlefield({
   function dropSouthHavenIntoHand(seat: Side): string {
     const sh = cardById('south_haven_dispatch');
     if (!sh) return 'South Haven Dispatch is missing from the catalogue.';
-    const cur = liveRef.current.hand[seat];
-    if (cur.length >= HAND_CAP) {
+    const drop = withSecretHandDrop(liveRef.current.hand[seat], sh, HAND_CAP);
+    if (!drop.dropped) {
       return 'The hand is sealed — South Haven Dispatch cannot enter.';
     }
-    const nextHand = { ...liveRef.current.hand, [seat]: [...cur, sh] };
+    const nextHand = { ...liveRef.current.hand, [seat]: drop.hand };
     setHand(nextHand);
     liveRef.current = { ...liveRef.current, hand: nextHand };
     if (profile && onUpdateProfile) {
@@ -1389,7 +1390,7 @@ export function Battlefield({
       const jk = cardById('justin_kern');
       if (jk) {
         setInspectPower(undefined);
-        setInspectSticky(false);
+        setInspectSticky(true);
         setInspectCard(jk);
       }
       return;
@@ -1404,7 +1405,7 @@ export function Battlefield({
       const sk = cardById('seth_kern');
       if (sk) {
         setInspectPower(undefined);
-        setInspectSticky(false);
+        setInspectSticky(true);
         setInspectCard(sk);
       }
       return;
@@ -1427,18 +1428,22 @@ export function Battlefield({
     if (!isCodePrefix(next)) {
       codeRealNameRef.current = next || codeRealNameRef.current;
     }
-    if (isHiddenAdeptCode(next) && profile && onUpdateProfile) {
-      const beforeJk = profile.collection.includes('justin_kern');
-      const unlocked = applyJustinKernUnlock({ ...profile, username: next });
-      onUpdateProfile(unlocked);
-      setCodeToast('A hidden adept has answered.');
-      if (!beforeJk && unlocked.collection.includes('justin_kern')) {
-        const jk = cardById('justin_kern');
-        if (jk) {
-          setInspectPower(undefined);
-          setInspectSticky(false);
-          setInspectCard(jk);
-        }
+    if (isHiddenAdeptCode(next)) {
+      // Hidden Adept answers like Oppenheimer: Justin drops into hand (one
+      // shot, every time) with a reveal that stays until Close / Esc. The
+      // profile is only scrubbed — Justin is never a collection plate.
+      setCodeDraft('');
+      unlockAudio();
+      metalRiffSfx();
+      const seat: Side =
+        mode === 'hotseat' || mode === 'friend' ? (mode === 'friend' ? mySide : side) : 'blue';
+      const msg = dropJustinIntoHand(seat);
+      setCodeToast(`A hidden adept has answered. ${msg}`);
+      const jk = cardById('justin_kern');
+      if (jk) {
+        setInspectPower(undefined);
+        setInspectSticky(true);
+        setInspectCard(jk);
       }
     }
   }

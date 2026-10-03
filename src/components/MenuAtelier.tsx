@@ -190,13 +190,16 @@ export function MenuAtelier({
     }
     let nextProfile = { ...profile, username: next };
     if (isHiddenAdeptCode(next)) {
-      const beforeJk = nextProfile.collection.includes('justin_kern');
+      // Hidden Adept answers like Oppenheimer: Justin joins the next circle's
+      // hand (pending one-shot drop) with a reveal that stays until Close /
+      // Esc. The profile is only scrubbed — never a collection plate.
+      unlockAudio();
+      metalRiffSfx();
+      writePendingJustinHand();
       nextProfile = applyJustinKernUnlock(nextProfile);
-      if (!beforeJk && nextProfile.collection.includes('justin_kern')) {
-        const jk = cardById('justin_kern');
-        if (jk) setRevealUnlock({ card: jk, caption: 'A hidden adept has answered' });
-        setToast('A hidden adept has answered.');
-      }
+      const jk = cardById('justin_kern');
+      if (jk) setRevealUnlock({ card: jk, caption: 'A hidden adept has answered' });
+      setToast('A hidden adept has answered — Justin Kern joins the next circle.');
     }
     onUpdateProfile(nextProfile);
   }

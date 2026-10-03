@@ -187,3 +187,16 @@ export function writePendingSouthHavenHand(): void {
 export function clearPendingSouthHavenHand(): void {
   clearSessionFlag(PENDING_SOUTH_HAVEN_HAND_KEY);
 }
+
+/**
+ * Secret hand-drop plate answered by a typed code (menu → next circle, or
+ * mid-match → straight into hand). Never a collection / working plate.
+ */
+export function secretDropCardId(
+  name: string,
+): 'justin_kern' | 'seth_kern' | 'south_haven_dispatch' | null {
+  if (isOppenheimerCode(name) || isHiddenAdeptCode(name)) return 'justin_kern';
+  if (isSethKernCode(name)) return 'seth_kern';
+  if (isSouthHavenPdCode(name)) return 'south_haven_dispatch';
+  return null;
+}
