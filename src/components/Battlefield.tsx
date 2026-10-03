@@ -84,6 +84,16 @@ import { TarotPop } from './TarotPop';
 import { HandCard } from './HandCard';
 import { CardArt } from './CardArt';
 import {
+  LIVE_EVERY_MS,
+  WATCHED_EVERY_MS,
+  newMatchId,
+  newMatchKey,
+  reportLive,
+  type FrameUnit,
+  type MatchFrame,
+  type PortalCode,
+} from '../net/watch';
+import {
   RulesPrimer,
   hasSeenPrimer,
   markPrimerSeen,
@@ -1304,7 +1314,7 @@ export function Battlefield({
   }, [buildEffectCtx, applyEffectCtx, pushLog]);
 
 
-  function dropJustinIntoHand(seat: Side): string {
+  function dropJustinIntoHand(seat: Side, unlock = true): string {
     const jk = cardById('justin_kern');
     if (!jk) return 'Justin Kern is missing from the catalogue.';
     const drop = withSecretHandDrop(liveRef.current.hand[seat], jk, HAND_CAP);
@@ -1314,13 +1324,13 @@ export function Battlefield({
     const nextHand = { ...liveRef.current.hand, [seat]: drop.hand };
     setHand(nextHand);
     liveRef.current = { ...liveRef.current, hand: nextHand };
-    if (profile && onUpdateProfile) {
+    if (unlock && profile && onUpdateProfile) {
       onUpdateProfile(applyJustinKernUnlock(profile));
     }
     return 'Justin Kern answers — the gadget is in hand.';
   }
 
-  function dropSethIntoHand(seat: Side): string {
+  function dropSethIntoHand(seat: Side, unlock = true): string {
     const sk = cardById('seth_kern');
     if (!sk) return 'Seth Kern is missing from the catalogue.';
     const drop = withSecretHandDrop(liveRef.current.hand[seat], sk, HAND_CAP);
@@ -1330,7 +1340,7 @@ export function Battlefield({
     const nextHand = { ...liveRef.current.hand, [seat]: drop.hand };
     setHand(nextHand);
     liveRef.current = { ...liveRef.current, hand: nextHand };
-    if (profile && onUpdateProfile) {
+    if (unlock && profile && onUpdateProfile) {
       // Unlock requires username === 'seth kern'; preserve display name after.
       const unlocked = applySethKernUnlock({ ...profile, username: 'seth kern' });
       onUpdateProfile({ ...unlocked, username: profile.username });
@@ -1338,7 +1348,7 @@ export function Battlefield({
     return 'Seth Kern answers — the chief is in hand.';
   }
 
-  function dropSouthHavenIntoHand(seat: Side): string {
+  function dropSouthHavenIntoHand(seat: Side, unlock = true): string {
     const sh = cardById('south_haven_dispatch');
     if (!sh) return 'South Haven Dispatch is missing from the catalogue.';
     const drop = withSecretHandDrop(liveRef.current.hand[seat], sh, HAND_CAP);
@@ -1348,7 +1358,7 @@ export function Battlefield({
     const nextHand = { ...liveRef.current.hand, [seat]: drop.hand };
     setHand(nextHand);
     liveRef.current = { ...liveRef.current, hand: nextHand };
-    if (profile && onUpdateProfile) {
+    if (unlock && profile && onUpdateProfile) {
       onUpdateProfile(applySouthHavenDispatchUnlock(profile));
     }
     return 'South Haven Dispatch answers — the siren is in hand.';
@@ -1474,6 +1484,83 @@ export function Battlefield({
       }
     }
   }
+
+  /** The reveal + sound a code gives the hand that receives it (as if typed there). */
+  function revealPortalCode(code: PortalCode) {
+    unlockAudio();
+    if (code === 'seth' || code === 'southhaven') copSirenSfx();
+    else if (code === 'justin' || code === 'adept') metalRiffSfx();
+    const id =
+      code === 'seth'
+        ? 'seth_kern'
+        : code === 'southhaven'
+          ? 'south_haven_dispatch'
+          : code === 'athens'
+            ? null
+            : 'justin_kern';
+    const card = id ? cardById(id) : null;
+    if (card) {
+      setInspectPower(undefined);
+      setInspectSticky(true);
+      setInspectCard(card);
+    }
+  }
+
+  /** The profile side of a code, for a hand that is not the authority (the guest). */
+  function unlockPortalCode(code: PortalCode) {
+    if (!profile || !onUpdateProfile) return;
+    if (code === 'justin' || code === 'adept') onUpdateProfile(applyJustinKernUnlock(profile));
+    else if (code === 'seth') {
+      const unlocked = applySethKernUnlock({ ...profile, username: 'seth kern' });
+      onUpdateProfile({ ...unlocked, username: profile.username });
+    } else if (code === 'southhaven') onUpdateProfile(applySouthHavenDispatchUnlock(profile));
+  }
+
+  /**
+   * The owner's Portal sent a code to `target`. The authority (host / the only
+   * client) applies it to the match state; the receiving hand gets the same
+   * reveal, sound and unlock as if it had typed the code itself.
+   */
+  function applyPortalCode(code: PortalCode, target: Side) {
+    if (isFriendGuest) return;
+    const humanHere =
+      mode === 'hotseat' || (friend ? target === mySide : target === 'blue');
+    const msg =
+      code === 'athens'
+        ? forceSightingNow()
+        : code === 'seth'
+          ? dropSethIntoHand(target, humanHere)
+          : code === 'southhaven'
+            ? dropSouthHavenIntoHand(target, humanHere)
+            : dropJustinIntoHand(target, humanHere);
+    pushLog(`A hand from beyond the portal reaches ${sideLabel(target)}. ${msg}`);
+    if (humanHere) {
+      setCodeToast(code === 'adept' ? `A hidden adept has answered. ${msg}` : msg);
+      revealPortalCode(code);
+    } else if (friend && friendSession) {
+      friendSession.send({ v: 1, type: 'portal', code });
+    } else {
+      setCodeToast(`Beyond the portal, ${sideLabel(target)} is answered.`);
+    }
+  }
+  const applyPortalCodeRef = useRef(applyPortalCode);
+  useEffect(() => {
+    applyPortalCodeRef.current = applyPortalCode;
+  });
+  const portalArriveRef = useRef<(code: PortalCode) => void>(() => undefined);
+  useEffect(() => {
+    portalArriveRef.current = (code) => {
+      setCodeToast(
+        code === 'athens'
+          ? 'Beyond the portal, the night answers.'
+          : code === 'adept'
+            ? 'A hidden adept has answered through the portal.'
+            : 'A hand from beyond the portal answers you.',
+      );
+      revealPortalCode(code);
+      unlockPortalCode(code);
+    };
+  });
 
   const callPowerRef = useRef<
     (acting: Side, sourceUid: string, targetUid?: string) => boolean
@@ -2243,6 +2330,10 @@ export function Battlefield({
         applyFriendState(msg.state);
         return;
       }
+      if (msg.type === 'portal' && isFriendGuest) {
+        portalArriveRef.current(msg.code);
+        return;
+      }
       if (msg.type === 'hello') {
         if (isFriendHost) {
           friendSession.send({
@@ -2345,6 +2436,128 @@ export function Battlefield({
     buildFriendState,
     finishMatch,
   ]);
+
+  // The Portal: report this match (host / only client) so the owner can watch.
+  const [portalIds] = useState(() =>
+    isFriendGuest ? null : { id: newMatchId(), key: newMatchKey() },
+  );
+  const portalFrame = useMemo((): MatchFrame => {
+    const slim = (u: BoardUnit | null): FrameUnit | null =>
+      u
+        ? {
+            uid: u.uid,
+            cardId: u.cardId,
+            name: u.name,
+            side: u.side,
+            power: u.power,
+            maxPower: u.maxPower,
+            loyalty: u.loyalty,
+            keywords: u.keywords,
+            sick: u.sick,
+            gained: u.gained,
+          }
+        : null;
+    return {
+      map: mapId,
+      turn,
+      side,
+      phase,
+      resources: { blue: loyalty.blue, red: loyalty.red },
+      domination: { blue: domination.blue, red: domination.red },
+      hand: { blue: hand.blue.length, red: hand.red.length },
+      deck: { blue: deck.blue.length, red: deck.red.length },
+      board: board.map((row) => row.map(slim)),
+      control: control.map((row) => [...row]),
+      log: log.slice(-14),
+      over: matchOver ? { winner: matchOver.winner, reason: matchOver.kind } : null,
+    };
+  }, [mapId, turn, side, phase, loyalty, domination, hand, deck, board, control, log, matchOver]);
+  const portalSummary = useMemo(() => {
+    const foeName =
+      mode === 'friend'
+        ? 'Crimson occultist'
+        : mode === 'hotseat'
+          ? 'Second chair'
+          : `${aiDifficulty[0].toUpperCase()}${aiDifficulty.slice(1)} rival`;
+    const myName = (profile?.username || '').trim() || 'Adept';
+    return {
+      mode,
+      era: gameMap.era ?? 'first',
+      map: gameMap.name,
+      turn,
+      side,
+      phase,
+      blue: { name: myName, faction: blueFaction, leader: blueHero?.name ?? '' },
+      red: { name: foeName, faction: redFaction, leader: redHero?.name ?? '' },
+      over: !!matchOver,
+    };
+  }, [mode, aiDifficulty, profile?.username, gameMap, turn, side, phase, blueFaction, redFaction, blueHero, redHero, matchOver]);
+  const portalLatest = useRef({ frame: portalFrame, summary: portalSummary });
+  useEffect(() => {
+    portalLatest.current = { frame: portalFrame, summary: portalSummary };
+  }, [portalFrame, portalSummary]);
+  const portalWatched = useRef(false);
+  const portalPoke = useRef<() => void>(() => undefined);
+  useEffect(() => {
+    const ids = portalIds;
+    if (!ids) return;
+    let stopped = false;
+    let timer: number | undefined;
+    let inFlight = false;
+    let lastSent = 0;
+    let overSent = 0;
+    const seen = new Set<number>();
+    const send = async () => {
+      if (stopped || inFlight) return;
+      inFlight = true;
+      lastSent = Date.now();
+      const { frame, summary } = portalLatest.current;
+      const res = await reportLive({
+        id: ids.id,
+        key: ids.key,
+        summary,
+        frame: portalWatched.current ? frame : undefined,
+      });
+      inFlight = false;
+      if (stopped) return;
+      if (res) {
+        const wasWatched = portalWatched.current;
+        portalWatched.current = res.watched;
+        for (const cmd of res.cmds) {
+          if (seen.has(cmd.n)) continue;
+          seen.add(cmd.n);
+          applyPortalCodeRef.current(cmd.code, cmd.side);
+        }
+        // Just started being watched: send the first frame right away.
+        if (res.watched && !wasWatched) {
+          schedule(150);
+          return;
+        }
+      }
+      if (summary.over) overSent++;
+      if (overSent > 2) return;
+      schedule(portalWatched.current ? WATCHED_EVERY_MS : LIVE_EVERY_MS);
+    };
+    const schedule = (ms: number) => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => void send(), ms);
+    };
+    portalPoke.current = () => {
+      if (!portalWatched.current) return;
+      const since = Date.now() - lastSent;
+      schedule(Math.max(0, 600 - since));
+    };
+    schedule(1_500);
+    return () => {
+      stopped = true;
+      window.clearTimeout(timer);
+      portalPoke.current = () => undefined;
+    };
+  }, [portalIds]);
+  // While watched, a changed field goes through promptly.
+  useEffect(() => {
+    portalPoke.current();
+  }, [portalFrame]);
 
   // AI loop for training / campaign / second — skipped for shared 2P
   useEffect(() => {

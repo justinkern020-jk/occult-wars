@@ -58,6 +58,14 @@ describe('randomRoomCode', () => {
 });
 
 describe('parseFriendMessage', () => {
+  it('carries a code sent through the portal, and only known codes', () => {
+    expect(parseFriendMessage({ v: 1, type: 'portal', code: 'seth' })).toEqual({
+      v: 1,
+      type: 'portal',
+      code: 'seth',
+    });
+    expect(parseFriendMessage({ v: 1, type: 'portal', code: 'battle count' })).toBeNull();
+  });
   it('accepts v1 typed messages', () => {
     expect(parseFriendMessage({ v: 1, type: 'ping' })).toEqual({
       v: 1,

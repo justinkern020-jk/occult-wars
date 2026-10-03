@@ -64,6 +64,8 @@ export type FriendMessage =
   | { v: 1; type: 'intent'; intent: FriendIntent }
   | FriendLoadoutMessage
   | { v: 1; type: 'ping' }
+  /** Host → guest: a code sent through the owner's Portal reached the guest's side. */
+  | { v: 1; type: 'portal'; code: 'justin' | 'adept' | 'seth' | 'southhaven' | 'athens' }
   | { v: 1; type: 'error'; message: string };
 
 export type FriendHandlers = {
@@ -158,6 +160,9 @@ export function parseFriendMessage(raw: unknown): FriendMessage | null {
       return m as unknown as FriendMessage;
     case 'loadout':
       if (!Array.isArray(m.cards)) return null;
+      return m as unknown as FriendMessage;
+    case 'portal':
+      if (!['justin', 'adept', 'seth', 'southhaven', 'athens'].includes(String(m.code))) return null;
       return m as unknown as FriendMessage;
     default:
       return null;

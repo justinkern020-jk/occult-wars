@@ -1,5 +1,6 @@
 import { useEffect, useSyncExternalStore } from 'react';
 import { readVisitCount } from '../game/visits';
+import { PortalDoor } from './Portal';
 import { beatNow, countryName, readTableSnapshot, subscribeTable } from '../net/table';
 
 type Props = {
@@ -115,6 +116,8 @@ export function BattleCountModal({ onClose }: Props) {
             </ol>
           )}
         </section>
+
+        <PortalDoor />
 
         <button
           type="button"
