@@ -22,11 +22,14 @@ const ERA_NAME: Record<string, string> = {
 };
 const MODE_NAME: Record<string, string> = {
   friend: 'Against a friend',
-  hotseat: 'One table',
-  training: 'Against the rival',
-  campaign: 'Campaign',
-  second: 'Second Hour',
+  hotseat: 'Pass the Grimoire',
+  training: 'Training rite',
+  campaign: 'The Leaden Hour',
+  second: 'Second Hour yard',
+  old: 'Sealed Century',
 };
+/** Every mode but a friend match is practice. */
+const PRACTICE = new Set(['hotseat', 'training', 'campaign', 'second', 'old']);
 
 function hasOwnerProof(): boolean {
   try {
@@ -118,7 +121,8 @@ export function PortalDoor() {
                   <b className="portal-red">{m.red.name}</b>
                 </span>
                 <span className="portal-match-meta">
-                  {ERA_NAME[m.era] ?? m.era} · {MODE_NAME[m.mode] ?? m.mode} · Turn {m.turn}
+                  {PRACTICE.has(m.mode) ? 'Practice' : 'Live table'} · {MODE_NAME[m.mode] ?? m.mode} ·{' '}
+                  {ERA_NAME[m.era] ?? m.era} · Turn {m.turn}
                   {m.over ? ' · ended' : ''}
                 </span>
               </button>
