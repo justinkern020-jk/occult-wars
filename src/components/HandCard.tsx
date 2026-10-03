@@ -11,6 +11,7 @@ export function HandCard({
   onClick,
   onInspect,
   onDragDeployStart,
+  handIndex,
 }: {
   card: Card;
   selected?: boolean;
@@ -19,6 +20,8 @@ export function HandCard({
   onInspect?: () => void;
   /** Units only: begin pointer drag to muster onto a legal tile. */
   onDragDeployStart?: (e: ReactPointerEvent<HTMLButtonElement>) => void;
+  /** Position in the hand row — lets the row scroll the chosen card into view. */
+  handIndex?: number;
 }) {
   const pressTimer = useRef<number | null>(null);
   const startPos = useRef<{ x: number; y: number } | null>(null);
@@ -38,6 +41,7 @@ export function HandCard({
       type="button"
       className={`hand-card kind-${card.kind} ${selected ? 'is-selected' : ''} ${disabled ? 'is-disabled' : ''} ${canDrag ? 'is-draggable' : ''}`}
       disabled={disabled}
+      data-hand-i={handIndex}
       onClick={(e) => {
         if (dragged.current) {
           e.preventDefault();

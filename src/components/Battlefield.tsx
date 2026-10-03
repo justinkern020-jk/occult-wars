@@ -82,6 +82,7 @@ import {
 import type { Card } from '../game/types';
 import { TarotPop } from './TarotPop';
 import { HandCard } from './HandCard';
+import { CardArt } from './CardArt';
 import {
   RulesPrimer,
   hasSeenPrimer,
@@ -372,6 +373,13 @@ export function Battlefield({
     initialControl(gameMap.tiles),
   );
   const [selectedHand, setSelectedHand] = useState<number | null>(null);
+  const handRowRef = useRef<HTMLDivElement | null>(null);
+  // A long hand scrolls: keep the chosen card in view.
+  useEffect(() => {
+    if (selectedHand == null) return;
+    const el = handRowRef.current?.querySelector<HTMLElement>(`[data-hand-i="${selectedHand}"]`);
+    el?.scrollIntoView?.({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+  }, [selectedHand]);
   const [selectedUnit, setSelectedUnit] = useState<string | null>(null);
   const [attacker, setAttacker] = useState<string | null>(null);
   const [revealCard, setRevealCard] = useState<Card | null>(null);
@@ -2674,11 +2682,28 @@ export function Battlefield({
   const playerWon = matchOver ? matchOver.winner === PLAYER : false;
   const activeHand = hand[inputSide];
   const activeHero = inputSide === 'blue' ? blueHero : redHero;
+  const foeHero = inputSide === 'blue' ? redHero : blueHero;
+  /** Pass the Grimoire: turn the circle toward Crimson's chair on Crimson's rite. */
+  const seatFlip = hotseat && side === 'red';
+  const readLeader = (card: Card) => {
+    setInspectPower(undefined);
+    setInspectSticky(false);
+    setInspectCard(card);
+  };
 
   return (
-    <section className={`battlefield${nukeActive ? ' nuke-shake' : ''}`} data-testid="battlefield" data-mode={mode} data-phase={phase}>
+    <section
+      className={`battlefield${nukeActive ? ' nuke-shake' : ''}${seatFlip ? ' is-seat-flip' : ''}`}
+      data-testid="battlefield"
+      data-mode={mode}
+      data-phase={phase}
+      data-seat-flip={seatFlip ? 'true' : 'false'}
+    >
       <header className="bf-hud">
-        <div className="bf-scores" aria-label="Resources and Domination">
+        <div
+          className={`bf-scores${seatFlip ? ' is-seat-flip' : ''}`}
+          aria-label="Resources and Domination"
+        >
           <dl className="score-chip is-ally" data-testid="score-azure">
             <dt>Azure · {blueFaction.split(' ').slice(-1)[0]}</dt>
             <dd>
@@ -2750,6 +2775,36 @@ export function Battlefield({
           </dl>
         </div>
         <div className="bf-actions">
+          <div className="leader-tray">
+            {activeHero && (
+              <button
+                type="button"
+                className="leader-plate is-mine"
+                data-testid="my-leader"
+                onClick={() => readLeader(activeHero)}
+              >
+                <CardArt name={activeHero.name} className="leader-plate-art" />
+                <span className="leader-plate-copy">
+                  <strong>{activeHero.name}</strong>
+                  <em>{activeHero.text}</em>
+                </span>
+              </button>
+            )}
+            {foeHero && (
+              <button
+                type="button"
+                className="leader-plate is-foe"
+                data-testid="foe-leader"
+                onClick={() => readLeader(foeHero)}
+              >
+                <CardArt name={foeHero.name} className="leader-plate-art" />
+                <span className="leader-plate-copy">
+                  <strong>{foeHero.name}</strong>
+                  <em>{foeHero.text}</em>
+                </span>
+              </button>
+            )}
+          </div>
           {activeHero && (
             <button
               type="button"
@@ -2763,8 +2818,7 @@ export function Battlefield({
               onClick={() => useLeader(inputSide)}
               title={activeHero.text}
             >
-              {activeHero.name}
-              {leaderUsed[inputSide] ? ' · spent' : ` · R${activeHero.cost}`}
+              {leaderUsed[inputSide] ? 'Spent' : `Speak · R${activeHero.cost}`}
             </button>
           )}
           {(() => {
@@ -3147,7 +3201,20 @@ export function Battlefield({
                 ? ' · Crimson is working…'
                 : ''}
         </p>
-        <div className="hand-row">
+        <div className="hand-row" ref={handRowRef}>
+          {activeHero && (
+            <button
+              type="button"
+              className="hand-card kind-hero hand-leader"
+              data-testid="hand-leader"
+              onClick={() => readLeader(activeHero)}
+              title={`${activeHero.name}. ${activeHero.text}`}
+            >
+              <CardArt name={activeHero.name} />
+              <span className="hand-leader-tag">Leader</span>
+              <span className="hand-card-name">{activeHero.name}</span>
+            </button>
+          )}
           {activeHand.map((card, i) => {
             const isUnit = card.kind === 'unit';
             const isSpell = card.kind === 'rite' || card.kind === 'device';
@@ -3156,6 +3223,7 @@ export function Battlefield({
               <HandCard
                 key={`${card.id}-${i}`}
                 card={card}
+                handIndex={i}
                 selected={selectedHand === i || dragHand === i}
                 disabled={inputLocked || tooCostly}
                 onClick={() => {
