@@ -6,6 +6,7 @@ import { PlayingNow } from './components/PlayingNow'
 import { captureOwnerKey } from './net/watch'
 import { SiteAnalytics } from './components/SiteAnalytics'
 import { HonourToast } from './components/HonourToast'
+import { BarkSubtitle } from './components/BarkSubtitle'
 
 captureOwnerKey()
 
@@ -15,5 +16,6 @@ createRoot(document.getElementById('root')!).render(
     <PlayingNow />
     <SiteAnalytics />
     <HonourToast />
+    <BarkSubtitle />
   </StrictMode>,
 )

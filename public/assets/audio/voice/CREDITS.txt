@@ -1,0 +1,8 @@
+Leader barks (power_*, foe_*, victory_*, defeat_*) — 2026-10-03
+  Text-to-speech, not a voice actor: Microsoft Edge neural voices via edge-tts
+  (en-GB-RyanNeural for your leader, en-GB-ThomasNeural for the foe), slowed
+  and pitched down, then a gramophone chain in ffmpeg (280-3200 Hz band,
+  presence lift, compression, tanh soft clip, short room echo) mixed with an
+  original synthesised shellac crackle. Lines are original period-style barks,
+  not quotations. 40 kbps mono mp3, ~300 KB for all 16.
+  Toggle: Settings > Leader voices (also silent with the device mute).

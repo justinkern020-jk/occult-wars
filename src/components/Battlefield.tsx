@@ -107,7 +107,10 @@ import {
 } from './RulesPrimer';
 import { UnitCoin, type BoardUnit } from './UnitCoin';
 import { WeatherLayer } from './WeatherLayer';
+import { HighlightButton } from './HighlightShot';
+import { leaderBark } from '../game/voice';
 import { useEncounterLog } from '../hooks/useEncounterLog';
+import { useBattleMusic } from '../hooks/useBattleMusic';
 import { announce } from '../game/achievements';
 import { MushroomCloud } from './MushroomCloud';
 import { FalloutRain } from './FalloutRain';
@@ -423,6 +426,7 @@ export function Battlefield({
   const [discard, setDiscard] = useState(emptyDiscard);
   const [board, setBoard] = useState<(BoardUnit | null)[][]>(emptyBoard);
   useEncounterLog(board, hand[mySide], discard, !!matchOver);
+  useBattleMusic(board, domination, turn, !!matchOver);
   const [control, setControl] = useState<ControlGrid>(() =>
     initialControl(gameMap.tiles),
   );
@@ -1060,6 +1064,7 @@ export function Battlefield({
         : winner === PLAYER;
       if (playerWon) victoryStinger();
       else defeatStinger();
+      leaderBark(playerWon || hotseat ? 'victory' : 'defeat');
       // The battle count: a finished match for this hour (here and at the table).
       recordMatchPlayed(eraRef.current);
       reportPlayed(eraRef.current);
@@ -1352,6 +1357,7 @@ export function Battlefield({
       setLeaderUsed((L) => ({ ...L, [acting]: true }));
       setAim(null);
       leaderCallSfx();
+      leaderBark(hotseat || acting === tallySide ? 'power' : 'foe');
       if (acting === tallySide) tallyRef.current.leader++;
       return true;
     },
@@ -2490,6 +2496,7 @@ export function Battlefield({
           (!prevSt.leaderUsed?.red && st.leaderUsed?.red)
         ) {
           leaderCallSfx();
+          leaderBark(!prevSt.leaderUsed?.[mySide] && st.leaderUsed?.[mySide] ? 'power' : 'foe');
         }
         if (prevSt.side !== st.side && !st.matchOver) endTurnSfx();
       }
@@ -2521,6 +2528,7 @@ export function Battlefield({
         }
         if (st.matchOver.winner === mySide) victoryStinger();
         else defeatStinger();
+        leaderBark(st.matchOver.winner === mySide ? 'victory' : 'defeat');
         // The host reports the match to the table; the guest keeps its own count.
         recordMatchPlayed(eraRef.current);
       }
@@ -4037,6 +4045,25 @@ export function Battlefield({
                   Return to the atelier
                 </button>
               )}
+              <HighlightButton
+                get={() => ({
+                  grid: boardGridRef.current,
+                  board,
+                  control,
+                  mapId: gameMap.id,
+                  mapName: gameMap.name,
+                  era: eraRef.current,
+                  turn,
+                  winner: matchOver.winner,
+                  winnerLeader: matchOver.winner === 'blue' ? blueHero : redHero,
+                  winnerFaction: matchOver.winner === 'blue' ? blueFaction : redFaction,
+                  won: hotseat || matchOver.winner === (friend ? mySide : PLAYER),
+                  kind: matchOver.kind,
+                  domination,
+                  player: profile?.username || undefined,
+                  title: profile?.title,
+                })}
+              />
             </div>
             <SeatInvite onTakeSeat={onTakeSeat} offer={mode !== 'campaign'} />
           </div>

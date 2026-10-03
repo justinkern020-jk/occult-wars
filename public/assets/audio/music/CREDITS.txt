@@ -10,3 +10,10 @@ Retired: battlefield-mystical.mp3 (melancholy piano CC0 from OpenGameArt) remove
   startMatchTheme now loads battlefield-souls.mp3 only.
 
 Menu bed remains Moonlight Sonata: /assets/audio/moonlight.mp3
+
+battle-choir.ogg / battle-choir.mp3 — intensity layer over the match bed
+  Original synthesis (numpy, scripts/gen_battle_choir.py), 2026-10-03, CC0.
+  Low formant choir ("ah"/"oh"), deep detuned strings with tremolo and a slow
+  funeral-march drum in D minor (Dm, Bb, Gm, A), 39 s seamless loop with a
+  circular cathedral reverb. Web Audio fades it in when a match tips (near
+  Domination, late rites, a great unit falls). Toggle: Settings > Swelling choir.

@@ -686,3 +686,16 @@
 @media (prefers-reduced-motion: reduce) {
   .wx-fog-a, .wx-fog-b, .wx-moonbeam, .honour-toast { animation: none !important; }
 }
+
+/* ════════ Batch 3: barks, highlight ════════ */
+.bark-sub {
+  position: fixed; left: 50%; bottom: max(5.5rem, 12vh); transform: translateX(-50%); z-index: 110; margin: 0;
+  max-width: min(36rem, 92vw); padding: 0.45rem 1rem; border-radius: 0.4rem; pointer-events: none;
+  font-family: var(--font-body); font-style: italic; font-size: clamp(0.95rem, 2.4vw, 1.15rem); color: #dff5e6;
+  background: #070b08cc; border: 1px solid #2fbf7a55; box-shadow: 0 0 24px #2fbf7a33; text-shadow: 0 0 8px #2fbf7a88;
+  animation: bark-in 3.2s ease forwards;
+}
+.bark-sub.is-foe { color: #f1c9c0; border-color: #c4473f66; box-shadow: 0 0 24px #c4473f33; text-shadow: 0 0 8px #c4473f88; }
+@keyframes bark-in { 0% { opacity: 0; } 8%, 85% { opacity: 1; } 100% { opacity: 0; } }
+.highlight-note { font-size: 0.8rem; color: #8fdcb0; align-self: center; }
+@media (prefers-reduced-motion: reduce) { .bark-sub { animation: none; } }

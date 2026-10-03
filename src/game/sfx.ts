@@ -880,3 +880,8 @@ export function setMusicBed(next: MusicBed): void {
 export function currentMusicBed(): MusicBed {
   return bed;
 }
+
+/** The one AudioContext (for layers kept in their own modules: the battle choir, voices). */
+export function sharedAudioContext(): AudioContext | null {
+  return getAC();
+}
