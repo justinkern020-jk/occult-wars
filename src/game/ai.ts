@@ -255,8 +255,8 @@ function isMeasuredBlooded(u: AiUnit): boolean {
 
 /**
  * Worth of Blooded firing on `u` with `left` power after the fight. Classic
- * Blooded keeps grok's flat bonus; measured Blooded (+1, capped at printed +3)
- * is worth `perPoint` for each point it actually grows (0 once capped).
+ * Blooded keeps grok's flat bonus; measured Blooded is worth `perPoint` for
+ * the +1 it gains every time it strikes and survives.
  */
 function bloodedEdge(u: AiUnit, left: number, flat: number, perPoint: number): number {
   if (!isMeasuredBlooded(u)) return flat;

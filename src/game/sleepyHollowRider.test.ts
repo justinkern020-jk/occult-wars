@@ -3,6 +3,7 @@ import { cardById } from '../data/catalog';
 import type { EffectCtx, EffectUnit } from './effects';
 import { mapById, type Side } from './maps';
 import { resolveStrike } from './rules';
+import { applyAction, endRite, newMatch, unitPos, type EngineState } from './engine';
 
 const tiles = mapById('leaden-court').tiles;
 
@@ -45,9 +46,10 @@ function fromCard(id: string, uid: string, side: Side, power?: number): EffectUn
 describe('Sleepy Hollow Rider (blooded)', () => {
   const card = cardById('sleepy_hollow_rider')!;
 
-  it('card text promises +1 power (max +3) after it strikes and survives', () => {
+  it('card text promises +1 power every time it strikes and survives', () => {
     expect(card.keywords).toContain('blooded');
-    expect(card.text).toMatch(/After this unit strikes and survives, it gains \+1 power \(max \+3\)\./);
+    expect(card.text).toMatch(/^After this unit strikes and survives, it gains \+1 power\. /);
+    expect(card.text).not.toMatch(/max|once per/i);
   });
 
   it('trades with a P3 foe, survives at 1, then gains +1 power (Power is now 2)', () => {
@@ -166,27 +168,51 @@ describe('Sleepy Hollow Rider (blooded)', () => {
     expect(ctx.units.rider.maxPower).toBe(6);
   });
 
-  it('caps Blooded growth at printed power +3 (P4 rider tops out at 7)', () => {
+  it('has no cap: six strikes take a P4 rider to 10', () => {
     const rider = fromCard('sleepy_hollow_rider', 'rider', 'blue');
     rider.tough = true;
     const ctx = ctxWith([[rider, 2, 2]]);
-    for (const uid of ['a', 'b', 'c']) strikeFreshFoe(ctx, uid);
-    expect(ctx.units.rider.power).toBe(7);
-    expect(ctx.units.rider.maxPower).toBe(7);
-    strikeFreshFoe(ctx, 'd');
-    strikeFreshFoe(ctx, 'e');
-    expect(ctx.units.rider.power).toBe(7);
-    expect(ctx.units.rider.maxPower).toBe(7);
-    expect(ctx.log.join(' ')).toMatch(/can grow no stronger\. Power is 7/);
+    for (const uid of ['a', 'b', 'c', 'd', 'e', 'f']) strikeFreshFoe(ctx, uid);
+    expect(ctx.units.rider.power).toBe(10);
+    expect(ctx.units.rider.maxPower).toBe(10);
+    expect(ctx.log.join(' ')).toMatch(/gains \+1 power\. Power is now 10/);
+  });
+});
+
+describe('Sleepy Hollow Rider in the headless engine (AI sims)', () => {
+  function place(s: EngineState, id: string, uid: string, side: Side, r: number, c: number, tough = false) {
+    const u = fromCard(id, uid, side);
+    if (tough) u.tough = true;
+    s.ctx.units[uid] = u;
+    s.ctx.board[r][c] = uid;
+    return u;
+  }
+
+  it('attack and then defend in the same turn: +1 each time (+2 total)', () => {
+    const s = newMatch({ tiles, blueDeck: [], redDeck: [] });
+    place(s, 'sleepy_hollow_rider', 'rider', 'blue', 2, 2, true);
+    place(s, 'alley_inquiry', 'a', 'red', 1, 2);
+    expect(applyAction(s, { type: 'attack', uid: 'rider', targetUid: 'a' })).toBeNull();
+    expect(s.ctx.units.rider.power).toBe(5);
+    endRite(s);
+    expect(s.side).toBe('red');
+    const pos = unitPos(s.ctx, 'rider')!;
+    place(s, 'alley_inquiry', 'b', 'red', pos.r, pos.c === 0 ? 1 : pos.c - 1);
+    expect(applyAction(s, { type: 'attack', uid: 'b', targetUid: 'rider' })).toBeNull();
+    expect(s.ctx.units.b).toBeUndefined();
+    expect(s.ctx.units.rider.power).toBe(6);
+    expect(s.ctx.units.rider.maxPower).toBe(6);
   });
 
-  it('never lowers a rider that other effects pushed past the cap', () => {
-    const rider = fromCard('sleepy_hollow_rider', 'rider', 'blue', 9);
-    rider.tough = true;
-    const ctx = ctxWith([[rider, 2, 2]]);
-    strikeFreshFoe(ctx, 'a');
-    expect(ctx.units.rider.power).toBe(9);
-    expect(ctx.units.rider.maxPower).toBe(9);
+  it('keeps damage: remaining power +1 when defending (no reset to pre-fight)', () => {
+    const s = newMatch({ tiles, blueDeck: [], redDeck: [] });
+    endRite(s); // red to act
+    place(s, 'sleepy_hollow_rider', 'rider', 'blue', 2, 2);
+    place(s, 'tommy_wight', 't', 'red', 1, 2); // P3
+    expect(applyAction(s, { type: 'attack', uid: 't', targetUid: 'rider' })).toBeNull();
+    expect(s.ctx.units.t).toBeUndefined();
+    expect(s.ctx.units.rider.power).toBe(2);
+    expect(s.ctx.units.rider.maxPower).toBe(5);
   });
 });
 

@@ -4787,7 +4787,7 @@
     "keywords": [
       "blooded"
     ],
-    "text": "After this unit strikes and survives, it gains +1 power (max +3). The Hessian does not need a head to swing.",
+    "text": "After this unit strikes and survives, it gains +1 power. The Hessian does not need a head to swing.",
     "power": 4,
     "legacyAttack": 4,
     "legacyHealth": 4,

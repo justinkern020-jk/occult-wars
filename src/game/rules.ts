@@ -409,14 +409,11 @@ function addPending(u: EffectUnit, n: number) {
 }
 
 /**
- * Cards whose Blooded is the measured form: after striking and surviving,
- * power is what it has left after damage +1, and Blooded growth never takes
- * it past printed power +3. Every other Blooded card keeps the classic form
- * (pre-fight power +2).
+ * Cards whose Blooded is the measured form: every time it strikes and
+ * survives, power is what it has left after damage +1 (max power +1), with
+ * no cap. Every other Blooded card keeps the classic form (pre-fight +2).
  */
 export const MEASURED_BLOODED: ReadonlySet<string> = new Set(['sleepy_hollow_rider']);
-/** Most power a measured Blooded unit can reach over its printed power. */
-export const MEASURED_BLOODED_CAP = 3;
 
 /**
  * Power / max power after Blooded fires on a unit that struck and survived.
@@ -426,22 +423,17 @@ export function bloodedResult(
   u: { cardId?: string; power: number; maxPower?: number },
   powerBefore: number,
 ): { power: number; maxPower: number } {
-  const maxBefore = u.maxPower ?? powerBefore;
   if (!u.cardId || !MEASURED_BLOODED.has(u.cardId)) {
     return { power: powerBefore + 2, maxPower: powerBefore + 2 };
   }
-  const printed = cardById(u.cardId)?.power ?? powerBefore;
-  const cap = printed + MEASURED_BLOODED_CAP;
-  // Never lowers power that other effects pushed past the cap.
-  const power = Math.max(u.power, Math.min(u.power + 1, cap));
-  const maxPower = Math.max(maxBefore, Math.min(maxBefore + 1, cap), power);
-  return { power, maxPower };
+  const maxBefore = u.maxPower ?? powerBefore;
+  const power = u.power + 1;
+  return { power, maxPower: Math.max(maxBefore + 1, power) };
 }
 
 /**
  * After a fight: Blooded (struck and survived → pre-fight power +2, or for
- * measured Blooded, remaining power +1 up to printed +3) and
- * Sprout (survived a battle → +1 power).
+ * measured Blooded, remaining power +1) and Sprout (survived a battle → +1).
  */
 function afterBattleGrowth(
   ctx: EffectCtx,
@@ -454,23 +446,14 @@ function afterBattleGrowth(
   if (struck && hasKeyword(u, 'blooded')) {
     const measured = MEASURED_BLOODED.has(u.cardId);
     const prevMax = u.maxPower;
-    const prevPower = u.power;
     const next = bloodedResult(u, powerBefore);
     u.power = next.power;
     u.maxPower = next.maxPower;
-    if (measured) {
-      const up = next.power - prevPower;
-      gain += Math.max(0, next.maxPower - prevMax);
-      log(
-        ctx,
-        up > 0
-          ? `${u.name} is still standing and gains +1 power. Power is now ${next.power}.`
-          : `${u.name} is still standing but can grow no stronger. Power is ${next.power}.`,
-      );
-    } else {
-      gain += 2;
-      log(ctx, `${u.name} is still standing and gains +2 power. Power is now ${next.power}.`);
-    }
+    gain += measured ? Math.max(0, next.maxPower - prevMax) : 2;
+    log(
+      ctx,
+      `${u.name} is still standing and gains +${measured ? 1 : 2} power. Power is now ${next.power}.`,
+    );
   }
   if (hasKeyword(u, 'sprout')) {
     u.power += 1;
