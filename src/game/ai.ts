@@ -21,7 +21,7 @@ import { DOMINATION_WIN, bankFromHoldings, countHoldings } from './scoring';
 import { canDeployOn, isEnemyStronghold, isPaintable } from './control';
 import { canBeStruck, hasKeyword, manhattan, rangedReach } from './keywords';
 import { applyDamage, combatantFrom, resolveMelee } from './combat';
-import { crownBonusOnBoard, type RulesBoard } from './rules';
+import { MEASURED_BLOODED, bloodedResult, crownBonusOnBoard, type RulesBoard } from './rules';
 import type { EffectUnit } from './effects';
 import {
   applyAction,
@@ -249,6 +249,21 @@ function strikable(atk: AiUnit, def: AiUnit, at?: { r: number; c: number }): boo
 
 // ── grok scoring ───────────────────────────────────────────────────────────
 
+function isMeasuredBlooded(u: AiUnit): boolean {
+  return !!u.cardId && MEASURED_BLOODED.has(u.cardId);
+}
+
+/**
+ * Worth of Blooded firing on `u` with `left` power after the fight. Classic
+ * Blooded keeps grok's flat bonus; measured Blooded (+1, capped at printed +3)
+ * is worth `perPoint` for each point it actually grows (0 once capped).
+ */
+function bloodedEdge(u: AiUnit, left: number, flat: number, perPoint: number): number {
+  if (!isMeasuredBlooded(u)) return flat;
+  const next = bloodedResult({ cardId: u.cardId, power: left, maxPower: u.maxPower ?? u.power }, u.power);
+  return Math.max(0, next.power - left) * perPoint;
+}
+
 /** grok `ke`: strike score. */
 function attackScore(s: AiSnapshot, atk: AiUnit, def: AiUnit): number {
   if (!canStrikeNow(s, atk)) return -9999;
@@ -281,8 +296,12 @@ function attackScore(s: AiSnapshot, atk: AiUnit, def: AiUnit): number {
   let dies = false;
   let dealt = 0;
   let taken = 0;
+  let atkLeft = atk.power;
+  let defLeft = def.power;
   if (melee) {
     const f = meleePreview(atk, def, s);
+    atkLeft = f.atkPower;
+    defLeft = f.defPower;
     kills = f.defenderDestroyed;
     dies = f.attackerDestroyed;
     dealt = Math.max(0, def.power - f.defPower);
@@ -299,7 +318,7 @@ function attackScore(s: AiSnapshot, atk: AiUnit, def: AiUnit): number {
     if (storms) v += 9000;
     else if (tile && isPaintable(tile) && s.control[def.r][def.c] !== atk.side && !noClaim(atk))
       v += tileWorth(s, tile, false);
-    if (hasKeyword(atk, 'blooded')) v += 8;
+    if (hasKeyword(atk, 'blooded')) v += bloodedEdge(atk, atkLeft, 8, 4);
   } else if (kills && dies) {
     v += defV - atkV - 4;
   } else if (!kills && dies) {
@@ -307,8 +326,13 @@ function attackScore(s: AiSnapshot, atk: AiUnit, def: AiUnit): number {
   } else {
     v += dealt * 4 - taken * 5;
     if (dealt <= 0) v -= 10;
-    if (hasKeyword(atk, 'blooded') && !dies && dealt > 0) v += 6;
-    if (hasKeyword(def, 'blooded') && !kills) v -= 6;
+    if (hasKeyword(atk, 'blooded') && !dies && dealt > 0)
+      v += bloodedEdge(atk, atkLeft, 6, 3);
+    if (hasKeyword(def, 'blooded') && !kills) {
+      // Measured Blooded only grows when it strikes back (melee).
+      if (!isMeasuredBlooded(def)) v -= 6;
+      else if (melee) v -= bloodedEdge(def, defLeft, 6, 3);
+    }
   }
   return v;
 }
