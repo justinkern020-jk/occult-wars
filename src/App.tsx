@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Battlefield, type MatchMode } from './components/Battlefield';
 import { CombatDemo } from './components/CombatDemo';
+import { CardPeekLayer } from './components/CardPeek';
 import { Catalog } from './components/Catalog';
 import { TitleScreen } from './components/TitleScreen';
 import { MenuAtelier } from './components/MenuAtelier';
@@ -695,6 +696,7 @@ export default function App() {
         />
       )}
       {screen === 'sandbox' && <CombatDemo />}
+      <CardPeekLayer />
       {blackMondayReveal && (
         <TarotPop
           card={blackMondayReveal}

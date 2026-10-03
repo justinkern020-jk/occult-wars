@@ -467,6 +467,7 @@ export function DeckEditor({ profile, onSave, onDelete, onBack, initialEra, retu
                   <button
                     type="button"
                     className="deck-plate-look"
+                    data-peek-card={c.id}
                     onClick={() => setInspect(c)}
                     title={`Own ${owned[c.id] ?? 0} · in working ${have} · tap to read`}
                   >

@@ -256,7 +256,7 @@ export function Catalog({ profile, onUpdate }: Props) {
             .filter(Boolean)
             .join(' ');
           return (
-            <div key={`${c.faction}-${c.id}`} className={wrapCls}>
+            <div key={`${c.faction}-${c.id}`} className={wrapCls} data-peek-card={c.id}>
               <CardView card={c} onClick={() => setInspect(c)} />
               {profile && (
                 <p

@@ -80,6 +80,8 @@ export function UnitCoin({
       key={clash ? `clash-${clash.key}` : undefined}
       role="button"
       tabIndex={0}
+      data-peek-card={unit.cardId}
+      data-peek-power={unit.power}
       className={`stone-coin is-${unit.side} ${foe ? 'coin-foe' : 'coin-mine'} ${selected ? 'stone-picked' : ''} ${unit.sick ? 'is-sick' : ''} ${veiled ? 'is-veiled' : ''} ${sliding ? 'coin-slide-hide' : ''} ${canStep && !selected ? 'can-step' : ''} ${clash ? 'coin-clash' : ''}`}
       style={
         clash

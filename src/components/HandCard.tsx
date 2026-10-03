@@ -40,14 +40,18 @@ export function HandCard({
     <button
       type="button"
       className={`hand-card kind-${card.kind} ${selected ? 'is-selected' : ''} ${disabled ? 'is-disabled' : ''} ${canDrag ? 'is-draggable' : ''}`}
-      disabled={disabled}
+      // aria-disabled (not disabled): a too-costly plate must still be readable
+      // (hover peek, double-click inspect); taps on it do nothing.
+      aria-disabled={disabled || undefined}
       data-hand-i={handIndex}
+      data-peek-card={card.id}
       onClick={(e) => {
         if (dragged.current) {
           e.preventDefault();
           dragged.current = false;
           return;
         }
+        if (disabled) return;
         onClick?.();
       }}
       onContextMenu={(e) => {
@@ -63,7 +67,7 @@ export function HandCard({
         if (e.button !== 0) return;
         dragged.current = false;
         startPos.current = { x: e.clientX, y: e.clientY };
-        if (onInspect) {
+        if (onInspect && e.pointerType !== 'touch') {
           clearPress();
           pressTimer.current = window.setTimeout(() => {
             pressTimer.current = null;
