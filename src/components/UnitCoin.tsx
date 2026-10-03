@@ -126,8 +126,12 @@ export function UnitCoin({
         </span>
       </span>
       {hits?.map((h) => (
-        <span key={h.id} className="coin-dmg-float" aria-hidden>
-          {h.text}
+        <span
+          key={h.id}
+          className={`coin-dmg-float${h.text.startsWith('+') ? ' coin-gain-float' : ''}`}
+          aria-hidden
+        >
+          {h.text.replace(/^-/, '\u2212')}
         </span>
       ))}
       {fast && (

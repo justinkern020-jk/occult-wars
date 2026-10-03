@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
 import { cardById } from '../data/catalog';
 import {
   aiDifficultyLabel,
@@ -121,6 +121,14 @@ import {
 } from '../game/hourUnlock';
 import { portalCodeFor } from '../game/portalCodes';
 import { diffBoards, guestSounds, newOnPile, type FxBoard } from '../game/boardFx';
+
+/** Death-burst sparks: fixed spread so renders stay pure. */
+const EMBERS = Array.from({ length: 11 }, (_, i) => ({
+  a: (i * 360) / 11 + ((i * 37) % 19) - 9,
+  d: 26 + ((i * 53) % 30),
+  t: 0.75 + ((i * 29) % 5) * 0.09,
+  s: 3 + (i % 3),
+}));
 import type {
   FriendMatchState,
   FriendMessage,
@@ -490,6 +498,53 @@ export function Battlefield({
     phase,
     matchOver,
   };
+  // ——— Combat feel, read from board diffs so every hand (host, guest, AI, hotseat) sees it ———
+  const [bursts, setBursts] = useState<
+    { id: string; r: number; c: number; name: string; side: Side }[]
+  >([]);
+  const [shake, setShake] = useState<{ key: number; hard: boolean } | null>(null);
+  const shakeTimerRef = useRef<number | null>(null);
+  const prevFxRef = useRef<{ board: FxBoard; turn: number } | null>(null);
+  /** bootMatch sets this so a fresh table is not read as a massacre. */
+  const boardResetRef = useRef(false);
+  useEffect(() => {
+    const prev = prevFxRef.current;
+    prevFxRef.current = { board: board as FxBoard, turn };
+    if (!prev || boardResetRef.current || turn < prev.turn) {
+      boardResetRef.current = false;
+      return;
+    }
+    if (prev.board === board) return;
+    const d = diffBoards(prev.board, board as FxBoard);
+    if (d.gains.length > 0) {
+      showPips(
+        d.gains.map((g) => ({ id: '', uid: g.unit.uid, r: g.r, c: g.c, text: `+${g.amount}` })),
+      );
+    }
+    if (d.deaths.length > 0) {
+      const stamp = Date.now();
+      const fresh = d.deaths.map((x, i) => ({
+        id: `${stamp}-${i}-${x.unit.uid}`,
+        r: x.r,
+        c: x.c,
+        name: x.unit.name,
+        side: x.unit.side,
+      }));
+      setBursts((cur) => [...cur, ...fresh]);
+      window.setTimeout(() => {
+        setBursts((cur) => cur.filter((b) => !fresh.some((f) => f.id === b.id)));
+      }, 1250);
+    }
+    if (d.deaths.length > 0 || d.strikers.length > 0) {
+      if (shakeTimerRef.current != null) window.clearTimeout(shakeTimerRef.current);
+      setShake((cur) => ({ key: (cur?.key ?? 0) + 1, hard: d.deaths.length > 0 }));
+      shakeTimerRef.current = window.setTimeout(() => {
+        shakeTimerRef.current = null;
+        setShake(null);
+      }, 420);
+    }
+  }, [board, turn, showPips]);
+
   /** Always-latest action fns so the AI timeout loop never closes over a stale board. */
   const deployToRef = useRef<
     (r: number, c: number, handIndex: number, acting: Side) => boolean
@@ -743,6 +798,7 @@ export function Battlefield({
       const b = emptyBoard();
 
       setControl(ctrl);
+      boardResetRef.current = true;
       setBoard(b);
       setDeck(d);
       setHand(h);
@@ -3239,7 +3295,11 @@ export function Battlefield({
         </div>
       )}
       <div className="bf-stage" style={{ position: 'relative' }}>
-        <div className="bf-board-socket">
+        <div
+          className={`bf-board-socket${
+            shake ? ` field-shake-${shake.key % 2 ? 'a' : 'b'}${shake.hard ? ' shake-hard' : ''}` : ''
+          }`}
+        >
           <img
             className="bf-board-socket-frame"
             src="/assets/images/bf_board_frame.png"
@@ -3330,8 +3390,42 @@ export function Battlefield({
                     {pips
                       .filter((p) => p.r === r && p.c === c && p.uid !== unit?.uid)
                       .map((p) => (
-                        <span key={p.id} className="dmg-float" aria-hidden>
-                          {p.text}
+                        <span
+                          key={p.id}
+                          className={`dmg-float${p.text.startsWith('+') ? ' gain-float' : ''}`}
+                          aria-hidden
+                        >
+                          {p.text.replace(/^-/, '\u2212')}
+                        </span>
+                      ))}
+                    {bursts
+                      .filter((b) => b.r === r && b.c === c)
+                      .map((b) => (
+                        <span key={b.id} className={`death-burst is-${b.side}`} aria-hidden>
+                          <span className="death-half half-l">
+                            <CardArt name={b.name} className="stone-face" />
+                          </span>
+                          <span className="death-half half-r">
+                            <CardArt name={b.name} className="stone-face" />
+                          </span>
+                          <svg className="death-crack" viewBox="0 0 100 100">
+                            <path d="M52 2 L46 22 L57 37 L43 54 L55 70 L48 98" />
+                            <path d="M46 22 L30 30 M57 37 L74 31 M43 54 L26 63 M55 70 L72 79" />
+                          </svg>
+                          {EMBERS.map((e, i) => (
+                            <span
+                              key={i}
+                              className="death-ember"
+                              style={
+                                {
+                                  '--a': `${e.a}deg`,
+                                  '--d': `${e.d}px`,
+                                  '--t': `${e.t}s`,
+                                  '--s': `${e.s}px`,
+                                } as CSSProperties
+                              }
+                            />
+                          ))}
                         </span>
                       ))}
                     {moveOk && moveDir && (

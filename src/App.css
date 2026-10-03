@@ -5233,3 +5233,108 @@ input[type='search'] {
 .deck-note-ok {
   color: #a8e0a0;
 }
+
+/* ——— Combat feel: field shake, gain floats, death burst ——— */
+.battlefield .bf-board-socket.field-shake-a { animation: field-shake-a 0.32s cubic-bezier(0.3, 0.7, 0.4, 1); }
+.battlefield .bf-board-socket.field-shake-b { animation: field-shake-b 0.32s cubic-bezier(0.3, 0.7, 0.4, 1); }
+.bf-board-socket.shake-hard { --shake: 4px; }
+.bf-board-socket { --shake: 2.5px; }
+@keyframes field-shake-a {
+  0%, 100% { transform: translate(0, 0); }
+  18% { transform: translate(calc(var(--shake) * -1), calc(var(--shake) * 0.5)); }
+  38% { transform: translate(var(--shake), calc(var(--shake) * -0.6)); }
+  58% { transform: translate(calc(var(--shake) * -0.55), calc(var(--shake) * 0.3)); }
+  78% { transform: translate(calc(var(--shake) * 0.3), 0); }
+}
+@keyframes field-shake-b {
+  0%, 100% { transform: translate(0, 0); }
+  18% { transform: translate(calc(var(--shake) * -1), calc(var(--shake) * 0.5)); }
+  38% { transform: translate(var(--shake), calc(var(--shake) * -0.6)); }
+  58% { transform: translate(calc(var(--shake) * -0.55), calc(var(--shake) * 0.3)); }
+  78% { transform: translate(calc(var(--shake) * 0.3), 0); }
+}
+.coin-dmg-float.coin-gain-float,
+.dmg-float.gain-float {
+  color: #eaffe6;
+  text-shadow: 0 0 8px #3fd07a, 0 0 18px #1f9a52cc, 0 2px #03200f;
+}
+.death-burst {
+  position: absolute;
+  inset: 4%;
+  z-index: 26;
+  pointer-events: none;
+  border-radius: 50%;
+}
+.death-half {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  filter: saturate(0.6) brightness(0.85);
+  box-shadow: 0 0 0 2px #2a1c10, 0 0 14px #ff5a1e55;
+}
+.death-half.half-l {
+  clip-path: polygon(0 0, 52% 0, 46% 22%, 57% 37%, 43% 54%, 55% 70%, 48% 100%, 0 100%);
+  animation: death-half-l 1.15s cubic-bezier(0.35, 0.1, 0.4, 1) forwards;
+}
+.death-half.half-r {
+  clip-path: polygon(52% 0, 100% 0, 100% 100%, 48% 100%, 55% 70%, 43% 54%, 57% 37%, 46% 22%);
+  animation: death-half-r 1.15s cubic-bezier(0.35, 0.1, 0.4, 1) forwards;
+}
+@keyframes death-half-l {
+  0%, 22% { transform: none; opacity: 1; }
+  100% { transform: translate(-14%, 10%) rotate(-11deg); opacity: 0; filter: grayscale(1) brightness(0.4); }
+}
+@keyframes death-half-r {
+  0%, 22% { transform: none; opacity: 1; }
+  100% { transform: translate(13%, 13%) rotate(9deg); opacity: 0; filter: grayscale(1) brightness(0.4); }
+}
+.death-crack {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: #ffd38a;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 3px #ff7a2a) drop-shadow(0 0 7px #c2340f);
+  stroke-dasharray: 140;
+  stroke-dashoffset: 140;
+  animation: death-crack 1.15s ease-out forwards;
+}
+@keyframes death-crack {
+  0% { stroke-dashoffset: 140; opacity: 1; }
+  22% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+.death-ember {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--s);
+  height: var(--s);
+  margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff1c4 0 25%, #ff9a3c 55%, #b8300c00 100%);
+  box-shadow: 0 0 6px 1px #ff6a1ecc;
+  opacity: 0;
+  animation: death-ember var(--t) 0.2s cubic-bezier(0.15, 0.6, 0.3, 1) forwards;
+}
+@keyframes death-ember {
+  0% { opacity: 0; transform: rotate(var(--a)) translateX(0) scale(1); }
+  12% { opacity: 1; }
+  100% { opacity: 0; transform: rotate(var(--a)) translateX(calc(var(--d) * 0.9)) translateY(-18%) scale(0.4); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .battlefield .bf-board-socket.field-shake-a,
+  .battlefield .bf-board-socket.field-shake-b { animation: none; }
+  .death-half.half-l,
+  .death-half.half-r { animation: death-fade 0.9s ease-out forwards; }
+  .death-ember { display: none; }
+}
+@keyframes death-fade {
+  0%, 30% { opacity: 1; }
+  100% { opacity: 0; }
+}
