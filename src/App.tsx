@@ -62,7 +62,10 @@ import { ACH_EVENT, noteMatch, noteSecret, noteSighting, settleHonours, type Ach
 import { noteEncounters } from './game/codexUnlock';
 import { Honours, TitlePicker } from './components/Honours';
 import { SettingsPanel } from './components/SettingsPanel';
-import { toastHonours } from './components/HonourToast';
+import { toastHonours, toastNotice } from './components/HonourToast';
+import { Ladder, RankBadge } from './components/Ladder';
+import { beginRanked, newSittingNonce, refreshMyRank, reportRanked, useMyRank } from './net/ranked';
+import { readSeatState } from './net/account';
 import './App.css';
 import './polish.css';
 
@@ -85,7 +88,8 @@ type Screen =
   | 'meeting'
   | 'sandbox'
   | 'codex'
-  | 'honours';
+  | 'honours'
+  | 'ladder';
 
 /** Pick a rival order for training (not self / not ally preferred). */
 function trainingFoe(order: string | null): string {
@@ -133,6 +137,28 @@ export default function App() {
   /** The Ledger opened by a "Take a seat" invitation: straight to the sign-up form. */
   const [ledgerSeat, setLedgerSeat] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const myRank = useMyRank();
+  /** Ranked: this table's sitting nonce (the host's) and how many sittings have finished. */
+  const [sittingNonce, setSittingNonce] = useState(newSittingNonce);
+  const rankedRef = useRef<{ nonce: string; sitting: number } | null>(null);
+  const reportLadder = (won: boolean) => {
+    const r = rankedRef.current;
+    if (!r || !readSeatState().seat) return;
+    const sitting = r.sitting;
+    r.sitting += 1;
+    const before = myRank?.pts ?? null;
+    const announceRank = (row: Awaited<ReturnType<typeof refreshMyRank>>) => {
+      if (!row || before === null || row.pts === before) return;
+      const d = row.pts - before;
+      toastNotice('The Ladder', `${d > 0 ? '+' : ''}${d} · ${row.rank}`, `${row.pts} points this season`);
+    };
+    reportRanked(r.nonce, sitting, won)
+      .then((res) => {
+        if (res.settled) void refreshMyRank().then(announceRank);
+        else if (res.waiting) window.setTimeout(() => void refreshMyRank().then(announceRank), 6000);
+      })
+      .catch(() => undefined);
+  };
 
   // Honours: sightings, secrets and plates met on the field arrive as events.
   useEffect(() => {
@@ -352,6 +378,11 @@ export default function App() {
       setFriendRole(role);
       setFriendSession(session);
       setFriendFoe((role === 'host' ? guestLoadout : hostLoadout).who ?? null);
+      // Ranked: both chairs key the sitting by the host's nonce.
+      const nonce = hostLoadout.who?.nonce;
+      rankedRef.current = nonce ? { nonce, sitting: 0 } : null;
+      if (nonce && readSeatState().seat) beginRanked(nonce);
+      setSittingNonce(newSittingNonce());
       setMatchMode('friend');
       setMapId((prev) => (isMainGameMap(prev) ? prev : 'ashen-cross'));
       setScreen('field');
@@ -442,6 +473,7 @@ export default function App() {
         onCodex={() => setScreen('codex')}
         onHonours={() => setScreen('honours')}
         onSettings={() => setSettingsOpen(true)}
+        onLadder={() => setScreen('ladder')}
       />
       {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
       </>
@@ -454,6 +486,14 @@ export default function App() {
         <Suspense fallback={<p className="ledger-wait">Opening the Codex…</p>}>
           <Codex profile={profile} onBack={() => setScreen('menu')} />
         </Suspense>
+      </div>
+    );
+  }
+
+  if (screen === 'ladder') {
+    return (
+      <div className="app app-shell">
+        <Ladder onBack={() => setScreen('menu')} />
       </div>
     );
   }
@@ -526,12 +566,21 @@ export default function App() {
           </p>
           <div id="playing-dock" className="playing-dock" />
         </nav>
+        <p className="friend-rank" data-testid="friend-rank">
+          {myRank ? (
+            <>
+              Ranked sittings count toward the Ladder · <RankBadge row={myRank} />
+            </>
+          ) : (
+            <>Take a seat in the Ledger and your live sittings count toward the Ladder.</>
+          )}
+        </p>
         <FriendWorking
           key={tableChallenge ? `${tableChallenge.role}-${tableChallenge.room}` : 'friend'}
           customDecks={profile.customDecks}
           allegiance={firstHourAllegiance()}
           tableChallenge={tableChallenge}
-          who={{ name: profile.username || undefined, title: profile.title }}
+          who={{ name: profile.username || undefined, title: profile.title, rank: myRank?.rank, nonce: sittingNonce }}
           onReady={({ room, role, session, hostLoadout, guestLoadout }) => {
             setTableChallenge(null);
             startFriend(room, role, session, hostLoadout, guestLoadout);
@@ -650,9 +699,19 @@ export default function App() {
                 {profile.title && <em className="adept-title"> · {profile.title}</em>}
               </p>
               <TitlePicker profile={profile} onUpdate={update} />
-              <button type="button" className="brass-btn brass-btn-ghost" onClick={() => setScreen('honours')}>
-                Honours &amp; Titles
-              </button>
+              {myRank && (
+                <p className="honours-name">
+                  The Ladder: <RankBadge row={myRank} />
+                </p>
+              )}
+              <div className="match-actions">
+                <button type="button" className="brass-btn brass-btn-ghost" onClick={() => setScreen('honours')}>
+                  Honours &amp; Titles
+                </button>
+                <button type="button" className="brass-btn brass-btn-ghost" onClick={() => setScreen('ladder')}>
+                  The Ladder
+                </button>
+              </div>
             </div>
           }
           focusSeat={ledgerSeat}
@@ -762,10 +821,13 @@ export default function App() {
           onRiteTally={(t) => {
             // A passed grimoire (one hand, both chairs) never counts toward rites or XP.
             if (matchMode !== 'hotseat') update((p) => noteMatch(recordMatchTally(p, t), t, { mode: matchMode }));
+            // The guest's chair learns of the end here (the host reports from onMatchEnd).
+            if (matchMode === 'friend' && friendRole === 'guest' && t.finished) reportLadder(t.won);
           }}
           onMatchEnd={({ playerWon, kind, tally }) => {
             // The Ledger: live-table and practice results (a passed grimoire is neither).
             if (matchMode !== 'hotseat') void recordMatch(playerWon, matchMode === 'friend');
+            if (matchMode === 'friend' && friendRole === 'host') reportLadder(playerWon);
             const modeKey =
               matchMode === 'campaign'
                 ? 'campaign'

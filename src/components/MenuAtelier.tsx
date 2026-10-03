@@ -68,6 +68,7 @@ type Props = {
   onCodex?: () => void;
   onHonours?: () => void;
   onSettings?: () => void;
+  onLadder?: () => void;
 };
 
 function doubleNodeCount(map: GameMap): number {
@@ -116,6 +117,7 @@ export function MenuAtelier({
   onCodex,
   onHonours,
   onSettings,
+  onLadder,
 }: Props) {
   const realNameRef = useRef(
     isSecondHourCode(profile.username) ||
@@ -573,6 +575,25 @@ export function MenuAtelier({
                   </span>
                 </button>
               )}
+            </div>
+          )}
+
+          {onLadder && (
+            <div className="menu-doors">
+              <button
+                type="button"
+                className="menu-door brass-btn"
+                data-testid="open-ladder"
+                onClick={click(onLadder)}
+              >
+                <span className="menu-door-glyph" aria-hidden>
+                  ☉
+                </span>
+                <span className="menu-door-copy">
+                  <span className="menu-door-title">The Ladder</span>
+                  <span className="menu-door-sub">Ranked live tables · Initiate to Magus · this month</span>
+                </span>
+              </button>
             </div>
           )}
 

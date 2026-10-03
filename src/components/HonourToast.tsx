@@ -5,13 +5,19 @@ import { HONOUR_BY_ID } from '../game/achievements';
 import { powerCallSfx } from '../game/sfx';
 
 export const HONOUR_TOAST_EVENT = 'ow:honour-toast';
+export const NOTICE_EVENT = 'ow:notice';
+
+/** A plain notice in the same brass plate (the ladder, and the like). */
+export function toastNotice(kicker: string, title: string, sub?: string): void {
+  window.dispatchEvent(new CustomEvent(NOTICE_EVENT, { detail: { kicker, title, sub } }));
+}
 
 export function toastHonours(ids: string[]): void {
   if (!ids.length) return;
   window.dispatchEvent(new CustomEvent<string[]>(HONOUR_TOAST_EVENT, { detail: ids }));
 }
 
-type Item = { key: number; id: string; more: number };
+type Item = { key: number; id: string; more: number; notice?: { kicker: string; title: string; sub?: string } };
 
 export function HonourToast() {
   const [items, setItems] = useState<Item[]>([]);
@@ -33,13 +39,38 @@ export function HonourToast() {
         window.setTimeout(() => setItems((cur) => cur.filter((x) => x.key !== it.key)), 5200);
       }
     };
+    const onNotice = (e: Event) => {
+      const d = (e as CustomEvent<{ kicker: string; title: string; sub?: string }>).detail;
+      if (!d) return;
+      const it = { key: ++k, id: '', more: 0, notice: d };
+      setItems((cur) => [...cur, it].slice(-4));
+      window.setTimeout(() => setItems((cur) => cur.filter((x) => x.key !== it.key)), 5200);
+    };
     window.addEventListener(HONOUR_TOAST_EVENT, on);
-    return () => window.removeEventListener(HONOUR_TOAST_EVENT, on);
+    window.addEventListener(NOTICE_EVENT, onNotice);
+    return () => {
+      window.removeEventListener(HONOUR_TOAST_EVENT, on);
+      window.removeEventListener(NOTICE_EVENT, onNotice);
+    };
   }, []);
   if (!items.length) return null;
   return createPortal(
     <div className="honour-toasts" role="status" aria-live="polite">
       {items.map((it) => {
+        if (it.notice) {
+          return (
+            <div key={it.key} className="honour-toast" data-testid="notice-toast">
+              <span className="honour-toast-seal" aria-hidden>
+                ☉
+              </span>
+              <span>
+                <small>{it.notice.kicker}</small>
+                <strong>{it.notice.title}</strong>
+                {it.notice.sub && <em>{it.notice.sub}</em>}
+              </span>
+            </div>
+          );
+        }
         const h = HONOUR_BY_ID[it.id];
         return (
           <div key={it.key} className="honour-toast" data-testid="honour-toast">

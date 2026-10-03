@@ -1,12 +1,13 @@
 /**
  * One function for every /api door (/api/table, /api/account, /api/watch,
- * /api/meeting, /api/relay). Keeping them in a single function means one warm instance
+ * /api/meeting, /api/relay, /api/ranked). Keeping them in a single function means one warm instance
  * serves them all — so the best-effort memory store (used until Upstash is
  * connected) is shared between them, and there are fewer cold starts.
  */
 import { json } from './_lib/http.js';
 import { handleAccount } from './_routes/account.js';
 import { handleMeeting } from './_routes/meeting.js';
+import { handleRanked } from './_routes/ranked.js';
 import { handleRelay } from './_routes/relay.js';
 import { handleTable } from './_routes/table.js';
 import { handleWatch } from './_routes/watch.js';
@@ -17,6 +18,7 @@ const ROUTES: Record<string, (req: Request) => Promise<Response>> = {
   watch: handleWatch,
   meeting: handleMeeting,
   relay: handleRelay,
+  ranked: handleRanked,
 };
 
 export function routeName(req: Request): string {
