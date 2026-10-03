@@ -27,7 +27,7 @@ import { cardById } from '../data/catalog';
 import type { Card } from '../game/types';
 import { BattleCountModal } from './BattleCountModal';
 import { AiMindPicker } from './AiMindPicker';
-import type { AiDifficulty } from '../game/ai';
+import { aiDifficultyLabel, type AiDifficulty } from '../game/ai';
 import { TarotPop } from './TarotPop';
 import { brassClick, copSirenSfx, metalRiffSfx, setMusicBed, unlockAudio } from '../game/sfx';
 
@@ -46,6 +46,8 @@ type Props = {
   onLeaden: () => void;
   onHotseat: () => void;
   onFriend: () => void;
+  /** The Ledger — account, name, record, the book of names. */
+  onLedger?: () => void;
   onSecond: () => void;
   onShop: () => void;
   onOldWork: () => void;
@@ -88,6 +90,7 @@ export function MenuAtelier({
   onLeaden,
   onHotseat,
   onFriend,
+  onLedger,
   onSecond,
   onShop,
   onOldWork,
@@ -293,7 +296,7 @@ export function MenuAtelier({
             <span className="menu-door-copy">
               <span className="menu-door-title">Training Rite</span>
               <span className="menu-door-sub">
-                A rival order, alone on the circle
+                {aiDifficultyLabel(aiDifficulty)} rival, alone on the circle
               </span>
             </span>
           </button>
@@ -363,6 +366,25 @@ export function MenuAtelier({
               </span>
             </button>
           </div>
+
+          {onLedger && (
+            <div className="menu-doors">
+              <button
+                type="button"
+                className="menu-door brass-btn"
+                data-testid="open-ledger"
+                onClick={click(onLedger)}
+              >
+                <span className="menu-door-glyph" aria-hidden>
+                  §
+                </span>
+                <span className="menu-door-copy">
+                  <span className="menu-door-title">The Ledger</span>
+                  <span className="menu-door-sub">A name, your record, the other occultists</span>
+                </span>
+              </button>
+            </div>
+          )}
 
           <div className="menu-doors menu-doors-2">
             <button
@@ -522,7 +544,7 @@ export function MenuAtelier({
           className="brass-btn brass-btn-solid enter-field-btn"
           onClick={click(onTraining)}
         >
-          Enter the field
+          Enter the field · {aiDifficultyLabel(aiDifficulty)}
         </button>
       </section>
 
