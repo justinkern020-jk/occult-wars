@@ -2522,7 +2522,9 @@ export function Battlefield({
         id: ids.id,
         key: ids.key,
         summary,
-        frame: portalWatched.current ? frame : undefined,
+        // The board always rides along (about 1–2 KB), so the Portal opens on
+        // the live field at once instead of waiting for the watched handshake.
+        frame,
       });
       inFlight = false;
       if (stopped) return;

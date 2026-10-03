@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { mapById, tileLabel } from '../game/maps';
+import { MAPS, mapById, tileLabel } from '../game/maps';
 import { PORTAL_CODE_LABEL, portalCodeFor } from '../game/portalCodes';
 import { readSeatToken } from '../net/account';
 import {
   OWNER_KEY_STORAGE,
   portalOpen,
+  normalizeFrame,
   readWho,
   sendPortalCode,
   viewMatch,
@@ -231,10 +232,13 @@ function asUnit(u: NonNullable<MatchFrame['board'][number][number]>): BoardUnit 
   return { ...u } as BoardUnit;
 }
 
+
+
 /** Full-screen, read-only view of one live match, with the code prompt. */
 export function PortalView({ matchId, onLeave }: { matchId: string; onLeave: () => void }) {
   const [summary, setSummary] = useState<MatchSummary | null>(null);
   const [frame, setFrame] = useState<MatchFrame | null>(null);
+  const [frameAt, setFrameAt] = useState(0);
   const [gone, setGone] = useState(false);
   const [code, setCode] = useState('');
   const [target, setTarget] = useState<'blue' | 'red'>('blue');
@@ -255,7 +259,11 @@ export function PortalView({ matchId, onLeave }: { matchId: string; onLeave: () 
         misses = 0;
         setGone(false);
         setSummary(r.summary);
-        if (r.frame) setFrame(r.frame);
+        const f = normalizeFrame(r.frame);
+        if (f) {
+          setFrame(f);
+          setFrameAt(Number((r.summary as { at?: number }).at) || Date.now());
+        }
       });
     read();
     const t = window.setInterval(read, 1_500);
@@ -279,7 +287,12 @@ export function PortalView({ matchId, onLeave }: { matchId: string; onLeave: () 
   }, [frame?.log]);
 
   const mapId = frame?.map;
-  const map = useMemo(() => (mapId ? mapById(mapId) : null), [mapId]);
+  const mapName = summary?.map;
+  const map = useMemo(() => {
+    if (mapId && MAPS.some((m) => m.id === mapId)) return mapById(mapId);
+    // An older or odd frame: find the field by its name, else the first field.
+    return MAPS.find((m) => m.name === mapName) ?? (mapId || mapName ? MAPS[0] : null);
+  }, [mapId, mapName]);
 
   async function onCode(raw: string) {
     const next = raw.slice(0, 32);
@@ -321,6 +334,12 @@ export function PortalView({ matchId, onLeave }: { matchId: string; onLeave: () 
               {live?.over ? ` · ${SIDE_NAME[live.over.winner]} has won` : ''}
             </p>
           )}
+          {live && (
+            <p className="portal-quiet portal-view-fresh" data-testid="portal-view-fresh">
+              {live.board.flat().filter(Boolean).length} on the field · board as of{' '}
+              {Math.max(0, Math.round((Date.now() - frameAt) / 1000))} s ago
+            </p>
+          )}
           {gone && <p className="portal-quiet">The field has gone dark.</p>}
         </header>
 
@@ -342,10 +361,10 @@ export function PortalView({ matchId, onLeave }: { matchId: string; onLeave: () 
                   <div className="board-grid" role="grid" aria-readonly>
                     {map.tiles.map((row, r) =>
                       row.map((tile, c) => {
-                        if (tile.kind === 'void') {
+                        const unit = live.board[r]?.[c] ?? null;
+                        if (tile.kind === 'void' && !unit) {
                           return <div key={`${r}-${c}`} className="tile-void" aria-hidden />;
                         }
-                        const unit = live.board[r]?.[c] ?? null;
                         const owned = live.control[r]?.[c] ?? null;
                         return (
                           <div

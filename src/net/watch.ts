@@ -190,3 +190,53 @@ export async function sendPortalCode(
 ): Promise<boolean> {
   return (await watchCall<{ ok: boolean }>({ op: 'code', id, side, code }))?.ok === true;
 }
+
+/** Any frame (this build's or an older client's) made safe to draw. */
+export function normalizeFrame(raw: unknown): MatchFrame | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const f = raw as Record<string, unknown>;
+  const side = (v: unknown): 'blue' | 'red' | null => (v === 'blue' || v === 'red' ? v : null);
+  const num = (v: unknown, d = 0) => (Number.isFinite(Number(v)) ? Number(v) : d);
+  const pair = (v: unknown) => {
+    const o = (v && typeof v === 'object' ? v : {}) as Record<string, unknown>;
+    return { blue: num(o.blue), red: num(o.red) };
+  };
+  const unit = (v: unknown): FrameUnit | null => {
+    if (!v || typeof v !== 'object') return null;
+    const u = v as Record<string, unknown>;
+    const s = side(u.side) ?? (u.owner === 'red' ? 'red' : u.owner === 'blue' ? 'blue' : null);
+    if (!s) return null;
+    const power = num(u.power ?? u.attack, 0);
+    return {
+      uid: String(u.uid ?? u.id ?? Math.random().toString(36).slice(2)),
+      cardId: String(u.cardId ?? u.card ?? ''),
+      name: String(u.name ?? ''),
+      side: s,
+      power,
+      maxPower: num(u.maxPower, power),
+      loyalty: num(u.loyalty, 0),
+      keywords: Array.isArray(u.keywords) ? u.keywords.filter((k): k is string => typeof k === 'string') : [],
+      sick: u.sick === true,
+      gained: num(u.gained, 0),
+    };
+  };
+  const grid = <T,>(v: unknown, cell: (x: unknown) => T): T[][] =>
+    Array.isArray(v) ? v.map((row) => (Array.isArray(row) ? row.map(cell) : [])) : [];
+  return {
+    map: typeof f.map === 'string' ? f.map : '',
+    turn: num(f.turn, 1),
+    side: side(f.side) ?? 'blue',
+    phase: typeof f.phase === 'string' ? f.phase : '',
+    resources: pair(f.resources),
+    domination: pair(f.domination),
+    hand: pair(f.hand),
+    deck: pair(f.deck),
+    board: grid(f.board, unit),
+    control: grid(f.control, side),
+    log: Array.isArray(f.log) ? f.log.filter((l): l is string => typeof l === 'string').slice(-30) : [],
+    over:
+      f.over && typeof f.over === 'object' && side((f.over as { winner?: unknown }).winner)
+        ? { winner: side((f.over as { winner: unknown }).winner)!, reason: String((f.over as { reason?: unknown }).reason ?? '') }
+        : null,
+  };
+}
