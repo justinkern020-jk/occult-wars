@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CARDS, cardById, isExcludedPlateId } from '../data/catalog';
 import {
   allyOf,
@@ -12,7 +12,8 @@ import {
   type CustomDeck,
   type Profile,
 } from '../game/profile';
-import { validateDeck } from '../game/deck';
+import { buildOrderAllyWorkingIds, validateDeck } from '../game/deck';
+import { strongestBySims, strongestDeck } from '../game/autoDeck';
 import { brassClick } from '../game/sfx';
 import { CardArt } from './CardArt';
 import { TarotPop } from './TarotPop';
@@ -21,9 +22,46 @@ import type { Card } from '../game/types';
 /** A shelf holds this many workings. */
 export const MAX_WORKINGS = 8;
 
+export type DeckEra = 'first' | 'second' | 'old';
+export const DECK_ERA_NAME: Record<DeckEra, string> = {
+  first: 'First Hour',
+  second: 'Second Hour',
+  old: 'Sealed Century',
+};
+const ERA_FIELDS: Record<DeckEra, string> = {
+  first: 'Training, the Leaden Hour, Pass the Grimoire and friend matches',
+  second: 'the Second Hour yard',
+  old: 'the Sealed Century',
+};
+
+export function eraOrder(profile: Profile, era: DeckEra): string | null {
+  if (era === 'second') return profile.secondOrder;
+  if (era === 'old') return profile.oldOrder;
+  return profile.allegiance;
+}
+
+/** Copies a player may seat in an era working: the collection, plus the oath's own working for the later hours. */
+export function ownedForEra(profile: Profile, era: DeckEra): Record<string, number> {
+  const owned = countOwned(profile.collection);
+  const order = eraOrder(profile, era);
+  if (era === 'first' || !order) return owned;
+  const gift = countOwned(buildOrderAllyWorkingIds(order, 30));
+  const out = { ...owned };
+  for (const [id, n] of Object.entries(gift)) out[id] = (out[id] ?? 0) + n;
+  return out;
+}
+
+function eraDraft(profile: Profile, era: DeckEra): DraftWorking[] {
+  const order = eraOrder(profile, era);
+  if (!order) return [];
+  const heroId = (era === 'second' ? profile.secondHero : profile.oldHero) ?? heroesForOrder(order)[0]?.id ?? '';
+  const cards = (era === 'second' ? profile.secondCards : profile.oldCards) ?? buildOrderAllyWorkingIds(order, 30);
+  return [{ id: `${era}-working`, name: `${DECK_ERA_NAME[era]} working`, heroId, cards: [...cards], fresh: false }];
+}
+
 type Props = {
   profile: Profile;
-  onSave: (deck: CustomDeck) => void;
+  onSave: (deck: CustomDeck, era: DeckEra) => void;
   /** Drop a sealed working from the profile. */
   onDelete?: (id: string) => void;
   onBack: () => void;
@@ -56,17 +94,42 @@ export function draftsFromProfile(profile: Profile): DraftWorking[] {
 
 export function DeckEditor({ profile, onSave, onDelete, onBack }: Props) {
   const [inspect, setInspect] = useState<Card | null>(null);
-  const order = profile.allegiance as FirstHourOrder | null;
-  const [drafts, setDrafts] = useState<DraftWorking[]>(() => draftsFromProfile(profile));
-  const [activeId, setActiveId] = useState(() => draftsFromProfile(profile)[0]?.id ?? '');
+  const eras = (['first', 'second', 'old'] as DeckEra[]).filter((e) => !!eraOrder(profile, e));
+  const [era, setEra] = useState<DeckEra>(eras[0] ?? 'first');
+  const order = eraOrder(profile, era) as FirstHourOrder | null;
+  const [shelves, setShelves] = useState<Record<DeckEra, DraftWorking[]>>(() => ({
+    first: draftsFromProfile(profile),
+    second: eraDraft(profile, 'second'),
+    old: eraDraft(profile, 'old'),
+  }));
+  const drafts = shelves[era];
+  const setDrafts = (fn: (all: DraftWorking[]) => DraftWorking[]) =>
+    setShelves((sh) => ({ ...sh, [era]: fn(sh[era]) }));
+  const [activeByEra, setActiveByEra] = useState<Record<DeckEra, string>>(() => ({
+    first: draftsFromProfile(profile)[0]?.id ?? '',
+    second: 'second-working',
+    old: 'old-working',
+  }));
+  const activeId = activeByEra[era];
+  const setActiveId = (id: string) => setActiveByEra((m) => ({ ...m, [era]: id }));
   const [filter, setFilter] = useState('');
-  const [note, setNote] = useState<string | null>(null);
-  const owned = useMemo(() => countOwned(profile.collection), [profile.collection]);
+  const [note, setNote] = useState<{ text: string; ok?: boolean } | null>(null);
+  const [dirty, setDirty] = useState(false);
+  /** Trial sittings in progress (0–1), or null. */
+  const [testing, setTesting] = useState<number | null>(null);
+  const testTimer = useRef<number | null>(null);
+  useEffect(
+    () => () => {
+      if (testTimer.current != null) window.clearTimeout(testTimer.current);
+    },
+    [],
+  );
+  const owned = useMemo(() => ownedForEra(profile, era), [profile, era]);
   const ally = order ? allyOf(order) : null;
   const heroes = order ? heroesForOrder(order) : [];
   const active = drafts.find((d) => d.id === activeId) ?? drafts[0];
   /** The working the field takes (first sealed). */
-  const fieldId = profile.customDecks[0]?.id;
+  const fieldId = era === 'first' ? profile.customDecks[0]?.id : `${era}-working`;
 
   const pool = useMemo(() => {
     if (!order) return [];
@@ -97,18 +160,59 @@ export function DeckEditor({ profile, onSave, onDelete, onBack }: Props) {
 
   function patch(next: Partial<DraftWorking>) {
     if (!active) return;
+    setDirty(true);
     setDrafts((all) => all.map((d) => (d.id === active.id ? { ...d, ...next } : d)));
+  }
+
+  function strongest() {
+    if (!active || !order || testing != null) return;
+    const hero = cardById(active.heroId);
+    const faction = hero?.faction ?? order;
+    brassClick();
+    const quick = strongestDeck(faction, owned);
+    if (quick.short > 0) {
+      patch({ cards: quick.cards });
+      setNote({ text: `You own only ${quick.cards.length} plates this working may hold — it needs 30. Break a seal or visit the night counter.` });
+      return;
+    }
+    // Let the candidate lists spar in short slices so the page stays live.
+    const it = strongestBySims(faction, active.heroId, owned, active.cards);
+    const forId = active.id;
+    setTesting(0);
+    const step = () => {
+      const until = performance.now() + 40;
+      for (;;) {
+        const r = it.next();
+        if (r.done) {
+          testTimer.current = null;
+          setTesting(null);
+          setDrafts((all) => all.map((d) => (d.id === forId ? { ...d, cards: r.value.cards } : d)));
+          setDirty(true);
+          setNote({
+            text:
+              r.value.games > 0
+                ? `The strongest of ${r.value.candidates} candidate decks (won ${Math.round(r.value.winRate * 100)}% of ${r.value.games} trial sittings) is seated. Save the deck to take it onto the field.`
+                : `The strongest ${r.value.cards.length} of your plates are seated. Save the deck to take it onto the field.`,
+          });
+          return;
+        }
+        setTesting(r.value);
+        if (performance.now() > until) break;
+      }
+      testTimer.current = window.setTimeout(step, 0);
+    };
+    testTimer.current = window.setTimeout(step, 0);
   }
 
   function add(id: string) {
     if (!active) return;
     const have = counts[id] ?? 0;
     if (have >= Math.min(3, owned[id] ?? 0)) {
-      setNote(have >= 3 ? 'At most 3 copies.' : 'You do not own another copy.');
+      setNote({ text: have >= 3 ? 'At most 3 copies.' : 'You do not own another copy.' });
       return;
     }
     if (active.cards.length >= 40) {
-      setNote('A working holds at most 40 plates.');
+      setNote({ text: 'A working holds at most 40 plates.' });
       return;
     }
     brassClick();
@@ -129,7 +233,7 @@ export function DeckEditor({ profile, onSave, onDelete, onBack }: Props) {
 
   function newWorking() {
     if (drafts.length >= MAX_WORKINGS) {
-      setNote('Eight workings is the shelf. Delete one first.');
+      setNote({ text: 'Eight workings is the shelf. Delete one first.' });
       return;
     }
     const id = `working-${Date.now()}`;
@@ -139,34 +243,34 @@ export function DeckEditor({ profile, onSave, onDelete, onBack }: Props) {
       { id, name: 'Untitled working', heroId: heroes[0]?.id ?? '', cards: [], fresh: true },
     ]);
     setActiveId(id);
-    setNote('New working. Seal it to keep it — and to take it onto the field.');
+    setNote({ text: 'New working. Save it to keep it — and to take it onto the field.' });
   }
 
   function deleteWorking() {
     if (!active) return;
     if (drafts.length <= 1) {
-      setNote('Keep at least one working.');
+      setNote({ text: 'Keep at least one working.' });
       return;
     }
     const rest = drafts.filter((d) => d.id !== active.id);
     brassClick();
-    setDrafts(rest);
+    setDrafts(() => rest);
     setActiveId(rest[0]?.id ?? '');
     if (!active.fresh) onDelete?.(active.id);
-    setNote(active.fresh ? 'Discarded the unsealed working.' : 'That working left the ledger.');
+    setNote({ text: active.fresh ? 'Discarded the unsealed working.' : 'That working left the ledger.' });
   }
 
   function save() {
     if (!active) return;
     const v = validateDeck(active.heroId, active.cards);
     if (!v.ok) {
-      setNote(v.error);
+      setNote({ text: v.error });
       return;
     }
     for (const [id, n] of Object.entries(counts)) {
       const have = owned[id] ?? 0;
       if (n > have) {
-        setNote(`You only own ${have} of ${cardById(id)?.name ?? 'that plate'}.`);
+        setNote({ text: `You only own ${have} of ${cardById(id)?.name ?? 'that plate'}.` });
         return;
       }
     }
@@ -177,11 +281,14 @@ export function DeckEditor({ profile, onSave, onDelete, onBack }: Props) {
       cards: active.cards,
     };
     if (!isLegalDeck(deck)) {
-      setNote('A working needs one leader and 30–40 cards from that order and its ally.');
+      setNote({ text: 'A working needs one leader and 30–40 cards from that order and its ally.' });
       return;
     }
     brassClick();
-    onSave(deck);
+    onSave(deck, era);
+    setDrafts((all) => all.map((d) => (d.id === deck.id ? { ...d, ...deck, fresh: false } : d)));
+    setDirty(false);
+    setNote({ text: `Saved. “${deck.name}” is your ${DECK_ERA_NAME[era]} deck on the field for ${ERA_FIELDS[era]}.`, ok: true });
   }
 
   if (!order || !active) {
@@ -201,10 +308,35 @@ export function DeckEditor({ profile, onSave, onDelete, onBack }: Props) {
   const seated = [...new Set(active.cards)];
 
   return (
-    <section className="deck-editor plate-screen" data-testid="deck-editor">
+    <section className="deck-editor plate-screen" data-testid="deck-editor" data-era={era}>
+      {eras.length > 1 && (
+        <div className="deck-eras" role="tablist" aria-label="Hour">
+          {eras.map((e) => (
+            <button
+              key={e}
+              type="button"
+              role="tab"
+              aria-selected={e === era}
+              data-testid={`deck-era-${e}`}
+              disabled={testing != null}
+              className={e === era ? 'brass-btn brass-btn-solid deck-tab' : 'brass-btn deck-tab'}
+              onClick={() => {
+                if (e === era) return;
+                if (dirty && !window.confirm('Leave this hour without saving your changes?')) return;
+                setEra(e);
+                setDirty(false);
+                setNote(null);
+                setFilter('');
+              }}
+            >
+              {DECK_ERA_NAME[e]}
+            </button>
+          ))}
+        </div>
+      )}
       <header className="deck-editor-head">
         <div>
-          <p className="plate-kicker">Deck editor</p>
+          <p className="plate-kicker">Deck editor · {DECK_ERA_NAME[era]}</p>
           <h2>Ink a working</h2>
           <p className="lede">
             1 leader · 30–40 plates · max 3 copies · {order}
@@ -249,11 +381,12 @@ export function DeckEditor({ profile, onSave, onDelete, onBack }: Props) {
           <p className="deck-count" data-testid="deck-count">
             {active.cards.length} / 30–40
             {active.id === fieldId && !active.fresh ? ' · on the field' : ''}
-            {active.fresh ? ' · not sealed' : ''}
+            {active.fresh ? ' · not saved' : ''}
           </p>
         </div>
       </header>
 
+      {era === 'first' && (
       <div className="deck-tabs" role="tablist" aria-label="Workings">
         {drafts.map((d) => (
           <button
@@ -281,12 +414,8 @@ export function DeckEditor({ profile, onSave, onDelete, onBack }: Props) {
           New working
         </button>
       </div>
-
-      {note && (
-        <p className="deck-note" role="alert" data-testid="deck-note">
-          {note}
-        </p>
       )}
+
 
       <div className="deck-editor-body">
         <div className="deck-pool">
@@ -375,27 +504,66 @@ export function DeckEditor({ profile, onSave, onDelete, onBack }: Props) {
         </div>
       </div>
 
-      <div className="deck-editor-actions">
-        <button type="button" className="brass-btn brass-btn-solid" onClick={save}>
-          Seal the working
+      <p className="lede">
+        Saving puts this deck on the field for {ERA_FIELDS[era]}.
+        {era === 'first' ? ' Friend Working can still pick any saved deck.' : ''}
+      </p>
+      <div className="deck-editor-actions deck-save-bar" data-testid="deck-save-bar">
+        <span className="deck-save-count" data-testid="deck-save-count">
+          {active.cards.length} / 30–40{dirty ? ' · unsaved changes' : active.fresh ? ' · not saved' : ' · saved'}
+        </span>
+        {note && (
+          <p
+            className={`deck-note${note.ok ? ' deck-note-ok' : ''}`}
+            role={note.ok ? 'status' : 'alert'}
+            aria-live="polite"
+            data-testid="deck-note"
+          >
+            {note.text}
+          </p>
+        )}
+        <button
+          type="button"
+          className="brass-btn"
+          data-testid="deck-strongest"
+          onClick={strongest}
+          disabled={testing != null}
+          title="Builds the strongest legal deck from the plates you own (trial sittings between candidate lists)"
+        >
+          {testing != null ? `Testing decks… ${Math.round(testing * 100)}%` : 'Strongest deck'}
         </button>
         <button
           type="button"
-          className="brass-btn brass-btn-ghost"
-          data-testid="delete-working"
-          onClick={deleteWorking}
-          disabled={drafts.length <= 1}
+          className="brass-btn brass-btn-solid"
+          data-testid="deck-save"
+          onClick={save}
+          disabled={testing != null}
         >
-          Delete working
+          Save deck
         </button>
-        <button type="button" className="brass-btn brass-btn-ghost" onClick={onBack}>
+        {era === 'first' && (
+          <button
+            type="button"
+            className="brass-btn brass-btn-ghost"
+            data-testid="delete-working"
+            onClick={deleteWorking}
+            disabled={drafts.length <= 1}
+          >
+            Delete working
+          </button>
+        )}
+        <button
+          type="button"
+          className="brass-btn brass-btn-ghost"
+          data-testid="deck-return"
+          onClick={() => {
+            if (dirty && !window.confirm('Return without saving your changes?')) return;
+            onBack();
+          }}
+        >
           Return
         </button>
       </div>
-      <p className="lede">
-        Sealing puts this working on the field for Training, the Leaden Hour, and the Grimoire.
-        Friend Working can still pick any sealed list.
-      </p>
       {inspect && <TarotPop card={inspect} onClose={() => setInspect(null)} />}
     </section>
   );

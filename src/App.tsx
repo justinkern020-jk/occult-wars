@@ -639,15 +639,20 @@ export default function App() {
       {screen === 'deck' && (
         <DeckEditor
           profile={profile}
-          onSave={(deck) => {
-            update({
-              ...profile,
-              customDecks: [
-                deck,
-                ...profile.customDecks.filter((d) => d.id !== deck.id),
-              ],
-            });
-            setScreen('menu');
+          onSave={(deck, era) => {
+            // Saved = on the field for that hour. Pushed to the cloud at once when signed in.
+            update(
+              (p) =>
+                era === 'second'
+                  ? { ...p, secondHero: deck.heroId, secondCards: [...deck.cards] }
+                  : era === 'old'
+                    ? { ...p, oldHero: deck.heroId, oldCards: [...deck.cards] }
+                    : {
+                        ...p,
+                        customDecks: [deck, ...p.customDecks.filter((d) => d.id !== deck.id)],
+                      },
+              { now: true },
+            );
           }}
           onDelete={(id) => {
             update((p) => ({

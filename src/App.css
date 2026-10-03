@@ -5202,3 +5202,38 @@ input[type='search'] {
   align-self: center;
   padding: 0.35rem 0.9rem;
 }
+
+/* Deck editor: hour tabs and a save bar that stays in reach. */
+.deck-eras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 0.8rem;
+}
+.deck-save-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  margin-top: 0.8rem;
+  border-radius: 0.6rem;
+  background: #120d0fef;
+  box-shadow: 0 -6px 18px #000a, inset 0 0 0 1px #c6a15b55;
+}
+.deck-save-count {
+  font-size: 0.85rem;
+  color: #e3c98a;
+  margin-right: auto;
+}
+.deck-save-bar .deck-note {
+  flex-basis: 100%;
+  order: -1;
+  margin: 0 0 0.2rem;
+}
+.deck-note-ok {
+  color: #a8e0a0;
+}

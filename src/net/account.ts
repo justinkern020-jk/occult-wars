@@ -80,7 +80,7 @@ export function subscribeSeat(fn: (s: SeatState) => void): () => void {
   return () => listeners.delete(fn);
 }
 
-async function call<T>(init: { op: string; body?: Record<string, unknown> }): Promise<T> {
+async function call<T>(init: { op: string; body?: Record<string, unknown>; keepalive?: boolean }): Promise<T> {
   let res: Response;
   try {
     res =
@@ -98,6 +98,7 @@ async function call<T>(init: { op: string; body?: Record<string, unknown> }): Pr
               ...seatHeaders(),
             },
             body: JSON.stringify({ op: init.op, ...init.body }),
+            keepalive: init.keepalive,
           });
   } catch {
     throw new AccountError('The ledger could not be reached.', 0);
@@ -186,8 +187,10 @@ export async function fetchCloudProfile(): Promise<unknown | null> {
   return data.profile ?? null;
 }
 
-export async function pushCloudProfile(profile: unknown): Promise<void> {
-  await call({ op: 'profile', body: { profile } });
+export async function pushCloudProfile(profile: unknown, opts: { keepalive?: boolean } = {}): Promise<void> {
+  // keepalive (page closing) only fits small bodies (~64 KB).
+  const keepalive = !!opts.keepalive && JSON.stringify(profile).length < 60_000;
+  await call({ op: 'profile', body: { profile }, keepalive });
 }
 
 /** "7–3 · 70%" or "untried". */
