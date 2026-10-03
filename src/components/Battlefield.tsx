@@ -20,10 +20,10 @@ import {
 import {
   actNeedsAim,
   applyPendingFieldPoison,
+  castFromHand,
   effectNeedsAim,
   leaderNeedsAim,
   resolveActivatedAbility,
-  resolveEffect,
   resolveLeaderPower,
   type EffectCtx,
   type EffectUnit,
@@ -1081,30 +1081,12 @@ export function Battlefield({
         return false;
       }
       const ctx = buildEffectCtx(acting);
-      ctx.loyalty[acting] -= card.cost;
-      const err = resolveEffect(
-        ctx,
-        card.effect,
-        {
-          id: card.id,
-          name: card.name,
-          alsoDraw: card.alsoDraw,
-          alsoBank: card.alsoBank,
-          alsoHealth: card.alsoHealth,
-          alsoTough: card.alsoTough,
-          aim: card.aim,
-        },
-        targetUid,
-        aimPos,
-      );
+      // Pay, resolve, spend to discard, and any "then discard a card".
+      const err = castFromHand(ctx, acting, handIndex, targetUid, aimPos);
       if (err) {
         pushLog(err);
         return false;
       }
-      // spend card from hand into discard
-      const spent = ctx.hand[acting][handIndex];
-      ctx.hand[acting] = ctx.hand[acting].filter((_, i) => i !== handIndex);
-      if (spent) ctx.discard[acting].push(spent);
       applyEffectCtx(ctx);
       setSelectedHand(null);
       setAim(null);

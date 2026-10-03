@@ -45,6 +45,10 @@ export interface Card {
   alsoBank?: number;
   alsoHealth?: number;
   alsoTough?: boolean;
+  /** Empower also locks the target: cannot move or attack on its next rite. */
+  alsoLock?: boolean;
+  /** After resolving, the caster discards a random card (Waking the Sleeper). */
+  alsoDiscard?: boolean;
 }
 
 export interface Combatant {

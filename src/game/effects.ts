@@ -159,8 +159,11 @@ export function destroyUnit(ctx: EffectCtx, uid: string, seen?: Set<string>) {
   visited.add(uid);
   const pos = findPos(ctx, uid);
   const def = cardById(u.cardId);
-  const burst = def?.death ?? 0;
-  const deathBank = (def as { deathBank?: number } | undefined)?.deathBank ?? 0;
+  // A silenced unit (Lion's Mask / False Vintage) has lost its abilities.
+  const burst = u.silenced ? 0 : (def?.death ?? 0);
+  const deathBank = u.silenced
+    ? 0
+    : ((def as { deathBank?: number } | undefined)?.deathBank ?? 0);
   const burstTargets: string[] = [];
   if (pos && burst > 0) {
     for (const [dr, dc] of [
@@ -221,12 +224,54 @@ export function destroyUnit(ctx: EffectCtx, uid: string, seen?: Set<string>) {
   }
 }
 
+/**
+ * "It cannot move or attack on its next rite."
+ * powder keeps the unit exhausted through its owner's next rite open
+ * (refreshForRite). A foe is also exhausted at once; your own unit keeps
+ * the rest of this rite and sits out the next one.
+ */
 function lockUnit(ctx: EffectCtx, unit: EffectUnit, casterSide: Side, reason: string) {
-  unit.moved = true;
-  unit.attacked = true;
-  unit.sick = true;
-  if (unit.side !== casterSide) unit.powder = true;
+  unit.powder = true;
+  if (unit.side !== casterSide) {
+    unit.moved = true;
+    unit.attacked = true;
+    unit.sick = true;
+  }
   pushLog(ctx, `${unit.name} ${reason}`);
+}
+
+/** Strip a unit's abilities ("loses its abilities"). */
+export function silenceUnit(unit: EffectUnit) {
+  unit.silenced = true;
+  unit.keywords = [];
+  unit.tough = false;
+  unit.fast = false;
+  unit.shutter = false;
+}
+
+/** Return a unit to its owner's hand as its real catalog card. */
+function bounceToHand(ctx: EffectCtx, unit: EffectUnit) {
+  const owner = unit.side;
+  const pos = findPos(ctx, unit.uid);
+  if (pos) ctx.board[pos.r][pos.c] = null;
+  delete ctx.units[unit.uid];
+  const def = cardById(unit.cardId);
+  const bounced: Card = def
+    ? { ...def }
+    : {
+        id: unit.cardId,
+        name: unit.name,
+        faction: '',
+        kind: 'unit',
+        rarity: 'common',
+        cost: unit.loyalty,
+        oath: 0,
+        power: unit.maxPower,
+        keywords: [...unit.keywords],
+        text: '',
+      };
+  if (ctx.hand[owner].length < HAND_CAP) ctx.hand[owner].push(bounced);
+  else ctx.discard[owner].push(bounced);
 }
 
 function snuffGuns(ctx: EffectCtx, side: Side, sourceName: string) {
@@ -268,6 +313,8 @@ export type CardExtras = {
   alsoTough?: boolean;
   alsoSilence?: boolean;
   alsoDiscard?: boolean;
+  /** Empower also locks the target (Carve the Seal). */
+  alsoLock?: boolean;
   name: string;
   aim?: boolean;
 };
@@ -380,6 +427,9 @@ export function resolveEffect(
         pushLog(ctx, `${target!.name} gains +${card.alsoHealth} power.`);
       }
       if (card.alsoTough) target!.tough = true;
+      if (card.alsoLock && ctx.units[target!.uid]) {
+        lockUnit(ctx, target!, side, 'cannot move or attack on its next rite.');
+      }
       break;
     }
     case 'lock': {
@@ -400,16 +450,15 @@ export function resolveEffect(
       addGain(target!, Math.max(0, n - target!.maxPower));
       target!.power = n;
       target!.maxPower = n;
-      if (card.alsoSilence) target!.silenced = true;
-      pushLog(ctx, `${target!.name} is remade at power ${n}.`);
+      // Card text: "It is healed to full, loses its abilities, and its power becomes N."
+      silenceUnit(target!);
+      pushLog(ctx, `${target!.name} is remade at power ${n} and loses its abilities.`);
       break;
     }
     case 'destroy': {
       const err = needTarget();
       if (err) return err;
-      const name = target!.name;
       destroyUnit(ctx, target!.uid);
-      pushLog(ctx, `${name} is unmade.`);
       break;
     }
     case 'sacrifice_splash': {
@@ -497,25 +546,8 @@ export function resolveEffect(
     case 'bounce': {
       const err = needTarget();
       if (err) return err;
-      const owner = target!.side;
-      const cardId = target!.cardId;
       const name = target!.name;
-      const pos = findPos(ctx, target!.uid);
-      if (pos) ctx.board[pos.r][pos.c] = null;
-      delete ctx.units[target!.uid];
-      const bounced: Card = {
-        id: cardId,
-        name,
-        faction: '',
-        kind: 'unit',
-        rarity: 'common',
-        cost: 0,
-        oath: 0,
-        keywords: [],
-        text: '',
-      };
-      if (ctx.hand[owner].length < HAND_CAP) ctx.hand[owner].push(bounced);
-      else ctx.discard[owner].push(bounced);
+      bounceToHand(ctx, target!);
       pushLog(ctx, `${name} is returned to hand.`);
       break;
     }
@@ -546,6 +578,64 @@ export function resolveEffect(
   if ((card.alsoBank ?? 0) > 0) {
     bankLoyalty(ctx, side, card.alsoBank!);
     pushLog(ctx, `${card.name} also banks ${card.alsoBank}.`);
+  }
+  return null;
+}
+
+/** CardExtras for a catalog rite/device card. */
+export function castExtras(card: Card): CardExtras {
+  return {
+    id: card.id,
+    name: card.name,
+    alsoDraw: card.alsoDraw,
+    alsoBank: card.alsoBank,
+    alsoHealth: card.alsoHealth,
+    alsoTough: card.alsoTough,
+    alsoLock: card.alsoLock,
+    alsoDiscard: card.alsoDiscard,
+    aim: card.aim,
+  };
+}
+
+/**
+ * Cast the rite/device at `handIndex` for `acting`: pay its cost, resolve the
+ * effect, move the card to discard, then apply "Then discard a card"
+ * (random, from the remaining hand). Mutates ctx; returns an error or null.
+ * Shared by Battlefield (player + AI) and the headless engine.
+ */
+export function castFromHand(
+  ctx: EffectCtx,
+  acting: Side,
+  handIndex: number,
+  targetUid?: string | null,
+  aimPos?: AimPos | null,
+  rand: () => number = Math.random,
+): string | null {
+  const card = ctx.hand[acting][handIndex];
+  if (!card || (card.kind !== 'rite' && card.kind !== 'device')) return 'That is not a rite.';
+  if (!card.effect) return `${card.name} has no working.`;
+  if (ctx.loyalty[acting] < card.cost) return `Not enough resources (need ${card.cost}).`;
+  const prevSide = ctx.side;
+  ctx.side = acting;
+  ctx.loyalty[acting] -= card.cost;
+  const err = resolveEffect(ctx, card.effect, castExtras(card), targetUid, aimPos);
+  ctx.side = prevSide;
+  if (err) {
+    ctx.loyalty[acting] += card.cost;
+    return err;
+  }
+  const at = ctx.hand[acting].indexOf(card);
+  if (at >= 0) ctx.hand[acting].splice(at, 1);
+  ctx.discard[acting].push(card);
+  if (card.alsoDiscard) {
+    const h = ctx.hand[acting];
+    if (h.length > 0) {
+      const [lost] = h.splice(Math.floor(rand() * h.length), 1);
+      ctx.discard[acting].push(lost);
+      pushLog(ctx, `${card.name}: ${lost.name} is discarded.`);
+    } else {
+      pushLog(ctx, `${card.name}: the hand is already empty.`);
+    }
   }
   return null;
 }
@@ -633,6 +723,10 @@ export function resolveLeaderPower(
     if (!aimPos) return 'Name an empty circle.';
     const { r, c } = aimPos;
     if (ctx.board[r][c]) return 'That circle is occupied.';
+    const tile = ctx.tiles?.[r]?.[c];
+    if (tile && (tile.kind === 'void' || tile.kind === 'stronghold')) {
+      return 'Claim an empty circle that is not a stronghold.';
+    }
     ctx.loyalty[side] -= cost;
     ctx.control[r][c] = side;
     pushLog(ctx, `${leader.name} claims the circle.`);
@@ -684,6 +778,12 @@ export function resolveLeaderPower(
   }
   ctx.loyalty[side] -= cost;
   if (op === 'haste') {
+    // "may act at once": a unit that could not act yet (slow muster / chill)
+    // is freed. A unit that already acted this rite does not act twice.
+    if (target.sick && !target.powder) {
+      target.moved = false;
+      target.attacked = false;
+    }
     target.sick = false;
     target.fast = true;
     if (!target.keywords.includes('fast')) target.keywords = [...target.keywords, 'fast'];
@@ -799,6 +899,7 @@ export function resolveActivatedAbility(
   if (!card || !act) return 'That unit has no power to call.';
   if (source.side !== ctx.side) return 'That unit will not heed you.';
   if (source.sick) return 'That unit cannot call a power.';
+  if (source.silenced) return 'That unit has lost its abilities.';
   if (act.once ? source.once : source.used) {
     return 'That power has already been called.';
   }

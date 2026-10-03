@@ -345,13 +345,13 @@
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Device. Name a unit. It gains +2 health.",
+    "text": "Device. Name a unit. It gains +2 power.",
     "quote": "Breathe the green air. It is older than the street.",
     "quoted": "River lung",
     "aim": true,
     "effect": {
       "op": "empower",
-      "n": 0
+      "n": 2
     }
   },
   {
@@ -661,7 +661,7 @@
     "cost": 4,
     "oath": 0,
     "keywords": [],
-    "text": "A saint of stairwells and shared sinks. Three blows, four wounds, and the landing is hers.",
+    "text": "A saint of stairwells and shared sinks. Four blows, four wounds, and the landing is hers.",
     "quote": "Holiness is a room that still has a door.",
     "quoted": "Tenement office",
     "power": 4,
@@ -1291,7 +1291,8 @@
       "op": "destroy"
     },
     "quote": "Arise! Awake! and stop not till the goal is reached.",
-    "quoted": "Katha Upanishad"
+    "quoted": "Katha Upanishad",
+    "alsoDiscard": true
   },
   {
     "id": "industrial_rite",
@@ -1680,7 +1681,7 @@
     "cost": 5,
     "oath": 0,
     "keywords": [],
-    "text": "The wood that walked into the city. No sermon. Five wounds, four blows.",
+    "text": "The wood that walked into the city. No sermon. Five wounds, five blows.",
     "power": 5,
     "legacyAttack": 4,
     "legacyHealth": 5,
@@ -2690,7 +2691,8 @@
       "n": 2
     },
     "quote": "Set me as a seal upon thine heart, as a seal upon thine arm.",
-    "quoted": "Song of Solomon 8:6"
+    "quoted": "Song of Solomon 8:6",
+    "alsoLock": true
   },
   {
     "id": "the_mute_alchemist",
@@ -3185,7 +3187,7 @@
     "cost": 3,
     "oath": 2,
     "keywords": [],
-    "text": "Andrew Jackson Davis's heir in a lecture hall. He sees the blow coming and still only hits for 2.",
+    "text": "Andrew Jackson Davis's heir in a lecture hall. He sees the blow coming and answers it at full power.",
     "power": 3,
     "legacyAttack": 2,
     "legacyHealth": 3,

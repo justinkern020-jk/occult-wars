@@ -18,6 +18,30 @@ import { applyBank, type ControlGrid } from './scoring';
 import { cardById } from '../data/catalog';
 import type { Card } from './types';
 
+/**
+ * Every card keyword the engine implements, and where:
+ * combat (combat.ts / keywords.ts), strike (resolveStrike), deploy
+ * (Battlefield deployTo / engine), rite open / end (riteOpenUpkeep,
+ * bankFromHoldings, sproutAtRiteEnd, pollBonus), death (effects destroyUnit).
+ * The card audit test asserts every printed keyword is listed here.
+ */
+export const HANDLED_KEYWORDS: ReadonlySet<string> = new Set([
+  // combat timing / damage
+  'fast', 'slow', 'tough', 'ranged', 'shutter', 'veiled', 'crown',
+  // strike outcomes
+  'blooded', 'sprout', 'reap', 'devour', 'banish', 'arrest',
+  // movement / conquest
+  'root', 'unclaiming', 'airship', 'glory', 'bloom', 'toll', 'deed', 'canvass', 'graze',
+  // deploy
+  'delay', 'chill', 'warband', 'berserk', 'charm', 'scandal', 'relay',
+  // rite open / end
+  'tithe', 'tithe2', 'hearth', 'tax', 'seep', 'gills', 'poll',
+  // death
+  'salvage', 'mourner',
+  // flavour / presentation (no rule beyond the sighting & siren)
+  'cryptid', 'gas',
+]);
+
 const ORTHO = [
   [1, 0],
   [-1, 0],
@@ -431,6 +455,12 @@ function advanceInto(
   c: number,
 ): AdvanceResult {
   if (!ctx.units[u.uid]) return { stronghold: false, conquered: false };
+  if ((u.arrest ?? 0) > 0) {
+    u.moved = true;
+    u.attacked = true;
+    log(ctx, `${u.name} is arrested and holds its ground.`);
+    return { stronghold: false, conquered: false };
+  }
   ctx.board[from.r][from.c] = null;
   if (ctx.board[r][c]) return { stronghold: false, conquered: false };
   ctx.board[r][c] = u.uid;
@@ -551,7 +581,8 @@ export function resolveStrike(
   const from = findPos(ctx, atkUid);
   if (!atk || !def || !from) return outcome('Nothing there to strike.');
   if (atk.sick || atk.moved || atk.attacked) return outcome(`${atk.name} cannot act.`);
-  if ((atk.arrest ?? 0) > 0) return outcome(`${atk.name} is arrested and cannot strike.`);
+  // Arrest (card text): "cannot move for its next two turns" — an arrested
+  // unit may still strike, but it does not step forward after a kill.
   if (ctxRooted(ctx, atk.side, from.r, from.c)) {
     return outcome(`${atk.name} is rooted and cannot move or strike.`);
   }
@@ -594,7 +625,8 @@ export function resolveStrike(
   }
 
   // Devour: whatever meets it in combat is unmade; that owner discards.
-  if (hasKeyword(atk, 'devour') || hasKeyword(def, 'devour')) {
+  // A ranged shot never meets it (unanswered), so it resolves as a shot.
+  if (hasKeyword(atk, 'devour') || (hasKeyword(def, 'devour') && !ranged)) {
     atk.moved = true;
     atk.attacked = true;
     if (hasKeyword(atk, 'devour')) {
