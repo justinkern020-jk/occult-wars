@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { readTableSnapshot, subscribeTable } from '../net/table';
+import { readSeenMeeting } from '../net/meeting';
 import { MAPS, mapsForEra, type GameMap } from '../game/maps';
 import {
   PACK_COST,
@@ -48,6 +50,8 @@ type Props = {
   onFriend: () => void;
   /** The Ledger — account, name, record, the book of names. */
   onLedger?: () => void;
+  /** The Occultist Meeting — the shared board. */
+  onMeeting?: () => void;
   onSecond: () => void;
   onShop: () => void;
   onOldWork: () => void;
@@ -91,6 +95,7 @@ export function MenuAtelier({
   onHotseat,
   onFriend,
   onLedger,
+  onMeeting,
   onSecond,
   onShop,
   onOldWork,
@@ -109,6 +114,8 @@ export function MenuAtelier({
   const [hourOpen, setHourOpen] = useState(() => bootHourOpen(profile.username));
   const [toast, setToast] = useState<string | null>(null);
   const [battleCountOpen, setBattleCountOpen] = useState(false);
+  const tableSnap = useSyncExternalStore(subscribeTable, readTableSnapshot, readTableSnapshot);
+  const meetUnread = (tableSnap.view?.meet ?? 0) > readSeenMeeting();
   const [revealUnlock, setRevealUnlock] = useState<{ card: Card; caption: string } | null>(null);
   const firstMaps = mapsForEra('first');
 
@@ -367,8 +374,34 @@ export function MenuAtelier({
             </button>
           </div>
 
-          {onLedger && (
-            <div className="menu-doors">
+          {(onLedger || onMeeting) && (
+            <div className={`menu-doors${onLedger && onMeeting ? ' menu-doors-2' : ''}`}>
+              {onMeeting && (
+                <button
+                  type="button"
+                  className="menu-door brass-btn"
+                  data-testid="open-meeting"
+                  onClick={click(onMeeting)}
+                >
+                  <span className="menu-door-glyph" aria-hidden>
+                    ☾
+                  </span>
+                  <span className="menu-door-copy">
+                    <span className="menu-door-title">
+                      Occultist Meeting
+                      {meetUnread && (
+                        <span
+                          className="menu-unread"
+                          data-testid="meeting-unread"
+                          aria-label="New words at the meeting"
+                        />
+                      )}
+                    </span>
+                    <span className="menu-door-sub">The board every hand can read</span>
+                  </span>
+                </button>
+              )}
+              {onLedger && (
               <button
                 type="button"
                 className="menu-door brass-btn"
@@ -383,6 +416,7 @@ export function MenuAtelier({
                   <span className="menu-door-sub">A name, your record, the other occultists</span>
                 </span>
               </button>
+              )}
             </div>
           )}
 

@@ -15,6 +15,7 @@ describe('parseTableView', () => {
         { country: 5, n: 1 },
       ],
       store: 'redis',
+      meet: 12,
     });
     expect(v).toEqual({
       playing: 3,
@@ -23,6 +24,7 @@ describe('parseTableView', () => {
       challenge: { room: 'ABCD', mine: false, left: 41_000 },
       checkins: [{ country: 'US', n: 2 }],
       store: 'redis',
+      meet: 12,
     });
   });
 

@@ -10,6 +10,7 @@ import { PackBreak } from './components/PackBreak';
 import { CampaignHour } from './components/CampaignHour';
 import { FriendWorking } from './components/FriendWorking';
 import { Ledger } from './components/Ledger';
+import { Meeting } from './components/Meeting';
 import {
   TABLE_CHALLENGE_EVENT,
   setTableState,
@@ -63,6 +64,7 @@ type Screen =
   | 'old'
   | 'shop'
   | 'ledger'
+  | 'meeting'
   | 'sandbox';
 
 /** Pick a rival order for training (not self / not ally preferred). */
@@ -177,6 +179,8 @@ export default function App() {
         return 'Rites desk';
       case 'ledger':
         return 'The Ledger';
+      case 'meeting':
+        return 'The Occultist Meeting';
       default:
         return 'Atelier';
     }
@@ -327,6 +331,7 @@ export default function App() {
           ensureSworn(() => setScreen('friend'));
         }}
         onLedger={() => setScreen('ledger')}
+        onMeeting={() => setScreen('meeting')}
         onSecond={() => {
           if (readHourOpen()) setScreen('second');
         }}
@@ -490,6 +495,14 @@ export default function App() {
           }}
           onBack={() => setScreen('menu')}
         />
+      </div>
+    );
+  }
+
+  if (screen === 'meeting') {
+    return (
+      <div className="app app-shell">
+        <Meeting onBack={() => setScreen('menu')} guestName={profile.username} />
       </div>
     );
   }

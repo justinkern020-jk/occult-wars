@@ -30,6 +30,8 @@ export type TableView = {
   challenge: ChallengeView | null;
   checkins: { country: string; n: number }[];
   store: 'redis' | 'memory';
+  /** Newest Occultist Meeting message id. */
+  meet: number;
 };
 
 const MARK_RE = /^[a-z0-9]{16}$/;
@@ -67,6 +69,7 @@ export function parseTableView(raw: unknown): TableView | null {
           .map((c) => ({ country: String(c.country), n: Number(c.n) }))
       : [],
     store: r.store === 'redis' ? 'redis' : 'memory',
+    meet: Number(r.meet) || 0,
   };
 }
 

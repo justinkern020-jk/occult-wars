@@ -31,6 +31,8 @@ export type TableView = {
   others: string[];
   challenge: ChallengeView | null;
   checkins: { country: string; n: number }[];
+  /** Newest Occultist Meeting message id (for the unread dot). */
+  meet: number;
 };
 
 type Challenge = { room: string; mark: string; at: number };
@@ -87,9 +89,11 @@ export async function beat(
   const others = seated.filter((m) => m !== mark).slice(0, 200);
   tail.push(['HMGET', K.country, mark, ...others]);
   tail.push(['HGETALL', K.checkins]);
+  tail.push(['GET', 'ow:meet:n']);
   const res = await store.pipe(tail);
-  const countries = (res[res.length - 2] as (string | null)[]) ?? [];
-  const tally = toRecord(res[res.length - 1]);
+  const countries = (res[res.length - 3] as (string | null)[]) ?? [];
+  const tally = toRecord(res[res.length - 2]);
+  const meet = Number(res[res.length - 1]) || 0;
 
   return {
     ok: true,
@@ -102,6 +106,7 @@ export async function beat(
       .map(([c, n]) => ({ country: c, n: Number(n) }))
       .filter((r) => COUNTRY_RE.test(r.country) && r.n > 0)
       .sort((a, b) => b.n - a.n || a.country.localeCompare(b.country)),
+    meet,
   };
 }
 
