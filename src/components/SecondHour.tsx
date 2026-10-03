@@ -11,6 +11,8 @@ import type { Profile } from '../game/profile';
 import { CARDS } from '../data/catalog';
 import { buildOrderAllyWorkingIds } from '../game/deck';
 import { MapMini } from './MapMini';
+import { AiMindPicker } from './AiMindPicker';
+import type { AiDifficulty } from '../game/ai';
 
 type Props = {
   profile: Profile;
@@ -18,9 +20,19 @@ type Props = {
   onEnterYard: (mapId: string, order: SecondHourSociety) => void;
   onShop: () => void;
   onBack: () => void;
+  aiDifficulty?: AiDifficulty;
+  onAiDifficulty?: (next: AiDifficulty) => void;
 };
 
-export function SecondHour({ profile, onUpdate, onEnterYard, onShop, onBack }: Props) {
+export function SecondHour({
+  profile,
+  onUpdate,
+  onEnterYard,
+  onShop,
+  onBack,
+  aiDifficulty = 'expert',
+  onAiDifficulty,
+}: Props) {
   const sworn =
     profile.secondOrder && isSecondHourSociety(profile.secondOrder)
       ? profile.secondOrder
@@ -93,6 +105,7 @@ export function SecondHour({ profile, onUpdate, onEnterYard, onShop, onBack }: P
         Ally jewel · {SECOND_HOUR_ALLIES[sworn]}. The rival across the yard is the
         other tradition, not your ally. Cabals dual-Power.
       </p>
+      {onAiDifficulty && <AiMindPicker value={aiDifficulty} onChange={onAiDifficulty} />}
       <div className="map-grid">
         {yards.map((m) => (
           <button

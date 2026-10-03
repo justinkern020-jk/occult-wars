@@ -26,6 +26,8 @@ import {
 import { cardById } from '../data/catalog';
 import type { Card } from '../game/types';
 import { BattleCountModal } from './BattleCountModal';
+import { AiMindPicker } from './AiMindPicker';
+import type { AiDifficulty } from '../game/ai';
 import { TarotPop } from './TarotPop';
 import { brassClick, copSirenSfx, metalRiffSfx, setMusicBed, unlockAudio } from '../game/sfx';
 
@@ -35,6 +37,9 @@ type Props = {
   selectedMapId: string;
   onSelectMap: (id: string) => void;
   onTraining: () => void;
+  /** Rival mind for solo rites (Easy / Experienced / Expert). */
+  aiDifficulty?: AiDifficulty;
+  onAiDifficulty?: (next: AiDifficulty) => void;
   onCollection: () => void;
   onDeckEditor: () => void;
   onPack: () => void;
@@ -75,6 +80,8 @@ export function MenuAtelier({
   selectedMapId,
   onSelectMap,
   onTraining,
+  aiDifficulty = 'expert',
+  onAiDifficulty,
   onCollection,
   onDeckEditor,
   onPack,
@@ -271,6 +278,8 @@ export function MenuAtelier({
             {profile.username} · {profile.alchemicalShards} shards
             {profile.allegiance ? ` · ${profile.allegiance}` : ' · unswear'}
           </p>
+
+          {onAiDifficulty && <AiMindPicker value={aiDifficulty} onChange={onAiDifficulty} />}
 
           <button
             type="button"

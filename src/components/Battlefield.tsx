@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
 import { cardById, isExcludedPlateId } from '../data/catalog';
-import { pickTrainingAction, type AiSnapshot } from '../game/ai';
+import {
+  aiDifficultyLabel,
+  aiStepCap,
+  actionKey,
+  pickAiAction,
+  resetAiPlan,
+  type AiDifficulty,
+  type AiSnapshot,
+} from '../game/ai';
 import {
   canDeployOn,
   initialControl,
@@ -141,6 +149,8 @@ export type BattlefieldProps = {
   profile?: Profile;
   onUpdateProfile?: (next: Profile) => void;
   onLeave?: () => void;
+  /** Rival mind for the Crimson AI (training / campaign / second hour). */
+  aiDifficulty?: AiDifficulty;
   onMatchEnd?: (result: {
     winner: Side;
     kind: VictoryKind;
@@ -304,6 +314,7 @@ export function Battlefield({
   onUpdateProfile,
   onLeave,
   onMatchEnd,
+  aiDifficulty = 'expert',
 }: BattlefieldProps = {}) {
   const [mapId, setMapId] = useState(initialMapId);
   useEffect(() => {
@@ -494,6 +505,8 @@ export function Battlefield({
   const revealResumeRef = useRef<(() => void) | null>(null);
   const [aim, setAim] = useState<AimMode>(null);
   const [leaderUsed, setLeaderUsed] = useState({ blue: false, red: false });
+  const leaderUsedRef = useRef(leaderUsed);
+  leaderUsedRef.current = leaderUsed;
   const [passPrompt, setPassPrompt] = useState(false);
 
   const pushLog = useCallback((msg: string) => {
@@ -702,6 +715,7 @@ export function Battlefield({
 
   const bootMatch = useCallback(
     (id: string) => {
+      resetAiPlan();
       const m = mapById(id);
       const ctrl = initialControl(m.tiles);
       let dBlue = deckFor(blueFaction, blueDeckIds);
@@ -2374,15 +2388,21 @@ export function Battlefield({
       }, 14000);
     };
 
+    const cap = aiStepCap(aiDifficulty);
+    const avoid: string[] = [];
+    const stopAi = () => {
+      setAiBusy(false);
+      clearRevealTimer();
+      revealResumeRef.current = null;
+      setRevealCard(null);
+      endRiteRef.current();
+    };
+
     const run = () => {
       if (cancelled) return;
       steps += 1;
-      if (steps > 14) {
-        setAiBusy(false);
-        clearRevealTimer();
-        revealResumeRef.current = null;
-        setRevealCard(null);
-        endRiteRef.current();
+      if (steps > cap) {
+        stopAi();
         return;
       }
 
@@ -2407,38 +2427,67 @@ export function Battlefield({
                   cardId: u.cardId,
                   r,
                   c,
+                  maxPower: u.maxPower,
+                  tough: !!u.tough || u.keywords.includes('tough'),
+                  fast: !!u.fast || u.keywords.includes('fast'),
+                  arrest: u.arrest ?? 0,
+                  shutter: !!u.shutter,
+                  silenced: !!u.silenced,
+                  powder: !!u.powder,
+                  name: u.name,
+                  loyalty: u.loyalty,
                 }
               : null,
           ),
         ),
         hand: live.hand.red,
         loyalty: live.loyalty.red,
+        domination: { ...live.domination },
+        leader: redHero ?? undefined,
+        leaderUsed: leaderUsedRef.current.red,
+        avoid: [...avoid],
+        foeLoyalty: live.loyalty.blue,
+        turn: live.turn,
       };
-      const action = pickTrainingAction(snap);
+      const action = pickAiAction(snap, aiDifficulty);
+      // A pick that fails (stale or illegal) is never offered again this rite.
+      const failed = () => {
+        avoid.push(actionKey(action));
+        later(run, 90);
+      };
 
-      const castIdx = live.hand.red.findIndex(
-        (c, i) =>
-          (c.kind === 'rite' || c.kind === 'device') &&
-          c.effect &&
-          !effectNeedsAim(c.effect, c.aim) &&
-          c.cost <= live.loyalty.red &&
-          i === live.hand.red.findIndex((x) => x.id === c.id),
-      );
-      if (castIdx >= 0 && Math.random() < 0.28) {
-        const ok = castCardRef.current(AI_SIDE, castIdx);
-        later(run, ok ? 420 : 80);
+      if (action.type === 'cast') {
+        const card = live.hand.red[action.index];
+        const aimPos =
+          action.r != null && action.c != null ? { r: action.r, c: action.c } : undefined;
+        // Never open the player's aim prompt on the AI's behalf.
+        const unaimed =
+          !!card && effectNeedsAim(card.effect, card.aim) && !action.targetUid && !aimPos;
+        if (card && !unaimed && castCardRef.current(AI_SIDE, action.index, action.targetUid, aimPos)) {
+          showAiReveal(card, () => later(run, 280));
+          return;
+        }
+        failed();
+        return;
+      }
+
+      if (action.type === 'leader') {
+        const aimPos =
+          action.r != null && action.c != null ? { r: action.r, c: action.c } : undefined;
+        const unaimed = !!redHero && leaderNeedsAim(redHero) && !action.targetUid && !aimPos;
+        if (redHero && !unaimed && useLeaderRef.current(AI_SIDE, action.targetUid, aimPos)) {
+          showAiReveal(redHero, () => later(run, 280));
+          return;
+        }
+        failed();
         return;
       }
 
       if (action.type === 'act') {
         const src = findUnitRef.current(action.uid);
         const card = src ? cardById(src.unit.cardId) : undefined;
-        const ok = callPowerRef.current(
-          AI_SIDE,
-          action.uid,
-          action.targetUid,
-        );
-        if (ok) {
+        const unaimed = !!card?.act && actNeedsAim(card.act) && !action.targetUid;
+        if (!unaimed && callPowerRef.current(AI_SIDE, action.uid, action.targetUid)) {
           if (card) {
             showAiReveal(card, () => later(run, 320));
           } else {
@@ -2446,21 +2495,17 @@ export function Battlefield({
           }
           return;
         }
-        later(run, 120);
+        failed();
         return;
       }
 
       if (action.type === 'deploy') {
         const card = live.hand.red[action.index];
-        if (card?.kind === 'unit') {
-          const ok = deployToRef.current(action.r, action.c, action.index, AI_SIDE);
-          if (ok) {
-            showAiReveal(card, () => later(run, 320));
-            return;
-          }
+        if (card?.kind === 'unit' && deployToRef.current(action.r, action.c, action.index, AI_SIDE)) {
+          showAiReveal(card, () => later(run, 320));
+          return;
         }
-        // Deploy failed (stale or illegal) — do not reflash; try again next tick once.
-        later(run, 120);
+        failed();
         return;
       }
       if (action.type === 'move') {
@@ -2470,7 +2515,7 @@ export function Battlefield({
           return;
         }
         if (res === 'fail') {
-          later(run, 120);
+          failed();
           return;
         }
         later(run, 420);
@@ -2478,20 +2523,15 @@ export function Battlefield({
       }
       if (action.type === 'attack') {
         const def = findUnitRef.current(action.targetUid);
-        if (def) {
-          const ok = strikeRef.current(action.uid, def.r, def.c);
-          later(run, ok ? 500 : 120);
+        if (def && strikeRef.current(action.uid, def.r, def.c)) {
+          later(run, 500);
           return;
         }
-        later(run, 120);
+        failed();
         return;
       }
       // end — call latest endRite so openRiteFor keeps AI-deployed coins
-      setAiBusy(false);
-      clearRevealTimer();
-      revealResumeRef.current = null;
-      setRevealCard(null);
-      endRiteRef.current();
+      stopAi();
     };
 
     later(run, 550);
@@ -2505,7 +2545,7 @@ export function Battlefield({
       revealResumeRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [side, phase, matchOver, sharedTwoPlayer]);
+  }, [side, phase, matchOver, sharedTwoPlayer, aiDifficulty, redHero]);
 
   const legalMove = useMemo(() => {
     const empty = new Set<string>();
@@ -2675,7 +2715,14 @@ export function Battlefield({
             </span>
           </div>
           <dl className="score-chip is-enemy" data-testid="score-crimson">
-            <dt>Crimson · {redFaction.split(' ').slice(-1)[0]}</dt>
+            <dt>
+              Crimson · {redFaction.split(' ').slice(-1)[0]}
+              {!sharedTwoPlayer && (
+                <span className="bf-mind" data-testid="ai-mind">
+                  {aiDifficultyLabel(aiDifficulty)}
+                </span>
+              )}
+            </dt>
             <dd>
               <span className="score-resource-jewel" role="img" aria-label="Resources" title="Resources" />
               <strong className="score-loyalty" title="Resources — spend to muster units and cast rites">

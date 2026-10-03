@@ -3921,3 +3921,46 @@ input[type='search'] {
   font-family: Cinzel, Georgia, serif;
   font-size: 0.92rem;
 }
+
+/* Rival mind (AI difficulty) — matches occultwar.grok.me */
+.ai-mind {
+  max-width: 36rem;
+  margin: 0.85rem 0 0.15rem;
+}
+.ai-mind-label {
+  font-family: var(--font-display);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #e7d7a4;
+  font-size: 0.62rem;
+  display: block;
+}
+.ai-mind-row {
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+  display: flex;
+}
+.ai-mind-btn {
+  letter-spacing: 0.08em;
+  min-height: 2.2rem;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.78rem;
+}
+.ai-mind-blurb {
+  color: #f3ead7b0;
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+}
+.score-chip .bf-mind {
+  display: block;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #c6a15b;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  font-size: clamp(0.42rem, 1.35vw, 0.55rem);
+  line-height: 1.1;
+  overflow: hidden;
+}

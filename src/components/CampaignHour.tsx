@@ -27,6 +27,8 @@ import {
 import { MushroomCloud } from './MushroomCloud';
 import { FalloutRain } from './FalloutRain';
 import { TarotPop } from './TarotPop';
+import { AiMindPicker } from './AiMindPicker';
+import type { AiDifficulty } from '../game/ai';
 
 type Props = {
   profile: Profile;
@@ -35,6 +37,8 @@ type Props = {
   onBack: () => void;
   lastOutcome?: { stageIndex: number; outcome: StageOutcome } | null;
   onConsumeOutcome?: () => void;
+  aiDifficulty?: AiDifficulty;
+  onAiDifficulty?: (next: AiDifficulty) => void;
 };
 
 /** nuke → fallout → radiation → winter → epilogue → justin → plate → Fulcanelli warning */
@@ -55,6 +59,8 @@ export function CampaignHour({
   onBack,
   lastOutcome,
   onConsumeOutcome,
+  aiDifficulty = 'expert',
+  onAiDifficulty,
 }: Props) {
   const progress = profile.campaign ?? {
     stage: 0,
@@ -352,6 +358,7 @@ export function CampaignHour({
           <p className="cutscene-line lede">{stage.cutscene.vo}</p>
           <p className="campaign-brief">{stage.briefing}</p>
           <p className="campaign-foe">Foe · {stage.foe}</p>
+          {onAiDifficulty && <AiMindPicker value={aiDifficulty} onChange={onAiDifficulty} />}
           <button
             type="button"
             className="brass-btn brass-btn-solid"

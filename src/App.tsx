@@ -39,6 +39,7 @@ import { CARDS } from './data/catalog';
 import { readHourOpen } from './game/hourUnlock';
 import type { StageOutcome } from './game/campaign';
 import { mapsForEra } from './game/maps';
+import { AI_DIFFICULTY_KEY, readAiDifficulty, type AiDifficulty } from './game/ai';
 import './App.css';
 
 type Screen =
@@ -70,6 +71,21 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>('title');
   const [mapId, setMapId] = useState('ashen-cross');
   const [matchMode, setMatchMode] = useState<MatchMode>('training');
+  const [aiDifficulty, setAiDifficultyState] = useState<AiDifficulty>(() => {
+    try {
+      return readAiDifficulty(window.localStorage.getItem(AI_DIFFICULTY_KEY));
+    } catch {
+      return 'expert';
+    }
+  });
+  const setAiDifficulty = (next: AiDifficulty) => {
+    setAiDifficultyState(next);
+    try {
+      window.localStorage.setItem(AI_DIFFICULTY_KEY, next);
+    } catch {
+      /* private mode — keep it for this visit */
+    }
+  };
   const [blueFaction, setBlueFaction] = useState('The Vril Syndicate');
   const [redFaction, setRedFaction] = useState('The Hermetic Circle');
   const [blueHeroId, setBlueHeroId] = useState<string | undefined>();
@@ -247,6 +263,8 @@ export default function App() {
         selectedMapId={mapId}
         onSelectMap={setMapId}
         onTraining={startTraining}
+        aiDifficulty={aiDifficulty}
+        onAiDifficulty={setAiDifficulty}
         onCollection={() => setScreen('archive')}
         onDeckEditor={() => ensureSworn(() => setScreen('deck'))}
         onPack={() => ensureSworn(() => setScreen('pack'))}
@@ -285,6 +303,8 @@ export default function App() {
           onUpdate={update}
           lastOutcome={campaignOutcome}
           onConsumeOutcome={() => setCampaignOutcome(null)}
+          aiDifficulty={aiDifficulty}
+          onAiDifficulty={setAiDifficulty}
           onPlayStage={(mid, foe, stageIndex) => {
             const order = firstHourAllegiance()!;
             setMapId(mid);
@@ -349,6 +369,8 @@ export default function App() {
         <SecondHour
           profile={profile}
           onUpdate={update}
+          aiDifficulty={aiDifficulty}
+          onAiDifficulty={setAiDifficulty}
           onEnterYard={(mid, order) => {
             setMapId(mid);
             setBlueFaction(order);
@@ -465,6 +487,7 @@ export default function App() {
           friendSession={friendSession ?? undefined}
           profile={profile}
           onUpdateProfile={update}
+          aiDifficulty={aiDifficulty}
           onLeave={() => {
             friendSession?.destroy();
             setFriendSession(null);
