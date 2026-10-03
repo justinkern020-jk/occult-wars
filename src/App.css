@@ -4488,3 +4488,11 @@ input[type='search'] {
 .leader-shelf-wrap .hand-row {
   overflow-x: auto;
 }
+/* The fuller battle count can outgrow a short screen: let it scroll. */
+.battle-count-overlay {
+  overflow-y: auto;
+  align-items: safe center;
+}
+.battle-count-plate {
+  max-width: 100%;
+}
