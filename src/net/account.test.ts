@@ -28,6 +28,13 @@ describe('account client', () => {
     expect(readSeatState()).toEqual({ status: 'shut', seat: null });
   });
 
+  it('reads a quiet 200 shut answer the same way', async () => {
+    resetSeatForTests();
+    vi.stubGlobal('fetch', answer(200, { ok: false, shut: true, error: 'shut' }));
+    await refreshSeat();
+    expect(readSeatState()).toEqual({ status: 'shut', seat: null });
+  });
+
   it('takes a seat on sign-up', async () => {
     const seat = {
       id: 'u1',

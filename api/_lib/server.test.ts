@@ -142,8 +142,11 @@ describe('/api/account handler', () => {
   it('stays shut on instance memory', async () => {
     setStoreForTests(memoryStore());
     const r = await call('GET', undefined, '?op=book');
-    expect(r.status).toBe(503);
-    expect(r.body.shut).toBe(true);
+    expect(r.status).toBe(200);
+    expect(r.body).toMatchObject({ ok: false, shut: true });
+    const w = await call('POST', { op: 'signup', email: 'a@b.co', password: 'hunter2hunter2' });
+    expect(w.status).toBe(503);
+    expect(w.body.shut).toBe(true);
   });
 
   it('seat, name, record, book and cloud profile', async () => {

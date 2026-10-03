@@ -53,7 +53,9 @@ export async function handleAccount(req: Request, now = Date.now()): Promise<Res
     if (shut(store)) {
       return json(
         { ok: false, shut: true, error: 'The book is shut — accounts open once the ledger store is connected.' },
-        503,
+        // Reads (every page load asks "who is here?") answer quietly so a shut
+        // book is not a console error; writes still refuse with 503.
+        req.method === 'GET' ? 200 : 503,
       );
     }
     const token = tokenFrom(req);
