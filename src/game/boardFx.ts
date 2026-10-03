@@ -16,6 +16,8 @@ export type FxUnit = {
   power: number;
   keywords: string[];
   attacked?: boolean;
+  used?: boolean;
+  once?: boolean;
 };
 
 export type FxBoard = (FxUnit | null)[][];
@@ -28,6 +30,8 @@ export type BoardDiff = {
   gains: { unit: FxUnit; r: number; c: number; amount: number }[];
   /** Units that struck between the two snapshots (attacked false → true). */
   strikers: { unit: FxUnit; r: number; c: number; fromR: number; fromC: number }[];
+  /** Units whose own power was called (once-each-rite / once-in-a-sitting flag set). */
+  calls: { unit: FxUnit; r: number; c: number }[];
 };
 
 function index(board: FxBoard): Map<string, { u: FxUnit; r: number; c: number }> {
@@ -43,7 +47,15 @@ function index(board: FxBoard): Map<string, { u: FxUnit; r: number; c: number }>
 export function diffBoards(prev: FxBoard, next: FxBoard): BoardDiff {
   const a = index(prev);
   const b = index(next);
-  const out: BoardDiff = { moves: [], musters: [], deaths: [], wounds: [], gains: [], strikers: [] };
+  const out: BoardDiff = {
+    moves: [],
+    musters: [],
+    deaths: [],
+    wounds: [],
+    gains: [],
+    strikers: [],
+    calls: [],
+  };
   for (const [uid, was] of a) {
     const now = b.get(uid);
     if (!now) {
@@ -56,6 +68,9 @@ export function diffBoards(prev: FxBoard, next: FxBoard): BoardDiff {
     const d = now.u.power - was.u.power;
     if (d < 0) out.wounds.push({ unit: now.u, r: now.r, c: now.c, amount: -d });
     if (d > 0) out.gains.push({ unit: now.u, r: now.r, c: now.c, amount: d });
+    if ((!was.u.used && now.u.used) || (!was.u.once && now.u.once)) {
+      out.calls.push({ unit: now.u, r: now.r, c: now.c });
+    }
     if (!was.u.attacked && now.u.attacked) {
       out.strikers.push({ unit: now.u, r: now.r, c: now.c, fromR: was.r, fromC: was.c });
     }
@@ -73,10 +88,11 @@ export type GuestSound =
   | 'dispatch'
   | 'clash'
   | 'gunshot'
-  | 'death';
+  | 'power';
 
 /**
- * What the guest should hear for one state step. `newDiscards` are plates that
+ * What the guest should hear for one state step (deaths are heard by every
+ * hand from the shared board effect, so they are not listed here). `newDiscards` are plates that
  * just reached either discard pile (a rite / device among them means a cast).
  */
 export function guestSounds(diff: BoardDiff, newDiscards: Card[]): GuestSound[] {
@@ -87,7 +103,6 @@ export function guestSounds(diff: BoardDiff, newDiscards: Card[]): GuestSound[] 
     else if (spell.keywords.includes('gas')) out.push('gas');
     else out.push('cast');
   }
-  const hurt = diff.wounds.length > 0 || diff.deaths.length > 0;
   if (diff.strikers.length > 0 && !spell) {
     const s = diff.strikers[0];
     const victims = [
@@ -99,7 +114,7 @@ export function guestSounds(diff: BoardDiff, newDiscards: Card[]): GuestSound[] 
   } else if ((diff.moves.length > 0 || diff.musters.length > 0) && !spell) {
     out.push('move');
   }
-  if (diff.deaths.length > 0 && (hurt || spell)) out.push('death');
+  if (diff.calls.length > 0 && !spell) out.push('power');
   return out;
 }
 

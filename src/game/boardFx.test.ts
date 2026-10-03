@@ -24,7 +24,7 @@ describe('boardFx', () => {
     expect(guestSounds(d, [])).toEqual(['move']);
   });
 
-  it('reads a melee strike with a death as clash + death', () => {
+  it('reads a melee strike with a death as a clash', () => {
     const a = empty();
     const b = empty();
     a[0][0] = u('a', 'blue', 3);
@@ -32,7 +32,7 @@ describe('boardFx', () => {
     b[0][0] = u('a', 'blue', 3, { attacked: true });
     const d = diffBoards(a, b);
     expect(d.deaths.map((x) => x.unit.uid)).toEqual(['b']);
-    expect(guestSounds(d, [])).toEqual(['clash', 'death']);
+    expect(guestSounds(d, [])).toEqual(['clash']);
   });
 
   it('reads a ranged shot at distance as a gunshot, with wounds and gains', () => {
@@ -48,6 +48,16 @@ describe('boardFx', () => {
     expect(d.wounds[0].amount).toBe(3);
     expect(d.gains[0].amount).toBe(1);
     expect(guestSounds(d, [])).toEqual(['gunshot']);
+  });
+
+  it('a called power is heard', () => {
+    const a = empty();
+    const b = empty();
+    a[1][1] = u('a', 'blue', 3);
+    b[1][1] = u('a', 'blue', 4, { used: true });
+    const d = diffBoards(a, b);
+    expect(d.calls).toHaveLength(1);
+    expect(guestSounds(d, [])).toEqual(['power']);
   });
 
   it('a rite reaching the pile is a cast', () => {

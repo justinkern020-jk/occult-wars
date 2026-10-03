@@ -7,3 +7,10 @@ spell-cast.mp3 — rite / device cast ("C: crystalline rune chime")
   Original synthesis (no samples), synth_spells.py. Free to use.
 knock/knock-<note>.mp3 — coin moves play a song, one note per move (Moonlight Sonata I, Beethoven, public domain; Dies Irae chant on hand)
   The "C: deep hollow knock" re-rendered at each pitch: original synthesis (no samples), synth_knock_melody.py. Free to use.
+unit-death.mp3 — a unit falls: the coin cracks (split hollow knock), falling cursed glass, ember hiss
+end-turn.mp3 — end of rite: two slow hollow knocks under a far bell hum
+leader-call.mp3 — a leader's power: deep gong, low choir breath, rune glint
+power-call.mp3 — a unit's called power: hollow knock and a low rune chime
+victory.mp3 — victory: rising low choir (D minor, B-flat, D major) on a gong
+defeat.mp3 — defeat: a deep bell tolls three times
+  All six: original synthesis (no samples) in the knock + crystalline chime palette, synth_battle.py. Free to use.

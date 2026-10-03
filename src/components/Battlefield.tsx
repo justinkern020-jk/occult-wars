@@ -69,7 +69,7 @@ import {
   victoryReason,
   type VictoryKind,
 } from '../game/scoring';
-import { clashSfx, gunshotSfx, defeatStinger, victoryStinger, brassClick, coinMoveSfx, preloadCoinMoveSfx, resetCoinMoveSong, spellCastSfx, preloadSpellCastSfx, setMusicBed, unlockAudio, sirenSfx, metalRiffSfx, nukeBoomSfx, nukemVoiceSfx, copSirenSfx } from '../game/sfx';
+import { clashSfx, gunshotSfx, defeatStinger, victoryStinger, coinMoveSfx, unitDeathSfx, endTurnSfx, leaderCallSfx, powerCallSfx, softKnockSfx, preloadBattleSfx, preloadCoinMoveSfx, resetCoinMoveSong, spellCastSfx, preloadSpellCastSfx, setMusicBed, unlockAudio, sirenSfx, metalRiffSfx, nukeBoomSfx, nukemVoiceSfx, copSirenSfx } from '../game/sfx';
 import {
   recordMatchVisit,
   rollVisitTurn,
@@ -328,6 +328,7 @@ export function Battlefield({
   useEffect(() => {
     preloadCoinMoveSfx();
     preloadSpellCastSfx();
+    preloadBattleSfx();
   }, []);
   useEffect(() => {
     setMapId(initialMapId);
@@ -348,6 +349,7 @@ export function Battlefield({
   const [friendSynced, setFriendSynced] = useState(!friend || friendRole === 'host');
   /** Guest: first state is a seat, not a move — no sounds until we have a prior snapshot. */
   const friendSyncedRef = useRef(false);
+  const lastFriendStRef = useRef<FriendMatchState | null>(null);
 
   const blueHero = useMemo(
     () =>
@@ -531,6 +533,7 @@ export function Battlefield({
         side: x.unit.side,
       }));
       setBursts((cur) => [...cur, ...fresh]);
+      unitDeathSfx();
       window.setTimeout(() => {
         setBursts((cur) => cur.filter((b) => !fresh.some((f) => f.id === b.id)));
       }, 1250);
@@ -1240,7 +1243,7 @@ export function Battlefield({
       applyEffectCtx(ctx);
       setLeaderUsed((L) => ({ ...L, [acting]: true }));
       setAim(null);
-      brassClick();
+      leaderCallSfx();
       return true;
     },
     [
@@ -1319,7 +1322,6 @@ export function Battlefield({
         setAim(null);
         setSelectedUnit(null);
         setAttacker(null);
-        brassClick();
         unlockAudio();
         metalRiffSfx();
         nukemVoiceSfx();
@@ -1336,7 +1338,7 @@ export function Battlefield({
       setAim(null);
       setSelectedUnit(null);
       setAttacker(null);
-      brassClick();
+      powerCallSfx();
       // Mid-rite domination from tap-crown etc.
       if (ctx.domination[acting] >= DOMINATION_WIN) {
         finishMatch(
@@ -2059,7 +2061,7 @@ export function Battlefield({
     }
     const live = liveRef.current;
     if (live.phase === 'over' || live.matchOver) return;
-    brassClick();
+    endTurnSfx();
     const acting = live.side;
     const holdings = countHoldings(live.gameMap.tiles, live.control, acting);
     // Poll: +1 per poll unit standing on a circle this side holds.
@@ -2366,6 +2368,17 @@ export function Battlefield({
         else if (snd === 'dispatch') copSirenSfx();
         else if (snd === 'gunshot') gunshotSfx();
         else if (snd === 'clash') clashSfx();
+        else if (snd === 'power') powerCallSfx();
+      }
+      const prevSt = lastFriendStRef.current;
+      if (prevSt) {
+        if (
+          (!prevSt.leaderUsed?.blue && st.leaderUsed?.blue) ||
+          (!prevSt.leaderUsed?.red && st.leaderUsed?.red)
+        ) {
+          leaderCallSfx();
+        }
+        if (prevSt.side !== st.side && !st.matchOver) endTurnSfx();
       }
       const step = diff.moves[0];
       if (step) kickCoinSlide(step.unit as BoardUnit, step.fromR, step.fromC, step.toR, step.toC);
@@ -2380,6 +2393,7 @@ export function Battlefield({
       }
     }
     friendSyncedRef.current = true;
+    lastFriendStRef.current = st;
     if (st.mapId && st.mapId !== mapId) setMapId(st.mapId);
     setLoyalty(st.loyalty);
     setDomination(st.domination);
@@ -3688,7 +3702,7 @@ export function Battlefield({
               type="button"
               className="brass-btn brass-btn-solid"
               onClick={() => {
-                brassClick();
+                softKnockSfx();
                 setPassPrompt(false);
               }}
             >

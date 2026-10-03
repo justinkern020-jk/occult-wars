@@ -84,10 +84,8 @@ export function clashSfx() {
   const n = 1 + Math.floor(Math.random() * 3);
   const a = new Audio(`/assets/audio/swords/clash-${n}.mp3`);
   a.volume = 0.55;
-  void a.play().catch(() => {
-    beep(180, 0.1, 'sawtooth', 0.12);
-    beep(90, 0.14, 'square', 0.08, 0.05);
-  });
+  // Blocked / missing: silence rather than an oscillator beep.
+  void a.play().catch(() => {});
 }
 
 /** Real recorded gunshot for ranged strikes (replaces Atari square bloop). */
@@ -466,20 +464,109 @@ export function copSirenSfx() {
   });
 }
 
-export function victoryStinger() {
-  unlockAudio();
-  beep(220, 0.4, 'sine', 0.09);
-  beep(277, 0.35, 'triangle', 0.06, 0.08);
-  beep(440, 0.5, 'sine', 0.08, 0.22);
-  beep(659, 0.42, 'sine', 0.05, 0.38);
-  beep(880, 0.55, 'triangle', 0.04, 0.5);
+/**
+ * Battle samples (original synthesis, synth_battle.py — the deep hollow knock and
+ * crystalline rune chime palette): a small preloaded pool per file, reused.
+ */
+const SAMPLE_POOL = 2;
+const samplePools = new Map<string, { els: HTMLAudioElement[]; next: number }>();
+
+function samplePool(src: string): { els: HTMLAudioElement[]; next: number } {
+  let pool = samplePools.get(src);
+  if (pool) return pool;
+  pool = { els: [], next: 0 };
+  samplePools.set(src, pool);
+  if (typeof Audio === 'undefined') return pool;
+  for (let i = 0; i < SAMPLE_POOL; i++) {
+    try {
+      const a = new Audio(src);
+      a.preload = 'auto';
+      pool.els.push(a);
+    } catch {
+      /* no audio element support */
+    }
+  }
+  return pool;
 }
 
+function playSample(src: string, volume: number, jitter = 0, delayMs = 0): void {
+  const go = () => {
+    try {
+      unlockAudio();
+      const pool = samplePool(src);
+      if (pool.els.length === 0) return;
+      let a = pool.els.find((x) => x.paused || x.ended);
+      if (!a) {
+        a = pool.els[pool.next % pool.els.length];
+        pool.next++;
+      }
+      a.pause();
+      a.currentTime = 0;
+      a.volume = volume;
+      (a as HTMLAudioElement & { preservesPitch?: boolean }).preservesPitch = false;
+      a.playbackRate = jitter ? 1 - jitter + Math.random() * jitter * 2 : 1;
+      void a.play().catch(() => {});
+    } catch {
+      /* fail silently */
+    }
+  };
+  if (delayMs > 0 && typeof window !== 'undefined') window.setTimeout(go, delayMs);
+  else go();
+}
+
+const SFX = '/assets/audio/sfx';
+const BATTLE_SAMPLES = [
+  `${SFX}/unit-death.mp3`,
+  `${SFX}/end-turn.mp3`,
+  `${SFX}/leader-call.mp3`,
+  `${SFX}/power-call.mp3`,
+  `${SFX}/victory.mp3`,
+  `${SFX}/defeat.mp3`,
+];
+
+/** Warm the battle samples so the first death / end of rite doesn't lag. */
+export function preloadBattleSfx(): void {
+  try {
+    BATTLE_SAMPLES.forEach((src) => samplePool(src).els.forEach((a) => a.load()));
+  } catch {
+    /* fail silently */
+  }
+}
+
+/** A coin cracks: split-wood knock, falling cursed glass, ember hiss. */
+export function unitDeathSfx(): void {
+  // Lands just behind the clash / shot so the two layer instead of masking.
+  playSample(`${SFX}/unit-death.mp3`, 0.5, 0.03, 110);
+}
+
+/** The rite passes: two slow hollow knocks under a far bell hum. */
+export function endTurnSfx(): void {
+  playSample(`${SFX}/end-turn.mp3`, 0.45, 0.02);
+}
+
+/** A leader speaks: deep gong, low choir breath, a rune glint. */
+export function leaderCallSfx(): void {
+  playSample(`${SFX}/leader-call.mp3`, 0.45, 0.02);
+}
+
+/** A unit's power is called: a hollow knock and one low rune chime. */
+export function powerCallSfx(): void {
+  playSample(`${SFX}/power-call.mp3`, 0.42, 0.04);
+}
+
+/** A soft single knock for quiet table confirms (does not advance the move song). */
+export function softKnockSfx(): void {
+  playSample(`${SFX}/wood-chime-move.mp3`, 0.25, 0.03);
+}
+
+/** Victory: a rising low choir on a gong. */
+export function victoryStinger() {
+  playSample(`${SFX}/victory.mp3`, 0.55);
+}
+
+/** Defeat: a deep bell tolls three times. */
 export function defeatStinger() {
-  unlockAudio();
-  beep(220, 0.5, 'sine', 0.1);
-  beep(196, 0.55, 'triangle', 0.08, 0.15);
-  beep(147, 0.7, 'sine', 0.09, 0.35);
+  playSample(`${SFX}/defeat.mp3`, 0.6);
 }
 
 export function playChronicle(id: string) {
