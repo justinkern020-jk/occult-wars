@@ -187,6 +187,29 @@ export async function signIn(
   return { user, token: await newSession(store, user.id) };
 }
 
+/** Close an account for good (the password again, to be sure). */
+export async function deleteAccount(
+  store: Store,
+  user: User,
+  password: unknown,
+  token: string | null,
+): Promise<void> {
+  const pw = typeof password === 'string' ? password : '';
+  const got = await scrypt(pw, Buffer.from(user.salt, 'hex'), 64);
+  const want = Buffer.from(user.hash, 'hex');
+  if (got.length !== want.length || !timingSafeEqual(got, want)) {
+    throw new SeatError(401, 'That is not the password for this seat.');
+  }
+  await store.pipe([
+    ['DEL', K.user(user.id)],
+    ['DEL', K.email(user.email)],
+    ...(user.username ? [['DEL', K.name(user.username.toLowerCase())]] : []),
+    ['DEL', K.profile(user.id)],
+    ['ZREM', K.book, user.id],
+    ...(token ? [['DEL', K.session(sha(token))]] : []),
+  ]);
+}
+
 export async function signOut(store: Store, token: string | null): Promise<void> {
   if (token) await store.pipe([['DEL', K.session(sha(token))]]);
 }

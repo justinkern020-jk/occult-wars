@@ -38,4 +38,23 @@ describe('account bearer seat', () => {
     );
     expect(((await gone.json()) as { seat: unknown }).seat).toBeNull();
   });
+
+  it('closes an account with its password; the email can sign up again', async () => {
+    setStoreForTests(memoryStore());
+    process.env.OW_ALLOW_MEMORY_ACCOUNTS = '1';
+    const post = (body: unknown, headers: Record<string, string> = {}) =>
+      handleAccount(new Request('https://x/api/account', { method: 'POST', body: JSON.stringify(body), headers }));
+    const { token } = (await (await post({ op: 'signup', email: 'dee@example.com', password: 'hunter2hunter2' })).json()) as { token: string };
+    const auth = { authorization: `Bearer ${token}` };
+    await post({ op: 'name', username: 'Dee' }, auth);
+    expect((await post({ op: 'delete', password: 'wrong-wrong' }, auth)).status).toBe(401);
+    expect((await post({ op: 'delete', password: 'hunter2hunter2' }, auth)).status).toBe(200);
+    const me = await handleAccount(new Request('https://x/api/account', { headers: auth }));
+    expect(((await me.json()) as { seat: unknown }).seat).toBeNull();
+    expect((await post({ op: 'signin', email: 'dee@example.com', password: 'hunter2hunter2' })).status).toBe(401);
+    const again = await post({ op: 'signup', email: 'dee@example.com', password: 'hunter2hunter2' });
+    expect(again.status).toBe(200);
+    const t2 = ((await again.json()) as { token: string }).token;
+    expect((await post({ op: 'name', username: 'Dee' }, { authorization: `Bearer ${t2}` })).status).toBe(200);
+  });
 });

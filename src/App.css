@@ -5143,3 +5143,11 @@ input[type='search'] {
 .meeting-link:hover {
   color: #ffe2a0;
 }
+.account-close {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: #a8956f;
+}
+.account-close summary {
+  cursor: pointer;
+}

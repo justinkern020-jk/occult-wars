@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
   AccountError,
+  deleteAccount,
   readBook,
   recordLine,
   signIn,
@@ -287,6 +288,7 @@ function SeatPage({ seat, onNamed }: { seat: Seat; onNamed: () => void }) {
       ) : (
         <p className="ledger-wait">No record until the name is in the book.</p>
       )}
+      <CloseAccount />
     </div>
   );
 }
@@ -294,4 +296,46 @@ function SeatPage({ seat, onNamed }: { seat: Seat; onNamed: () => void }) {
 function recordPercent(w: number, l: number): string {
   const line = recordLine(w, l);
   return line === 'untried' ? line : line.split(' · ')[1];
+}
+
+function CloseAccount() {
+  const [password, setPassword] = useState('');
+  const [note, setNote] = useState('');
+  const [busy, setBusy] = useState(false);
+  return (
+    <details className="account-close" data-testid="account-close">
+      <summary>Close this account</summary>
+      <form
+        className="account-form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          setBusy(true);
+          setNote('');
+          deleteAccount(password)
+            .catch((err: unknown) => setNote(message(err, 'The book would not close the account.')))
+            .finally(() => setBusy(false));
+        }}
+      >
+        <p className="ledger-wait">
+          This removes the account, its name in the book and its cloud copy. What is on this
+          device stays.
+        </p>
+        <label>
+          Password, to be sure
+          <input
+            type="password"
+            required
+            autoComplete="current-password"
+            value={password}
+            data-testid="account-close-password"
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </label>
+        <button type="submit" className="brass-btn" data-testid="account-close-submit" disabled={busy}>
+          Close the account
+        </button>
+      </form>
+      {note ? <p className="account-note">{note}</p> : null}
+    </details>
+  );
 }

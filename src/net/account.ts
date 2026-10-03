@@ -155,6 +155,13 @@ export async function signOut(): Promise<void> {
   }
 }
 
+/** Close this account for good (asks for the password again). */
+export async function deleteAccount(password: string): Promise<void> {
+  await call({ op: 'delete', body: { password } });
+  writeSeatToken(null);
+  setState({ status: 'open', seat: null });
+}
+
 export async function takeLedgerName(username: string): Promise<Seat | null> {
   return seatFrom(await call({ op: 'name', body: { username } }));
 }

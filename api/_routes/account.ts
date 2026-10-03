@@ -25,6 +25,7 @@ import {
   readCloudProfile,
   recordResult,
   signIn,
+  deleteAccount,
   signOut,
   signUp,
   takeName,
@@ -91,6 +92,10 @@ export async function handleAccount(req: Request, now = Date.now()): Promise<Res
     }
     const user = await userForToken(store, token);
     if (!user) throw new SeatError(401, 'Sign in first.');
+    if (op === 'delete') {
+      await deleteAccount(store, user, body.password, token);
+      return json({ ok: true, seat: null }, 200, { 'Set-Cookie': sessionCookie(null) });
+    }
     if (op === 'name') return json({ ok: true, seat: publicSeat(await takeName(store, user, body.username)) });
     if (op === 'record') {
       const next = await recordResult(store, user, body.won === true, body.table === true);
