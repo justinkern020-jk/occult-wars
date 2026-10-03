@@ -179,18 +179,34 @@ export async function readWho(): Promise<{ hands: HandLine[]; matches: MatchSumm
   return { hands: r.hands ?? [], matches: r.matches ?? [], build: r.build ?? '' };
 }
 
-/** One claimed name on the owner's account roll (no email). */
+/** One seat on the owner's account roll (no email); username null = never took a name. */
 export type AccountLine = {
-  username: string;
+  username: string | null;
   createdAt: number;
   lastSignInAt: number | null;
   country: string | null;
 };
 
-export async function readAccounts(): Promise<{ accounts: AccountLine[]; truncated: boolean } | null> {
-  const r = await watchCall<{ accounts?: AccountLine[]; truncated?: boolean }>({ op: 'accounts' });
+export type AccountRoll = {
+  accounts: AccountLine[];
+  unnamedAccounts: AccountLine[];
+  total: number;
+  unnamed: number;
+  truncated: boolean;
+};
+
+export async function readAccounts(): Promise<AccountRoll | null> {
+  const r = await watchCall<Partial<AccountRoll>>({ op: 'accounts' });
   if (!r) return null;
-  return { accounts: r.accounts ?? [], truncated: !!r.truncated };
+  const accounts = r.accounts ?? [];
+  const unnamedAccounts = r.unnamedAccounts ?? [];
+  return {
+    accounts,
+    unnamedAccounts,
+    total: r.total ?? accounts.length + unnamedAccounts.length,
+    unnamed: r.unnamed ?? unnamedAccounts.length,
+    truncated: !!r.truncated,
+  };
 }
 
 export async function viewMatch(

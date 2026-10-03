@@ -5,7 +5,7 @@
  *   { op: 'who' }                          → { hands, matches, build } (everyone at the table now)
  *   { op: 'view', id }                     → { summary, frame }
  *   { op: 'code', id, side, code }         → { ok, cmd }
- *   { op: 'accounts' }                     → { accounts, truncated } (names + dates; never emails)
+ *   { op: 'accounts' }                     → { accounts, unnamedAccounts, total, unnamed, truncated } (names + dates; never emails)
  * Anyone else gets a bare 404 so the door is not advertised.
  */
 import { getStore } from '../_lib/store.js';

@@ -10,7 +10,7 @@ import {
   readAccounts,
   readWho,
   sendPortalCode,
-  type AccountLine,
+  type AccountRoll,
   viewMatch,
   type HandLine,
   type MatchFrame,
@@ -128,7 +128,7 @@ export function PortalDoor() {
   const [hands, setHands] = useState<HandLine[] | null>(null);
   const [build, setBuild] = useState('');
   const [now, setNow] = useState(() => Date.now());
-  const [accounts, setAccounts] = useState<{ accounts: AccountLine[]; truncated: boolean } | null>(null);
+  const [accounts, setAccounts] = useState<AccountRoll | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -247,18 +247,25 @@ export function PortalDoor() {
         </ol>
       )}
       <h3 className="portal-roll-title" data-testid="portal-accounts-title">
-        Accounts{accounts ? ` (${accounts.accounts.length}${accounts.truncated ? '+' : ''})` : ''}
+        {accounts
+          ? `Accounts: ${accounts.total}${accounts.truncated ? '+' : ''} total (${accounts.accounts.length} with a username)`
+          : 'Accounts'}
       </h3>
       {accounts == null ? (
         <p className="portal-quiet">Reading the book of names…</p>
-      ) : accounts.accounts.length === 0 ? (
-        <p className="portal-quiet">No one has taken a name yet.</p>
+      ) : accounts.total === 0 ? (
+        <p className="portal-quiet">No one has taken a seat yet.</p>
       ) : (
         <ol className="portal-roll" data-testid="portal-accounts">
-          {accounts.accounts.map((a) => (
-            <li key={a.username} className="portal-hand" data-testid="portal-account">
+          {[...accounts.accounts, ...accounts.unnamedAccounts].map((a, i) => (
+            <li
+              key={a.username ?? `unnamed-${i}`}
+              className="portal-hand"
+              data-testid="portal-account"
+              data-unnamed={a.username ? undefined : 'true'}
+            >
               <span className="portal-hand-name">
-                <b>{a.username}</b>
+                {a.username ? <b>{a.username}</b> : <i>(no name)</i>}
               </span>
               <span className="portal-hand-meta">
                 Seated {seatDate(a.createdAt)}
