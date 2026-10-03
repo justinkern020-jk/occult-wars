@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
 import { cardById } from '../data/catalog';
+import { createOnceGate } from '../game/onceGate';
 import {
   aiDifficultyLabel,
   aiStepCap,
@@ -442,6 +443,13 @@ export function Battlefield({
   const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);
   const dragHandRef = useRef<number | null>(null);
   const [cryptidSight, setCryptidSight] = useState<string | null>(null);
+  // Each cryptid's Sighting is announced once per match (later rites, musters and effect passes stay silent).
+  const cryptidGateRef = useRef(createOnceGate());
+  const announceCryptid = useCallback((name: string, ms = 2400) => {
+    if (!cryptidGateRef.current.first(name)) return;
+    setCryptidSight(name);
+    window.setTimeout(() => setCryptidSight((cur) => (cur === name ? null : cur)), ms);
+  }, []);
   const visitTurnRef = useRef<number | null>(null);
   const sightingFiredRef = useRef(false);
   const [codeDraft, setCodeDraft] = useState('');
@@ -774,14 +782,14 @@ export function Battlefield({
         if (names.length > 0) {
           setHand(handAfter);
           nextHand = handAfter;
-          setCryptidSight(names[0]);
-          setTimeout(() => setCryptidSight(null), 2400);
+          cryptidGateRef.current.mark(...names.slice(1));
+          announceCryptid(names[0]!);
         }
       }
 
       return { nextDeck, nextHand, cleared };
     },
-    [bankUnits, pushLog, blueFaction, redFaction, mode, showPips],
+    [bankUnits, pushLog, blueFaction, redFaction, mode, showPips, announceCryptid],
   );
 
   const bootMatch = useCallback(
@@ -829,6 +837,7 @@ export function Battlefield({
             : 'first';
       eraRef.current = era;
       sightingFiredRef.current = false;
+      cryptidGateRef.current.reset();
       // Rare sighting every 15th real match boot (Strict Mode remounts deduped).
       let veilNote: string | null = null;
       const forcedSight = readForceSighting();
@@ -1115,15 +1124,11 @@ export function Battlefield({
       }
 
       for (const u of Object.values(ctx.units)) {
-        if (hasKeyword(u, 'cryptid')) {
-          setCryptidSight(u.name);
-          setTimeout(() => setCryptidSight(null), 2200);
-          break;
-        }
+        if (hasKeyword(u, 'cryptid')) announceCryptid(u.name, 2200);
       }
       if (ctx.pips?.length) showPips(ctx.pips);
     },
-    [pushLog, showPips],
+    [pushLog, showPips, announceCryptid],
   );
 
   const castCard = useCallback(
@@ -1446,8 +1451,8 @@ export function Battlefield({
     visitTurnRef.current = null;
     setHand(handAfter);
     liveRef.current = { ...liveRef.current, hand: handAfter };
-    setCryptidSight(names[0]);
-    setTimeout(() => setCryptidSight(null), 2400);
+    cryptidGateRef.current.mark(...names.slice(1));
+    announceCryptid(names[0]!);
     return `Sighting: ${names.join(', ')}.`;
   }
 
@@ -1761,10 +1766,7 @@ export function Battlefield({
           pushLog(`${card.name} finds that hand empty.`);
         }
       }
-      if (hasKeyword(card, 'cryptid')) {
-        setCryptidSight(card.name);
-        setTimeout(() => setCryptidSight(null), 2200);
-      }
+      if (hasKeyword(card, 'cryptid')) announceCryptid(card.name, 2200);
       if (relays.length > 0) {
         setDeck((D) => {
           setHand((H) => {
@@ -1783,7 +1785,7 @@ export function Battlefield({
       coinMoveSfx();
       return true;
     },
-    [hand, board, control, gameMap, loyalty, pushLog],
+    [hand, board, control, gameMap, loyalty, pushLog, announceCryptid],
   );
 
   const canStrikeTarget = useCallback(
@@ -2408,7 +2410,7 @@ export function Battlefield({
     setBoard(st.board);
     setControl(st.control);
     setLeaderUsed(st.leaderUsed);
-    if (st.cryptidSight != null) setCryptidSight(st.cryptidSight);
+    if (st.cryptidSight != null) announceCryptid(st.cryptidSight);
     liveRef.current = {
       ...liveRef.current,
       board: st.board,
@@ -2430,7 +2432,7 @@ export function Battlefield({
     setAim(null);
     setPassPrompt(false);
     setAiBusy(false);
-  }, [mapId, kickCoinSlide, showPips, mySide]);
+  }, [mapId, kickCoinSlide, showPips, mySide, announceCryptid]);
 
   // Host: broadcast authoritative state (debounced).
   useEffect(() => {
