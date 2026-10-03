@@ -72,7 +72,7 @@ import {
   victoryReason,
   type VictoryKind,
 } from '../game/scoring';
-import { clashSfx, gunshotSfx, defeatStinger, victoryStinger, brassClick, setMusicBed, unlockAudio, sirenSfx, metalRiffSfx, nukeBoomSfx, nukemVoiceSfx, copSirenSfx } from '../game/sfx';
+import { clashSfx, gunshotSfx, defeatStinger, victoryStinger, brassClick, coinMoveSfx, preloadCoinMoveSfx, setMusicBed, unlockAudio, sirenSfx, metalRiffSfx, nukeBoomSfx, nukemVoiceSfx, copSirenSfx } from '../game/sfx';
 import {
   recordMatchVisit,
   rollVisitTurn,
@@ -329,6 +329,10 @@ export function Battlefield({
   aiDifficulty = 'expert',
 }: BattlefieldProps = {}) {
   const [mapId, setMapId] = useState(initialMapId);
+  // Warm the wooden coin-move knock so the first move plays without lag.
+  useEffect(() => {
+    preloadCoinMoveSfx();
+  }, []);
   useEffect(() => {
     setMapId(initialMapId);
   }, [initialMapId]);
@@ -1705,7 +1709,7 @@ export function Battlefield({
           return D;
         });
       }
-      brassClick();
+      coinMoveSfx();
       return true;
     },
     [hand, board, control, gameMap, loyalty, pushLog],
@@ -1791,6 +1795,7 @@ export function Battlefield({
 
       if (isEnemyStronghold(tile, atk.unit.side) && !leavesUnclaimed(atk.unit)) {
         kickCoinSlide(atk.unit, atk.r, atk.c, r, c);
+        coinMoveSfx();
         setBoard((b) => {
           const next = b.map((row) => [...row]);
           next[atk.r][atk.c] = null;
@@ -1852,6 +1857,7 @@ export function Battlefield({
       ctrl = grazed.control;
       notes.push(...grazed.notes);
       kickCoinSlide(atk.unit, atk.r, atk.c, r, c);
+      coinMoveSfx();
       setBoard((b) => {
         const next = b.map((row) => [...row]);
         next[atk.r][atk.c] = null;

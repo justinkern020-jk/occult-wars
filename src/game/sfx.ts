@@ -141,6 +141,61 @@ export function windChimeSfx(): Promise<void> {
   });
 }
 
+/** Wooden coin-move knock ("deep hollow knock"): small preloaded pool, reused. */
+const COIN_MOVE_SRC = '/assets/audio/sfx/wood-chime-move.mp3';
+const COIN_MOVE_POOL = 3;
+let coinMovePool: HTMLAudioElement[] | null = null;
+let coinMoveNext = 0;
+
+function getCoinMovePool(): HTMLAudioElement[] {
+  if (coinMovePool) return coinMovePool;
+  coinMovePool = [];
+  if (typeof Audio === 'undefined') return coinMovePool;
+  for (let i = 0; i < COIN_MOVE_POOL; i++) {
+    try {
+      const a = new Audio(COIN_MOVE_SRC);
+      a.preload = 'auto';
+      coinMovePool.push(a);
+    } catch {
+      /* no audio element support */
+    }
+  }
+  return coinMovePool;
+}
+
+/** Warm the coin-move pool so the first move doesn't lag. */
+export function preloadCoinMoveSfx(): void {
+  try {
+    getCoinMovePool().forEach((a) => a.load());
+  } catch {
+    /* fail silently */
+  }
+}
+
+/** Wooden knock when a coin (unit) moves or is deployed. Fails silently. */
+export function coinMoveSfx(): void {
+  try {
+    unlockAudio();
+    const pool = getCoinMovePool();
+    if (pool.length === 0) return;
+    // Prefer an idle element; otherwise reuse round-robin.
+    let a = pool.find((x) => x.paused || x.ended);
+    if (!a) {
+      a = pool[coinMoveNext % pool.length];
+      coinMoveNext++;
+    }
+    a.pause();
+    a.currentTime = 0;
+    a.volume = 0.35;
+    // Let the rate nudge pitch too (subtle variation between knocks).
+    (a as HTMLAudioElement & { preservesPitch?: boolean }).preservesPitch = false;
+    a.playbackRate = 0.94 + Math.random() * 0.12;
+    void a.play().catch(() => {});
+  } catch {
+    /* fail silently */
+  }
+}
+
 /** ~1.5s air-raid style siren for gas / chlorine rites (replaces cough static). */
 export function sirenSfx(dur = 1.5) {
   unlockAudio();

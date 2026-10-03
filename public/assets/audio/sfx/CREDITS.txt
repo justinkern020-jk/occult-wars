@@ -1,3 +1,5 @@
 wind-chime.mp3 — match-open sting
   Real wind chimes: Phillip Miller / Free Wind Chimes (CC0 via OpenGameArt)
   Light mystical tube shimmer mixed under.
+wood-chime-move.mp3 — coin (unit) move / deploy knock ("C: deep hollow knock")
+  Original modal synthesis (no samples), synth_wood_chimes.py. Free to use.
