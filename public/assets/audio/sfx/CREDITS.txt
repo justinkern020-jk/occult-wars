@@ -3,3 +3,5 @@ wind-chime.mp3 — match-open sting
   Light mystical tube shimmer mixed under.
 wood-chime-move.mp3 — coin (unit) move / deploy knock ("C: deep hollow knock")
   Original modal synthesis (no samples), synth_wood_chimes.py. Free to use.
+spell-cast.mp3 — rite / device cast ("C: crystalline rune chime")
+  Original synthesis (no samples), synth_spells.py. Free to use.

@@ -72,7 +72,7 @@ import {
   victoryReason,
   type VictoryKind,
 } from '../game/scoring';
-import { clashSfx, gunshotSfx, defeatStinger, victoryStinger, brassClick, coinMoveSfx, preloadCoinMoveSfx, setMusicBed, unlockAudio, sirenSfx, metalRiffSfx, nukeBoomSfx, nukemVoiceSfx, copSirenSfx } from '../game/sfx';
+import { clashSfx, gunshotSfx, defeatStinger, victoryStinger, brassClick, coinMoveSfx, preloadCoinMoveSfx, spellCastSfx, preloadSpellCastSfx, setMusicBed, unlockAudio, sirenSfx, metalRiffSfx, nukeBoomSfx, nukemVoiceSfx, copSirenSfx } from '../game/sfx';
 import {
   recordMatchVisit,
   rollVisitTurn,
@@ -329,9 +329,10 @@ export function Battlefield({
   aiDifficulty = 'expert',
 }: BattlefieldProps = {}) {
   const [mapId, setMapId] = useState(initialMapId);
-  // Warm the wooden coin-move knock so the first move plays without lag.
+  // Warm the wooden coin-move knock and spell-cast chime so the first use plays without lag.
   useEffect(() => {
     preloadCoinMoveSfx();
+    preloadSpellCastSfx();
   }, []);
   useEffect(() => {
     setMapId(initialMapId);
@@ -1135,7 +1136,7 @@ export function Battlefield({
       setAim(null);
       if (card.id === 'south_haven_dispatch') copSirenSfx();
       else if (hasKeyword(card, 'gas')) sirenSfx();
-      else brassClick();
+      else spellCastSfx();
       return true;
     },
     [hand, loyalty, buildEffectCtx, applyEffectCtx, pushLog],

@@ -196,6 +196,59 @@ export function coinMoveSfx(): void {
   }
 }
 
+/** Spell-cast chime ("crystalline rune chime"): small preloaded pool, reused. */
+const SPELL_CAST_SRC = '/assets/audio/sfx/spell-cast.mp3';
+const SPELL_CAST_POOL = 3;
+let spellCastPool: HTMLAudioElement[] | null = null;
+let spellCastNext = 0;
+
+function getSpellCastPool(): HTMLAudioElement[] {
+  if (spellCastPool) return spellCastPool;
+  spellCastPool = [];
+  if (typeof Audio === 'undefined') return spellCastPool;
+  for (let i = 0; i < SPELL_CAST_POOL; i++) {
+    try {
+      const a = new Audio(SPELL_CAST_SRC);
+      a.preload = 'auto';
+      spellCastPool.push(a);
+    } catch {
+      /* no audio element support */
+    }
+  }
+  return spellCastPool;
+}
+
+/** Warm the spell-cast pool so the first cast doesn't lag. */
+export function preloadSpellCastSfx(): void {
+  try {
+    getSpellCastPool().forEach((a) => a.load());
+  } catch {
+    /* fail silently */
+  }
+}
+
+/** Crystalline rune chime when a spell (rite / device) is cast. Fails silently. */
+export function spellCastSfx(): void {
+  try {
+    unlockAudio();
+    const pool = getSpellCastPool();
+    if (pool.length === 0) return;
+    let a = pool.find((x) => x.paused || x.ended);
+    if (!a) {
+      a = pool[spellCastNext % pool.length];
+      spellCastNext++;
+    }
+    a.pause();
+    a.currentTime = 0;
+    a.volume = 0.4;
+    (a as HTMLAudioElement & { preservesPitch?: boolean }).preservesPitch = false;
+    a.playbackRate = 0.97 + Math.random() * 0.06;
+    void a.play().catch(() => {});
+  } catch {
+    /* fail silently */
+  }
+}
+
 /** ~1.5s air-raid style siren for gas / chlorine rites (replaces cough static). */
 export function sirenSfx(dur = 1.5) {
   unlockAudio();
