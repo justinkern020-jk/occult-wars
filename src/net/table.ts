@@ -34,6 +34,8 @@ export type TableView = {
   meet: number;
   /** The deployed build ('' when unknown). */
   build: string;
+  /** Finished matches, every hand, by hour (old = the Sealed Century prequel). */
+  played: { first: number; second: number; old: number };
 };
 
 /* ---- what this hand is doing (owner's roll only) and which build it runs ---- */
@@ -140,7 +142,19 @@ export function parseTableView(raw: unknown): TableView | null {
     store: r.store === 'redis' ? 'redis' : 'memory',
     meet: Number(r.meet) || 0,
     build: typeof r.build === 'string' && /^[a-z0-9]{1,12}$/.test(r.build) ? r.build : '',
+    played: parsePlayed(r.played),
   };
+}
+
+function parsePlayed(raw: unknown): { first: number; second: number; old: number } {
+  const p = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
+  const n = (k: string) => Math.max(0, Math.floor(Number(p[k]) || 0));
+  return { first: n('first'), second: n('second'), old: n('old') };
+}
+
+/** A finished match (win or loss) for the public tally. */
+export function reportPlayed(era: 'first' | 'second' | 'old'): void {
+  void post({ op: 'played', era }).catch(() => undefined);
 }
 
 async function post(body: Record<string, unknown>): Promise<unknown> {

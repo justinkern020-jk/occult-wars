@@ -56,6 +56,30 @@ export function readVisitCount(era: Era): number {
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
 }
 
+const PLAYED_KEYS: Record<Era, string> = {
+  first: 'occult-wars.played',
+  second: 'the-second-hour.played',
+  old: 'the-sealed-century.played',
+};
+
+/** A finished match on this device (win or loss), by hour. */
+export function recordMatchPlayed(era: Era): number {
+  if (typeof localStorage === 'undefined') return 0;
+  const n = readPlayedCount(era) + 1;
+  try {
+    localStorage.setItem(PLAYED_KEYS[era], String(n));
+  } catch {
+    /* private mode */
+  }
+  return n;
+}
+
+export function readPlayedCount(era: Era): number {
+  if (typeof localStorage === 'undefined') return 0;
+  const n = Number(localStorage.getItem(PLAYED_KEYS[era]) ?? '0');
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
+}
+
 /** Test helper: set visits so the *next* recordMatchVisit is a sighting. */
 export function setVisitsForNextSighting(era: Era): void {
   if (typeof localStorage === 'undefined') return;

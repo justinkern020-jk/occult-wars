@@ -17,6 +17,7 @@ describe('parseTableView', () => {
       store: 'redis',
       meet: 12,
       build: '',
+      played: { first: 4, second: '2', old: -1 },
     });
     expect(v).toEqual({
       playing: 3,
@@ -27,6 +28,7 @@ describe('parseTableView', () => {
       store: 'redis',
       meet: 12,
       build: '',
+      played: { first: 4, second: 2, old: 0 },
     });
   });
 

@@ -78,6 +78,7 @@ import {
 import { clashSfx, gunshotSfx, defeatStinger, victoryStinger, coinMoveSfx, unitDeathSfx, endTurnSfx, leaderCallSfx, powerCallSfx, softKnockSfx, preloadBattleSfx, preloadCoinMoveSfx, resetCoinMoveSong, spellCastSfx, preloadSpellCastSfx, setMusicBed, unlockAudio, sirenSfx, metalRiffSfx, nukeBoomSfx, nukemVoiceSfx, copSirenSfx } from '../game/sfx';
 import {
   recordMatchVisit,
+  recordMatchPlayed,
   rollVisitTurn,
   pickCryptid,
   type Era,
@@ -96,7 +97,7 @@ import {
   type MatchFrame,
   type PortalCode,
 } from '../net/watch';
-import { setActivity } from '../net/table';
+import { reportPlayed, setActivity } from '../net/table';
 import {
   RulesPrimer,
   hasSeenPrimer,
@@ -1045,6 +1046,9 @@ export function Battlefield({
         : winner === PLAYER;
       if (playerWon) victoryStinger();
       else defeatStinger();
+      // The battle count: a finished match for this hour (here and at the table).
+      recordMatchPlayed(eraRef.current);
+      reportPlayed(eraRef.current);
       const gain = shardGainFor(mode, playerWon);
       const hint =
         playerWon && mode !== 'hotseat' && eraRef.current === 'first' ? noteFirstHourWin() : null;
@@ -2500,6 +2504,8 @@ export function Battlefield({
         }
         if (st.matchOver.winner === mySide) victoryStinger();
         else defeatStinger();
+        // The host reports the match to the table; the guest keeps its own count.
+        recordMatchPlayed(eraRef.current);
       }
     }
     if (before.matchOver && !st.matchOver) {

@@ -19,6 +19,9 @@ const K = {
   who: 'ow:t:who',
   since: 'ow:t:since',
   taken: (room: string) => `ow:t:taken:${room}`,
+  /** Finished matches by hour (first / second / old = the Sealed Century prequel). */
+  played: 'ow:t:played',
+  playedGate: (mark: string) => `ow:t:pg:${mark}`,
 };
 
 export const MARK_RE = /^[a-z0-9]{16}$/;
@@ -38,7 +41,30 @@ export type TableView = {
   meet: number;
   /** The deployed build; a client on another build reloads at a safe moment. */
   build: string;
+  /** Finished matches, every hand, by hour. */
+  played: PlayedTally;
 };
+
+export type PlayedTally = { first: number; second: number; old: number };
+export const PLAYED_ERAS = ['first', 'second', 'old'] as const;
+/** One finished match per hand per this many seconds counts. */
+const PLAYED_GATE_SEC = 20;
+
+export function playedTally(raw: unknown): PlayedTally {
+  const r = toRecord(raw);
+  const n = (k: string) => Math.max(0, Math.floor(Number(r[k]) || 0));
+  return { first: n('first'), second: n('second'), old: n('old') };
+}
+
+/** A finished match (win or loss) for the public tally; rate-limited per hand. */
+export async function recordPlayed(store: Store, mark: string, era: unknown) {
+  const e = String(era ?? '');
+  if (!(PLAYED_ERAS as readonly string[]).includes(e)) return { ok: false as const };
+  const [gate] = await store.pipe([['SET', K.playedGate(mark), '1', 'EX', PLAYED_GATE_SEC, 'NX']]);
+  if (gate !== 'OK') return { ok: true as const, counted: false };
+  await store.pipe([['HINCRBY', K.played, e, 1]]);
+  return { ok: true as const, counted: true };
+}
 
 export function serverBuild(env: Record<string, string | undefined> = process.env): string {
   return (env.VERCEL_GIT_COMMIT_SHA ?? '').slice(0, 12).toLowerCase();
@@ -196,10 +222,12 @@ export async function beat(
   tail.push(['HMGET', K.country, mark, ...others]);
   tail.push(['HGETALL', K.checkins]);
   tail.push(['GET', 'ow:meet:n']);
+  tail.push(['HGETALL', K.played]);
   const res = await store.pipe(tail);
-  const countries = (res[res.length - 3] as (string | null)[]) ?? [];
-  const tally = toRecord(res[res.length - 2]);
-  const meet = Number(res[res.length - 1]) || 0;
+  const countries = (res[res.length - 4] as (string | null)[]) ?? [];
+  const tally = toRecord(res[res.length - 3]);
+  const meet = Number(res[res.length - 2]) || 0;
+  const played = playedTally(res[res.length - 1]);
 
   return {
     ok: true,
@@ -214,6 +242,7 @@ export async function beat(
       .sort((a, b) => b.n - a.n || a.country.localeCompare(b.country)),
     meet,
     build,
+    played,
   };
 }
 

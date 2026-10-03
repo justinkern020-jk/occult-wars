@@ -1,11 +1,12 @@
 /**
  * POST /api/table — presence heartbeat, challenge issue / accept / cancel.
  * Body: { op: 'beat' | 'issue' | 'accept' | 'cancel', mark, room?, country? }
+ *       { op: 'played', mark, era: 'first' | 'second' | 'old' }  (a finished match, for the tally)
  *       { op: 'live', mark, id, key, summary, frame? }  (a match reporting to the Portal)
  */
 import { getStore } from '../_lib/store.js';
 import { HttpError, fail, headerCountry, json, readJson } from '../_lib/http.js';
-import { MARK_RE, ROOM_RE, accept, beat, cancel, cleanActivity, cleanCountry, issue, serverBuild } from '../_lib/table.js';
+import { MARK_RE, ROOM_RE, accept, beat, cancel, cleanActivity, cleanCountry, issue, recordPlayed, serverBuild } from '../_lib/table.js';
 import { FRAME_MAX, WatchError, reportLive } from '../_lib/watch.js';
 
 export async function handleTable(req: Request, now = Date.now()): Promise<Response> {
@@ -26,6 +27,7 @@ export async function handleTable(req: Request, now = Date.now()): Promise<Respo
         await reportLive(store, { id: body.id, key: body.key, summary: body.summary, frame: body.frame }, now),
       );
     }
+    if (op === 'played') return json(await recordPlayed(store, mark, body.era));
     const room = String(body.room ?? '');
     if (op === 'cancel') return json(await cancel(store, mark));
     if (!ROOM_RE.test(room)) throw new HttpError(400, 'Bad room.');

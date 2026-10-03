@@ -5933,3 +5933,35 @@ input[type='search'] {
     0 0 0 1px #c6a15b88,
     0 0 26px #3cff7a22;
 }
+
+/* ——— Battle count: matches played by hour ——— */
+.battle-count-played {
+  margin: 0 0 1.1rem;
+  text-align: left;
+}
+.battle-count-played h2 {
+  margin: 0 0 0.45rem;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #c6a15b;
+}
+.battle-count-played ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.3rem;
+}
+.battle-count-played li {
+  color: #f3ead7;
+  font-size: 0.92rem;
+}
+.battle-count-played b {
+  font-family: Cinzel, Georgia, serif;
+  font-variant-numeric: tabular-nums;
+}
+.battle-count-played small {
+  color: var(--color-muted, #a89a80);
+}

@@ -1,5 +1,5 @@
 import { useEffect, useSyncExternalStore } from 'react';
-import { readVisitCount } from '../game/visits';
+import { readPlayedCount, readVisitCount } from '../game/visits';
 import { PortalDoor } from './Portal';
 import { beatNow, countryName, readTableSnapshot, subscribeTable } from '../net/table';
 
@@ -12,6 +12,11 @@ export function BattleCountModal({ onClose }: Props) {
   const first = readVisitCount('first');
   const second = readVisitCount('second');
   const old = readVisitCount('old');
+  const mine = {
+    first: readPlayedCount('first'),
+    second: readPlayedCount('second'),
+    old: readPlayedCount('old'),
+  };
   const snap = useSyncExternalStore(subscribeTable, readTableSnapshot, readTableSnapshot);
 
   // Read the table while the book is open.
@@ -80,6 +85,28 @@ export function BattleCountModal({ onClose }: Props) {
             <dd data-testid="battle-count-old">{old}</dd>
           </div>
         </dl>
+
+        <section className="battle-count-played" data-testid="battle-count-played">
+          <h2>Matches played</h2>
+          <ul>
+            {(
+              [
+                ['first', 'First Hour'],
+                ['second', 'Second Hour'],
+                ['old', 'Sealed Century (prequel)'],
+              ] as const
+            ).map(([era, label]) => {
+              const all = view?.played?.[era];
+              return (
+                <li key={era} data-testid={`battle-count-played-${era}`}>
+                  <span>{label}:</span>{' '}
+                  <b>{all == null ? (wait ? '…' : '—') : all.toLocaleString()} played</b>
+                  <small> · yours {mine[era].toLocaleString()}</small>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
 
         {shut ? (
           <p className="battle-count-shut" data-testid="battle-count-remote">
