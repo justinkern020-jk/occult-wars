@@ -55,7 +55,7 @@ import { CARDS } from './data/catalog';
 import { levelFromXp } from './game/dailyRites';
 import { readHourOpen } from './game/hourUnlock';
 import type { StageOutcome } from './game/campaign';
-import { mapsForEra } from './game/maps';
+import { isMainGameMap } from './game/maps';
 import { AI_DIFFICULTY_KEY, readAiDifficulty, type AiDifficulty } from './game/ai';
 import './App.css';
 
@@ -243,9 +243,7 @@ export default function App() {
       setRedHeroId(undefined);
       setRedDeckIds(undefined);
       setMatchMode('training');
-      setMapId((prev) =>
-        mapsForEra('first').some((m) => m.id === prev) ? prev : 'ashen-cross',
-      );
+      setMapId((prev) => (isMainGameMap(prev) ? prev : 'ashen-cross'));
       setScreen('field');
     });
   }
@@ -261,9 +259,7 @@ export default function App() {
       setRedHeroId(undefined);
       setRedDeckIds(undefined);
       setMatchMode('hotseat');
-      setMapId((prev) =>
-        mapsForEra('first').some((m) => m.id === prev) ? prev : 'ashen-cross',
-      );
+      setMapId((prev) => (isMainGameMap(prev) ? prev : 'ashen-cross'));
       setScreen('field');
     });
   }
@@ -296,9 +292,7 @@ export default function App() {
       setFriendRole(role);
       setFriendSession(session);
       setMatchMode('friend');
-      setMapId((prev) =>
-        mapsForEra('first').some((m) => m.id === prev) ? prev : 'ashen-cross',
-      );
+      setMapId((prev) => (isMainGameMap(prev) ? prev : 'ashen-cross'));
       setScreen('field');
     });
   }

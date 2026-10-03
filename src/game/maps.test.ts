@@ -1,7 +1,18 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { MAPS, cardImageUrl, tileLabel, tileLogName, type Tile } from './maps';
+import {
+  MAPS,
+  cardImageUrl,
+  isMainGameMap,
+  mainGameMaps,
+  mapById,
+  mapsForEra,
+  matchEra,
+  tileLabel,
+  tileLogName,
+  type Tile,
+} from './maps';
 
 describe('card art paths', () => {
   it('resolves Papa John art to an existing local asset', () => {
@@ -52,5 +63,50 @@ describe('tile labels (map UI)', () => {
     expect(tileLogName({ kind: 'stronghold', home: 'red' })).toBe(
       'Crimson stronghold',
     );
+  });
+});
+
+describe('the prequel (Sealed Century) grounds in the main game', () => {
+  it('the main-game picker lists every First Hour field, then all seven prequel grounds', () => {
+    const ids = mainGameMaps().map((m) => m.id);
+    expect(ids).toEqual([...mapsForEra('first'), ...mapsForEra('old')].map((m) => m.id));
+    for (const id of [
+      'nile-court',
+      'saturn-cross',
+      'rose-crypt',
+      'silk-pass',
+      'noon-orchard',
+      'white-road',
+      'sun-garden',
+    ]) {
+      expect(isMainGameMap(id), id).toBe(true);
+    }
+    // Second Hour yards stay behind their own door.
+    expect(isMainGameMap('blackout-yard')).toBe(false);
+    expect(isMainGameMap('culvert-court')).toBe(false);
+    expect(isMainGameMap(undefined)).toBe(false);
+  });
+
+  it('a prequel ground in Training, Pass the Grimoire or a friend match plays as the First Hour', () => {
+    const nile = mapById('nile-court');
+    for (const mode of ['training', 'hotseat', 'friend', 'campaign']) {
+      expect(matchEra(mode, nile), mode).toBe('first');
+    }
+    expect(matchEra('old', nile)).toBe('old');
+    expect(matchEra('second', mapById('blackout-yard'))).toBe('second');
+    expect(matchEra('training', mapById('blackout-yard'))).toBe('second');
+    expect(matchEra('training', mapById('ashen-cross'))).toBe('first');
+  });
+
+  it('every prequel ground has a stronghold and gate for each side, so any mode can boot on it', () => {
+    for (const m of mapsForEra('old')) {
+      const flat = m.tiles.flat();
+      expect(m.tiles).toHaveLength(5);
+      for (const row of m.tiles) expect(row).toHaveLength(5);
+      for (const side of ['blue', 'red'] as const) {
+        expect(flat.some((t) => t.kind === 'stronghold' && t.home === side), `${m.id} ${side}`).toBe(true);
+        expect(flat.some((t) => t.kind === 'gate' && t.home === side), `${m.id} ${side}`).toBe(true);
+      }
+    }
   });
 });

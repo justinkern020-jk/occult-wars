@@ -167,6 +167,32 @@ export function mapsForEra(era: MapEra): GameMap[] {
   return MAPS.filter((m) => (m.era ?? 'first') === era);
 }
 
+/**
+ * Fields a player may pick in the main game — Training vs AI, Pass the Grimoire,
+ * and friend matches: every First Hour field, then the Sealed Century (prequel)
+ * grounds. The prequel grounds carry no era-only tile rules, so they play under
+ * the ordinary First Hour rite. Second Hour yards stay behind their own door.
+ */
+export function mainGameMaps(): GameMap[] {
+  return [...mapsForEra('first'), ...mapsForEra('old')];
+}
+
+export function isMainGameMap(id: string | null | undefined): boolean {
+  return !!id && mainGameMaps().some((m) => m.id === id);
+}
+
+/**
+ * The hour a match is played in (cryptid pool, visit counter, Portal label).
+ * The mode decides it; a Sealed Century ground picked in the main game still
+ * plays as the First Hour. A Second Hour yard keeps its own hour.
+ */
+export function matchEra(mode: string, map: GameMap): MapEra {
+  if (mode === 'second') return 'second';
+  if (mode === 'old') return 'old';
+  if ((map.era ?? 'first') === 'second') return 'second';
+  return 'first';
+}
+
 /** Board overlay label. Art speaks — never paint Gate/Stronghold/Resource text on tiles. */
 export function tileLabel(t: Tile): string {
   void t;

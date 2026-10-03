@@ -2163,6 +2163,18 @@ input[type='search'] {
     grid-template-columns: repeat(4, 1fr);
   }
 }
+.map-group + .map-group {
+  margin-top: 1.4rem;
+}
+.map-group-title {
+  margin-top: 0.2rem;
+}
+.map-group-note {
+  font-family: var(--font-body);
+  letter-spacing: 0.02em;
+  text-transform: none;
+  opacity: 0.75;
+}
 .map-card {
   flex-direction: column;
   align-items: stretch;

@@ -121,6 +121,7 @@ export function MenuAtelier({
   const meetUnread = (tableSnap.view?.meet ?? 0) > readSeenMeeting();
   const [revealUnlock, setRevealUnlock] = useState<{ card: Card; caption: string } | null>(null);
   const firstMaps = mapsForEra('first');
+  const prequelMaps = mapsForEra('old');
   const lvl = levelFromXp(profile.xp);
 
   useEffect(() => {
@@ -614,40 +615,57 @@ export function MenuAtelier({
       </section>
 
       <section className="plate field-picker">
-        <p className="plate-kicker">Choose the field (Training)</p>
-        <div className="map-grid">
-          {firstMaps.map((m) => {
-            const doubles = doubleNodeCount(m);
-            const active = m.id === selectedMapId;
-            return (
-              <button
-                key={m.id}
-                type="button"
-                aria-pressed={active}
-                data-testid={`map-${m.id}`}
-                className={`map-card brass-btn ${active ? 'brass-btn-solid' : ''}`}
-                onClick={() => onSelectMap(m.id)}
-              >
-                <span
-                  className="map-thumb"
-                  style={{
-                    backgroundImage: `url(/assets/maps/${m.id}.jpg)`,
-                  }}
-                >
-                  <span className="map-mini" aria-hidden>
-                    {m.tiles.flat().map((t, i) => (
-                      <MiniTile key={i} kind={t.kind} symbols={t.symbols} />
-                    ))}
-                  </span>
-                </span>
-                <span className="map-card-name">{m.name}</span>
-                <span className="map-card-sub">
-                  {doubles === 0 ? 'No double seal' : `${doubles} nodes worth 2`}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        <p className="plate-kicker">Choose the field (Training · Pass the Grimoire · Friend)</p>
+        {(
+          [
+            { key: 'first', title: null, maps: firstMaps },
+            { key: 'old', title: 'The Sealed Century grounds', maps: prequelMaps },
+          ] as const
+        ).map((group) => (
+          <div key={group.key} className={`map-group map-group-${group.key}`} data-testid={`map-group-${group.key}`}>
+            {group.title && (
+              <p className="plate-kicker map-group-title">
+                {group.title}
+                <span className="map-group-note"> · the prequel fields, played under the First Hour rite</span>
+              </p>
+            )}
+            <div className="map-grid">
+              {group.maps.map((m) => {
+                const doubles = doubleNodeCount(m);
+                const active = m.id === selectedMapId;
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    aria-pressed={active}
+                    data-testid={`map-${m.id}`}
+                    className={`map-card brass-btn ${active ? 'brass-btn-solid' : ''}`}
+                    onClick={() => onSelectMap(m.id)}
+                    title={m.epithet}
+                  >
+                    <span
+                      className={`map-thumb${m.mood === 'bright' ? ' mood-bright' : ''}`}
+                      style={{
+                        backgroundImage: `url(/assets/maps/${m.id}.jpg)`,
+                      }}
+                    >
+                      <span className="map-mini" aria-hidden>
+                        {m.tiles.flat().map((t, i) => (
+                          <MiniTile key={i} kind={t.kind} symbols={t.symbols} />
+                        ))}
+                      </span>
+                    </span>
+                    <span className="map-card-name">{m.name}</span>
+                    <span className="map-card-sub">
+                      {m.mood === 'bright' ? 'Daylight · ' : ''}
+                      {doubles === 0 ? 'No double seal' : `${doubles} nodes worth 2`}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
         <button
           type="button"
           className="brass-btn brass-btn-solid enter-field-btn"

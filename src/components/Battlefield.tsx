@@ -55,7 +55,7 @@ import {
   sproutAtRiteEnd,
 } from '../game/rules';
 import { canBeStruck, hasKeyword, manhattan } from '../game/keywords';
-import { MAPS, mapById, tileLabel, tileLogName, type Side } from '../game/maps';
+import { isMainGameMap, mapById, mapsForEra, matchEra, tileLabel, tileLogName, type Side } from '../game/maps';
 import {
   legalEmptySteps,
   orderedLegalDirs,
@@ -893,12 +893,9 @@ export function Battlefield({
       setAiBusy(false);
       setPassPrompt(false);
       setCryptidSight(null);
-      const era: Era =
-        mode === 'second' || m.era === 'second'
-          ? 'second'
-          : mode === 'old' || m.era === 'old'
-            ? 'old'
-            : 'first';
+      // The mode sets the hour: a Sealed Century ground picked in Training,
+      // Pass the Grimoire or a friend match still plays as the First Hour.
+      const era: Era = matchEra(mode, m);
       eraRef.current = era;
       sightingFiredRef.current = false;
       cryptidGateRef.current.reset();
@@ -2719,7 +2716,7 @@ export function Battlefield({
     const myName = (profile?.username || '').trim() || 'Adept';
     return {
       mode,
-      era: gameMap.era ?? 'first',
+      era: matchEra(mode, gameMap),
       map: gameMap.name,
       turn,
       side,
@@ -2731,9 +2728,9 @@ export function Battlefield({
   }, [mode, aiDifficulty, profile?.username, gameMap, turn, side, phase, blueFaction, redFaction, blueHero, redHero, matchOver]);
   // Tell the table which field this hand is on (the owner's roll links it to the Portal).
   useEffect(() => {
-    setActivity({ match: portalIds?.id, era: gameMap.era ?? 'first', map: gameMap.name });
+    setActivity({ match: portalIds?.id, era: matchEra(mode, gameMap), map: gameMap.name });
     return () => setActivity({ match: undefined, era: undefined, map: undefined });
-  }, [portalIds, gameMap.era, gameMap.name]);
+  }, [portalIds, mode, gameMap]);
   const portalLatest = useRef({ frame: portalFrame, summary: portalSummary });
   useEffect(() => {
     portalLatest.current = { frame: portalFrame, summary: portalSummary };
@@ -3334,24 +3331,32 @@ export function Battlefield({
           >
             Yield
           </button>
-          {MAPS.filter((m) => (m.era ?? 'first') === (gameMap.era ?? 'first'))
-            .length > 1 &&
-            mode === 'training' && (
-              <select
-                aria-label="Field"
-                value={mapId}
-                onChange={(e) => {
-                  bootedFor.current = null;
-                  setMapId(e.target.value);
-                }}
-              >
-                {MAPS.filter((m) => (m.era ?? 'first') === 'first').map((m) => (
+          {mode === 'training' && isMainGameMap(mapId) && (
+            <select
+              aria-label="Field"
+              data-testid="bf-field-select"
+              value={mapId}
+              onChange={(e) => {
+                bootedFor.current = null;
+                setMapId(e.target.value);
+              }}
+            >
+              <optgroup label="The First Hour">
+                {mapsForEra('first').map((m) => (
                   <option key={m.id} value={m.id}>
                     {m.name}
                   </option>
                 ))}
-              </select>
-            )}
+              </optgroup>
+              <optgroup label="The Sealed Century">
+                {mapsForEra('old').map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+          )}
         </div>
       </header>
 
