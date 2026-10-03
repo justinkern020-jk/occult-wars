@@ -120,6 +120,8 @@ export default function App() {
     outcome: StageOutcome;
   } | null>(null);
   const [campaignStage, setCampaignStage] = useState(0);
+  /** The Ledger opened by a "Take a seat" invitation: straight to the sign-up form. */
+  const [ledgerSeat, setLedgerSeat] = useState(false);
   const [friendRole, setFriendRole] = useState<FriendRole | null>(null);
   const [friendSession, setFriendSession] = useState<FriendSession | null>(null);
   const [blackMondayReveal, setBlackMondayReveal] = useState<Card | null>(null);
@@ -359,7 +361,14 @@ export default function App() {
           setTableChallenge(null);
           ensureSworn(() => setScreen('friend'));
         }}
-        onLedger={() => setScreen('ledger')}
+        onLedger={() => {
+          setLedgerSeat(false);
+          setScreen('ledger');
+        }}
+        onTakeSeat={() => {
+          setLedgerSeat(true);
+          setScreen('ledger');
+        }}
         onMeeting={() => setScreen('meeting')}
         onSecond={() => {
           if (readHourOpen()) setScreen('second');
@@ -549,7 +558,13 @@ export default function App() {
   if (screen === 'ledger') {
     return (
       <div className="app app-shell">
-        <Ledger onBack={() => setScreen('menu')} />
+        <Ledger
+          focusSeat={ledgerSeat}
+          onBack={() => {
+            setLedgerSeat(false);
+            setScreen('menu');
+          }}
+        />
       </div>
     );
   }
@@ -627,6 +642,13 @@ export default function App() {
           profile={profile}
           onUpdateProfile={update}
           aiDifficulty={aiDifficulty}
+          onTakeSeat={() => {
+            friendSession?.destroy();
+            setFriendSession(null);
+            setFriendRole(null);
+            setLedgerSeat(true);
+            setScreen('ledger');
+          }}
           onLeave={() => {
             friendSession?.destroy();
             setFriendSession(null);

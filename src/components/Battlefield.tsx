@@ -5,6 +5,7 @@ import { shardGainFor } from '../game/fortune';
 import { noteFirstHourWin } from '../game/secretHints';
 import { FortuneReveal } from './FortuneReveal';
 import { foilMask } from '../game/foil';
+import { SeatInvite } from './SeatInvite';
 import {
   aiDifficultyLabel,
   aiStepCap,
@@ -174,6 +175,8 @@ export type BattlefieldProps = {
   profile?: Profile;
   onUpdateProfile?: (next: Profile) => void;
   onLeave?: () => void;
+  /** "Take a seat" on the match-over plate: open the Ledger's sign-up form. */
+  onTakeSeat?: () => void;
   /** Rival mind for the Crimson AI (training / campaign / second hour). */
   aiDifficulty?: AiDifficulty;
   onMatchEnd?: (result: {
@@ -330,6 +333,7 @@ export function Battlefield({
   profile,
   onUpdateProfile,
   onLeave,
+  onTakeSeat,
   onMatchEnd,
   onRiteTally,
   aiDifficulty = 'expert',
@@ -4003,6 +4007,7 @@ export function Battlefield({
                 </button>
               )}
             </div>
+            <SeatInvite onTakeSeat={onTakeSeat} offer={mode !== 'campaign'} />
           </div>
         </div>
       )}

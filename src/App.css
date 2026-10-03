@@ -5805,3 +5805,131 @@ input[type='search'] {
     animation: none;
   }
 }
+
+/* ——— Take a seat (account invitation) ——— */
+.seat-invite {
+  margin: 1.15rem 0 0;
+  padding: 0.85rem 0.95rem 0.9rem;
+  border: 1px solid #8c6d3266;
+  border-left: 2px solid #c6a15b;
+  border-radius: 0 0.55rem 0.55rem 0;
+  background:
+    radial-gradient(120% 140% at 0% 0%, #3cff7a12 0%, transparent 55%),
+    linear-gradient(165deg, #1a1611e6 0%, #100d0ae6 100%);
+  box-shadow: inset 0 1px #ffecc81a;
+  animation: seat-invite-in 0.6s ease 1.9s both;
+}
+.seat-invite-kicker {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.66rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--color-brass);
+}
+.seat-invite-copy {
+  margin: 0.4rem 0 0;
+  font-style: italic;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--color-parchment);
+}
+.seat-invite-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+.seat-invite-actions .brass-btn {
+  min-height: 2.2rem;
+  padding: 0.4rem 0.95rem;
+  font-size: 0.72rem;
+}
+@keyframes seat-invite-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .seat-invite { animation: none; }
+}
+
+/* The Ledger, raised to the name box — and the seat link for signed-out hands */
+.menu-seat-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem 0.85rem;
+  margin: 0.15rem auto 0.1rem;
+  width: min(100%, 26rem);
+}
+.menu-ledger-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-height: 2.1rem;
+  padding: 0.35rem 0.95rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  gap: 0.45rem;
+}
+.menu-ledger-glyph {
+  display: inline-block;
+  margin-right: 0.15rem;
+  font-size: 0.95rem;
+  color: #3cff7a;
+  text-shadow: 0 0 6px #3cff7a66;
+  letter-spacing: 0;
+}
+.menu-seat-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.1rem;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #e3c98a;
+  text-decoration: underline;
+  text-decoration-color: #c6a15b66;
+  text-underline-offset: 0.3em;
+}
+.menu-seat-link:hover,
+.menu-seat-link:focus-visible {
+  color: #fff1c8;
+  text-decoration-color: #3cff7a;
+}
+.menu-seat-sub {
+  font-family: var(--font-body, 'Libre Baskerville', serif);
+  font-style: italic;
+  font-size: 0.72rem;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--color-muted);
+}
+.menu-seat-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: #3cff7a;
+  box-shadow: 0 0 6px #3cff7a, 0 0 12px #3cff7a66;
+  animation: seat-dot-breathe 2.8s ease-in-out infinite;
+}
+@keyframes seat-dot-breathe {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+@media (max-width: 420px) {
+  .menu-seat-sub { display: none; }
+}
+.account-seat.is-invited {
+  box-shadow:
+    inset 0 1px #ffecc833,
+    0 0 0 1px #c6a15b88,
+    0 0 26px #3cff7a22;
+}

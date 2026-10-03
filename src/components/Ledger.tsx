@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   AccountError,
   deleteAccount,
@@ -14,14 +14,18 @@ import {
 import { useSeat } from '../hooks/useSeat';
 import { brassClick } from '../game/sfx';
 
-type Props = { onBack: () => void };
+type Props = {
+  onBack: () => void;
+  /** Opened from a "Take a seat" invitation: bring the sign-up form into view and focus it. */
+  focusSeat?: boolean;
+};
 
 function message(err: unknown, fallback: string): string {
   return err instanceof Error && err.message ? err.message : fallback;
 }
 
 /** The Ledger — an account, a name in the book, a record, the other occultists. */
-export function Ledger({ onBack }: Props) {
+export function Ledger({ onBack, focusSeat = false }: Props) {
   const { status, seat } = useSeat();
   const [book, setBook] = useState<BookRow[] | null>(null);
   const [bookNote, setBookNote] = useState('');
@@ -69,7 +73,7 @@ export function Ledger({ onBack }: Props) {
       ) : seat ? (
         <SeatPage seat={seat} onNamed={loadBook} />
       ) : (
-        <TakeASeat offline={status === 'offline'} />
+        <TakeASeat offline={status === 'offline'} focus={focusSeat} />
       )}
 
       <div className="ledger-book plate">
@@ -110,8 +114,16 @@ export function Ledger({ onBack }: Props) {
   );
 }
 
-function TakeASeat({ offline }: { offline: boolean }) {
+function TakeASeat({ offline, focus = false }: { offline: boolean; focus?: boolean }) {
   const [mode, setMode] = useState<'signup' | 'signin'>('signup');
+  const boxRef = useRef<HTMLDivElement>(null);
+  const firstRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (!focus) return;
+    boxRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    // Focus without a second jump (the scroll above already placed the form).
+    firstRef.current?.focus({ preventScroll: true });
+  }, [focus]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -132,7 +144,12 @@ function TakeASeat({ offline }: { offline: boolean }) {
   }
 
   return (
-    <div className="ledger-self plate account-seat" data-testid="take-a-seat" data-mode={mode}>
+    <div
+      ref={boxRef}
+      className={`ledger-self plate account-seat${focus ? ' is-invited' : ''}`}
+      data-testid="take-a-seat"
+      data-mode={mode}
+    >
       <div className="ledger-self-head">
         <p className="plate-kicker">Take a seat</p>
       </div>
@@ -152,6 +169,7 @@ function TakeASeat({ offline }: { offline: boolean }) {
           <label>
             Name on the account
             <input
+              ref={firstRef}
               value={name}
               maxLength={40}
               autoComplete="name"

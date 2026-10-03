@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
+import { useSeat } from '../hooks/useSeat';
 import { readTableSnapshot, subscribeTable } from '../net/table';
 import { readSeenMeeting } from '../net/meeting';
 import { MAPS, mapsForEra, type GameMap } from '../game/maps';
@@ -53,6 +54,8 @@ type Props = {
   onFriend: () => void;
   /** The Ledger — account, name, record, the book of names. */
   onLedger?: () => void;
+  /** Signed-out players: open the Ledger straight onto its sign-up form. */
+  onTakeSeat?: () => void;
   /** The Occultist Meeting — the shared board. */
   onMeeting?: () => void;
   onSecond: () => void;
@@ -98,6 +101,7 @@ export function MenuAtelier({
   onHotseat,
   onFriend,
   onLedger,
+  onTakeSeat,
   onMeeting,
   onSecond,
   onShop,
@@ -120,6 +124,9 @@ export function MenuAtelier({
   const tableSnap = useSyncExternalStore(subscribeTable, readTableSnapshot, readTableSnapshot);
   const meetUnread = (tableSnap.view?.meet ?? 0) > readSeenMeeting();
   const [revealUnlock, setRevealUnlock] = useState<{ card: Card; caption: string } | null>(null);
+  const seatState = useSeat();
+  // Only a resolved, open book with no one sitting here gets the invitation.
+  const signedOut = seatState.status !== 'shut' && seatState.status !== 'unknown' && !seatState.seat;
   const firstMaps = mapsForEra('first');
   const prequelMaps = mapsForEra('old');
   const lvl = levelFromXp(profile.xp);
@@ -292,6 +299,37 @@ export function MenuAtelier({
               />
             </label>
           </div>
+          {(onLedger || (signedOut && onTakeSeat)) && (
+            <div className="menu-seat-row" data-testid="menu-seat-row">
+              {onLedger && (
+                <button
+                  type="button"
+                  className="brass-btn menu-ledger-btn"
+                  data-testid="open-ledger"
+                  onClick={click(onLedger)}
+                  title="A name, your record, the other occultists"
+                >
+                  <span className="menu-ledger-glyph" aria-hidden>
+                    §
+                  </span>
+                  The Ledger
+                </button>
+              )}
+              {signedOut && onTakeSeat && (
+                <button
+                  type="button"
+                  className="menu-seat-link"
+                  data-testid="menu-take-seat"
+                  onClick={click(onTakeSeat)}
+                  title="An account keeps your collection, workings and record across devices."
+                >
+                  <span className="menu-seat-dot" aria-hidden />
+                  Take a seat
+                  <span className="menu-seat-sub"> · keep your page across devices</span>
+                </button>
+              )}
+            </div>
+          )}
           {(isHiddenAdeptCode(profile.username) || isSethKernCode(profile.username)) && (
             <div className="menu-occultist-badges">
               {isHiddenAdeptCode(profile.username) && (
@@ -466,8 +504,8 @@ export function MenuAtelier({
             </button>
           </div>
 
-          {(onLedger || onMeeting) && (
-            <div className={`menu-doors${onLedger && onMeeting ? ' menu-doors-2' : ''}`}>
+          {onMeeting && (
+            <div className="menu-doors">
               {onMeeting && (
                 <button
                   type="button"
@@ -492,22 +530,6 @@ export function MenuAtelier({
                     <span className="menu-door-sub">The board every hand can read</span>
                   </span>
                 </button>
-              )}
-              {onLedger && (
-              <button
-                type="button"
-                className="menu-door brass-btn"
-                data-testid="open-ledger"
-                onClick={click(onLedger)}
-              >
-                <span className="menu-door-glyph" aria-hidden>
-                  §
-                </span>
-                <span className="menu-door-copy">
-                  <span className="menu-door-title">The Ledger</span>
-                  <span className="menu-door-sub">A name, your record, the other occultists</span>
-                </span>
-              </button>
               )}
             </div>
           )}
