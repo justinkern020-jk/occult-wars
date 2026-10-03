@@ -1,4 +1,5 @@
-import { useEffect, useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
+import { readSecretCounts, SECRET_LABEL, SECRET_ORDER, type SecretCounts } from '../net/secrets';
 import { readPlayedCount, readVisitCount } from '../game/visits';
 import { PortalDoor } from './Portal';
 import { beatNow, countryName, readTableSnapshot, subscribeTable } from '../net/table';
@@ -18,6 +19,16 @@ export function BattleCountModal({ onClose }: Props) {
     old: readPlayedCount('old'),
   };
   const snap = useSyncExternalStore(subscribeTable, readTableSnapshot, readTableSnapshot);
+  const [secrets, setSecrets] = useState<SecretCounts | null | 'wait'>('wait');
+  useEffect(() => {
+    let live = true;
+    void readSecretCounts().then((c) => {
+      if (live) setSecrets(c);
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
 
   // Read the table while the book is open.
   useEffect(() => {
@@ -102,6 +113,24 @@ export function BattleCountModal({ onClose }: Props) {
                   <span>{label}:</span>{' '}
                   <b>{all == null ? (wait ? '…' : '—') : all.toLocaleString()} played</b>
                   <small> · yours {mine[era].toLocaleString()}</small>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+
+        <section className="battle-count-played battle-count-secrets" data-testid="battle-count-secrets">
+          <h2>Secrets uncovered</h2>
+          <ul>
+            {SECRET_ORDER.map((id) => {
+              const n = secrets === 'wait' ? null : secrets?.[id];
+              return (
+                <li key={id} data-testid={`battle-count-secret-${id}`}>
+                  <span>{SECRET_LABEL[id]}:</span>{' '}
+                  <b>
+                    {n == null ? (secrets === 'wait' ? '…' : '—') : n.toLocaleString()}{' '}
+                    {n === 1 ? 'player' : 'players'}
+                  </b>
                 </li>
               );
             })}

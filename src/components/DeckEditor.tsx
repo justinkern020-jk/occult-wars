@@ -597,7 +597,7 @@ export function DeckEditor({ profile, onSave, onDelete, onBack, initialEra, retu
         </button>
       </div>
       {inspect && (
-        <TarotPop card={inspect} foil={foilCount(profile.foils, inspect.id) > 0} onClose={() => setInspect(null)} />
+        <TarotPop key={inspect.id} whisper card={inspect} foil={foilCount(profile.foils, inspect.id) > 0} onClose={() => setInspect(null)} />
       )}
     </section>
   );

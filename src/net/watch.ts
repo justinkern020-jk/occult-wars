@@ -143,6 +143,11 @@ async function watchCall<T>(body: Record<string, unknown>): Promise<T | null> {
   }
 }
 
+/** Owner-only call (null for anyone else). */
+export function watchCallOwner<T>(body: Record<string, unknown>): Promise<T | null> {
+  return watchCall<T>(body);
+}
+
 /** True only when the server says this is the owner. */
 export async function portalOpen(): Promise<boolean> {
   return (await watchCall<{ ok: boolean }>({ op: 'gate' }))?.ok === true;

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import { cardById } from '../data/catalog';
 import { createOnceGate } from '../game/onceGate';
 import { shardGainFor } from '../game/fortune';
-import { noteFirstHourWin } from '../game/secretHints';
+import { matchOverWhisper, whisperFor } from '../game/secretHints';
 import { FortuneReveal } from './FortuneReveal';
 import { foilMask } from '../game/foil';
 import { SeatInvite } from './SeatInvite';
@@ -99,6 +99,7 @@ import {
   type PortalCode,
 } from '../net/watch';
 import { reportPlayed, setActivity } from '../net/table';
+import { reportSecretFound, secretIdForCode } from '../net/secrets';
 import {
   RulesPrimer,
   hasSeenPrimer,
@@ -480,6 +481,8 @@ export function Battlefield({
   const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);
   const dragHandRef = useRef<number | null>(null);
   const [cryptidSight, setCryptidSight] = useState<string | null>(null);
+  /** The town's whisper under a Sighting (Athens clues). */
+  const [cryptidWhisper, setCryptidWhisper] = useState<string | null>(null);
   const helloSentForRef = useRef<FriendSession | null>(null);
   /** The match-over fortune chest (shards paid) and any whispered hint. */
   const [fortune, setFortune] = useState<{ gain: number; total: number; won: boolean; hint: string | null } | null>(null);
@@ -488,8 +491,13 @@ export function Battlefield({
   const announceCryptid = useCallback((name: string, ms = 2400) => {
     if (!cryptidGateRef.current.first(name)) return;
     announce({ kind: 'sighting', name });
+    const whisper = whisperFor('cryptid');
+    setCryptidWhisper(whisper);
     setCryptidSight(name);
-    window.setTimeout(() => setCryptidSight((cur) => (cur === name ? null : cur)), ms);
+    window.setTimeout(
+      () => setCryptidSight((cur) => (cur === name ? null : cur)),
+      whisper ? Math.max(ms, 4200) : ms,
+    );
   }, []);
   const visitTurnRef = useRef<number | null>(null);
   const sightingFiredRef = useRef(false);
@@ -1057,7 +1065,7 @@ export function Battlefield({
       reportPlayed(eraRef.current);
       const gain = shardGainFor(mode, playerWon);
       const hint =
-        playerWon && mode !== 'hotseat' && eraRef.current === 'first' ? noteFirstHourWin() : null;
+        matchOverWhisper(playerWon, playerWon && mode !== 'hotseat' && eraRef.current === 'first');
       setFortune(
         gain > 0 || hint
           ? { gain, total: (profile?.alchemicalShards ?? 0) + gain, won: playerWon, hint }
@@ -1559,6 +1567,8 @@ export function Battlefield({
   function onBattleCodeChange(raw: string) {
     const next = raw.slice(0, 32);
     setCodeDraft(next);
+    const secret = secretIdForCode(next);
+    if (secret) reportSecretFound(secret, codeRealNameRef.current || profile?.username);
     if (isSecondHourCode(next)) {
       writeHourOpen();
       setCodeToast('The leaden hour answers.');
@@ -3879,6 +3889,11 @@ export function Battlefield({
         <div className="cryptid-sight" data-testid="cryptid-sight">
           <p className="cryptid-word">Sighting</p>
           <p className="cryptid-name">{cryptidSight}</p>
+          {cryptidWhisper && (
+            <p className="cryptid-whisper" data-testid="cryptid-whisper">
+              {cryptidWhisper}
+            </p>
+          )}
         </div>
       )}
 
@@ -3942,8 +3957,10 @@ export function Battlefield({
 
       {inspectCard && (
         <TarotPop
+          key={inspectCard.id}
           card={inspectCard}
           power={inspectPower}
+          whisper={!inspectSticky}
           closeOnBackdrop={!inspectSticky}
           onClose={() => {
             setInspectCard(null);

@@ -229,6 +229,8 @@ export function memoryStore(now: () => number = Date.now): Store {
         h.set(String(a[1]), String(n));
         return n;
       }
+      case 'HLEN':
+        return hash(k, false)?.size ?? 0;
       case 'HGETALL': {
         const h = hash(k, false);
         if (!h) return [];

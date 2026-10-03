@@ -1,3 +1,4 @@
+import { readSecretFinders, SECRET_LABEL, SECRET_ORDER } from '../net/secrets';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { MAPS, mapById, tileLabel } from '../game/maps';
@@ -129,6 +130,18 @@ export function PortalDoor() {
   const [build, setBuild] = useState('');
   const [now, setNow] = useState(() => Date.now());
   const [accounts, setAccounts] = useState<AccountRoll | null>(null);
+  const [secrets, setSecrets] = useState<Awaited<ReturnType<typeof readSecretFinders>> | 'wait'>('wait');
+
+  useEffect(() => {
+    if (!open) return;
+    let alive = true;
+    void readSecretFinders().then((r) => {
+      if (alive) setSecrets(r);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -275,6 +288,42 @@ export function PortalDoor() {
             </li>
           ))}
         </ol>
+      )}
+      <h3 className="portal-roll-title" data-testid="portal-secrets-title">
+        Secrets uncovered
+      </h3>
+      {secrets === 'wait' ? (
+        <p className="portal-quiet">Reading who has found what…</p>
+      ) : secrets == null ? (
+        <p className="portal-quiet">The finders' book is shut.</p>
+      ) : (
+        <ul className="portal-secrets" data-testid="portal-secrets">
+          {SECRET_ORDER.map((id) => {
+            const rows = secrets.finders[id];
+            return (
+              <li key={id} data-testid={`portal-secret-${id}`}>
+                <b>
+                  {SECRET_LABEL[id]} · {secrets.counts[id]}
+                </b>
+                {rows.length === 0 ? (
+                  <span className="portal-quiet"> — no one yet</span>
+                ) : (
+                  <ol className="portal-roll">
+                    {rows.map((r, i) => (
+                      <li key={`${r.at}-${i}`} className="portal-hand">
+                        <span className="portal-hand-name">
+                          <b>{r.account ?? r.name}</b>
+                          {r.account && r.name && r.name !== r.account ? <i> ({r.name})</i> : null}
+                        </span>
+                        <span className="portal-hand-meta">Found {seatDate(r.at)}</span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </li>
+            );
+          })}
+        </ul>
       )}
       {watching &&
         createPortal(

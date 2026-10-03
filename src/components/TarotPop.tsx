@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { whisperFor } from '../game/secretHints';
 import type { Card } from '../game/types';
 import { CardView } from './CardView';
 
@@ -13,6 +14,7 @@ export function TarotPop({
   caption,
   closeOnBackdrop = true,
   foil = false,
+  whisper = false,
 }: {
   card: Card;
   power?: number;
@@ -22,7 +24,10 @@ export function TarotPop({
   closeOnBackdrop?: boolean;
   /** Show the foil face (an owned foil copy). */
   foil?: boolean;
+  /** A plain inspect: now and then a secret's whisper is written under the card. */
+  whisper?: boolean;
 }) {
+  const [whisperLine] = useState(() => (whisper ? whisperFor('inspect') : null));
   const closeArmed = useRef(false);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -67,6 +72,11 @@ export function TarotPop({
       >
         <CardView card={card} power={power} foil={foil} />
         {caption && <p className="tarot-pop-caption">{caption}</p>}
+        {whisperLine && (
+          <p className="tarot-pop-whisper" data-testid="inspect-whisper">
+            {whisperLine}
+          </p>
+        )}
         <button
           type="button"
           className="tarot-pop-close"

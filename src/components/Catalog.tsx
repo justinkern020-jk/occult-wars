@@ -275,7 +275,9 @@ export function Catalog({ profile, onUpdate }: Props) {
       </div>
       {inspect && (
         <TarotPop
+          key={inspect.id}
           card={inspect}
+          whisper
           foil={foilCount(profile?.foils, inspect.id) > 0}
           onClose={() => setInspect(null)}
         />

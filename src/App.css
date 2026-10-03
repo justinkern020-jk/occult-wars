@@ -6100,3 +6100,62 @@ input[type='search'] {
   .hand-arrow-left { left: -0.4rem; }
   .hand-arrow-right { right: -0.4rem; }
 }
+
+/* Secrets whispered: atelier wall, inspect footnote, meeting door, Sighting */
+.menu-whisper,
+.tarot-pop-whisper,
+.meeting-door-note,
+.cryptid-whisper {
+  font-family: 'IM Fell English', Georgia, serif;
+  font-style: italic;
+  color: #c9b58a;
+  opacity: 0.86;
+  letter-spacing: 0.01em;
+}
+.menu-whisper {
+  margin: -0.55rem 0 0.9rem;
+  max-width: 34rem;
+  font-size: 0.86rem;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.85);
+}
+.tarot-pop-whisper {
+  margin: 0.55rem auto 0;
+  max-width: 22rem;
+  text-align: center;
+  font-size: 0.8rem;
+}
+.meeting-door-note {
+  margin: 0 0 0.8rem;
+  font-size: 0.85rem;
+}
+.meeting-door-note-kicker {
+  font-style: normal;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-brass);
+}
+.cryptid-sight:has(.cryptid-whisper) {
+  align-content: center;
+  gap: 0.35rem;
+}
+.cryptid-whisper {
+  margin: 0.4rem 1rem 0;
+  max-width: 26rem;
+  text-align: center;
+  font-size: 0.95rem;
+  text-shadow: 0 0 12px #000;
+}
+.portal-secrets {
+  list-style: none;
+  margin: 0.25rem 0 0.75rem;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+.portal-secrets > li > b {
+  font-family: Cinzel, Georgia, serif;
+  color: #d4b56a;
+  font-size: 0.85rem;
+}

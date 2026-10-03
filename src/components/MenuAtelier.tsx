@@ -1,3 +1,5 @@
+import { reportSecretFound, secretIdForCode } from '../net/secrets';
+import { whisperFor } from '../game/secretHints';
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
 import { useSeat } from '../hooks/useSeat';
 import { readTableSnapshot, subscribeTable } from '../net/table';
@@ -126,6 +128,8 @@ export function MenuAtelier({
   );
   const [hourOpen, setHourOpen] = useState(() => bootHourOpen(profile.username));
   const [toast, setToast] = useState<string | null>(null);
+  /** Now and then a secret is whispered on the atelier wall (one per visit). */
+  const [menuWhisper] = useState(() => whisperFor('menu'));
   const [battleCountOpen, setBattleCountOpen] = useState(false);
   const tableSnap = useSyncExternalStore(subscribeTable, readTableSnapshot, readTableSnapshot);
   const meetUnread = (tableSnap.view?.meet ?? 0) > readSeenMeeting();
@@ -165,6 +169,8 @@ export function MenuAtelier({
 
   function onOccultistChange(raw: string) {
     const next = raw.slice(0, 32);
+    const secret = secretIdForCode(next);
+    if (secret) reportSecretFound(secret, realNameRef.current);
     if (isSecondHourCode(next)) {
       writeHourOpen();
       setHourOpen(true);
@@ -367,6 +373,11 @@ export function MenuAtelier({
             {profile.alchemicalShards} shards
             {profile.allegiance ? ` · ${profile.allegiance}` : ' · unswear'}
           </p>
+          {menuWhisper && (
+            <p className="menu-whisper" data-testid="menu-whisper">
+              {menuWhisper}
+            </p>
+          )}
 
           {profile.daily && profile.daily.rites.length > 0 && (
             <section className="menu-rites" data-testid="daily-rites" aria-label="The Day's Rites">

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { whisperFor } from '../game/secretHints';
 import { useSeat } from '../hooks/useSeat';
 import { brassClick } from '../game/sfx';
 import {
@@ -49,6 +50,8 @@ export function Meeting({ onBack, guestName, title }: Props) {
   const [shrinking, setShrinking] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [enlarged, setEnlarged] = useState<MeetingMessage | null>(null);
+  /** A note slipped under the door now and then (a secret's whisper). */
+  const [doorNote] = useState(() => whisperFor('meeting'));
   const fileRef = useRef<HTMLInputElement>(null);
   const cursor = useRef({ head: 0, rev: -1 });
   const listRef = useRef<HTMLOListElement>(null);
@@ -172,6 +175,11 @@ export function Meeting({ onBack, guestName, title }: Props) {
         Everyone at the table reads this board. Words, links and images are pinned as they come;
         images are shrunk first.
       </p>
+      {doorNote && (
+        <p className="meeting-door-note" data-testid="meeting-whisper">
+          <span className="meeting-door-note-kicker">Slipped under the door:</span> {doorNote}
+        </p>
+      )}
       {store === 'memory' && loaded && (
         <p className="meeting-faint" data-testid="meeting-faint">
           The hall keeps no lasting record yet — words may fade when the lamps are relit.
