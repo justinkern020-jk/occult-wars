@@ -11,9 +11,18 @@
 import type { Store } from './store.js';
 import type { User } from './accounts.js';
 
-export const WIN_PTS = 25;
+/**
+ * Tuned so a hand winning half its sittings reaches Magus in about 100 within
+ * a month (simulated median ~97; ~74 at a 60% rate, ~137 at 40%).
+ */
+export const WIN_PTS = 50;
 export const LOSS_PTS = 15;
-export const DIV_PTS = 100;
+/** From the third straight win on, each win carries a little more. */
+export const STREAK_BONUS = 10;
+export const STREAK_FROM = 3;
+export const DIV_PTS = 75;
+/** Points where Magus begins (9 grades × 3 divisions below it). */
+export const MAGUS_PTS = DIV_PTS * 3 * 9;
 export const GRADES = [
   'Initiate',
   'Neophyte',
@@ -56,7 +65,25 @@ export function rankFor(pts: number): { grade: string; div: number | null; label
   return { grade: GRADES[gi], div, label: `${GRADES[gi]} ${roman}`, into: within % DIV_PTS };
 }
 
-export type LadderRow = { name: string; pts: number; w: number; l: number; rank: string };
+export type LadderRow = { name: string; pts: number; w: number; l: number; rank: string; s?: number };
+type Row = { name: string; pts: number; w: number; l: number; s: number };
+
+/** One settled result on a row: win (+ streak bonus) or a loss held at the division floor. */
+export function applyPoints<T extends Row>(row: T, won: boolean): T {
+  const next = { ...row };
+  if (won) {
+    next.s = row.s + 1;
+    next.pts = row.pts + WIN_PTS + (next.s >= STREAK_FROM ? STREAK_BONUS : 0);
+    next.w = row.w + 1;
+  } else {
+    // Never below the floor of the division held (and never below zero).
+    const floor = Math.floor(row.pts / DIV_PTS) * DIV_PTS;
+    next.pts = Math.max(floor, row.pts - LOSS_PTS);
+    next.l = row.l + 1;
+    next.s = 0;
+  }
+  return next;
+}
 
 export const RK = {
   board: (s: string) => `ow:rk:${s}`,
@@ -82,11 +109,17 @@ function nameOf(u: User): string {
   return (u.username || u.displayName || 'Occultist').slice(0, 24);
 }
 
-function parseRow(raw: unknown): { name: string; pts: number; w: number; l: number } | null {
+function parseRow(raw: unknown): Row | null {
   if (typeof raw !== 'string') return null;
   try {
-    const r = JSON.parse(raw) as { name: string; pts: number; w: number; l: number };
-    return { name: String(r.name ?? ''), pts: Number(r.pts) || 0, w: Number(r.w) || 0, l: Number(r.l) || 0 };
+    const r = JSON.parse(raw) as Partial<Row>;
+    return {
+      name: String(r.name ?? ''),
+      pts: Number(r.pts) || 0,
+      w: Number(r.w) || 0,
+      l: Number(r.l) || 0,
+      s: Math.max(0, Math.floor(Number(r.s) || 0)),
+    };
   } catch {
     return null;
   }
@@ -164,7 +197,7 @@ export async function reportSitting(
 
 async function applyResult(store: Store, season: string, id: string, won: boolean, name: string | null) {
   const [raw] = await store.pipe([['HGET', RK.rows(season), id]]);
-  const row = parseRow(raw) ?? { name: name ?? 'Occultist', pts: 0, w: 0, l: 0 };
+  let row = parseRow(raw) ?? { name: name ?? 'Occultist', pts: 0, w: 0, l: 0, s: 0 };
   if (name) row.name = name;
   if (!name && !raw) {
     // The other hand's name: read from their account record if we can.
@@ -176,15 +209,7 @@ async function applyResult(store: Store, season: string, id: string, won: boolea
       /* keep */
     }
   }
-  if (won) {
-    row.pts += WIN_PTS;
-    row.w += 1;
-  } else {
-    // Never below the floor of the division held (and never below zero).
-    const floor = Math.floor(row.pts / DIV_PTS) * DIV_PTS;
-    row.pts = Math.max(floor, row.pts - LOSS_PTS);
-    row.l += 1;
-  }
+  row = applyPoints(row, won);
   await store.pipe([
     ['HSET', RK.rows(season), id, JSON.stringify(row)],
     ['ZADD', RK.board(season), row.pts * 10_000 + Math.min(9_999, row.w), id],
@@ -211,7 +236,7 @@ export async function readBoard(store: Store, now: number): Promise<{ season: st
 export async function readMine(store: Store, user: User, now: number): Promise<LadderRow> {
   const season = seasonOf(now);
   const [raw] = await store.pipe([['HGET', RK.rows(season), user.id]]);
-  const r = parseRow(raw) ?? { name: nameOf(user), pts: 0, w: 0, l: 0 };
+  const r = parseRow(raw) ?? { name: nameOf(user), pts: 0, w: 0, l: 0, s: 0 };
   return { ...r, rank: rankFor(r.pts).label };
 }
 

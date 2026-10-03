@@ -4,10 +4,10 @@
  */
 import { useEffect, useState } from 'react';
 import { seatHeaders } from './account';
-import { rankFor } from '../../api/_lib/ranked';
+import { DIV_PTS, LOSS_PTS, MAGUS_PTS, STREAK_BONUS, STREAK_FROM, WIN_PTS, rankFor } from '../../api/_lib/ranked';
 
-export { rankFor };
-export type LadderRow = { name: string; pts: number; w: number; l: number; rank: string };
+export { DIV_PTS, LOSS_PTS, MAGUS_PTS, STREAK_BONUS, STREAK_FROM, WIN_PTS, rankFor };
+export type LadderRow = { name: string; pts: number; w: number; l: number; rank: string; s?: number };
 
 const ENDPOINT = '/api/ranked';
 

@@ -1,7 +1,21 @@
 import { describe, expect, it } from 'vitest';
 import { memoryStore } from './store.js';
 import { signUp } from './accounts.js';
-import { MIN_SITTING_MS, PAIR_DAILY_CAP, WIN_PTS, beginSitting, rankFor, readBoard, readMine, reportSitting } from './ranked.js';
+import {
+  DIV_PTS,
+  LOSS_PTS,
+  MAGUS_PTS,
+  MIN_SITTING_MS,
+  PAIR_DAILY_CAP,
+  STREAK_BONUS,
+  WIN_PTS,
+  applyPoints,
+  beginSitting,
+  rankFor,
+  readBoard,
+  readMine,
+  reportSitting,
+} from './ranked.js';
 
 async function two() {
   const store = memoryStore();
@@ -14,9 +28,48 @@ async function two() {
 describe('ranked ladder', () => {
   it('names the grades with divisions, Magus on top', () => {
     expect(rankFor(0).label).toBe('Initiate III');
-    expect(rankFor(250).label).toBe('Initiate I');
-    expect(rankFor(300).label).toBe('Neophyte III');
+    expect(rankFor(DIV_PTS * 2 + 10).label).toBe('Initiate I');
+    expect(rankFor(DIV_PTS * 3).label).toBe('Neophyte III');
+    expect(rankFor(MAGUS_PTS - 1).label).toBe('Adeptus Exemptus I');
+    expect(rankFor(MAGUS_PTS).label).toBe('Magus');
     expect(rankFor(99999).label).toBe('Magus');
+  });
+
+  it('pays a streak from the third straight win, and a loss keeps the division', () => {
+    let r = { name: 'A', pts: 0, w: 0, l: 0, s: 0 };
+    r = applyPoints(r, true);
+    r = applyPoints(r, true);
+    expect(r.pts).toBe(WIN_PTS * 2);
+    r = applyPoints(r, true);
+    expect(r.pts).toBe(WIN_PTS * 3 + STREAK_BONUS);
+    expect(r.s).toBe(3);
+    const before = r.pts;
+    r = applyPoints(r, false);
+    expect(r.s).toBe(0);
+    expect(r.pts).toBe(Math.max(Math.floor(before / DIV_PTS) * DIV_PTS, before - LOSS_PTS));
+    // At a division's floor, a loss costs nothing.
+    const floor = applyPoints({ name: 'B', pts: DIV_PTS * 4, w: 0, l: 0, s: 0 }, false);
+    expect(floor.pts).toBe(DIV_PTS * 4);
+  });
+
+  it('reaches Magus in about 100 sittings at an even win rate', () => {
+    // Deterministic pseudo-random coin, many seasons: the median sits near 100.
+    let seed = 1893;
+    const coin = () => ((seed = (seed * 1103515245 + 12345) % 2 ** 31) / 2 ** 31) < 0.5;
+    const runs: number[] = [];
+    for (let k = 0; k < 400; k++) {
+      let r = { name: 'C', pts: 0, w: 0, l: 0, s: 0 };
+      let n = 0;
+      while (r.pts < MAGUS_PTS && n < 1000) {
+        r = applyPoints(r, coin());
+        n++;
+      }
+      runs.push(n);
+    }
+    runs.sort((a, b) => a - b);
+    const median = runs[runs.length >> 1];
+    expect(median).toBeGreaterThan(80);
+    expect(median).toBeLessThan(120);
   });
 
   it('settles only when both hands agree, after a believable sitting', async () => {

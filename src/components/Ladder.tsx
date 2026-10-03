@@ -1,6 +1,17 @@
 /** The Ladder: this month's live-table standings, Initiate to Magus. */
 import { useEffect, useState } from 'react';
-import { readLadder, seasonLabel, useMyRank, type LadderRow } from '../net/ranked';
+import {
+  DIV_PTS,
+  LOSS_PTS,
+  MAGUS_PTS,
+  STREAK_BONUS,
+  STREAK_FROM,
+  WIN_PTS,
+  readLadder,
+  seasonLabel,
+  useMyRank,
+  type LadderRow,
+} from '../net/ranked';
 
 export function RankBadge({ row, compact = false }: { row: LadderRow | null; compact?: boolean }) {
   if (!row) return null;
@@ -40,14 +51,19 @@ export function Ladder({ onBack }: { onBack: () => void }) {
       <div className="honours-worn plate">
         {me ? (
           <p className="honours-name">
-            Your standing: <RankBadge row={me} /> <small className="ladder-wl">{me.w}W · {me.l}L</small>
+            Your standing: <RankBadge row={me} />{' '}
+            <small className="ladder-wl">
+              {me.w}W · {me.l}L{(me.s ?? 0) >= 2 ? ` · ${me.s}-win streak` : ''}
+            </small>
           </p>
         ) : (
           <p className="honours-name">Take a seat in the Ledger to climb the ladder.</p>
         )}
         <p className="ladder-rules">
-          A win is +25, a loss −15 (never below your division). Three divisions to a grade, 100 points each. Both
-          chairs must finish and agree; practice and the AI never count. The ladder starts afresh each month.
+          A win is +{WIN_PTS}, and +{STREAK_BONUS} more from your {STREAK_FROM === 3 ? 'third' : `${STREAK_FROM}th`} straight
+          win on. A loss is −{LOSS_PTS}, never below your division. Three divisions to a grade, {DIV_PTS} points each;
+          Magus at {MAGUS_PTS.toLocaleString('en-GB')}. Both chairs must finish and agree; practice and the AI never
+          count. The ladder starts afresh each month.
         </p>
       </div>
       {note && <p className="ledger-wait">{note}</p>}
