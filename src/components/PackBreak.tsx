@@ -1,3 +1,4 @@
+import { notePack } from '../game/achievements';
 import { useState } from 'react';
 import type { Card } from '../game/types';
 import { PACK_COST, breakSeal, type Profile } from '../game/profile';
@@ -29,7 +30,7 @@ export function PackBreak({ profile, onUpdate, onBack }: Props) {
     }
     brassClick();
     setError(null);
-    onUpdate(result.profile);
+    onUpdate(notePack(result.profile, 'seal'));
     setPulls(result.pulls);
     setPullFoil(result.foil);
     // The reel behind the envelope is already turned: Skip / Keep shows it whole.

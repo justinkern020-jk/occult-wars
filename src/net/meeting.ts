@@ -20,6 +20,7 @@ export type MeetingMessage = {
   text: string;
   badge: MeetingBadge;
   img?: MeetingImage;
+  title?: string;
 };
 /** A compressed image ready to send (base64 without the data: prefix). */
 export type MeetingUpload = { data: string; w: number; h: number; type: string; bytes: number; preview: string };
@@ -112,12 +113,14 @@ export async function postMeeting(
   text: string,
   name: string,
   image?: MeetingUpload | null,
+  title?: string,
 ): Promise<MeetingMessage> {
   const r = await call<{ msg: MeetingMessage }>({
     op: 'post',
     mark: tableMark(),
     text,
     name,
+    ...(title ? { title } : {}),
     ...(image ? { image: { data: image.data, w: image.w, h: image.h } } : {}),
   });
   return r.msg;

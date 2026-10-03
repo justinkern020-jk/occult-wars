@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   AccountError,
   deleteAccount,
@@ -18,6 +18,8 @@ type Props = {
   onBack: () => void;
   /** Opened from a "Take a seat" invitation: bring the sign-up form into view and focus it. */
   focusSeat?: boolean;
+  /** Extra plates beside the seat (honours and title, the ladder rank). */
+  extra?: ReactNode;
 };
 
 function message(err: unknown, fallback: string): string {
@@ -25,7 +27,7 @@ function message(err: unknown, fallback: string): string {
 }
 
 /** The Ledger — an account, a name in the book, a record, the other occultists. */
-export function Ledger({ onBack, focusSeat = false }: Props) {
+export function Ledger({ onBack, focusSeat = false, extra }: Props) {
   const { status, seat } = useSeat();
   const [book, setBook] = useState<BookRow[] | null>(null);
   const [bookNote, setBookNote] = useState('');
@@ -75,6 +77,8 @@ export function Ledger({ onBack, focusSeat = false }: Props) {
       ) : (
         <TakeASeat offline={status === 'offline'} focus={focusSeat} />
       )}
+
+      {extra}
 
       <div className="ledger-book plate">
         <p className="plate-kicker">Who has a name</p>

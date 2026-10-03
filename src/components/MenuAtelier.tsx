@@ -63,6 +63,9 @@ type Props = {
   onOldWork: () => void;
   onAllegiance: () => void;
   onSandbox: () => void;
+  onCodex?: () => void;
+  onHonours?: () => void;
+  onSettings?: () => void;
 };
 
 function doubleNodeCount(map: GameMap): number {
@@ -108,6 +111,9 @@ export function MenuAtelier({
   onOldWork,
   onAllegiance,
   onSandbox,
+  onCodex,
+  onHonours,
+  onSettings,
 }: Props) {
   const realNameRef = useRef(
     isSecondHourCode(profile.username) ||
@@ -315,6 +321,20 @@ export function MenuAtelier({
                   The Ledger
                 </button>
               )}
+              {onSettings && (
+                <button
+                  type="button"
+                  className="brass-btn menu-ledger-btn menu-settings-btn"
+                  data-testid="open-settings"
+                  onClick={click(onSettings)}
+                  title="Voices, weather and the battle choir"
+                >
+                  <span className="menu-ledger-glyph" aria-hidden>
+                    ⚙
+                  </span>
+                  Settings
+                </button>
+              )}
               {signedOut && onTakeSeat && (
                 <button
                   type="button"
@@ -342,7 +362,9 @@ export function MenuAtelier({
           )}
 
           <p className="menu-shards" data-testid="shard-count">
-            {profile.username} · Lv {lvl.level} · {profile.alchemicalShards} shards
+            {profile.username}
+            {profile.title ? <em className="adept-title"> · {profile.title}</em> : null} · Lv {lvl.level} ·{' '}
+            {profile.alchemicalShards} shards
             {profile.allegiance ? ` · ${profile.allegiance}` : ' · unswear'}
           </p>
 
@@ -503,6 +525,45 @@ export function MenuAtelier({
               </span>
             </button>
           </div>
+
+          {(onCodex || onHonours) && (
+            <div className="menu-doors menu-doors-2">
+              {onCodex && (
+                <button
+                  type="button"
+                  className="menu-door brass-btn"
+                  data-testid="open-codex"
+                  onClick={click(onCodex)}
+                >
+                  <span className="menu-door-glyph" aria-hidden>
+                    ❦
+                  </span>
+                  <span className="menu-door-copy">
+                    <span className="menu-door-title">The Codex</span>
+                    <span className="menu-door-sub">Lore of every plate met</span>
+                  </span>
+                </button>
+              )}
+              {onHonours && (
+                <button
+                  type="button"
+                  className="menu-door brass-btn"
+                  data-testid="open-honours"
+                  onClick={click(onHonours)}
+                >
+                  <span className="menu-door-glyph" aria-hidden>
+                    ✦
+                  </span>
+                  <span className="menu-door-copy">
+                    <span className="menu-door-title">Honours &amp; Titles</span>
+                    <span className="menu-door-sub">
+                      {profile.title ? `Worn: ${profile.title}` : 'Earn a title to wear'}
+                    </span>
+                  </span>
+                </button>
+              )}
+            </div>
+          )}
 
           {onMeeting && (
             <div className="menu-doors">

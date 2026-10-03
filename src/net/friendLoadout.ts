@@ -9,12 +9,42 @@ import {
   normalizeFaction,
 } from '../game/orders';
 import type { CustomDeck } from '../game/profile';
+import { ALL_TITLES } from '../game/achievements';
+
+/** Who sits in the chair: the name, worn title and ladder rank shown across the table. */
+export type LoadoutWho = {
+  name?: string;
+  title?: string;
+  rank?: string;
+  /** Ranked: the host's sitting nonce, so both seats report the same match. */
+  nonce?: string;
+};
 
 export type FriendLoadout = {
   heroId?: string;
   cards: string[];
   faction?: string;
+  who?: LoadoutWho;
 };
+
+const shortText = (v: unknown, max: number): string | undefined => {
+  if (typeof v !== 'string') return undefined;
+  const t = v.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, max);
+  return t || undefined;
+};
+
+export function sanitizeWho(raw: unknown): LoadoutWho | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const r = raw as Record<string, unknown>;
+  const title = shortText(r.title, 48);
+  const who: LoadoutWho = {
+    name: shortText(r.name, 32),
+    title: title && ALL_TITLES.includes(title) ? title : undefined,
+    rank: shortText(r.rank, 32),
+    nonce: typeof r.nonce === 'string' && /^[a-z0-9]{8,32}$/.test(r.nonce) ? r.nonce : undefined,
+  };
+  return who.name || who.title || who.rank || who.nonce ? who : undefined;
+}
 
 const KNOWN_IDS = new Set(CARDS.map((c) => c.id));
 
@@ -23,6 +53,7 @@ export function sanitizeFriendLoadout(raw: {
   heroId?: unknown;
   cards?: unknown;
   faction?: unknown;
+  who?: unknown;
 }): FriendLoadout {
   const cards = Array.isArray(raw.cards)
     ? raw.cards.filter(
@@ -44,7 +75,8 @@ export function sanitizeFriendLoadout(raw: {
     faction = cardById(heroId)?.faction;
   }
 
-  return { heroId, cards, faction };
+  const who = sanitizeWho(raw.who);
+  return who ? { heroId, cards, faction, who } : { heroId, cards, faction };
 }
 
 /** Selected Deck Editor working + sworn order → wire payload. */

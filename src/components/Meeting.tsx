@@ -17,7 +17,7 @@ import {
 } from '../net/meeting';
 import { ACCEPT, ImageRefused, prepareImage } from '../net/meetingImage';
 
-type Props = { onBack: () => void; guestName: string };
+type Props = { onBack: () => void; guestName: string; title?: string };
 
 function when(at: number, now: number): string {
   const s = Math.max(0, Math.round((now - at) / 1000));
@@ -32,7 +32,7 @@ function when(at: number, now: number): string {
 }
 
 /** The Occultist Meeting — one board for everyone at the table. */
-export function Meeting({ onBack, guestName }: Props) {
+export function Meeting({ onBack, guestName, title }: Props) {
   const { seat } = useSeat();
   const [msgs, setMsgs] = useState<MeetingMessage[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -139,6 +139,7 @@ export function Meeting({ onBack, guestName }: Props) {
         text,
         owner ? ownerName.trim() || 'Grand Master' : name.trim(),
         upload,
+        title,
       );
       setDraft('');
       setUpload(null);
@@ -205,6 +206,9 @@ export function Meeting({ onBack, guestName }: Props) {
               >
                 <div className="meeting-msg-head">
                   <b className="meeting-name">{m.name}</b>
+                  {typeof m.title === 'string' && m.title.length <= 48 && (
+                    <em className="adept-title meeting-title">{m.title}</em>
+                  )}
                   {m.badge === 'owner' && (
                     <span className="meeting-badge" data-testid="meeting-owner-badge">
                       ✠ Grand Master

@@ -31,6 +31,8 @@ import {
 } from './orders';
 import { buildOrderAllyWorkingIds, buildWorkingIds } from './deck';
 import { addFoils, migrateFoils, rollFoil, type FoilBook } from './foil';
+import { migrateAch, migrateTitle, type AchState } from './achievements';
+import { migrateCodex } from './codexUnlock';
 
 export const PROFILE_KEY = 'occult-wars.profile.v1';
 export const PACK_COST = 150;
@@ -97,6 +99,12 @@ export type Profile = {
   daily: DailyState | null;
   /** Foil copies per plate id (shop pulls only; older copies stay plain). */
   foils?: FoilBook;
+  /** Honours: progress counts, distinct sets, and what is earned. */
+  ach?: AchState;
+  /** The title worn beside the name (one an honour granted). */
+  title?: string;
+  /** Codex pages met on the field (owned plates are open anyway). */
+  codex?: string[];
 };
 
 export function defaultProfile(): Profile {
@@ -246,7 +254,15 @@ function polishFields(raw: Partial<Profile> & Record<string, unknown>): Partial<
     ? renamedIds(raw.collection).filter(isKeepablePlateId)
     : [];
   const foils = migrateFoils(raw.foils, collection);
-  return Object.keys(foils).length ? { foils } : {};
+  const ach = migrateAch(raw.ach);
+  const title = ach ? migrateTitle(raw.title) : undefined;
+  const codex = migrateCodex(raw.codex);
+  return {
+    ...(Object.keys(foils).length ? { foils } : {}),
+    ...(ach ? { ach } : {}),
+    ...(title ? { title } : {}),
+    ...(codex ? { codex } : {}),
+  };
 }
 
 /** The orders this adept has sworn (a "win with" rite only names these). */

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { Battlefield, type MatchMode } from './components/Battlefield';
 import { CombatDemo } from './components/CombatDemo';
 import { CardPeekLayer } from './components/CardPeek';
@@ -23,6 +23,7 @@ import type { FriendRole, FriendSession } from './net/friendSession';
 import {
   resolveFriendMatchLoadouts,
   type FriendLoadout,
+  type LoadoutWho,
 } from './net/friendLoadout';
 import { SecondHour } from './components/SecondHour';
 import { SealedCentury } from './components/SealedCentury';
@@ -57,8 +58,15 @@ import { readHourOpen } from './game/hourUnlock';
 import type { StageOutcome } from './game/campaign';
 import { isMainGameMap } from './game/maps';
 import { AI_DIFFICULTY_KEY, readAiDifficulty, type AiDifficulty } from './game/ai';
+import { ACH_EVENT, noteMatch, noteSecret, noteSighting, settleHonours, type AchNoteDetail } from './game/achievements';
+import { noteEncounters } from './game/codexUnlock';
+import { Honours, TitlePicker } from './components/Honours';
+import { SettingsPanel } from './components/SettingsPanel';
+import { toastHonours } from './components/HonourToast';
 import './App.css';
 import './polish.css';
+
+const Codex = lazy(() => import('./components/Codex').then((m) => ({ default: m.Codex })));
 
 type Screen =
   | 'title'
@@ -75,7 +83,9 @@ type Screen =
   | 'shop'
   | 'ledger'
   | 'meeting'
-  | 'sandbox';
+  | 'sandbox'
+  | 'codex'
+  | 'honours';
 
 /** Pick a rival order for training (not self / not ally preferred). */
 function trainingFoe(order: string | null): string {
@@ -122,8 +132,52 @@ export default function App() {
   const [campaignStage, setCampaignStage] = useState(0);
   /** The Ledger opened by a "Take a seat" invitation: straight to the sign-up form. */
   const [ledgerSeat, setLedgerSeat] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // Honours: sightings, secrets and plates met on the field arrive as events.
+  useEffect(() => {
+    const on = (e: Event) => {
+      const d = (e as CustomEvent<AchNoteDetail>).detail;
+      if (!d) return;
+      if (d.kind === 'sighting') update((p) => noteSighting(p, d.name));
+      else if (d.kind === 'secret') update((p) => noteSecret(p, d.id));
+      else if (d.kind === 'encounter') {
+        update((p) => {
+          let next = noteEncounters(p, d.ids);
+          for (const id of ['justin_kern', 'seth_kern', 'south_haven_dispatch']) {
+            if (d.ids.includes(id)) next = noteSecret(next, id);
+          }
+          return settleHonours(next);
+        });
+      }
+    };
+    window.addEventListener(ACH_EVENT, on);
+    return () => window.removeEventListener(ACH_EVENT, on);
+  }, [update]);
+  // Anything met straight off the profile (level, collection, foils, codes) earns at once.
+  useEffect(() => {
+    if (settleHonours(profile) !== profile) update((p) => settleHonours(p));
+  }, [profile, update]);
+  // A toast for honours earned just now (not ones arriving with a cloud copy).
+  const toastedRef = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    const got = profile.ach?.got ?? {};
+    if (!toastedRef.current) {
+      toastedRef.current = new Set(Object.keys(got));
+      const fresh = Object.keys(got).filter((id) => Date.now() - got[id] < 60_000);
+      if (fresh.length) toastHonours(fresh);
+      return;
+    }
+    const seen = toastedRef.current;
+    const fresh = Object.keys(got).filter((id) => !seen.has(id));
+    for (const id of fresh) seen.add(id);
+    const now = fresh.filter((id) => Date.now() - got[id] < 60_000);
+    if (now.length) toastHonours(now);
+  }, [profile.ach]);
   const [friendRole, setFriendRole] = useState<FriendRole | null>(null);
   const [friendSession, setFriendSession] = useState<FriendSession | null>(null);
+  /** The other chair's name, title and rank (Friend Working). */
+  const [friendFoe, setFriendFoe] = useState<LoadoutWho | null>(null);
   const [blackMondayReveal, setBlackMondayReveal] = useState<Card | null>(null);
   /** A table challenge waiting for Friend Working (issued = host, answered = guest). */
   const [tableChallenge, setTableChallenge] = useState<{
@@ -184,7 +238,10 @@ export default function App() {
       case 'field':
         if (matchMode === 'campaign') return 'The Leaden Hour';
         if (matchMode === 'hotseat') return 'Pass the Grimoire';
-        if (matchMode === 'friend') return 'Friend Working';
+        if (matchMode === 'friend') {
+          const bits = [friendFoe?.name, friendFoe?.title, friendFoe?.rank].filter(Boolean);
+          return bits.length ? `Friend Working · vs ${bits.join(' · ')}` : 'Friend Working';
+        }
         if (matchMode === 'second') return 'The Hour After';
         if (matchMode === 'old') return 'The Sealed Century';
         return 'Training Rite';
@@ -215,7 +272,7 @@ export default function App() {
       default:
         return 'Atelier';
     }
-  }, [screen, matchMode]);
+  }, [screen, matchMode, friendFoe]);
 
   function firstHourAllegiance(): FirstHourOrder | null {
     const a = profile.allegiance;
@@ -294,6 +351,7 @@ export default function App() {
       setRedDeckIds(resolved.redDeckIds);
       setFriendRole(role);
       setFriendSession(session);
+      setFriendFoe((role === 'host' ? guestLoadout : hostLoadout).who ?? null);
       setMatchMode('friend');
       setMapId((prev) => (isMainGameMap(prev) ? prev : 'ashen-cross'));
       setScreen('field');
@@ -338,6 +396,7 @@ export default function App() {
 
   if (screen === 'menu') {
     return (
+      <>
       <MenuAtelier
         profile={profile}
         onUpdateProfile={update}
@@ -380,7 +439,30 @@ export default function App() {
         onOldWork={() => setScreen('old')}
         onAllegiance={() => setScreen('allegiance')}
         onSandbox={() => setScreen('sandbox')}
+        onCodex={() => setScreen('codex')}
+        onHonours={() => setScreen('honours')}
+        onSettings={() => setSettingsOpen(true)}
       />
+      {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
+      </>
+    );
+  }
+
+  if (screen === 'codex') {
+    return (
+      <div className="app app-shell">
+        <Suspense fallback={<p className="ledger-wait">Opening the Codex…</p>}>
+          <Codex profile={profile} onBack={() => setScreen('menu')} />
+        </Suspense>
+      </div>
+    );
+  }
+
+  if (screen === 'honours') {
+    return (
+      <div className="app app-shell">
+        <Honours profile={profile} onUpdate={update} onBack={() => setScreen('menu')} />
+      </div>
     );
   }
 
@@ -449,6 +531,7 @@ export default function App() {
           customDecks={profile.customDecks}
           allegiance={firstHourAllegiance()}
           tableChallenge={tableChallenge}
+          who={{ name: profile.username || undefined, title: profile.title }}
           onReady={({ room, role, session, hostLoadout, guestLoadout }) => {
             setTableChallenge(null);
             startFriend(room, role, session, hostLoadout, guestLoadout);
@@ -550,7 +633,7 @@ export default function App() {
   if (screen === 'meeting') {
     return (
       <div className="app app-shell">
-        <Meeting onBack={() => setScreen('menu')} guestName={profile.username} />
+        <Meeting onBack={() => setScreen('menu')} guestName={profile.username} title={profile.title} />
       </div>
     );
   }
@@ -559,6 +642,19 @@ export default function App() {
     return (
       <div className="app app-shell">
         <Ledger
+          extra={
+            <div className="ledger-self plate ledger-honours" data-testid="ledger-honours">
+              <p className="plate-kicker">Honours</p>
+              <p className="honours-name">
+                {profile.username || 'The adept'}
+                {profile.title && <em className="adept-title"> · {profile.title}</em>}
+              </p>
+              <TitlePicker profile={profile} onUpdate={update} />
+              <button type="button" className="brass-btn brass-btn-ghost" onClick={() => setScreen('honours')}>
+                Honours &amp; Titles
+              </button>
+            </div>
+          }
           focusSeat={ledgerSeat}
           onBack={() => {
             setLedgerSeat(false);
@@ -665,7 +761,7 @@ export default function App() {
           }}
           onRiteTally={(t) => {
             // A passed grimoire (one hand, both chairs) never counts toward rites or XP.
-            if (matchMode !== 'hotseat') update((p) => recordMatchTally(p, t));
+            if (matchMode !== 'hotseat') update((p) => noteMatch(recordMatchTally(p, t), t, { mode: matchMode }));
           }}
           onMatchEnd={({ playerWon, kind, tally }) => {
             // The Ledger: live-table and practice results (a passed grimoire is neither).
@@ -681,7 +777,7 @@ export default function App() {
                       ? 'old'
                       : 'training';
             let next = awardShards(profile, modeKey, playerWon);
-            if (matchMode !== 'hotseat') next = recordMatchTally(next, tally);
+            if (matchMode !== 'hotseat') next = noteMatch(recordMatchTally(next, tally), tally, { mode: matchMode, kind });
             if (!playerWon) {
               const r = applyBlackMondayLossInject(next, {
                 deckId: working?.id,

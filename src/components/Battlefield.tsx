@@ -105,6 +105,9 @@ import {
   markPrimerSeen,
 } from './RulesPrimer';
 import { UnitCoin, type BoardUnit } from './UnitCoin';
+import { WeatherLayer } from './WeatherLayer';
+import { useEncounterLog } from '../hooks/useEncounterLog';
+import { announce } from '../game/achievements';
 import { MushroomCloud } from './MushroomCloud';
 import { FalloutRain } from './FalloutRain';
 import { BattleCountModal } from './BattleCountModal';
@@ -418,6 +421,7 @@ export function Battlefield({
   });
   const [discard, setDiscard] = useState(emptyDiscard);
   const [board, setBoard] = useState<(BoardUnit | null)[][]>(emptyBoard);
+  useEncounterLog(board, hand[mySide], discard, !!matchOver);
   const [control, setControl] = useState<ControlGrid>(() =>
     initialControl(gameMap.tiles),
   );
@@ -483,6 +487,7 @@ export function Battlefield({
   const cryptidGateRef = useRef(createOnceGate());
   const announceCryptid = useCallback((name: string, ms = 2400) => {
     if (!cryptidGateRef.current.first(name)) return;
+    announce({ kind: 'sighting', name });
     setCryptidSight(name);
     window.setTimeout(() => setCryptidSight((cur) => (cur === name ? null : cur)), ms);
   }, []);
@@ -1415,6 +1420,7 @@ export function Battlefield({
         }
         pendingGadgetRef.current = { acting, sourceUid };
         setNukeActive(true);
+        announce({ kind: 'secret', id: 'gadget' });
         setAim(null);
         setSelectedUnit(null);
         setAttacker(null);
@@ -3708,6 +3714,7 @@ export function Battlefield({
               <CoinSlideLayer slide={coinSlide} gridRef={boardGridRef} />
             )}
           </div>
+          <WeatherLayer />
           </div>
         </div>
       </div>

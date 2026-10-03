@@ -65,6 +65,8 @@ export type FriendLoadoutMessage = {
   heroId?: string;
   cards: string[];
   faction?: string;
+  /** Name, worn title, ladder rank (optional; older clients omit it). */
+  who?: { name?: string; title?: string; rank?: string; nonce?: string };
 };
 
 export type FriendMessage =

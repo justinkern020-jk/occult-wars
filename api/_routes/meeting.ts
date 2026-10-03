@@ -57,7 +57,7 @@ export async function handleMeeting(req: Request, now = Date.now()): Promise<Res
       const mark = String(body.mark ?? '');
       if (!MARK_RE.test(mark)) throw new HttpError(400, 'Bad mark.');
       const who = await posterFor(store, tokenFrom(req), owner, mark, clientIp(req));
-      const msg = await postMeeting(store, who, { text: body.text, name: body.name, image: body.image }, now);
+      const msg = await postMeeting(store, who, { text: body.text, name: body.name, image: body.image, title: body.title }, now);
       return json({ ok: true, msg });
     }
     if (op === 'delete') {

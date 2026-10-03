@@ -8,6 +8,7 @@
  * (server-verified: OWNER_KEY / OWNER_EMAILS / OWNER_IDS) posts with a Grand
  * Master badge and may strike any message.
  */
+import { cleanTitle } from './titles.js';
 import { del as blobDel, put as blobPut } from '@vercel/blob';
 import type { Store } from './store.js';
 import { userForToken } from './accounts.js';
@@ -42,6 +43,8 @@ export type MeetingMessage = {
   text: string;
   badge: Badge;
   img?: MeetingImage;
+  /** An honour's title worn beside the name (whitelisted). */
+  title?: string;
 };
 
 export class MeetingError extends Error {
@@ -228,7 +231,7 @@ export async function posterFor(
 export async function postMeeting(
   store: Store,
   who: Poster,
-  input: { text: unknown; name: unknown; image?: unknown },
+  input: { text: unknown; name: unknown; image?: unknown; title?: unknown },
   now: number,
   env: Env = process.env,
 ): Promise<MeetingMessage> {
@@ -273,6 +276,8 @@ export async function postMeeting(
   const [n] = await store.pipe([['INCR', MK.n]]);
   const id = Number(n);
   const msg: MeetingMessage = { id, at: now, name, text, badge };
+  const title = cleanTitle(input.title);
+  if (title) msg.title = title;
   if (image) msg.img = await saveImage(store, id, image, env);
   // The board keeps the newest KEEP: the one that falls off goes with its image.
   const gone = id - KEEP;

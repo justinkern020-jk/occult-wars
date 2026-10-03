@@ -14,6 +14,7 @@ import {
   loadoutFromWorking,
   sanitizeFriendLoadout,
   type FriendLoadout,
+  type LoadoutWho,
 } from '../net/friendLoadout';
 import { cardById } from '../data/catalog';
 import type { CustomDeck } from '../game/profile';
@@ -41,6 +42,8 @@ type Props = {
   tableChallenge?: { role: FriendRole; room: string } | null;
   onReady: (payload: FriendReadyPayload) => void;
   onBack: () => void;
+  /** Name, title and rank shown to the other chair. */
+  who?: LoadoutWho;
 };
 
 const LOADOUT_RETRY_MS = 300;
@@ -56,11 +59,12 @@ export function FriendWorking({
   tableChallenge = null,
   onReady,
   onBack,
+  who,
 }: Props) {
   const [deckId, setDeckId] = useState(() => customDecks[0]?.id ?? '');
   const selectedDeck =
     customDecks.find((d) => d.id === deckId) ?? customDecks[0];
-  const localLoadout = loadoutFromWorking(selectedDeck, allegiance);
+  const localLoadout: FriendLoadout = { ...loadoutFromWorking(selectedDeck, allegiance), ...(who ? { who } : {}) };
 
   const [room, setRoom] = useState(randomRoomCode);
   const [role, setRole] = useState<FriendRole | null>(null);
@@ -177,6 +181,7 @@ export function FriendWorking({
         heroId: local.heroId,
         cards: local.cards,
         faction: local.faction,
+        ...(local.who ? { who: local.who } : {}),
       });
     };
 

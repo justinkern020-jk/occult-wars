@@ -5,6 +5,7 @@ import App from './App.tsx'
 import { PlayingNow } from './components/PlayingNow'
 import { captureOwnerKey } from './net/watch'
 import { SiteAnalytics } from './components/SiteAnalytics'
+import { HonourToast } from './components/HonourToast'
 
 captureOwnerKey()
 
@@ -13,5 +14,6 @@ createRoot(document.getElementById('root')!).render(
     <App />
     <PlayingNow />
     <SiteAnalytics />
+    <HonourToast />
   </StrictMode>,
 )

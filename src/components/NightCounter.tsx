@@ -1,3 +1,4 @@
+import { notePack } from '../game/achievements';
 import { keywordLabel } from '../game/keywords';
 import { useMemo, useState } from 'react';
 import {
@@ -121,7 +122,7 @@ export function NightCounter({ profile, onUpdate, onBack, counter = 'night', onD
     );
     setNoteIsError(false);
     brassClick();
-    onUpdate(r.profile);
+    onUpdate(notePack(r.profile, 'counter'));
     setOpening([{ card: r.card, foil: r.foil }]);
   }
 
