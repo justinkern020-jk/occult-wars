@@ -35,6 +35,33 @@ export class AccountError extends Error {
 }
 
 const ENDPOINT = '/api/account';
+/** The seat token, kept so a reload or a fresh tab stays seated. */
+export const SEAT_TOKEN_KEY = 'occult-wars.seat-token';
+const TOKEN_RE = /^[a-f0-9]{64}$/;
+
+export function readSeatToken(): string | null {
+  try {
+    const t = localStorage.getItem(SEAT_TOKEN_KEY);
+    return t && TOKEN_RE.test(t) ? t : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeSeatToken(token: string | null): void {
+  try {
+    if (token && TOKEN_RE.test(token)) localStorage.setItem(SEAT_TOKEN_KEY, token);
+    else localStorage.removeItem(SEAT_TOKEN_KEY);
+  } catch {
+    /* private mode: the HttpOnly cookie still carries the seat */
+  }
+}
+
+/** Authorization header for any /api call that should know the seat. */
+export function seatHeaders(): Record<string, string> {
+  const t = readSeatToken();
+  return t ? { authorization: `Bearer ${t}` } : {};
+}
 
 let state: SeatState = { status: 'unknown', seat: null };
 const listeners = new Set<(s: SeatState) => void>();
@@ -60,12 +87,16 @@ async function call<T>(init: { op: string; body?: Record<string, unknown> }): Pr
       init.body === undefined
         ? await fetch(`${ENDPOINT}?op=${encodeURIComponent(init.op)}`, {
             credentials: 'same-origin',
-            headers: { accept: 'application/json' },
+            headers: { accept: 'application/json', ...seatHeaders() },
           })
         : await fetch(ENDPOINT, {
             method: 'POST',
             credentials: 'same-origin',
-            headers: { 'content-type': 'application/json', accept: 'application/json' },
+            headers: {
+              'content-type': 'application/json',
+              accept: 'application/json',
+              ...seatHeaders(),
+            },
             body: JSON.stringify({ op: init.op, ...init.body }),
           });
   } catch {
@@ -89,8 +120,10 @@ async function call<T>(init: { op: string; body?: Record<string, unknown> }): Pr
   return data as T;
 }
 
-function seatFrom(data: { seat?: Seat | null }): Seat | null {
+function seatFrom(data: { seat?: Seat | null; token?: string }): Seat | null {
   const seat = data.seat ?? null;
+  if (typeof data.token === 'string') writeSeatToken(data.token);
+  else if (!seat) writeSeatToken(null);
   setState({ status: 'open', seat });
   return seat;
 }
@@ -114,8 +147,12 @@ export async function signIn(email: string, password: string): Promise<Seat | nu
 }
 
 export async function signOut(): Promise<void> {
-  await call({ op: 'signout', body: {} });
-  setState({ status: 'open', seat: null });
+  try {
+    await call({ op: 'signout', body: {} });
+  } finally {
+    writeSeatToken(null);
+    setState({ status: 'open', seat: null });
+  }
 }
 
 export async function takeLedgerName(username: string): Promise<Seat | null> {

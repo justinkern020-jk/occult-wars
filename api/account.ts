@@ -28,18 +28,10 @@ import {
   signOut,
   signUp,
   takeName,
+  tokenFrom,
   userForToken,
   writeCloudProfile,
 } from './_lib/accounts.js';
-
-function tokenFrom(req: Request): string | null {
-  const cookie = req.headers.get('cookie') ?? '';
-  for (const part of cookie.split(';')) {
-    const [k, ...v] = part.trim().split('=');
-    if (k === SESSION_COOKIE) return decodeURIComponent(v.join('='));
-  }
-  return null;
-}
 
 function sessionCookie(token: string | null): string {
   const base = `${SESSION_COOKIE}=${token ?? ''}; Path=/; HttpOnly; Secure; SameSite=Lax`;
@@ -85,7 +77,11 @@ export async function handleAccount(req: Request, now = Date.now()): Promise<Res
         op === 'signup'
           ? await signUp(store, { email: body.email, password: body.password, name: body.name }, now)
           : await signIn(store, { email: body.email, password: body.password });
-      return json({ ok: true, seat: publicSeat(user) }, 200, { 'Set-Cookie': sessionCookie(fresh) });
+      // The token also rides in the body so the client can keep it past a
+      // blocked or cleared cookie (validated server-side on every call).
+      return json({ ok: true, seat: publicSeat(user), token: fresh }, 200, {
+        'Set-Cookie': sessionCookie(fresh),
+      });
     }
     if (op === 'signout') {
       await signOut(store, token);

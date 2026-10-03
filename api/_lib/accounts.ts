@@ -269,3 +269,16 @@ export async function writeCloudProfile(store: Store, user: User, profile: unkno
   if (text.length > PROFILE_MAX) throw new SeatError(413, 'That profile is too large.');
   await store.pipe([['SET', K.profile(user.id), text]]);
 }
+
+/** The seat token: the HttpOnly cookie, or a Bearer header (kept in localStorage). */
+export function tokenFrom(req: Request): string | null {
+  const auth = req.headers.get('authorization') ?? '';
+  const bearer = /^Bearer\s+([a-f0-9]{64})$/i.exec(auth.trim());
+  if (bearer) return bearer[1].toLowerCase();
+  const cookie = req.headers.get('cookie') ?? '';
+  for (const part of cookie.split(';')) {
+    const [k, ...v] = part.trim().split('=');
+    if (k === SESSION_COOKIE) return decodeURIComponent(v.join('='));
+  }
+  return null;
+}

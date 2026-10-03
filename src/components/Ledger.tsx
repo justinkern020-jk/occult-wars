@@ -131,7 +131,7 @@ function TakeASeat({ offline }: { offline: boolean }) {
   }
 
   return (
-    <div className="ledger-self plate account-seat" data-testid="take-a-seat">
+    <div className="ledger-self plate account-seat" data-testid="take-a-seat" data-mode={mode}>
       <div className="ledger-self-head">
         <p className="plate-kicker">Take a seat</p>
       </div>
@@ -179,14 +179,24 @@ function TakeASeat({ offline }: { offline: boolean }) {
             onChange={(e) => setPassword(e.target.value)}
           />
         </label>
-        <button type="submit" className="brass-btn brass-btn-solid" disabled={busy}>
+        <button
+          type="submit"
+          className="brass-btn brass-btn-solid"
+          data-testid="account-submit"
+          disabled={busy}
+        >
           {mode === 'signup' ? 'Create the account' : 'Sign in'}
         </button>
       </form>
-      {note ? <p className="account-note">{note}</p> : null}
+      {note ? (
+        <p className="account-note" role="alert" data-testid="account-note">
+          {note}
+        </p>
+      ) : null}
       <button
         type="button"
         className="account-switch"
+        data-testid="account-mode-switch"
         onClick={() => {
           setNote('');
           setMode((m) => (m === 'signup' ? 'signin' : 'signup'));
@@ -228,6 +238,7 @@ function SeatPage({ seat, onNamed }: { seat: Seat; onNamed: () => void }) {
           <button
             type="button"
             className="account-switch"
+            data-testid="account-signout"
             disabled={busy}
             onClick={() => {
               setBusy(true);
