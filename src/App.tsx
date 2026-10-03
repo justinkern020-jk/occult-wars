@@ -32,6 +32,8 @@ import {
   applyBlackMondayLossInject,
   awardShards,
   deleteEraDeck,
+  recordMatchTally,
+  withDaily,
   saveEraDeck,
   sealedCenturyLoadout,
   swearAllegiance,
@@ -50,6 +52,7 @@ import {
 } from './game/orders';
 import { buildOrderAllyWorkingIds } from './game/deck';
 import { CARDS } from './data/catalog';
+import { levelFromXp } from './game/dailyRites';
 import { readHourOpen } from './game/hourUnlock';
 import type { StageOutcome } from './game/campaign';
 import { mapsForEra } from './game/maps';
@@ -127,8 +130,19 @@ export default function App() {
 
   // What this hand is doing, for the owner's roll (and the safe-reload check).
   useEffect(() => {
-    setActivity({ where: screen, mode: screen === 'field' ? matchMode : undefined, name: profile.username });
-  }, [screen, matchMode, profile.username]);
+    setActivity({
+      where: screen,
+      mode: screen === 'field' ? matchMode : undefined,
+      name: profile.username,
+      level: levelFromXp(profile.xp).level,
+    });
+  }, [screen, matchMode, profile.username, profile.xp]);
+
+  // The Day's Rites turn over at local midnight: fresh rites whenever the menu opens on a new day.
+  useEffect(() => {
+    if (screen !== 'menu') return;
+    if (withDaily(profile) !== profile) update((p) => withDaily(p));
+  }, [screen, profile, update]);
 
   // Seated in a two-hand match: no knocks at the table.
   useEffect(() => {
@@ -632,7 +646,11 @@ export default function App() {
                     : 'menu',
             );
           }}
-          onMatchEnd={({ playerWon, kind }) => {
+          onRiteTally={(t) => {
+            // A passed grimoire (one hand, both chairs) never counts toward rites or XP.
+            if (matchMode !== 'hotseat') update((p) => recordMatchTally(p, t));
+          }}
+          onMatchEnd={({ playerWon, kind, tally }) => {
             // The Ledger: live-table and practice results (a passed grimoire is neither).
             if (matchMode !== 'hotseat') void recordMatch(playerWon, matchMode === 'friend');
             const modeKey =
@@ -646,6 +664,7 @@ export default function App() {
                       ? 'old'
                       : 'training';
             let next = awardShards(profile, modeKey, playerWon);
+            if (matchMode !== 'hotseat') next = recordMatchTally(next, tally);
             if (!playerWon) {
               const r = applyBlackMondayLossInject(next, {
                 deckId: working?.id,

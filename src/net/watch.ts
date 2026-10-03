@@ -169,6 +169,8 @@ export type HandLine = {
   last: number;
   /** False for a page too old to say what it is doing. */
   known: boolean;
+  /** Adept level (0 / missing = a page too old to say). */
+  level?: number;
 };
 
 export async function readWho(): Promise<{ hands: HandLine[]; matches: MatchSummary[]; build: string } | null> {

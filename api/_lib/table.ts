@@ -81,6 +81,8 @@ export type Activity = {
   match: string;
   build: string;
   seat: boolean;
+  /** Adept level from match XP (0 = not told). */
+  level: number;
 };
 const WHERE = new Set([
   'title', 'menu', 'allegiance', 'field', 'archive', 'deck', 'pack', 'campaign', 'friend',
@@ -104,6 +106,10 @@ export function cleanActivity(raw: unknown): Activity | null {
     match: typeof o.match === 'string' && /^[a-z0-9]{12,24}$/.test(o.match) ? o.match : '',
     build: typeof o.build === 'string' && /^[a-z0-9]{1,12}$/.test(o.build) ? o.build : '',
     seat: o.seat === true,
+    level:
+      typeof o.level === 'number' && Number.isFinite(o.level)
+        ? Math.max(0, Math.min(999, Math.floor(o.level)))
+        : 0,
   };
 }
 
@@ -142,7 +148,7 @@ export async function listHands(store: Store, now: number): Promise<Hand[]> {
     const since = Number((sinces as unknown[])?.[i]) || last;
     const cc = (ccs as unknown[])?.[i];
     return {
-      ...(act ?? { name: '', where: 'menu', mode: '', era: '', map: '', match: '', build: '', seat: false }),
+      ...(act ?? { name: '', where: 'menu', mode: '', era: '', map: '', match: '', build: '', seat: false, level: 0 }),
       // A short, stable handle; never the mark itself.
       id: createHash('sha256').update(mark).digest('hex').slice(0, 10),
       country: typeof cc === 'string' ? cc : null,

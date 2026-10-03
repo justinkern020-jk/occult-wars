@@ -7,8 +7,10 @@ import {
   applyJustinKernUnlock,
   applySethKernUnlock,
   applySouthHavenDispatchUnlock,
+  claimRite,
   type Profile,
 } from '../game/profile';
+import { levelFromXp, riteLabel, riteReady } from '../game/dailyRites';
 import {
   bootHourOpen,
   isAthensCode,
@@ -31,7 +33,7 @@ import { BattleCountModal } from './BattleCountModal';
 import { AiMindPicker } from './AiMindPicker';
 import { aiDifficultyLabel, type AiDifficulty } from '../game/ai';
 import { TarotPop } from './TarotPop';
-import { brassClick, copSirenSfx, metalRiffSfx, setMusicBed, unlockAudio } from '../game/sfx';
+import { brassClick, copSirenSfx, metalRiffSfx, setMusicBed, spellCastSfx, unlockAudio } from '../game/sfx';
 
 type Props = {
   profile: Profile;
@@ -118,6 +120,7 @@ export function MenuAtelier({
   const meetUnread = (tableSnap.view?.meet ?? 0) > readSeenMeeting();
   const [revealUnlock, setRevealUnlock] = useState<{ card: Card; caption: string } | null>(null);
   const firstMaps = mapsForEra('first');
+  const lvl = levelFromXp(profile.xp);
 
   useEffect(() => {
     if (
@@ -263,7 +266,19 @@ export function MenuAtelier({
               aria-hidden
             />
             <label className="menu-occultist">
-              <span className="menu-occultist-label">Occultist</span>
+              <span className="menu-occultist-label">
+                Occultist
+                <span
+                  className="menu-level"
+                  data-testid="player-level"
+                  title={`${lvl.into} / ${lvl.need} XP to level ${lvl.level + 1}`}
+                >
+                  Lv {lvl.level}
+                  <span className="menu-level-thread" aria-hidden>
+                    <span style={{ width: `${Math.round((lvl.into / lvl.need) * 100)}%` }} />
+                  </span>
+                </span>
+              </span>
               <input
                 className="ledger-input menu-occultist-input"
                 value={profile.username}
@@ -286,9 +301,61 @@ export function MenuAtelier({
           )}
 
           <p className="menu-shards" data-testid="shard-count">
-            {profile.username} · {profile.alchemicalShards} shards
+            {profile.username} · Lv {lvl.level} · {profile.alchemicalShards} shards
             {profile.allegiance ? ` · ${profile.allegiance}` : ' · unswear'}
           </p>
+
+          {profile.daily && profile.daily.rites.length > 0 && (
+            <section className="menu-rites" data-testid="daily-rites" aria-label="The Day's Rites">
+              <h2 className="menu-rites-title">The Day&rsquo;s Rites</h2>
+              <ul className="menu-rites-list">
+                {profile.daily.rites.map((r) => {
+                  const ready = riteReady(r);
+                  const pct = Math.round((Math.min(r.progress, r.goal) / r.goal) * 100);
+                  return (
+                    <li
+                      key={r.id}
+                      className={`menu-rite${ready ? ' is-ready' : ''}${r.claimed ? ' is-claimed' : ''}`}
+                      data-testid="daily-rite"
+                    >
+                      <span className="menu-rite-label">{riteLabel(r)}</span>
+                      <span className="menu-rite-thread" aria-hidden>
+                        <span style={{ width: `${pct}%` }} />
+                      </span>
+                      <span className="menu-rite-count">
+                        {Math.min(r.progress, r.goal)}/{r.goal}
+                      </span>
+                      {ready ? (
+                        <button
+                          type="button"
+                          className="brass-btn brass-btn-solid menu-rite-claim"
+                          data-testid="claim-rite"
+                          onClick={() => {
+                            const { profile: next, granted } = claimRite(profile, r.id);
+                            if (granted > 0) {
+                              unlockAudio();
+                              spellCastSfx();
+                              onUpdateProfile(next);
+                              setToast(`The rite is answered: +${granted} shards.`);
+                            }
+                          }}
+                        >
+                          Claim {r.reward}
+                        </button>
+                      ) : (
+                        <span className="menu-rite-reward">
+                          {r.claimed ? 'Claimed' : `${r.reward} shards`}
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+              <p className="menu-rites-note">
+                New rites at midnight · every mode counts but Pass the Grimoire
+              </p>
+            </section>
+          )}
 
           {onAiDifficulty && <AiMindPicker value={aiDifficulty} onChange={onAiDifficulty} />}
 

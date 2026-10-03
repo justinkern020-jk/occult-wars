@@ -221,6 +221,7 @@ export function PortalDoor() {
               <li key={h.id} className="portal-hand" data-testid="portal-hand" data-where={h.where} data-mode={h.mode}>
                 <span className="portal-hand-name">
                   <b>{h.name || (h.known ? 'Unnamed hand' : 'Unknown hand')}</b>
+                  {h.level ? <i className="portal-hand-level">Lv {h.level}</i> : null}
                   {h.known && <i className="portal-hand-badge">{h.seat ? 'account' : 'guest'}</i>}
                 </span>
                 <span className="portal-hand-meta">

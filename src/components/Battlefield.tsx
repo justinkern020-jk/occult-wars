@@ -122,6 +122,7 @@ import {
 } from '../game/hourUnlock';
 import { portalCodeFor } from '../game/portalCodes';
 import { diffBoards, guestSounds, newOnPile, type FxBoard } from '../game/boardFx';
+import { emptyTally, type MatchTally } from '../game/dailyRites';
 
 /** Death-burst sparks: fixed spread so renders stay pure. */
 const EMBERS = Array.from({ length: 11 }, (_, i) => ({
@@ -175,7 +176,11 @@ export type BattlefieldProps = {
     winner: Side;
     kind: VictoryKind;
     playerWon: boolean;
+    /** This hand's tallies for the Day's Rites and XP. */
+    tally: MatchTally;
   }) => void;
+  /** A match left before its end (or the guest's end): its tallies so far. */
+  onRiteTally?: (tally: MatchTally) => void;
 };
 
 const DEFAULT_BLUE = 'The Vril Syndicate';
@@ -322,6 +327,7 @@ export function Battlefield({
   onUpdateProfile,
   onLeave,
   onMatchEnd,
+  onRiteTally,
   aiDifficulty = 'expert',
 }: BattlefieldProps = {}) {
   const [mapId, setMapId] = useState(initialMapId);
@@ -344,6 +350,23 @@ export function Battlefield({
     friend && friendRole === 'guest' ? 'red' : 'blue';
   const PLAYER: Side = mySide;
   const AI_SIDE: Side = 'red';
+  // ——— The Day's Rites: what this hand did this match (flushed once per match) ———
+  const tallySide: Side = mySide;
+  const tallyFaction = tallySide === 'blue' ? blueFaction : redFaction;
+  const tallyRef = useRef<MatchTally>(emptyTally(tallyFaction));
+  const tallyDoneRef = useRef(false);
+  const onRiteTallyRef = useRef(onRiteTally);
+  useEffect(() => {
+    onRiteTallyRef.current = onRiteTally;
+  });
+  /** Hand over an unfinished match's tallies (left mid-way / restarted). */
+  const flushOpenTally = useCallback(() => {
+    const t = tallyRef.current;
+    const any = t.cast + t.destroy + t.muster + t.conquer + t.damage + t.leader > 0;
+    if (!tallyDoneRef.current && any) onRiteTallyRef.current?.({ ...t, finished: false, won: false });
+    tallyDoneRef.current = true;
+  }, []);
+  useEffect(() => () => flushOpenTally(), [flushOpenTally]);
   const isFriendGuest = friend && friendRole === 'guest';
   const isFriendHost = friend && friendRole === 'host';
   /** Guest waits until first host state arrives. */
@@ -526,6 +549,17 @@ export function Battlefield({
     }
     if (prev.board === board) return;
     const d = diffBoards(prev.board, board as FxBoard);
+    {
+      const t = tallyRef.current;
+      for (const x of d.deaths) {
+        if (x.unit.side !== tallySide) {
+          t.destroy++;
+          t.damage += Math.max(0, x.unit.power);
+        }
+      }
+      for (const w of d.wounds) if (w.unit.side !== tallySide) t.damage += w.amount;
+      for (const m of d.musters) if (m.unit.side === tallySide) t.muster++;
+    }
     if (d.gains.length > 0) {
       showPips(
         d.gains.map((g) => ({ id: '', uid: g.unit.uid, r: g.r, c: g.c, text: `+${g.amount}` })),
@@ -554,7 +588,27 @@ export function Battlefield({
         setShake(null);
       }, 420);
     }
-  }, [board, turn, showPips]);
+  }, [board, turn, showPips, tallySide]);
+  const prevControlRef = useRef<{ control: typeof control; turn: number } | null>(null);
+  /** bootMatch sets this: the opening strongholds are not conquests. */
+  const controlResetRef = useRef(false);
+  useEffect(() => {
+    const was = prevControlRef.current;
+    prevControlRef.current = { control, turn };
+    if (!was || controlResetRef.current || turn < was.turn) {
+      controlResetRef.current = false;
+      return;
+    }
+    const prev = was.control;
+    if (prev === control) return;
+    let n = 0;
+    control.forEach((row, r) =>
+      row.forEach((owner, c) => {
+        if (owner === tallySide && prev[r]?.[c] !== tallySide) n++;
+      }),
+    );
+    tallyRef.current.conquer += n;
+  }, [control, turn, tallySide]);
 
   /** Always-latest action fns so the AI timeout loop never closes over a stale board. */
   const deployToRef = useRef<
@@ -796,6 +850,9 @@ export function Battlefield({
     (id: string) => {
       resetAiPlan();
       resetCoinMoveSong(); // the coin-move song starts over each match
+      flushOpenTally();
+      tallyRef.current = emptyTally(tallyFaction);
+      tallyDoneRef.current = false;
       const m = mapById(id);
       const ctrl = initialControl(m.tiles);
       let dBlue = deckFor(blueFaction, blueDeckIds);
@@ -810,6 +867,7 @@ export function Battlefield({
 
       setControl(ctrl);
       boardResetRef.current = true;
+      controlResetRef.current = true;
       setBoard(b);
       setDeck(d);
       setHand(h);
@@ -859,6 +917,7 @@ export function Battlefield({
         if (jk && h.blue.length < HAND_CAP) {
           h = { ...h, blue: [...h.blue, jk] };
           setHand(h);
+          if (tallySide === 'blue') tallyRef.current.touched = true;
           justinNote = 'Justin Kern answers the circle.';
         } else if (jk) {
           justinNote = "Justin Kern's hand is sealed — no room.";
@@ -872,6 +931,7 @@ export function Battlefield({
         if (sk && h.blue.length < HAND_CAP) {
           h = { ...h, blue: [...h.blue, sk] };
           setHand(h);
+          if (tallySide === 'blue') tallyRef.current.touched = true;
           sethNote = 'Seth Kern answers the circle.';
         } else if (sk) {
           sethNote = "Seth Kern's hand is sealed — no room.";
@@ -885,6 +945,7 @@ export function Battlefield({
         if (sh && h.blue.length < HAND_CAP) {
           h = { ...h, blue: [...h.blue, sh] };
           setHand(h);
+          if (tallySide === 'blue') tallyRef.current.touched = true;
           southHavenNote = 'South Haven Dispatch answers the circle.';
         } else if (sh) {
           southHavenNote = "South Haven Dispatch's hand is sealed — no room.";
@@ -975,9 +1036,15 @@ export function Battlefield({
         : winner === PLAYER;
       if (playerWon) victoryStinger();
       else defeatStinger();
-      onMatchEnd?.({ winner, kind, playerWon });
+      const tally: MatchTally = {
+        ...tallyRef.current,
+        finished: true,
+        won: winner === tallySide,
+      };
+      tallyDoneRef.current = true;
+      onMatchEnd?.({ winner, kind, playerWon, tally });
     },
-    [pushLog, onMatchEnd, hotseat, friend, sharedTwoPlayer, side, mySide, PLAYER],
+    [pushLog, onMatchEnd, hotseat, friend, sharedTwoPlayer, side, mySide, PLAYER, tallySide],
   );
 
   const buildEffectCtx = useCallback(
@@ -1191,6 +1258,7 @@ export function Battlefield({
       if (card.id === 'south_haven_dispatch') copSirenSfx();
       else if (hasKeyword(card, 'gas')) sirenSfx();
       else spellCastSfx();
+      if (acting === tallySide) tallyRef.current.cast++;
       return true;
     },
     [hand, loyalty, buildEffectCtx, applyEffectCtx, pushLog],
@@ -1249,6 +1317,7 @@ export function Battlefield({
       setLeaderUsed((L) => ({ ...L, [acting]: true }));
       setAim(null);
       leaderCallSfx();
+      if (acting === tallySide) tallyRef.current.leader++;
       return true;
     },
     [
@@ -1374,6 +1443,7 @@ export function Battlefield({
 
 
   function dropJustinIntoHand(seat: Side, unlock = true): string {
+    if (seat === tallySide) tallyRef.current.touched = true;
     const jk = cardById('justin_kern');
     if (!jk) return 'Justin Kern is missing from the catalogue.';
     const drop = withSecretHandDrop(liveRef.current.hand[seat], jk, HAND_CAP);
@@ -1390,6 +1460,7 @@ export function Battlefield({
   }
 
   function dropSethIntoHand(seat: Side, unlock = true): string {
+    if (seat === tallySide) tallyRef.current.touched = true;
     const sk = cardById('seth_kern');
     if (!sk) return 'Seth Kern is missing from the catalogue.';
     const drop = withSecretHandDrop(liveRef.current.hand[seat], sk, HAND_CAP);
@@ -1408,6 +1479,7 @@ export function Battlefield({
   }
 
   function dropSouthHavenIntoHand(seat: Side, unlock = true): string {
+    if (seat === tallySide) tallyRef.current.touched = true;
     const sh = cardById('south_haven_dispatch');
     if (!sh) return 'South Haven Dispatch is missing from the catalogue.';
     const drop = withSecretHandDrop(liveRef.current.hand[seat], sh, HAND_CAP);
@@ -1476,6 +1548,7 @@ export function Battlefield({
     const guestCode = isFriendGuest && friendSession ? portalCodeFor(next) : null;
     if (guestCode && friendSession) {
       setCodeDraft('');
+      if (guestCode !== 'athens') tallyRef.current.touched = true;
       friendSession.send({ v: 1, type: 'intent', intent: { kind: 'code', code: guestCode } });
       setCodeToast(
         guestCode === 'athens'
@@ -2389,10 +2462,33 @@ export function Battlefield({
           diff.wounds.map((w) => ({ uid: w.unit.uid, r: w.r, c: w.c, id: '', text: `-${w.amount}` })),
         );
       }
+      if (before.side === mySide) {
+        const mine = mySide === 'blue' ? before.discard?.blue ?? [] : before.discard?.red ?? [];
+        const now = mySide === 'blue' ? st.discard?.blue ?? [] : st.discard?.red ?? [];
+        tallyRef.current.cast += newOnPile(mine, now).filter(
+          (c) => c.kind === 'rite' || c.kind === 'device',
+        ).length;
+      }
+      if (prevSt && !prevSt.leaderUsed?.[mySide] && st.leaderUsed?.[mySide]) {
+        tallyRef.current.leader++;
+      }
       if (!before.matchOver && st.matchOver) {
+        if (!tallyDoneRef.current) {
+          tallyDoneRef.current = true;
+          onRiteTallyRef.current?.({
+            ...tallyRef.current,
+            finished: true,
+            won: st.matchOver.winner === mySide,
+          });
+        }
         if (st.matchOver.winner === mySide) victoryStinger();
         else defeatStinger();
       }
+    }
+    if (before.matchOver && !st.matchOver) {
+      // The host set a new table: a fresh tally for the new match.
+      tallyRef.current = emptyTally(tallyFaction);
+      tallyDoneRef.current = false;
     }
     friendSyncedRef.current = true;
     lastFriendStRef.current = st;
@@ -2432,7 +2528,7 @@ export function Battlefield({
     setAim(null);
     setPassPrompt(false);
     setAiBusy(false);
-  }, [mapId, kickCoinSlide, showPips, mySide, announceCryptid]);
+  }, [mapId, kickCoinSlide, showPips, mySide, announceCryptid, tallyFaction]);
 
   // Host: broadcast authoritative state (debounced).
   useEffect(() => {

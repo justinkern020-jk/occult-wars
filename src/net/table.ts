@@ -51,6 +51,8 @@ export type Activity = {
   map?: string;
   match?: string;
   name?: string;
+  /** The adept's level (from match XP), shown on the owner's roll. */
+  level?: number;
 };
 let activity: Activity = { where: 'title' };
 let newerBuild = '';

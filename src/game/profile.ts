@@ -1,6 +1,16 @@
 /** Profile persistence: occult-wars.profile.v1 */
 
 import {
+  applyTally,
+  ensureDaily,
+  localDayKey,
+  matchXp,
+  migrateDaily,
+  riteReady,
+  type DailyState,
+  type MatchTally,
+} from './dailyRites';
+import {
   BLACK_MONDAY_ID,
   CARDS,
   canonicalCardId,
@@ -80,6 +90,10 @@ export type Profile = {
    * oldCards, which the match reads).
    */
   oldDecks: CustomDeck[];
+  /** Lifetime XP from finished matches (level is derived: levelFromXp). */
+  xp: number;
+  /** The Day's Rites: today's three quests and their progress. */
+  daily: DailyState | null;
 };
 
 export function defaultProfile(): Profile {
@@ -101,6 +115,8 @@ export function defaultProfile(): Profile {
     oldHero: null,
     oldCards: null,
     oldDecks: [],
+    xp: 0,
+    daily: null,
   };
 }
 
@@ -212,6 +228,51 @@ export function migrateProfile(raw: Partial<Profile> & Record<string, unknown>):
     oldHero: old.hero,
     oldCards: old.cards,
     oldDecks: migrateDecks(raw.oldDecks),
+    xp:
+      typeof raw.xp === 'number' && Number.isFinite(raw.xp)
+        ? Math.max(0, Math.min(10_000_000, Math.floor(raw.xp)))
+        : 0,
+    daily: migrateDaily(raw.daily),
+  };
+}
+
+/** The orders this adept has sworn (a "win with" rite only names these). */
+export function swornOrders(p: Profile): string[] {
+  return [p.allegiance, p.secondOrder, p.oldOrder].filter(
+    (o): o is NonNullable<typeof o> => typeof o === 'string' && o.length > 0,
+  );
+}
+
+/** Today's rites (fresh ones once the local day has turned). */
+export function withDaily(p: Profile, day = localDayKey()): Profile {
+  const daily = ensureDaily(p.daily, swornOrders(p), day);
+  return daily === p.daily ? p : { ...p, daily };
+}
+
+/** Fold one match's tallies into today's rites and the adept's XP. */
+export function recordMatchTally(p: Profile, t: MatchTally, day = localDayKey()): Profile {
+  const q = withDaily(p, day);
+  return {
+    ...q,
+    daily: applyTally(q.daily!, t),
+    xp: q.xp + matchXp(t),
+  };
+}
+
+/** Claim a finished rite's shards (once). */
+export function claimRite(p: Profile, id: string): { profile: Profile; granted: number } {
+  const r = p.daily?.rites.find((x) => x.id === id);
+  if (!p.daily || !r || !riteReady(r)) return { profile: p, granted: 0 };
+  return {
+    profile: {
+      ...p,
+      alchemicalShards: p.alchemicalShards + r.reward,
+      daily: {
+        ...p.daily,
+        rites: p.daily.rites.map((x) => (x.id === id ? { ...x, claimed: true } : x)),
+      },
+    },
+    granted: r.reward,
   };
 }
 
