@@ -476,7 +476,8 @@ input[type='search'] {
 }
 
 .tarot-pop {
-  z-index: 80;
+  /* Above the rules primer / match veils (80): a code reveal's Close must win. */
+  z-index: 85;
   background: radial-gradient(#07060533, #070605d9);
   justify-content: center;
   align-items: center;

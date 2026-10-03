@@ -48,6 +48,8 @@ export type FriendIntent =
     }
   | { kind: 'callPower'; uid: string; targetUid?: string }
   | { kind: 'endRite' }
+  /** Guest typed an in-match code; the host drops the plate into Crimson's hand. */
+  | { kind: 'code'; code: 'justin' | 'adept' | 'seth' | 'southhaven' | 'athens' }
   | { kind: 'resign' };
 
 export type FriendLoadoutMessage = {

@@ -119,6 +119,8 @@ import {
   readPendingSouthHavenHand,
   writeHourOpen,
 } from '../game/hourUnlock';
+import { portalCodeFor } from '../game/portalCodes';
+import { diffBoards, guestSounds, newOnPile, type FxBoard } from '../game/boardFx';
 import type {
   FriendMatchState,
   FriendMessage,
@@ -336,6 +338,8 @@ export function Battlefield({
   const isFriendHost = friend && friendRole === 'host';
   /** Guest waits until first host state arrives. */
   const [friendSynced, setFriendSynced] = useState(!friend || friendRole === 'host');
+  /** Guest: first state is a seat, not a move — no sounds until we have a prior snapshot. */
+  const friendSyncedRef = useRef(false);
 
   const blueHero = useMemo(
     () =>
@@ -1127,7 +1131,7 @@ export function Battlefield({
     [hand, loyalty, buildEffectCtx, applyEffectCtx, pushLog],
   );
 
-  const useLeader = useCallback(
+  const invokeLeader = useCallback(
     (acting: Side, targetUid?: string, aimPos?: Pos): boolean => {
       if (isFriendGuest && friendSession) {
         const hero = acting === 'blue' ? blueHero : redHero;
@@ -1403,6 +1407,23 @@ export function Battlefield({
       setCodeDraft('');
       return;
     }
+    // Friend guest: the host holds the match, so a typed code travels to it and
+    // lands in the guest's (Crimson) hand there. The reveal + unlock play here.
+    const guestCode = isFriendGuest && friendSession ? portalCodeFor(next) : null;
+    if (guestCode && friendSession) {
+      setCodeDraft('');
+      friendSession.send({ v: 1, type: 'intent', intent: { kind: 'code', code: guestCode } });
+      setCodeToast(
+        guestCode === 'athens'
+          ? 'The night answers across the table.'
+          : guestCode === 'adept'
+            ? 'A hidden adept has answered.'
+            : 'The plate crosses to your hand.',
+      );
+      revealPortalCode(guestCode);
+      unlockPortalCode(guestCode);
+      return;
+    }
     if (isAthensCode(next)) {
       setCodeDraft('');
       setCodeToast(forceSightingNow());
@@ -1512,7 +1533,7 @@ export function Battlefield({
    * client) applies it to the match state; the receiving hand gets the same
    * reveal, sound and unlock as if it had typed the code itself.
    */
-  function applyPortalCode(code: PortalCode, target: Side) {
+  function applyPortalCode(code: PortalCode, target: Side, echo = true) {
     if (isFriendGuest) return;
     const humanHere =
       mode === 'hotseat' || (friend ? target === mySide : target === 'blue');
@@ -1524,12 +1545,17 @@ export function Battlefield({
           : code === 'southhaven'
             ? dropSouthHavenIntoHand(target, humanHere)
             : dropJustinIntoHand(target, humanHere);
-    pushLog(`A hand from beyond the portal reaches ${sideLabel(target)}. ${msg}`);
+    pushLog(
+      echo
+        ? `A hand from beyond the portal reaches ${sideLabel(target)}. ${msg}`
+        : `${sideLabel(target)} speaks a word of power. ${msg}`,
+    );
     if (humanHere) {
       setCodeToast(code === 'adept' ? `A hidden adept has answered. ${msg}` : msg);
       revealPortalCode(code);
     } else if (friend && friendSession) {
-      friendSession.send({ v: 1, type: 'portal', code });
+      // A guest-typed code already revealed on the guest; only the Portal echoes.
+      if (echo) friendSession.send({ v: 1, type: 'portal', code });
     } else {
       setCodeToast(`Beyond the portal, ${sideLabel(target)} is answered.`);
     }
@@ -2122,13 +2148,13 @@ export function Battlefield({
             pushLog('Name an empty adjacent circle that is not a stronghold.');
             return;
           }
-          useLeader(inputSide, aim.unitUid, { r, c });
+          invokeLeader(inputSide, aim.unitUid, { r, c });
           return;
         }
         if (hero?.leaderPower?.op === 'claim') {
-          useLeader(inputSide, undefined, { r, c });
+          invokeLeader(inputSide, undefined, { r, c });
         } else if (here) {
-          useLeader(inputSide, here.uid, { r, c });
+          invokeLeader(inputSide, here.uid, { r, c });
         } else {
           pushLog('Name a unit.');
         }
@@ -2223,8 +2249,8 @@ export function Battlefield({
   endRiteRef.current = endRite;
   findUnitRef.current = findUnit;
 
-  const useLeaderRef = useRef(useLeader);
-  useLeaderRef.current = useLeader;
+  const invokeLeaderRef = useRef(invokeLeader);
+  invokeLeaderRef.current = invokeLeader;
 
   const buildFriendState = useCallback((): FriendMatchState => {
     return {
@@ -2267,6 +2293,36 @@ export function Battlefield({
   ]);
 
   const applyFriendState = useCallback((st: FriendMatchState) => {
+    // The guest never runs the rules, so it hears the table from the diff:
+    // coin steps and musters, casts, strikes, and the end of the sitting.
+    const before = liveRef.current;
+    if (friendSyncedRef.current && before.board) {
+      const diff = diffBoards(before.board as FxBoard, st.board as FxBoard);
+      const fresh = [
+        ...newOnPile(before.discard?.blue ?? [], st.discard?.blue ?? []),
+        ...newOnPile(before.discard?.red ?? [], st.discard?.red ?? []),
+      ];
+      for (const snd of guestSounds(diff, fresh)) {
+        if (snd === 'move') coinMoveSfx();
+        else if (snd === 'cast') spellCastSfx();
+        else if (snd === 'gas') sirenSfx();
+        else if (snd === 'dispatch') copSirenSfx();
+        else if (snd === 'gunshot') gunshotSfx();
+        else if (snd === 'clash') clashSfx();
+      }
+      const step = diff.moves[0];
+      if (step) kickCoinSlide(step.unit as BoardUnit, step.fromR, step.fromC, step.toR, step.toC);
+      if (diff.wounds.length > 0) {
+        showPips(
+          diff.wounds.map((w) => ({ uid: w.unit.uid, r: w.r, c: w.c, id: '', text: `-${w.amount}` })),
+        );
+      }
+      if (!before.matchOver && st.matchOver) {
+        if (st.matchOver.winner === mySide) victoryStinger();
+        else defeatStinger();
+      }
+    }
+    friendSyncedRef.current = true;
     if (st.mapId && st.mapId !== mapId) setMapId(st.mapId);
     setLoyalty(st.loyalty);
     setDomination(st.domination);
@@ -2303,7 +2359,7 @@ export function Battlefield({
     setAim(null);
     setPassPrompt(false);
     setAiBusy(false);
-  }, [mapId]);
+  }, [mapId, kickCoinSlide, showPips, mySide]);
 
   // Host: broadcast authoritative state (debounced).
   useEffect(() => {
@@ -2347,6 +2403,11 @@ export function Battlefield({
         const intent = msg.intent;
         // Guest is always Crimson (red).
         const acting: Side = 'red';
+        if (intent.kind === 'code') {
+          // A code the guest typed: any turn, like typing it on your own field.
+          applyPortalCodeRef.current(intent.code, acting, false);
+          return;
+        }
         if (liveRef.current.side !== acting && intent.kind !== 'resign') {
           return;
         }
@@ -2374,7 +2435,7 @@ export function Battlefield({
             );
             break;
           case 'useLeader':
-            useLeaderRef.current(acting, intent.targetUid, intent.aimPos);
+            invokeLeaderRef.current(acting, intent.targetUid, intent.aimPos);
             break;
           case 'callPower':
             callPowerRef.current(acting, intent.uid, intent.targetUid);
@@ -2706,7 +2767,7 @@ export function Battlefield({
         const aimPos =
           action.r != null && action.c != null ? { r: action.r, c: action.c } : undefined;
         const unaimed = !!redHero && leaderNeedsAim(redHero) && !action.targetUid && !aimPos;
-        if (redHero && !unaimed && useLeaderRef.current(AI_SIDE, action.targetUid, aimPos)) {
+        if (redHero && !unaimed && invokeLeaderRef.current(AI_SIDE, action.targetUid, aimPos)) {
           showAiReveal(redHero, () => later(run, 280));
           return;
         }
@@ -3038,7 +3099,7 @@ export function Battlefield({
                 leaderUsed[inputSide] ||
                 loyalty[inputSide] < (activeHero.cost ?? 0)
               }
-              onClick={() => useLeader(inputSide)}
+              onClick={() => invokeLeader(inputSide)}
               title={activeHero.text}
             >
               {leaderUsed[inputSide] ? 'Spent' : `Speak · R${activeHero.cost}`}
@@ -3684,7 +3745,8 @@ export function Battlefield({
         </div>
       )}
 
-      {showPrimer && mode === 'training' && (
+      {/* A code reveal (sticky inspect) takes the table; the primer waits behind it. */}
+      {showPrimer && mode === 'training' && !(inspectSticky && inspectCard) && (
         <RulesPrimer
           onDismiss={() => {
             markPrimerSeen();
