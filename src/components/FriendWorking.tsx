@@ -158,7 +158,11 @@ export function FriendWorking({
 
   function beginHandshake(session: FriendSession) {
     if (readySent.current) return;
-    setStatus('Linked — exchanging Deck Editor workings…');
+    setStatus(
+      session.via?.() === 'relay'
+        ? 'Linked through the relay — exchanging Deck Editor workings…'
+        : 'Linked — exchanging Deck Editor workings…',
+    );
     setSearching(false);
     setBusy(true);
 

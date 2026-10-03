@@ -73,7 +73,8 @@ export function redisStore(url: string, token: string, fetcher: typeof fetch = f
 type Entry =
   | { t: 'str'; v: string; exp?: number }
   | { t: 'hash'; v: Map<string, string>; exp?: number }
-  | { t: 'zset'; v: Map<string, number>; exp?: number };
+  | { t: 'zset'; v: Map<string, number>; exp?: number }
+  | { t: 'list'; v: string[]; exp?: number };
 
 /** In-memory executor for the subset of Redis this app uses. */
 export function memoryStore(now: () => number = Date.now): Store {
@@ -132,20 +133,56 @@ export function memoryStore(now: () => number = Date.now): Store {
         const v = String(a[1]);
         let exp: number | undefined;
         let nx = false;
+        let xx = false;
         for (let i = 2; i < a.length; i++) {
           const f = String(a[i]).toUpperCase();
           if (f === 'NX') nx = true;
+          else if (f === 'XX') xx = true;
           else if (f === 'EX') exp = now() + Number(a[++i]) * 1000;
           else if (f === 'PX') exp = now() + Number(a[++i]);
         }
         if (nx && live(k)) return null;
+        if (xx && !live(k)) return null;
         db.set(k, { t: 'str', v, exp });
         return 'OK';
       }
       case 'DEL': {
         let n = 0;
-        for (const key of a) if (db.delete(String(key))) n++;
+        for (const key of a) if (live(String(key)) && db.delete(String(key))) n++;
         return n;
+      }
+      case 'EXISTS': {
+        let n = 0;
+        for (const key of a) if (live(String(key))) n++;
+        return n;
+      }
+      case 'RPUSH': {
+        const e = live(k);
+        const list = e?.t === 'list' ? e : { t: 'list' as const, v: [] as string[], exp: e?.exp };
+        if (!e || e.t !== 'list') db.set(k, list);
+        for (const x of a.slice(1)) list.v.push(String(x));
+        return list.v.length;
+      }
+      case 'LPOP': {
+        const e = live(k);
+        if (e?.t !== 'list' || e.v.length === 0) return null;
+        const x = e.v.shift()!;
+        if (e.v.length === 0) db.delete(k);
+        return x;
+      }
+      case 'LLEN': {
+        const e = live(k);
+        return e?.t === 'list' ? e.v.length : 0;
+      }
+      case 'LRANGE': {
+        const e = live(k);
+        if (e?.t !== 'list') return [];
+        const len = e.v.length;
+        let start = Number(a[1]);
+        let stop = Number(a[2]);
+        if (start < 0) start = Math.max(0, len + start);
+        if (stop < 0) stop = len + stop;
+        return e.v.slice(start, stop + 1);
       }
       case 'INCR': {
         const e = live(k);

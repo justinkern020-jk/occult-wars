@@ -470,6 +470,7 @@ export function Battlefield({
   const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);
   const dragHandRef = useRef<number | null>(null);
   const [cryptidSight, setCryptidSight] = useState<string | null>(null);
+  const helloSentForRef = useRef<FriendSession | null>(null);
   /** The match-over fortune chest (shards paid) and any whispered hint. */
   const [fortune, setFortune] = useState<{ gain: number; total: number; won: boolean; hint: string | null } | null>(null);
   // Each cryptid's Sighting is announced once per match (later rites, musters and effect passes stay silent).
@@ -2542,6 +2543,24 @@ export function Battlefield({
     setAiBusy(false);
   }, [mapId, kickCoinSlide, showPips, mySide, announceCryptid, tallyFaction]);
 
+  // Guest: say hello until the host's first state lands (either side may mount first).
+  useEffect(() => {
+    if (!friend || !friendSession || !isFriendGuest) return;
+    let tries = 0;
+    const hello = () =>
+      friendSession.send({ v: 1, type: 'hello', role: 'guest', room: friendSession.room });
+    hello();
+    const t = window.setInterval(() => {
+      tries += 1;
+      if (friendSyncedRef.current || tries > 40) {
+        window.clearInterval(t);
+        return;
+      }
+      hello();
+    }, 1500);
+    return () => window.clearInterval(t);
+  }, [friend, friendSession, isFriendGuest]);
+
   // Host: broadcast authoritative state (debounced).
   useEffect(() => {
     if (!isFriendHost || !friendSession) return;
@@ -2642,14 +2661,16 @@ export function Battlefield({
 
     friendSession.setOnMessage((msg) => onMessage(msg));
 
-    if (isFriendGuest) {
-      friendSession.send({
-        v: 1,
-        type: 'hello',
-        role: 'guest',
-        room: friendSession.room,
-      });
-    } else if (isFriendHost) {
+    // Greet once per link: this effect re-runs as state changes, and a hello
+    // each time made the host answer with hello + a full state, endlessly.
+    // (The guest's hello is retried by its own effect below until a state lands.)
+    if (helloSentForRef.current === friendSession) {
+      return () => {
+        friendSession.setOnMessage(null);
+      };
+    }
+    helloSentForRef.current = friendSession;
+    if (isFriendHost) {
       friendSession.send({
         v: 1,
         type: 'hello',

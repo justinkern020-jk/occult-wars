@@ -1,8 +1,15 @@
 /**
- * PeerJS Friend Working session — room codes + Quick Match slot pool.
- * Room host id: ow-XXXX. Quick Match slots: ow-q-0 .. ow-q-31.
+ * Friend Working session — room codes + Quick Match.
+ *
+ * Two transports carry the same FriendMessage protocol:
+ * - WebRTC (PeerJS): room host id ow-XXXX; the legacy Quick Match slot pool ow-q-0..31.
+ * - The relay (/api/relay, polling through the site's own API) when WebRTC cannot
+ *   open within RELAY_AFTER_MS — no UDP, a dead TURN, a locked-down network.
+ * The host listens on both; the guest tries WebRTC first, then the relay.
+ * Quick Match pairs through the relay's queue (falls back to the slot pool).
  */
 import Peer, { type DataConnection, type PeerError } from 'peerjs';
+import { outbox, pollInbox, relayCall, relayId, type RelayEnvelope } from './relay';
 import type { Card } from '../game/types';
 import type { Side } from '../game/maps';
 import type { ControlGrid } from '../game/control';
@@ -86,6 +93,8 @@ export type FriendSession = {
   setOnMessage: (fn: ((msg: FriendMessage) => void) | null) => void;
   role: FriendRole;
   room: string;
+  /** Which road the link took (null until linked). */
+  via?: () => 'p2p' | 'relay' | null;
 };
 
 const ROOM_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -94,24 +103,22 @@ const ROOM_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 export const QUICK_SLOT_COUNT = 32;
 export const QUICK_PROBE_MS = 850;
 
+/**
+ * STUN + PeerJS's own TURN relays (the PeerJS defaults). The Open Relay
+ * "openrelayproject" credentials once listed here were retired by Metered and
+ * no longer authenticate, which left peers behind strict NATs with no relay.
+ */
 export const ICE_SERVERS: RTCIceServer[] = [
-  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] },
   {
-    urls: 'turn:openrelay.metered.ca:80',
-    username: 'openrelayproject',
-    credential: 'openrelayproject',
-  },
-  {
-    urls: 'turn:openrelay.metered.ca:443',
-    username: 'openrelayproject',
-    credential: 'openrelayproject',
-  },
-  {
-    urls: 'turn:openrelay.metered.ca:443?transport=tcp',
-    username: 'openrelayproject',
-    credential: 'openrelayproject',
+    urls: ['turn:eu-0.turn.peerjs.com:3478', 'turn:us-0.turn.peerjs.com:3478'],
+    username: 'peerjs',
+    credential: 'peerjsp',
   },
 ];
+
+/** A guest whose WebRTC link has not opened by now takes the relay. */
+export const RELAY_AFTER_MS = 8_000;
 
 /** Normalize user input to a 4-letter room code (or null if invalid). */
 export function normalizeRoomCode(raw: string): string | null {
@@ -368,23 +375,6 @@ export function joinOnPeerId(
   );
 }
 
-export function hostFriendSession(
-  room: string,
-  handlers: FriendHandlers,
-): FriendSession {
-  const code = normalizeRoomCode(room);
-  if (!code) throw new Error('Room must be 4 letters');
-  return hostOnPeerId(peerIdForRoom(code), code, handlers);
-}
-
-export function joinFriendSession(
-  room: string,
-  handlers: FriendHandlers,
-): FriendSession {
-  const code = normalizeRoomCode(room);
-  if (!code) throw new Error('Room must be 4 letters');
-  return joinOnPeerId(peerIdForRoom(code), code, handlers);
-}
 
 export type QuickMatchHandle = {
   cancel: () => void;
@@ -397,10 +387,10 @@ export type QuickMatchHandlers = {
 };
 
 /**
- * Quick Match: probe ow-q-0..31 as guest; if none answer, claim first free
- * slot as host and wait for a seeker.
+ * Legacy Quick Match (WebRTC only): probe ow-q-0..31 as guest; if none
+ * answer, claim first free slot as host and wait for a seeker.
  */
-export function findQuickMatch(handlers: QuickMatchHandlers): QuickMatchHandle {
+export function findQuickMatchP2P(handlers: QuickMatchHandlers): QuickMatchHandle {
   let cancelled = false;
   let active: FriendSession | null = null;
   let probePeer: Peer | null = null;
@@ -616,6 +606,466 @@ export function findQuickMatch(handlers: QuickMatchHandlers): QuickMatchHandle {
       }
       active = null;
       destroyProbe();
+    },
+  };
+}
+
+// ——— Hybrid sessions: WebRTC first, the relay when it cannot open ———
+
+export type LinkOptions = {
+  /** Tests / restricted builds: skip WebRTC entirely. */
+  p2p?: boolean;
+  /** Override RELAY_AFTER_MS (tests). */
+  relayAfterMs?: number;
+};
+
+function parseEnvelopeMsg(env: RelayEnvelope): FriendMessage | null {
+  return env.k === 'msg' ? parseFriendMessage(env.m) : null;
+}
+
+/** Host a room on both roads: PeerJS id ow-ROOM and the relay's host inbox. */
+export function hostFriendSession(
+  room: string,
+  handlers: FriendHandlers,
+  opts: LinkOptions = {},
+): FriendSession {
+  const code = normalizeRoomCode(room);
+  if (!code) throw new Error('Room must be 4 letters');
+  const hid = relayId();
+  const sink: MsgSink = { current: null };
+  let via: 'p2p' | 'relay' | null = null;
+  let guestGid: string | null = null;
+  let guestOut: ReturnType<typeof outbox> | null = null;
+  let destroyed = false;
+  let hostingFired = false;
+  let opened = false;
+  let relayUp = false;
+  let p2pDown = opts.p2p === false;
+  let p2pError: string | null = null;
+  const pending: FriendMessage[] = [];
+  let relayStopTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const deliver = (msg: FriendMessage) => {
+    handlers.onMessage?.(msg);
+    sink.current?.(msg);
+  };
+  const fireHosting = () => {
+    if (hostingFired || destroyed) return;
+    hostingFired = true;
+    handlers.onHosting?.();
+  };
+  const fireOpen = () => {
+    if (opened || destroyed) return;
+    opened = true;
+    handlers.onOpen?.();
+  };
+  const flushPending = () => {
+    while (pending.length) send(pending.shift()!);
+  };
+  const failBoth = () => {
+    // Neither road could open a room: report the WebRTC reason.
+    if (p2pDown && !relayUp && !destroyed && !opened) {
+      handlers.onError?.(p2pError ?? 'Could not open the room.');
+    }
+  };
+
+  let p2p: FriendSession | null = null;
+  if (opts.p2p !== false) {
+    p2p = hostOnPeerId(peerIdForRoom(code), code, {
+      onHosting: fireHosting,
+      onOpen: () => {
+        if (via === 'relay') return;
+        via = 'p2p';
+        // Keep an ear on the relay a little longer, in case the guest still turns to it.
+        if (relayStopTimer) clearTimeout(relayStopTimer);
+        relayStopTimer = setTimeout(() => {
+          if (via === 'p2p') inbox?.stop();
+        }, 30_000);
+        inbox?.setPace('idle');
+        flushPending();
+        fireOpen();
+      },
+      onMessage: (msg) => {
+        if (via === 'p2p') deliver(msg);
+      },
+      onClose: (reason) => {
+        if (via === 'p2p') handlers.onClose?.(reason);
+      },
+      onError: (err) => {
+        if (err === 'PEER_ID_TAKEN') {
+          // Someone else hosts this room: let go of the relay side too.
+          inbox?.stop();
+          if (relayUp) void relayCall({ op: 'leave', room: code, hid });
+          relayUp = false;
+          handlers.onError?.(err);
+          return;
+        }
+        if (via === 'p2p') {
+          handlers.onError?.(err);
+          return;
+        }
+        if (via === null) {
+          // The WebRTC road is closed; the relay may still carry the match.
+          p2pDown = true;
+          p2pError = err;
+          failBoth();
+        }
+      },
+    });
+  }
+
+  let inbox: ReturnType<typeof pollInbox> | null = null;
+  inbox = pollInbox(
+    code,
+    'h',
+    (env) => {
+      if (destroyed) return;
+      if (env.k === 'syn') {
+        if (guestGid && env.gid !== guestGid && via === 'relay') return;
+        guestGid = env.gid;
+        guestOut = outbox(code, `g:${env.gid}`);
+        guestOut.send({ k: 'ack', gid: env.gid });
+        if (via !== 'relay') {
+          // The guest gave up on WebRTC: the relay carries the match.
+          const wasP2P = via === 'p2p';
+          via = 'relay';
+          if (relayStopTimer) clearTimeout(relayStopTimer);
+          try {
+            p2p?.destroy();
+          } catch {
+            /* ignore */
+          }
+          p2p = null;
+          inbox?.setPace('link');
+          flushPending();
+          if (!wasP2P) fireOpen();
+        }
+        return;
+      }
+      if (env.gid !== guestGid || via !== 'relay') return;
+      if (env.k === 'msg') {
+        const msg = parseEnvelopeMsg(env);
+        if (msg) deliver(msg);
+      } else if (env.k === 'bye') {
+        handlers.onClose?.('Your partner left the table.');
+      }
+    },
+    { hid },
+  );
+
+  void relayCall<{ taken?: boolean }>({ op: 'host', room: code, hid }).then((r) => {
+    if (destroyed) return;
+    if (r && r.ok) {
+      relayUp = true;
+      fireHosting();
+      inbox?.start();
+      return;
+    }
+    if (r && r.taken && opts.p2p === false) {
+      handlers.onError?.('PEER_ID_TAKEN');
+      return;
+    }
+    // Relay unreachable (or a stale claim): WebRTC alone, as before.
+    failBoth();
+  });
+
+  function send(msg: FriendMessage) {
+    if (via === 'p2p' && p2p) p2p.send(msg);
+    else if (via === 'relay' && guestOut && guestGid) guestOut.send({ k: 'msg', gid: guestGid, m: msg });
+    else pending.push(msg);
+  }
+
+  return {
+    role: 'host',
+    room: code,
+    send,
+    via: () => via,
+    setOnMessage(fn) {
+      sink.current = fn;
+    },
+    destroy() {
+      if (destroyed) return;
+      destroyed = true;
+      if (relayStopTimer) clearTimeout(relayStopTimer);
+      inbox?.stop();
+      if (via === 'relay' && guestOut && guestGid) void guestOut.now({ k: 'bye', gid: guestGid });
+      if (relayUp) void relayCall({ op: 'leave', room: code, hid });
+      try {
+        p2p?.destroy();
+      } catch {
+        /* ignore */
+      }
+      sink.current = null;
+    },
+  };
+}
+
+/** Join a room: WebRTC first; the relay if no link opens within RELAY_AFTER_MS. */
+export function joinFriendSession(
+  room: string,
+  handlers: FriendHandlers,
+  opts: LinkOptions = {},
+): FriendSession {
+  const code = normalizeRoomCode(room);
+  if (!code) throw new Error('Room must be 4 letters');
+  const gid = relayId();
+  const sink: MsgSink = { current: null };
+  let via: 'p2p' | 'relay' | null = null;
+  let destroyed = false;
+  let opened = false;
+  let relaying = false;
+  let lastP2PError: string | null = null;
+  const pending: FriendMessage[] = [];
+  const hostOut = outbox(code, 'h');
+  let inbox: ReturnType<typeof pollInbox> | null = null;
+  let synTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const deliver = (msg: FriendMessage) => {
+    handlers.onMessage?.(msg);
+    sink.current?.(msg);
+  };
+  const fireOpen = () => {
+    if (opened || destroyed) return;
+    opened = true;
+    handlers.onOpen?.();
+  };
+  const flushPending = () => {
+    while (pending.length) send(pending.shift()!);
+  };
+
+  let p2p: FriendSession | null = null;
+  const fallbackTimer = setTimeout(() => toRelay(), opts.relayAfterMs ?? RELAY_AFTER_MS);
+  if (opts.p2p !== false) {
+    p2p = joinOnPeerId(peerIdForRoom(code), code, {
+      onOpen: () => {
+        if (via !== null || relaying) return;
+        via = 'p2p';
+        clearTimeout(fallbackTimer);
+        flushPending();
+        fireOpen();
+      },
+      onMessage: (msg) => {
+        if (via === 'p2p') deliver(msg);
+      },
+      onClose: (reason) => {
+        if (via === 'p2p') handlers.onClose?.(reason);
+        else if (via === null) {
+          lastP2PError = reason ?? null;
+          toRelay();
+        }
+      },
+      onError: (err) => {
+        if (via === 'p2p') handlers.onError?.(err);
+        else if (via === null) {
+          lastP2PError = err;
+          toRelay();
+        }
+      },
+    });
+  } else {
+    clearTimeout(fallbackTimer);
+    queueMicrotask(() => toRelay());
+  }
+
+  function toRelay() {
+    if (destroyed || via !== null || relaying) return;
+    relaying = true;
+    clearTimeout(fallbackTimer);
+    try {
+      p2p?.destroy();
+    } catch {
+      /* ignore */
+    }
+    p2p = null;
+    inbox = pollInbox(code!, `g:${gid}`, (env) => {
+      if (destroyed) return;
+      if (env.k === 'ack' && via === null) {
+        via = 'relay';
+        if (synTimer) clearTimeout(synTimer);
+        inbox?.setPace('link');
+        flushPending();
+        fireOpen();
+        return;
+      }
+      if (via !== 'relay') return;
+      if (env.k === 'msg') {
+        const msg = parseEnvelopeMsg(env);
+        if (msg) deliver(msg);
+      } else if (env.k === 'bye') {
+        handlers.onClose?.('The host left the table.');
+      }
+    });
+    inbox.start();
+    let tries = 0;
+    const knock = async () => {
+      if (destroyed || via !== null) return;
+      tries += 1;
+      const r = await hostOut.now({ k: 'syn', gid });
+      if (destroyed || via !== null) return;
+      if (r && r.ok) {
+        // Delivered: the ack comes back through our inbox. Knock again if it is slow.
+        synTimer = setTimeout(knock, 6_000);
+        return;
+      }
+      if (tries >= 8) {
+        inbox?.stop();
+        handlers.onError?.(
+          r && r.nohost
+            ? 'No host is waiting in that room'
+            : lastP2PError ?? 'Could not reach the room',
+        );
+        return;
+      }
+      synTimer = setTimeout(knock, 1_500);
+    };
+    void knock();
+  }
+
+  function send(msg: FriendMessage) {
+    if (via === 'p2p' && p2p) p2p.send(msg);
+    else if (via === 'relay') hostOut.send({ k: 'msg', gid, m: msg });
+    else pending.push(msg);
+  }
+
+  return {
+    role: 'guest',
+    room: code,
+    send,
+    via: () => via,
+    setOnMessage(fn) {
+      sink.current = fn;
+    },
+    destroy() {
+      if (destroyed) return;
+      destroyed = true;
+      clearTimeout(fallbackTimer);
+      if (synTimer) clearTimeout(synTimer);
+      inbox?.stop();
+      if (via === 'relay') void hostOut.now({ k: 'bye', gid });
+      try {
+        p2p?.destroy();
+      } catch {
+        /* ignore */
+      }
+      sink.current = null;
+    },
+  };
+}
+
+/**
+ * Quick Match through the relay's queue: take the oldest waiting room as its
+ * guest, or open one and wait. Both then link like a room code (WebRTC, then
+ * the relay). If the relay cannot be reached, the legacy slot pool is used.
+ */
+export function findQuickMatch(
+  handlers: QuickMatchHandlers,
+  opts: LinkOptions = {},
+): QuickMatchHandle {
+  let cancelled = false;
+  let session: FriendSession | null = null;
+  let legacy: QuickMatchHandle | null = null;
+  let beat: ReturnType<typeof setInterval> | null = null;
+  let hostRoomCode: string | null = null;
+  let matched = false;
+
+  const stopBeat = () => {
+    if (beat) clearInterval(beat);
+    beat = null;
+  };
+  const fail = (reason: string) => {
+    if (cancelled) return;
+    cancelled = true;
+    stopBeat();
+    try {
+      session?.destroy();
+    } catch {
+      /* ignore */
+    }
+    session = null;
+    handlers.onFailed(reason);
+  };
+  const matchedNow = (s: FriendSession) => {
+    if (cancelled || matched) return;
+    matched = true;
+    stopBeat();
+    handlers.onStatus?.('Match found — opening the field…');
+    handlers.onMatched(s);
+  };
+
+  (async () => {
+    handlers.onStatus?.('Searching…');
+    const gid = relayId();
+    const r = await relayCall<{ role?: FriendRole; room?: string }>({ op: 'quick', gid });
+    if (cancelled) return;
+    if (!r || !r.ok || !r.room || (r.role !== 'host' && r.role !== 'guest')) {
+      legacy = findQuickMatchP2P(handlers);
+      return;
+    }
+    const code = r.room;
+    if (r.role === 'guest') {
+      handlers.onStatus?.('A partner is waiting — linking…');
+      let s!: FriendSession;
+      s = joinFriendSession(
+        code,
+        {
+          onOpen: () => matchedNow(s),
+          onError: () => {
+            if (!matched) fail('That partner slipped away — search again.');
+          },
+          onClose: () => {
+            if (!matched) fail('That partner slipped away — search again.');
+          },
+        },
+        opts,
+      );
+      session = s;
+      return;
+    }
+    hostRoomCode = code;
+    handlers.onStatus?.('No partner yet — waiting for the next occultist…');
+    let s!: FriendSession;
+    s = hostFriendSession(
+      code,
+      {
+        onOpen: () => matchedNow(s),
+        onError: (err) => {
+          if (!matched) fail(err === 'PEER_ID_TAKEN' ? 'Search again — that room was taken.' : err);
+        },
+      },
+      opts,
+    );
+    session = s;
+    let claimedAt: number | null = null;
+    beat = setInterval(() => {
+      if (cancelled || matched) return;
+      void relayCall<{ waiting?: boolean }>({ op: 'quickbeat', room: code, hid: gid }).then((b) => {
+        if (!b || cancelled || matched) return;
+        if (b.waiting) {
+          claimedAt = null;
+          return;
+        }
+        // Someone claimed the room; if they never arrive, stand in the queue again.
+        claimedAt ??= Date.now();
+        if (Date.now() - claimedAt > 20_000) {
+          claimedAt = null;
+          void relayCall({ op: 'quickagain', room: code, hid: gid });
+        }
+      });
+    }, 10_000);
+  })();
+
+  return {
+    cancel() {
+      cancelled = true;
+      stopBeat();
+      legacy?.cancel();
+      if (hostRoomCode && !matched) void relayCall({ op: 'quickcancel', room: hostRoomCode });
+      try {
+        session?.destroy();
+      } catch {
+        /* ignore */
+      }
+      session = null;
     },
   };
 }
