@@ -86,11 +86,31 @@ describe('cryptid pools', () => {
 
   it('keeps Second Hour beasts out of First Hour pools', () => {
     const first = cryptidPoolFor('The Vril Syndicate', 'first');
-    expect(first.some((c) => c.id === 'blackout_hound')).toBe(false);
-    const second = cryptidPoolFor('The Blackout Wardens', 'second');
-    expect(second.some((c) => c.id === 'blackout_hound' || c.id === 'roof_moth')).toBe(
+    expect(first.some((c) => c.id === 'the_sluagh')).toBe(false);
+    const second = cryptidPoolFor('The Whitethorn Coven', 'second');
+    expect(
+      second.some((c) => c.id === 'the_sluagh' || c.id === 'night_mare_of_the_barrow'),
+    ).toBe(true);
+    expect(second.every((c) => c.faction === 'The Whitethorn Coven')).toBe(true);
+  });
+
+  it('keeps Sealed Century beasts on Sealed Century matches', () => {
+    const old = cryptidPoolFor('The Briar Sidhe', 'old');
+    expect(old.some((c) => c.id === 'the_each_uisge' || c.id === 'will_of_the_marsh')).toBe(
       true,
     );
+    expect(cryptidPoolFor('The Vril Syndicate', 'first').some((c) => c.id === 'the_each_uisge')).toBe(
+      false,
+    );
+    expect(cryptidPoolFor('The Whitethorn Coven', 'second').some((c) => c.id === 'the_each_uisge')).toBe(
+      false,
+    );
+  });
+
+  it('tracks the Sealed Century separately', () => {
+    setVisitsForNextSighting('old');
+    expect(recordMatchVisit('old')).toBe(true);
+    expect(readVisitCount('second')).toBe(0);
   });
 
   it('rolls visit turn 2 or 3', () => {

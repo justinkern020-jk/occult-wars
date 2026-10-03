@@ -2,10 +2,14 @@ import raw from './cards.json';
 import type { Card } from '../game/types';
 
 export const FACTIONS = [
-  'The Blackout Wardens',
-  'The Drowned Parish',
-  'The Numbers Station',
-  'The Dust Ballot',
+  'The Whitethorn Coven',
+  'The Helix Bureau',
+  'The Monad Faculty',
+  'The Iconostasy',
+  'The Briar Sidhe',
+  'The Mercury Works',
+  'The Closed Proof',
+  'The Birch Vigil',
   'The Vril Syndicate',
   'Order of the Lead Dawn',
   'Sons of the Green Lion',

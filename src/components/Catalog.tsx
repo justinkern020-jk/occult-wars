@@ -8,7 +8,13 @@ import {
 } from '../game/profile';
 import { CardView } from './CardView';
 import { TarotPop } from './TarotPop';
-import { FIRST_HOUR_ORDERS, isSecondHourSociety } from '../game/orders';
+import {
+  FIRST_HOUR_ORDERS,
+  SEALED_CENTURY_ORDERS,
+  SECOND_HOUR_SOCIETIES,
+  isSealedCenturyOrder,
+  isSecondHourSociety,
+} from '../game/orders';
 
 type Props = {
   profile?: Profile;
@@ -18,8 +24,9 @@ type Props = {
 /**
  * The Collection is a full First Hour encyclopedia: every order plate,
  * cryptid, secret unlock, and nuke-aftermath Tarot — owned or not.
- * Second Hour societies stay on Second Hour matches (deliberately
- * filtered here since efa2bf7). Pack/deck/hand leak rules are unchanged;
+ * Second Hour societies and Sealed Century orders stay off the default
+ * list (deliberately filtered since efa2bf7); pick their tab, or show owned
+ * plates, to browse them (as grok.me does). Pack/deck/hand leak rules are unchanged;
  * excluded plates appear as archive-only faces, never auto-unlocked.
  */
 export function Catalog({ profile, onUpdate }: Props) {
@@ -39,7 +46,14 @@ export function Catalog({ profile, onUpdate }: Props) {
   const list = useMemo(() => {
     // First Hour complete set + Unaligned specials (secrets / nuke aftermath).
     // Do NOT filter isExcludedPlateId — those plates browse here as archive faces.
-    let rows = CARDS.filter((c) => !isSecondHourSociety(c.faction));
+    const eraTab =
+      faction !== 'all' && (isSecondHourSociety(faction) || isSealedCenturyOrder(faction));
+    let rows = CARDS;
+    if (!eraTab && !(ownedOnly && faction === 'all')) {
+      rows = rows.filter(
+        (c) => !isSecondHourSociety(c.faction) && !isSealedCenturyOrder(c.faction),
+      );
+    }
     if (unitsOnly) rows = rows.filter((c) => c.kind === 'unit');
     if (cryptidsOnly) rows = rows.filter((c) => c.keywords.includes('cryptid'));
     if (kind !== 'all') rows = rows.filter((c) => c.kind === kind);
@@ -125,6 +139,20 @@ export function Catalog({ profile, onUpdate }: Props) {
             </option>
           ))}
           <option value="Unaligned">Unaligned</option>
+          <optgroup label="Second Hour">
+            {SECOND_HOUR_SOCIETIES.map((f) => (
+              <option key={f} value={f}>
+                {f}
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label="The Sealed Century">
+            {SEALED_CENTURY_ORDERS.map((f) => (
+              <option key={f} value={f}>
+                {f}
+              </option>
+            ))}
+          </optgroup>
         </select>
         <select value={kind} onChange={(e) => setKind(e.target.value)}>
           <option value="all">All kinds</option>

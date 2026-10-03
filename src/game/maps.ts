@@ -15,12 +15,17 @@ export interface Tile {
   symbols?: 1 | 2;
 }
 
+/** Which hour a field belongs to: First Hour, Second Hour, or the Sealed Century. */
+export type MapEra = 'first' | 'second' | 'old';
+
 export interface GameMap {
   id: string;
   name: string;
   epithet: string;
   tiles: Tile[][];
-  era?: 'first' | 'second';
+  era?: MapEra;
+  /** 'bright' grounds are daylight fields (warmer tiles). */
+  mood?: 'bright';
 }
 
 function Me(ch: string): Tile {
@@ -53,10 +58,11 @@ function R(
   name: string,
   epithet: string,
   rows: string[],
-  era: 'first' | 'second' = 'first',
+  era: MapEra = 'first',
+  mood?: 'bright',
 ): GameMap {
   const tiles = rows.map((row) => [...row].map(Me));
-  return { id, name, epithet, tiles, era };
+  return mood ? { id, name, epithet, tiles, era, mood } : { id, name, epithet, tiles, era };
 }
 
 export const MAPS: GameMap[] = [
@@ -98,13 +104,66 @@ export const MAPS: GameMap[] = [
     ['srRrs', '.2s2.', 's1s1s', '.2s2.', 'sbBbs'],
     'second',
   ),
+  // The Sealed Century — seven grounds, none the same shape.
+  R(
+    'nile-court',
+    'The Nile Court',
+    'A bent river. A double under the house. A belt of singles you have to cross.',
+    ['.rRr.', 's.2.s', '11s11', 's.2.s', '.bBb.'],
+    'old',
+  ),
+  R(
+    'saturn-cross',
+    'The Saturn Ring',
+    'A cloister ring. The heart is a hole. Doubles hang on the side aisles, and the aisles never meet.',
+    ['.rRr.', '1s.s1', '2s.s2', '1s.s1', '.bBb.'],
+    'old',
+  ),
+  R(
+    'rose-crypt',
+    'The Rose Crypt',
+    'The houses stand one rank forward. Chapel seals pay one. There is no double seal.',
+    ['rs.sr', 's1R1s', 's.s.s', 's1B1s', 'bs.sb'],
+    'old',
+  ),
+  R(
+    'silk-pass',
+    'The Silk Pass',
+    'Two rooms. You only cross by standing on a double-seal ledge.',
+    ['..R..', 'r1s1r', '.2.2.', 'b1s1b', '..B..'],
+    'old',
+  ),
+  R(
+    'noon-orchard',
+    'The Noon Orchard',
+    'Daylight. Side hedges, a center path, and doubles that are the only bridges.',
+    ['srRrs', '1.s.1', 's2s2s', '1.s.1', 'sbBbs'],
+    'old',
+    'bright',
+  ),
+  R(
+    'white-road',
+    'The White Road',
+    'Daylight. Two forks with a void between the groves. Switch roads at home, not in the middle.',
+    ['r.R.r', 's1s1s', '.2.2.', 's1s1s', 'b.B.b'],
+    'old',
+    'bright',
+  ),
+  R(
+    'sun-garden',
+    'The Sun Garden',
+    'Daylight. Doubles in the corners, beside your own doors. The open road is the fight.',
+    ['2rRr2', 's.1.s', 'sssss', 's.1.s', '2bBb2'],
+    'old',
+    'bright',
+  ),
 ];
 
 export function mapById(id: string): GameMap {
   return MAPS.find((m) => m.id === id) ?? MAPS[0];
 }
 
-export function mapsForEra(era: 'first' | 'second'): GameMap[] {
+export function mapsForEra(era: MapEra): GameMap[] {
   return MAPS.filter((m) => (m.era ?? 'first') === era);
 }
 

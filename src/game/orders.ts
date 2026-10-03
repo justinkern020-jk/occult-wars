@@ -1,4 +1,4 @@
-/** First-hour orders, second-hour societies, and ally jewels. */
+/** First-hour orders, second-hour societies, sealed-century loyalties, and ally jewels. */
 
 export const FIRST_HOUR_ORDERS = [
   'The Vril Syndicate',
@@ -12,13 +12,31 @@ export const FIRST_HOUR_ORDERS = [
 export type FirstHourOrder = (typeof FIRST_HOUR_ORDERS)[number];
 
 export const SECOND_HOUR_SOCIETIES = [
+  'The Whitethorn Coven',
+  'The Helix Bureau',
+  'The Monad Faculty',
+  'The Iconostasy',
+] as const;
+
+export type SecondHourSociety = (typeof SECOND_HOUR_SOCIETIES)[number];
+
+/** The Sealed Century: four loyalties of the old work. */
+export const SEALED_CENTURY_ORDERS = [
+  'The Briar Sidhe',
+  'The Mercury Works',
+  'The Closed Proof',
+  'The Birch Vigil',
+] as const;
+
+export type SealedCenturyOrder = (typeof SEALED_CENTURY_ORDERS)[number];
+
+/** Factions retired from the Second Hour (old saves may still name them). */
+export const RETIRED_SECOND_HOUR_SOCIETIES = [
   'The Blackout Wardens',
   'The Drowned Parish',
   'The Numbers Station',
   'The Dust Ballot',
 ] as const;
-
-export type SecondHourSociety = (typeof SECOND_HOUR_SOCIETIES)[number];
 
 /** Six first-hour pairs (bidirectional). */
 export const FIRST_HOUR_ALLIES: Record<FirstHourOrder, FirstHourOrder> = {
@@ -30,12 +48,36 @@ export const FIRST_HOUR_ALLIES: Record<FirstHourOrder, FirstHourOrder> = {
   'The Columbia Lodge': 'Sons of the Green Lion',
 };
 
-/** Four second-hour pairs. */
+/** Four second-hour pairs (ally jewels). */
 export const SECOND_HOUR_ALLIES: Record<SecondHourSociety, SecondHourSociety> = {
-  'The Blackout Wardens': 'The Drowned Parish',
-  'The Drowned Parish': 'The Blackout Wardens',
-  'The Numbers Station': 'The Dust Ballot',
-  'The Dust Ballot': 'The Numbers Station',
+  'The Whitethorn Coven': 'The Iconostasy',
+  'The Iconostasy': 'The Whitethorn Coven',
+  'The Helix Bureau': 'The Monad Faculty',
+  'The Monad Faculty': 'The Helix Bureau',
+};
+
+/** Second Hour rival across the yard (the other tradition, not the ally). */
+export const SECOND_HOUR_RIVALS: Record<SecondHourSociety, SecondHourSociety> = {
+  'The Whitethorn Coven': 'The Helix Bureau',
+  'The Helix Bureau': 'The Whitethorn Coven',
+  'The Iconostasy': 'The Monad Faculty',
+  'The Monad Faculty': 'The Iconostasy',
+};
+
+/** Sealed Century ally jewels. */
+export const SEALED_CENTURY_ALLIES: Record<SealedCenturyOrder, SealedCenturyOrder> = {
+  'The Briar Sidhe': 'The Birch Vigil',
+  'The Birch Vigil': 'The Briar Sidhe',
+  'The Mercury Works': 'The Closed Proof',
+  'The Closed Proof': 'The Mercury Works',
+};
+
+/** Sealed Century rival across the circle. */
+export const SEALED_CENTURY_RIVALS: Record<SealedCenturyOrder, SealedCenturyOrder> = {
+  'The Briar Sidhe': 'The Mercury Works',
+  'The Mercury Works': 'The Briar Sidhe',
+  'The Birch Vigil': 'The Closed Proof',
+  'The Closed Proof': 'The Birch Vigil',
 };
 
 export function isFirstHourOrder(f: string): f is FirstHourOrder {
@@ -46,16 +88,25 @@ export function isSecondHourSociety(f: string): f is SecondHourSociety {
   return (SECOND_HOUR_SOCIETIES as readonly string[]).includes(f);
 }
 
+export function isSealedCenturyOrder(f: string): f is SealedCenturyOrder {
+  return (SEALED_CENTURY_ORDERS as readonly string[]).includes(f);
+}
+
+export function isRetiredSecondHourSociety(f: string): boolean {
+  return (RETIRED_SECOND_HOUR_SOCIETIES as readonly string[]).includes(f);
+}
+
 export function normalizeFaction(f: string): string {
   if (f === 'The Hermetic Cabal') return 'The Hermetic Circle';
   return f;
 }
 
-/** Ally jewel for a sworn order (first or second hour). */
+/** Ally jewel for a sworn order (first hour, second hour, or sealed century). */
 export function allyOf(faction: string): string | null {
   const n = normalizeFaction(faction);
   if (isFirstHourOrder(n)) return FIRST_HOUR_ALLIES[n];
   if (isSecondHourSociety(n)) return SECOND_HOUR_ALLIES[n];
+  if (isSealedCenturyOrder(n)) return SEALED_CENTURY_ALLIES[n];
   return null;
 }
 
@@ -85,12 +136,23 @@ export const FIRST_HOUR_PAIR_BLURBS: Record<FirstHourOrder, string> = {
 };
 
 export const SECOND_HOUR_BLURBS: Record<SecondHourSociety, string> = {
-  'The Blackout Wardens':
-    'Lamps against the dark. Ally: Drowned Parish.',
-  'The Drowned Parish':
-    'Water under the seals. Ally: Blackout Wardens.',
-  'The Numbers Station':
-    'Four. Four. Two. Ally: Dust Ballot.',
-  'The Dust Ballot':
-    'The count before the living. Ally: Numbers Station.',
+  'The Whitethorn Coven':
+    'Witches, the sidhe, and the green law. May Queen, pooka, bean-nighe, sluagh. Ally: the Iconostasy.',
+  'The Helix Bureau':
+    'Mad-scientist industry. Aether, chromium, a patent golem, an unlicensed engine. Ally: the Monad Faculty.',
+  'The Monad Faculty':
+    'Alchemists and masters of the metaphysical. Salt, the living monad, the golden visage. Ally: the Helix Bureau.',
+  'The Iconostasy':
+    'Slavic folklore. Mad monks, shamans, gamayun, likho, the pike tsar. Ally: the Whitethorn Coven.',
+};
+
+export const SEALED_CENTURY_BLURBS: Record<SealedCenturyOrder, string> = {
+  'The Briar Sidhe':
+    'Witches, the sidhe, and the green law. Cailleach, puck, kelpie, dullahan. Ally: the Birch Vigil.',
+  'The Mercury Works':
+    'Interwar occult industry. Coils, patents, ray rifles, a walking lathe. Ally: the Closed Proof.',
+  'The Closed Proof':
+    'Alchemists and masters of the metaphysical. Quicksilver, the veil, the hidden adept. Ally: the Mercury Works.',
+  'The Birch Vigil':
+    'Slavic folklore. Grizzled shamans, mad monks, leshy, rusalka, the black icon. Ally: the Briar Sidhe.',
 };

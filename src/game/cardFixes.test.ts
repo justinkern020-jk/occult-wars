@@ -52,18 +52,8 @@ function cast(ctx: EffectCtx, id: string, target?: string, aimPos?: { r: number;
   return castFromHand(ctx, ctx.side, ctx.hand[ctx.side].length - 1, target, aimPos, () => 0);
 }
 
-describe('Lung of the River', () => {
-  it('gives +2 power as printed', () => {
-    const ctx = ctx0();
-    put(ctx, 'tenement_saint', 'a', 'blue', 2, 2);
-    expect(cast(ctx, 'lung_of_the_river', 'a')).toBeNull();
-    expect(ctx.units.a.power).toBe(6);
-    expect(cardById('lung_of_the_river')!.text).toMatch(/\+2 power/);
-  });
-});
-
 describe('bounce rites return the real card (redeployable)', () => {
-  for (const id of ['crosstalk', 'sealed_return', 'the_thirteenth_chair']) {
+  for (const id of ['the_thirteenth_chair']) {
     it(id, () => {
       const ctx = ctx0();
       put(ctx, 'sleepy_hollow_rider', 'x', 'red', 1, 2);
@@ -86,7 +76,7 @@ describe('bounce rites return the real card (redeployable)', () => {
 describe("Lion's Mask / False Vintage: power becomes N and abilities are lost", () => {
   it("Lion's Mask strips keywords and the activated power", () => {
     const ctx = ctx0();
-    put(ctx, 'roof_warden', 'g', 'red', 1, 2, { power: 1 });
+    put(ctx, 'night_aviator', 'g', 'red', 1, 2, { power: 1 });
     expect(cast(ctx, 'lion_s_mask', 'g')).toBeNull();
     expect(ctx.units.g.power).toBe(4);
     expect(ctx.units.g.keywords).toEqual([]);
@@ -95,7 +85,7 @@ describe("Lion's Mask / False Vintage: power becomes N and abilities are lost", 
   it('a silenced unit cannot call its power and leaves no death burst', () => {
     const ctx = ctx0();
     put(ctx, 'hex_banner', 'h', 'blue', 2, 2);
-    put(ctx, 'tenement_saint', 'foe', 'red', 1, 2);
+    put(ctx, 'devoted_clerk', 'foe', 'red', 1, 2);
     ctx.side = 'red';
     expect(cast(ctx, 'false_vintage', 'h')).toBeNull();
     ctx.side = 'blue';
@@ -106,7 +96,7 @@ describe("Lion's Mask / False Vintage: power becomes N and abilities are lost", 
 describe('Carve the Seal: +2 power and cannot move or attack on its next rite', () => {
   it('own unit keeps this rite, sits out the next', () => {
     const ctx = ctx0();
-    put(ctx, 'tenement_saint', 'a', 'blue', 2, 2);
+    put(ctx, 'devoted_clerk', 'a', 'blue', 2, 2);
     expect(cast(ctx, 'carve_the_seal', 'a')).toBeNull();
     expect(ctx.units.a.power).toBe(6);
     expect(ctx.units.a.moved).toBeFalsy();
@@ -120,7 +110,7 @@ describe('Carve the Seal: +2 power and cannot move or attack on its next rite', 
 describe('Waking the Sleeper: unmake, then discard a card', () => {
   it('discards a card from the caster hand', () => {
     const ctx = ctx0();
-    put(ctx, 'tenement_saint', 'x', 'red', 1, 2);
+    put(ctx, 'devoted_clerk', 'x', 'red', 1, 2);
     ctx.hand.blue.push(cardById('ash_lice')!);
     expect(cast(ctx, 'waking_the_sleeper', 'x')).toBeNull();
     expect(ctx.units.x).toBeUndefined();
@@ -132,7 +122,7 @@ describe('Waking the Sleeper: unmake, then discard a card', () => {
 describe('claim leaders: an empty circle that is not a stronghold', () => {
   it('rejects a stronghold', () => {
     const ctx = ctx0();
-    const err = resolveLeaderPower(ctx, cardById('the_ward_boss')!, undefined, { r: 0, c: 2 });
+    const err = resolveLeaderPower(ctx, cardById('queen_of_the_hedgerow')!, undefined, { r: 0, c: 2 });
     expect(err).toMatch(/not a stronghold/);
     expect(ctx.loyalty.blue).toBe(10);
   });
@@ -156,7 +146,7 @@ describe('The Iron Saint haste: may act at once', () => {
 describe('Arrest (Seth Kern): cannot move, may still strike', () => {
   it('an arrested unit strikes but holds its ground after a kill', () => {
     const ctx = ctx0();
-    put(ctx, 'tenement_saint', 'a', 'blue', 2, 2, { arrest: 1 });
+    put(ctx, 'devoted_clerk', 'a', 'blue', 2, 2, { arrest: 1 });
     put(ctx, 'alley_inquiry', 'x', 'red', 1, 2);
     const out = resolveStrike(ctx, tiles, 'a', 1, 2);
     expect(out.error).toBeNull();
@@ -176,7 +166,7 @@ describe('Arrest (Seth Kern): cannot move, may still strike', () => {
 describe('The Open Retort (devour) only unmakes what meets it in combat', () => {
   it('a ranged shot is not answered by devour', () => {
     const ctx = ctx0();
-    put(ctx, 'wire_saint', 'gun', 'blue', 3, 2);
+    put(ctx, 'night_aviator', 'gun', 'blue', 3, 2);
     put(ctx, 'the_open_retort', 'ret', 'red', 1, 2);
     resolveStrike(ctx, tiles, 'gun', 1, 2);
     expect(ctx.units.gun).toBeDefined();
@@ -184,7 +174,7 @@ describe('The Open Retort (devour) only unmakes what meets it in combat', () => 
   });
   it('melee into it is unmade', () => {
     const ctx = ctx0();
-    put(ctx, 'tenement_saint', 'a', 'blue', 2, 2);
+    put(ctx, 'devoted_clerk', 'a', 'blue', 2, 2);
     put(ctx, 'the_open_retort', 'ret', 'red', 1, 2);
     resolveStrike(ctx, tiles, 'a', 1, 2);
     expect(ctx.units.a).toBeUndefined();
@@ -192,9 +182,8 @@ describe('The Open Retort (devour) only unmakes what meets it in combat', () => 
 });
 
 describe('flavour text no longer contradicts dual Power', () => {
-  it('Poughkeepsie Seer / Tenement Saint / Birch King', () => {
+  it('Poughkeepsie Seer / Birch King', () => {
     expect(cardById('poughkeepsie_seer')!.text).not.toMatch(/hits for 2/);
-    expect(cardById('tenement_saint')!.text).toMatch(/Four blows, four wounds/);
     expect(cardById('the_birch_king')!.text).toMatch(/Five wounds, five blows/);
   });
 });

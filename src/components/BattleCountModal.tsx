@@ -8,6 +8,7 @@ type Props = {
 export function BattleCountModal({ onClose }: Props) {
   const first = readVisitCount('first');
   const second = readVisitCount('second');
+  const old = readVisitCount('old');
 
   return (
     <div
@@ -31,6 +32,10 @@ export function BattleCountModal({ onClose }: Props) {
           <div className="battle-count-stat">
             <dt>Second Hour sittings</dt>
             <dd data-testid="battle-count-second">{second}</dd>
+          </div>
+          <div className="battle-count-stat">
+            <dt>Sealed Century sittings</dt>
+            <dd data-testid="battle-count-old">{old}</dd>
           </div>
         </dl>
 

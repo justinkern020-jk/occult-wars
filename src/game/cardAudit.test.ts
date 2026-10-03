@@ -23,7 +23,7 @@ const tiles = mapById('leaden-court').tiles;
 function mk(uid: string, side: Side, power: number, extra: Partial<EffectUnit> = {}): EffectUnit {
   return {
     uid,
-    cardId: 'tenement_saint',
+    cardId: 'devoted_clerk',
     name: uid,
     side,
     power,
@@ -36,8 +36,8 @@ function mk(uid: string, side: Side, power: number, extra: Partial<EffectUnit> =
 
 /** A busy board: allies and foes around the middle, decks/hands stocked. */
 function busyCtx(): EffectCtx {
-  const filler = CARDS.find((c) => c.id === 'tenement_saint')!;
-  const rite = CARDS.find((c) => c.id === 'numbers_prayer')!;
+  const filler = CARDS.find((c) => c.id === 'devoted_clerk')!;
+  const rite = CARDS.find((c) => c.id === 'the_hydesville_knock')!;
   const ctx: EffectCtx = {
     side: 'blue',
     loyalty: { blue: 10, red: 8 },

@@ -114,7 +114,7 @@ describe('Sleepy Hollow Rider (blooded)', () => {
 
   it('does not grow when shot from range (it did not strike)', () => {
     const rider = fromCard('sleepy_hollow_rider', 'rider', 'red');
-    const gun = fromCard('wire_saint', 'gun', 'blue'); // Ranged P3
+    const gun = fromCard('night_aviator', 'gun', 'blue'); // Ranged P3
     const ctx = ctxWith([
       [rider, 0, 2],
       [gun, 2, 2],

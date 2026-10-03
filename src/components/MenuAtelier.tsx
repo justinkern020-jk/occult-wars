@@ -42,6 +42,8 @@ type Props = {
   onHotseat: () => void;
   onFriend: () => void;
   onSecond: () => void;
+  onShop: () => void;
+  onOldWork: () => void;
   onAllegiance: () => void;
   onSandbox: () => void;
 };
@@ -80,6 +82,8 @@ export function MenuAtelier({
   onHotseat,
   onFriend,
   onSecond,
+  onShop,
+  onOldWork,
   onAllegiance,
   onSandbox,
 }: Props) {
@@ -384,6 +388,44 @@ export function MenuAtelier({
             </button>
           </div>
 
+          <div className="menu-doors">
+            <button
+              type="button"
+              className="menu-door brass-btn brass-btn-solid"
+              data-testid="open-shop"
+              onClick={click(onShop)}
+            >
+              <span className="menu-door-glyph" aria-hidden>
+                ◇
+              </span>
+              <span className="menu-door-copy">
+                <span className="menu-door-title">Night Counter</span>
+                <span className="menu-door-sub">
+                  Second Hour plates · the seals do not carry them
+                </span>
+              </span>
+            </button>
+          </div>
+
+          <div className="menu-doors">
+            <button
+              type="button"
+              className="menu-door brass-btn"
+              data-testid="open-old-work"
+              onClick={click(onOldWork)}
+            >
+              <span className="menu-door-glyph" aria-hidden>
+                †
+              </span>
+              <span className="menu-door-copy">
+                <span className="menu-door-title">The Sealed Century</span>
+                <span className="menu-door-sub">
+                  Four orders. Sidhe and witches, the mercury works, the closed proof, the birch vigil.
+                </span>
+              </span>
+            </button>
+          </div>
+
           <div className="menu-doors menu-doors-2">
             <button
               type="button"
@@ -414,7 +456,7 @@ export function MenuAtelier({
                 <span className="menu-door-copy">
                   <span className="menu-door-title">The hour after</span>
                   <span className="menu-door-sub">
-                    Four societies took what the six left.
+                    Four occult orders. Sidhe, the helix, the monad, the icon.
                   </span>
                 </span>
               </button>

@@ -74,7 +74,8 @@ describe('nuke aftermath never enter workings / hands', () => {
     for (const faction of [
       'The Vril Syndicate',
       'Unaligned',
-      'The Blackout Wardens',
+      'The Whitethorn Coven',
+      'The Briar Sidhe',
     ]) {
       const ids = buildWorkingIds(faction, 30);
       for (const id of NUKE_IDS) expect(ids).not.toContain(id);
@@ -111,20 +112,21 @@ describe('nuke aftermath never enter workings / hands', () => {
 
   it('migrateProfile strips leaked nuke aftermath from collection and decks', () => {
     const next = migrateProfile({
-      collection: ['radiation_poisoning', 'nuclear_winter', 'lamp_bearer'],
+      collection: ['radiation_poisoning', 'nuclear_winter', 'coil_novice'],
       customDecks: [
         {
           id: 'first-working',
           name: 'Leak',
           heroId: 'the_rune_colonel',
-          cards: ['radiation_poisoning', 'nuclear_winter', 'lamp_bearer'],
+          cards: ['radiation_poisoning', 'nuclear_winter', 'coil_novice'],
         },
       ],
-      secondCards: ['nuclear_winter', 'lamp_bearer'],
+      secondOrder: 'The Whitethorn Coven',
+      secondCards: ['nuclear_winter', 'fairy_doctor'],
     });
-    expect(next.collection).toEqual(['lamp_bearer']);
-    expect(next.customDecks[0]?.cards).toEqual(['lamp_bearer']);
-    expect(next.secondCards).toEqual(['lamp_bearer']);
+    expect(next.collection).toEqual(['coil_novice']);
+    expect(next.customDecks[0]?.cards).toEqual(['coil_novice']);
+    expect(next.secondCards).toEqual(['fairy_doctor']);
   });
 
   it('applyNukeAftermathUnlocks does not grant collectibles', () => {
@@ -179,7 +181,8 @@ describe('South Haven Dispatch is secret hand-drop only', () => {
     for (const faction of [
       'The Vril Syndicate',
       'Unaligned',
-      'The Blackout Wardens',
+      'The Whitethorn Coven',
+      'The Briar Sidhe',
     ]) {
       expect(buildWorkingIds(faction, 30)).not.toContain(SHD);
     }
@@ -209,19 +212,19 @@ describe('South Haven Dispatch is secret hand-drop only', () => {
   it('applySouthHavenDispatchUnlock strips collection / decks (no grant)', () => {
     const base = {
       ...defaultProfile(),
-      collection: [SHD, 'lamp_bearer'],
+      collection: [SHD, 'coil_novice'],
       customDecks: [
         {
           id: 'first-working',
           name: 'Leak',
           heroId: 'the_rune_colonel',
-          cards: [SHD, 'lamp_bearer'],
+          cards: [SHD, 'coil_novice'],
         },
       ],
     };
     const next = applySouthHavenDispatchUnlock(base);
-    expect(next.collection).toEqual(['lamp_bearer']);
-    expect(next.customDecks[0]?.cards).toEqual(['lamp_bearer']);
+    expect(next.collection).toEqual(['coil_novice']);
+    expect(next.customDecks[0]?.cards).toEqual(['coil_novice']);
     // Idempotent — never grants
     const again = applySouthHavenDispatchUnlock(defaultProfile());
     expect(again.collection).not.toContain(SHD);
@@ -229,20 +232,21 @@ describe('South Haven Dispatch is secret hand-drop only', () => {
 
   it('migrateProfile strips leaked south_haven_dispatch', () => {
     const next = migrateProfile({
-      collection: [SHD, 'lamp_bearer'],
+      collection: [SHD, 'coil_novice'],
       customDecks: [
         {
           id: 'first-working',
           name: 'Leak',
           heroId: 'the_rune_colonel',
-          cards: [SHD, 'lamp_bearer'],
+          cards: [SHD, 'coil_novice'],
         },
       ],
-      secondCards: [SHD, 'lamp_bearer'],
+      secondOrder: 'The Whitethorn Coven',
+      secondCards: [SHD, 'fairy_doctor'],
     });
-    expect(next.collection).toEqual(['lamp_bearer']);
-    expect(next.customDecks[0]?.cards).toEqual(['lamp_bearer']);
-    expect(next.secondCards).toEqual(['lamp_bearer']);
+    expect(next.collection).toEqual(['coil_novice']);
+    expect(next.customDecks[0]?.cards).toEqual(['coil_novice']);
+    expect(next.secondCards).toEqual(['fairy_doctor']);
   });
 
   it('catalog still holds the card for code-unlock reveal art', () => {
@@ -258,19 +262,62 @@ describe('Justin / Seth Kern are secret hand-drops only', () => {
 
   it('migrateProfile strips leaked Kern plates from collection and workings', () => {
     const next = migrateProfile({
-      collection: ['justin_kern', 'seth_kern', 'lamp_bearer'],
+      collection: ['justin_kern', 'seth_kern', 'coil_novice'],
       customDecks: [
         {
           id: 'first-working',
           name: 'Leak',
           heroId: 'the_rune_colonel',
-          cards: ['justin_kern', 'seth_kern', 'lamp_bearer'],
+          cards: ['justin_kern', 'seth_kern', 'coil_novice'],
         },
       ],
-      secondCards: ['justin_kern', 'lamp_bearer'],
+      secondOrder: 'The Whitethorn Coven',
+      secondCards: ['justin_kern', 'fairy_doctor'],
     });
-    expect(next.collection).toEqual(['lamp_bearer']);
-    expect(next.customDecks[0]?.cards).toEqual(['lamp_bearer']);
-    expect(next.secondCards).toEqual(['lamp_bearer']);
+    expect(next.collection).toEqual(['coil_novice']);
+    expect(next.customDecks[0]?.cards).toEqual(['coil_novice']);
+    expect(next.secondCards).toEqual(['fairy_doctor']);
+  });
+});
+
+describe('retired Second Hour societies load cleanly from old saves', () => {
+  it('strips Blackout Wardens / Drowned Parish plates and the old oath', () => {
+    const next = migrateProfile({
+      collection: ['lamp_bearer', 'blackout_hound', 'coil_novice'],
+      customDecks: [
+        {
+          id: 'first-working',
+          name: 'Old',
+          heroId: 'the_rune_colonel',
+          cards: ['lamp_bearer', 'coil_novice'],
+        },
+      ],
+      secondOrder: 'The Blackout Wardens',
+      secondHero: 'the_warden_general',
+      secondCards: ['lamp_bearer', 'visor_sergeant'],
+    });
+    expect(next.collection).toEqual(['coil_novice']);
+    expect(next.customDecks[0]?.cards).toEqual(['coil_novice']);
+    expect(next.secondOrder).toBeNull();
+    expect(next.secondHero).toBeNull();
+    expect(next.secondCards).toBeNull();
+    expect(next.oldOrder).toBeNull();
+  });
+
+  it('keeps a current Second Hour oath and a Sealed Century working', () => {
+    const next = migrateProfile({
+      secondOrder: 'The Helix Bureau',
+      secondHero: 'chief_adler',
+      secondCards: ['lamp_bearer'],
+      oldOrder: 'The Briar Sidhe',
+      oldHero: 'the_whitethorn_queen',
+      oldCards: ['cailleach_of_the_thorn', 'coil_novice'],
+    });
+    expect(next.secondOrder).toBe('The Helix Bureau');
+    expect(next.secondCards).toEqual([]);
+    expect(next.oldOrder).toBe('The Briar Sidhe');
+    expect(next.oldHero).toBe('the_whitethorn_queen');
+    // First Hour plates cannot sit in a Sealed Century working.
+    expect(next.oldCards).toEqual(['cailleach_of_the_thorn']);
   });
 });

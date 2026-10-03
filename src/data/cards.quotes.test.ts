@@ -23,13 +23,13 @@ describe('card resources copy', () => {
 
 describe('cardGeneratesResources', () => {
   it('flags tithe / bank / leech engines, not mere muster cost', () => {
-    const siren = CARDS.find((c) => c.id === 'siren_maid');
-    const lamp = CARDS.find((c) => c.id === 'lamp_bearer');
+    const siren = CARDS.find((c) => c.id === 'parish_tithe_lord');
+    const lamp = CARDS.find((c) => c.id === 'coil_novice');
     const rose = CARDS.find((c) => c.id === 'rose_of_the_shut_garden');
     const mint = CARDS.find((c) => c.id === 'runaway_mint');
     expect(siren && cardGeneratesResources(siren)).toBe(true);
     expect(rose && cardGeneratesResources(rose)).toBe(true);
-    // lamp_bearer has cost but does not bank Resources
+    // coil_novice has cost but does not bank Resources
     expect(lamp && cardGeneratesResources(lamp)).toBe(false);
     // empties banks — does not generate
     expect(mint && cardGeneratesResources(mint)).toBe(false);
@@ -41,7 +41,7 @@ describe('cardGeneratesResources', () => {
       .sort();
     expect(ids.length).toBeGreaterThan(20);
     expect(ids).toContain('brass_count');
-    expect(ids).toContain('the_spare_lamp');
+    expect(ids).toContain('opened_barrow');
     expect(ids).toContain('hearth_imp');
   });
 });

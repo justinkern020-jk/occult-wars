@@ -18,11 +18,12 @@ function leaky() {
   return {
     ...defaultProfile(),
     username: 'seth kern',
-    collection: ['justin_kern', 'seth_kern', 'lamp_bearer'],
+    collection: ['justin_kern', 'seth_kern', 'coil_novice'],
     customDecks: [
-      { id: 'w', name: 'Leak', heroId: 'the_rune_colonel', cards: ['justin_kern', 'lamp_bearer', 'seth_kern'] },
+      { id: 'w', name: 'Leak', heroId: 'the_rune_colonel', cards: ['justin_kern', 'coil_novice', 'seth_kern'] },
     ],
-    secondCards: ['seth_kern', 'lamp_bearer'],
+    secondOrder: 'The Whitethorn Coven',
+    secondCards: ['seth_kern', 'fairy_doctor'],
   };
 }
 
@@ -51,9 +52,9 @@ describe('Kern secret hand drops', () => {
 
   it('migrateProfile sanitizes an old saved profile', () => {
     const p = migrateProfile(leaky() as never);
-    expect(p.collection).toEqual(['lamp_bearer']);
-    expect(p.customDecks[0].cards).toEqual(['lamp_bearer']);
-    expect(p.secondCards).toEqual(['lamp_bearer']);
+    expect(p.collection).toEqual(['coil_novice']);
+    expect(p.customDecks[0].cards).toEqual(['coil_novice']);
+    expect(p.secondCards).toEqual(['fairy_doctor']);
   });
 
   describe('loadProfile from storage', () => {
@@ -106,14 +107,14 @@ describe('Kern secret hand drops', () => {
 
   it('a code drops the card into hand every time it is entered (until the hand is sealed)', () => {
     const jk = cardById('justin_kern')!;
-    let hand = [cardById('lamp_bearer')!];
+    let hand = [cardById('coil_novice')!];
     for (let i = 0; i < 3; i++) {
       const d = withSecretHandDrop(hand, jk);
       expect(d.dropped).toBe(true);
       hand = d.hand;
     }
     expect(hand.filter((c) => c.id === 'justin_kern')).toHaveLength(3);
-    const full = Array(7).fill(cardById('lamp_bearer')!);
+    const full = Array(7).fill(cardById('coil_novice')!);
     expect(withSecretHandDrop(full, jk).dropped).toBe(false);
   });
 });

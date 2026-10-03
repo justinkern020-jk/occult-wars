@@ -123,7 +123,8 @@ export type MatchMode =
   | 'hotseat'
   | 'campaign'
   | 'friend'
-  | 'second';
+  | 'second'
+  | 'old';
 
 export type BattlefieldProps = {
   initialMapId?: string;
@@ -734,7 +735,11 @@ export function Battlefield({
       setPassPrompt(false);
       setCryptidSight(null);
       const era: Era =
-        mode === 'second' || m.era === 'second' ? 'second' : 'first';
+        mode === 'second' || m.era === 'second'
+          ? 'second'
+          : mode === 'old' || m.era === 'old'
+            ? 'old'
+            : 'first';
       eraRef.current = era;
       sightingFiredRef.current = false;
       // Rare sighting every 15th real match boot (Strict Mode remounts deduped).
@@ -2857,7 +2862,7 @@ export function Battlefield({
             draggable={false}
           />
           <div
-            className="board-wrap"
+            className={`board-wrap${gameMap.mood === 'bright' ? ' mood-bright' : ''}`}
             style={{
               backgroundImage: `url(/assets/maps/${gameMap.id}.jpg)`,
             }}

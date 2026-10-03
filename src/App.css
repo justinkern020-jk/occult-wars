@@ -3794,3 +3794,130 @@ input[type='search'] {
     animation: none;
   }
 }
+.board-wrap.mood-bright {
+  filter: saturate(1.15) brightness(1.08);
+}
+.mood-bright .tile-street {
+  background: radial-gradient(circle, #fff1c466, #e7c56e33 72%);
+}
+.mood-bright .tile-resource {
+  background: radial-gradient(circle at 50% 45%, #ffe38a66, #3a682214 72%);
+}
+.mood-bright .tile-gate {
+  background: radial-gradient(circle at 50% 42%, #7dffe055, #14302822 70%);
+}
+.map-mini-plain {
+  background: #0c0907;
+  width: 4.5rem;
+  margin: 0.15rem 0 0.35rem;
+  position: static;
+}
+.deck-tabs {
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0.25rem 0 0.75rem;
+  display: flex;
+}
+.deck-tab {
+  letter-spacing: 0.08em;
+  min-height: 2.4rem;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.68rem;
+}
+.deck-note {
+  color: #e7b4b4;
+  margin: 0 0 0.75rem;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.92rem;
+}
+.deck-plate-look {
+  appearance: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  background: 0 0;
+  border: 0;
+  flex-direction: column;
+  gap: 0.2rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+.deck-stepper {
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.15rem;
+  display: flex;
+}
+.deck-stepper span {
+  color: var(--color-brass);
+  font-variant-numeric: tabular-nums;
+  font-family: Cinzel, Palatino, serif;
+  font-size: 0.75rem;
+}
+.deck-stepper .brass-btn {
+  letter-spacing: 0;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0.15rem 0.35rem;
+  font-size: 1.05rem;
+  box-shadow:
+    inset 0 0 0 1px #0c0907cc,
+    0 3px #120e0b;
+}
+.shop-filters {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0 0 0.85rem;
+  display: flex;
+}
+.shop-grid {
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  max-height: none;
+}
+.shop-meta {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #c6a15b;
+  justify-content: space-between;
+  gap: 0.35rem;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.62rem;
+  display: flex;
+}
+.shop-society {
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #a89878;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.58rem;
+}
+.shop-meta em {
+  font-style: normal;
+}
+.shop-buy {
+  letter-spacing: 0.04em;
+  white-space: normal;
+  width: 100%;
+  min-height: 2.5rem;
+  margin-top: 0.2rem;
+  padding: 0.4rem 0.35rem;
+  font-size: 0.68rem;
+  line-height: 1.2;
+  box-shadow:
+    inset 0 0 0 1px #5a3c1473,
+    0 3px #120e0b;
+}
+.card-shop {
+  padding-bottom: 2rem;
+}
+.shop-note {
+  color: #c6a15b;
+  margin: 0 0 0.75rem;
+  font-family: Cinzel, Georgia, serif;
+  font-size: 0.92rem;
+}

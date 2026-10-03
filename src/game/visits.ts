@@ -4,22 +4,25 @@ import { CARDS } from '../data/catalog';
 import type { Card } from './types';
 import {
   isFirstHourOrder,
+  isSealedCenturyOrder,
   isSecondHourSociety,
 } from './orders';
 
-export type Era = 'first' | 'second';
+export type Era = 'first' | 'second' | 'old';
 
-/** Matches between rare cryptid sightings (First and Second Hour). */
+/** Matches between rare cryptid sightings (First Hour, Second Hour, Sealed Century). */
 export const SIGHTING_EVERY = 15;
 
 const VISIT_KEYS: Record<Era, string> = {
   first: 'occult-wars.visits',
   second: 'the-second-hour.visits',
+  old: 'the-sealed-century.visits',
 };
 
 const GATE_KEYS: Record<Era, string> = {
   first: 'occult-wars.visit-gate',
   second: 'the-second-hour.visit-gate',
+  old: 'the-sealed-century.visit-gate',
 };
 
 /** Ignore remounts within this window (React Strict Mode boots twice). */
@@ -66,12 +69,14 @@ export function setVisitsForNextSighting(era: Era): void {
  * Cryptid pools by era.
  * First Hour: order cryptids (Vril Wyrm, Foo Fighter, Mothman, …) as rare sightings.
  * Second Hour: society cryptids on Second Hour matches.
+ * Sealed Century: order cryptids on Sealed Century matches.
  * Never ordinary deck plates.
  */
 function cryptidsInEra(era: Era): Card[] {
   return CARDS.filter((c) => {
     if (!c.keywords.includes('cryptid')) return false;
     if (era === 'second') return isSecondHourSociety(c.faction);
+    if (era === 'old') return isSealedCenturyOrder(c.faction);
     return isFirstHourOrder(c.faction);
   });
 }

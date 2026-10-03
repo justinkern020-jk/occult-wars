@@ -15,6 +15,8 @@ import {
   type FriendLoadout,
 } from './net/friendLoadout';
 import { SecondHour } from './components/SecondHour';
+import { SealedCentury } from './components/SealedCentury';
+import { NightCounter } from './components/NightCounter';
 import { useProfile } from './hooks/useProfile';
 import {
   applyBlackMondayLossInject,
@@ -25,7 +27,15 @@ import {
 import { cardById } from './data/catalog';
 import { TarotPop } from './components/TarotPop';
 import type { Card } from './game/types';
-import { FIRST_HOUR_ORDERS, allyOf, isFirstHourOrder, type FirstHourOrder } from './game/orders';
+import {
+  FIRST_HOUR_ORDERS,
+  SECOND_HOUR_RIVALS,
+  allyOf,
+  isFirstHourOrder,
+  type FirstHourOrder,
+} from './game/orders';
+import { buildOrderAllyWorkingIds } from './game/deck';
+import { CARDS } from './data/catalog';
 import { readHourOpen } from './game/hourUnlock';
 import type { StageOutcome } from './game/campaign';
 import { mapsForEra } from './game/maps';
@@ -42,6 +52,8 @@ type Screen =
   | 'campaign'
   | 'friend'
   | 'second'
+  | 'old'
+  | 'shop'
   | 'sandbox';
 
 /** Pick a rival order for training (not self / not ally preferred). */
@@ -82,6 +94,7 @@ export default function App() {
         if (matchMode === 'hotseat') return 'Pass the Grimoire';
         if (matchMode === 'friend') return 'Friend Working';
         if (matchMode === 'second') return 'The Hour After';
+        if (matchMode === 'old') return 'The Sealed Century';
         return 'Training Rite';
       case 'archive':
         return 'The Collection';
@@ -95,6 +108,10 @@ export default function App() {
         return 'Friend Working';
       case 'second':
         return 'The Hour After';
+      case 'old':
+        return 'The Sealed Century';
+      case 'shop':
+        return 'Night Counter';
       case 'allegiance':
         return 'Swear an Order';
       case 'sandbox':
@@ -239,6 +256,8 @@ export default function App() {
         onSecond={() => {
           if (readHourOpen()) setScreen('second');
         }}
+        onShop={() => setScreen('shop')}
+        onOldWork={() => setScreen('old')}
         onAllegiance={() => setScreen('allegiance')}
         onSandbox={() => setScreen('sandbox')}
       />
@@ -333,22 +352,75 @@ export default function App() {
           onEnterYard={(mid, order) => {
             setMapId(mid);
             setBlueFaction(order);
-            setRedFaction(
-              order === 'The Blackout Wardens'
-                ? 'The Numbers Station'
-                : order === 'The Drowned Parish'
-                  ? 'The Dust Ballot'
-                  : order === 'The Numbers Station'
-                    ? 'The Blackout Wardens'
-                    : 'The Drowned Parish',
-            );
+            // The rival across the yard is the other tradition, not the ally.
+            setRedFaction(SECOND_HOUR_RIVALS[order]);
             setBlueHeroId(profile.secondHero ?? undefined);
             setBlueDeckIds(profile.secondCards ?? undefined);
+            setRedHeroId(undefined);
+            setRedDeckIds(undefined);
             setMatchMode('second');
+            setScreen('field');
+          }}
+          onShop={() => setScreen('shop')}
+          onBack={() => setScreen('menu')}
+        />
+      </div>
+    );
+  }
+
+  if (screen === 'old') {
+    return (
+      <div className="app app-shell">
+        <nav className="shell-bar">
+          <button
+            type="button"
+            className="brass-btn brass-btn-ghost shell-back"
+            onClick={() => setScreen('menu')}
+          >
+            Return to the atelier
+          </button>
+          <p className="shell-brand">
+            <span>Occult Wars</span>
+            <em>The Sealed Century</em>
+          </p>
+        </nav>
+        <SealedCentury
+          profile={profile}
+          onUpdate={update}
+          onEnter={(mid, order, rival) => {
+            setMapId(mid);
+            setBlueFaction(order);
+            setRedFaction(rival);
+            setBlueHeroId(profile.oldHero ?? undefined);
+            setBlueDeckIds(profile.oldCards ?? undefined);
+            setRedHeroId(CARDS.find((c) => c.kind === 'hero' && c.faction === rival)?.id);
+            setRedDeckIds(buildOrderAllyWorkingIds(rival, 30));
+            setMatchMode('old');
             setScreen('field');
           }}
           onBack={() => setScreen('menu')}
         />
+      </div>
+    );
+  }
+
+  if (screen === 'shop') {
+    return (
+      <div className="app app-shell">
+        <nav className="shell-bar">
+          <button
+            type="button"
+            className="brass-btn brass-btn-ghost shell-back"
+            onClick={() => setScreen('menu')}
+          >
+            Return to the atelier
+          </button>
+          <p className="shell-brand">
+            <span>Occult Wars</span>
+            <em>Night Counter</em>
+          </p>
+        </nav>
+        <NightCounter profile={profile} onUpdate={update} onBack={() => setScreen('menu')} />
       </div>
     );
   }
@@ -365,7 +437,9 @@ export default function App() {
                 ? 'campaign'
                 : matchMode === 'second'
                   ? 'second'
-                  : 'menu',
+                  : matchMode === 'old'
+                    ? 'old'
+                    : 'menu',
             )
           }
         >
@@ -400,7 +474,9 @@ export default function App() {
                 ? 'campaign'
                 : matchMode === 'second'
                   ? 'second'
-                  : 'menu',
+                  : matchMode === 'old'
+                    ? 'old'
+                    : 'menu',
             );
           }}
           onMatchEnd={({ playerWon, kind }) => {

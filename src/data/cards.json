@@ -1,703 +1,558 @@
 [
   {
-    "id": "lamp_bearer",
-    "name": "Lamp Bearer",
-    "faction": "The Blackout Wardens",
-    "kind": "unit",
-    "rarity": "common",
-    "cost": 2,
-    "oath": 0,
-    "keywords": [
-      "crown"
-    ],
-    "text": "Lamp. Adjacent units you control strike for +1. The lantern is the only law on the street.",
-    "quote": "We have lit the lamps, and still the dark is not afraid.",
-    "quoted": "A warden's night book, 1939",
-    "power": 2,
-    "legacyAttack": 2,
-    "legacyHealth": 2
-  },
-  {
-    "id": "visor_sergeant",
-    "name": "Visor Sergeant",
-    "faction": "The Blackout Wardens",
+    "id": "fairy_doctor",
+    "name": "Fairy Doctor",
+    "faction": "The Whitethorn Coven",
     "kind": "unit",
     "rarity": "uncommon",
     "cost": 3,
     "oath": 0,
     "keywords": [
-      "shutter"
+      "tithe",
+      "crown"
     ],
-    "text": "Shutter. Ranged strikes cannot choose this unit. The visor takes the flash and gives nothing back.",
-    "quote": "Shut the house. The sky is not a friend tonight.",
-    "quoted": "Blackout order, London",
+    "text": "Tithe. Lamp. While she stands, your bank yields +1. Adjacent units you control strike for +1 Power. A country doctor of the sidhe. She diagnoses the fairy stroke and invoices the hedge.",
+    "quote": "The cure is milk, iron, and a name said backwards.",
+    "quoted": "The Whitethorn Coven",
     "power": 3,
-    "legacyAttack": 2,
+    "legacyAttack": 3,
     "legacyHealth": 3
   },
   {
-    "id": "siren_maid",
-    "name": "Siren Maid",
-    "faction": "The Blackout Wardens",
+    "id": "bean_nighe",
+    "name": "Bean-Nighe",
+    "faction": "The Whitethorn Coven",
     "kind": "unit",
-    "rarity": "common",
-    "cost": 2,
-    "oath": 0,
-    "keywords": [
-      "tithe"
-    ],
-    "text": "While she stands, your bank yields +1. She rings the all-clear only when the circle is yours.",
-    "quote": "The siren is a prayer said too late.",
-    "quoted": "Parish notice, 1940",
-    "power": 3,
-    "legacyAttack": 1,
-    "legacyHealth": 3
-  },
-  {
-    "id": "roof_warden",
-    "name": "Roof Warden",
-    "faction": "The Blackout Wardens",
-    "kind": "unit",
-    "rarity": "common",
+    "rarity": "uncommon",
     "cost": 3,
     "oath": 0,
     "keywords": [
       "ranged",
-      "shutter"
-    ],
-    "text": "Ranged Strike. Shutter. He shoots from the tiles, and the answering shot cannot find him.",
-    "quote": "Look up. That is where the hour breaks.",
-    "quoted": "Roof watch manual",
-    "power": 3,
-    "legacyAttack": 3,
-    "legacyHealth": 2
-  },
-  {
-    "id": "sandbag_saint",
-    "name": "Sandbag Saint",
-    "faction": "The Blackout Wardens",
-    "kind": "unit",
-    "rarity": "common",
-    "cost": 3,
-    "oath": 0,
-    "keywords": [
-      "tough"
-    ],
-    "text": "Toughness. The first point of any strike is refused. He is a wall that learned a name.",
-    "quote": "Pile the bags. Leave a gap for the living.",
-    "quoted": "Shelter card",
-    "power": 5,
-    "legacyAttack": 1,
-    "legacyHealth": 5
-  },
-  {
-    "id": "blackout_captain",
-    "name": "Blackout Captain",
-    "faction": "The Blackout Wardens",
-    "kind": "unit",
-    "rarity": "rare",
-    "cost": 4,
-    "oath": 0,
-    "keywords": [
-      "shutter",
-      "crown"
-    ],
-    "text": "Shutter. Lamp. Adjacent allies strike for +1, and guns cannot call her out.",
-    "quote": "One lamp, and the street remembers who holds it.",
-    "quoted": "Captain's standing order",
-    "power": 4,
-    "legacyAttack": 3,
-    "legacyHealth": 4
-  },
-  {
-    "id": "snuff_the_guns",
-    "name": "Snuff the Guns",
-    "faction": "The Blackout Wardens",
-    "kind": "rite",
-    "rarity": "common",
-    "cost": 3,
-    "oath": 0,
-    "keywords": [],
-    "text": "Deal 2 damage to every enemy unit with Ranged Strike.",
-    "quote": "Put the lights out in their hands.",
-    "quoted": "Warden's rite",
-    "effect": {
-      "op": "snuff_guns"
-    }
-  },
-  {
-    "id": "whispered_curfew",
-    "name": "Whispered Curfew",
-    "faction": "The Blackout Wardens",
-    "kind": "rite",
-    "rarity": "common",
-    "cost": 2,
-    "oath": 0,
-    "keywords": [],
-    "text": "Name a unit. It cannot move or attack on its next rite.",
-    "quote": "Stay in. The street is closed.",
-    "quoted": "Curfew slip",
-    "aim": true,
-    "effect": {
-      "op": "lock"
-    }
-  },
-  {
-    "id": "parish_blackout",
-    "name": "Parish Blackout",
-    "faction": "The Blackout Wardens",
-    "kind": "rite",
-    "rarity": "uncommon",
-    "cost": 4,
-    "oath": 0,
-    "keywords": [],
-    "text": "Deal 1 damage to every unit on the field.",
-    "quote": "When the ward goes dark, everyone is equally lost.",
-    "quoted": "Blackout psalm",
-    "effect": {
-      "op": "smite_all",
-      "n": 1
-    }
-  },
-  {
-    "id": "the_spare_lamp",
-    "name": "The Spare Lamp",
-    "faction": "The Blackout Wardens",
-    "kind": "device",
-    "rarity": "common",
-    "cost": 2,
-    "oath": 0,
-    "keywords": [],
-    "text": "Device. Bank 1 resources and draw 1 card.",
-    "quote": "There is always one lamp left in the cupboard.",
-    "quoted": "Quarter inventory",
-    "effect": {
-      "op": "bank_draw"
-    }
-  },
-  {
-    "id": "chief_warden",
-    "name": "Chief Warden",
-    "faction": "The Blackout Wardens",
-    "kind": "hero",
-    "rarity": "patron",
-    "cost": 2,
-    "oath": 0,
-    "keywords": [],
-    "text": "Leader. Once in a sitting: pay 2. A unit gains Shutter and Toughness.",
-    "quote": "I will stand in the door until the dark learns my name.",
-    "quoted": "The Chief Warden",
-    "leaderPower": {
-      "op": "snuff"
-    }
-  },
-  {
-    "id": "grate_chorister",
-    "name": "Grate Chorister",
-    "faction": "The Drowned Parish",
-    "kind": "unit",
-    "rarity": "common",
-    "cost": 2,
-    "oath": 0,
-    "keywords": [
-      "gills",
-      "seep"
-    ],
-    "text": "Gills. Seep. At the start of your rite, deal 1 to each adjacent enemy. The hymn comes up through the grate.",
-    "quote": "The river remembers every name the city dropped.",
-    "quoted": "Culvert hymn",
-    "power": 3,
-    "legacyAttack": 1,
-    "legacyHealth": 3
-  },
-  {
-    "id": "sewer_verger",
-    "name": "Sewer Verger",
-    "faction": "The Drowned Parish",
-    "kind": "unit",
-    "rarity": "common",
-    "cost": 2,
-    "oath": 0,
-    "keywords": [
-      "seep"
-    ],
-    "text": "Seep. At the start of your rite, deal 1 to each adjacent enemy. He keeps the keys to drains that are not on the map.",
-    "quote": "Open the small door. The large one opens itself.",
-    "quoted": "Verger's key ring",
-    "power": 2,
-    "legacyAttack": 2,
-    "legacyHealth": 2
-  },
-  {
-    "id": "tide_clerk",
-    "name": "Tide Clerk",
-    "faction": "The Drowned Parish",
-    "kind": "unit",
-    "rarity": "common",
-    "cost": 2,
-    "oath": 0,
-    "keywords": [
-      "tithe",
       "gills"
     ],
-    "text": "Gills. While this unit stands, your bank yields +1. The books are kept in waterproof ink.",
-    "quote": "What the river takes, it files.",
-    "quoted": "Tide ledger",
-    "power": 2,
-    "legacyAttack": 1,
-    "legacyHealth": 2
-  },
-  {
-    "id": "mud_pallbearer",
-    "name": "Mud Pallbearer",
-    "faction": "The Drowned Parish",
-    "kind": "unit",
-    "rarity": "uncommon",
-    "cost": 3,
-    "oath": 0,
-    "keywords": [
-      "gills",
-      "tough"
-    ],
-    "text": "Gills. Toughness. He carries the drowned and does not join them.",
-    "quote": "Shoulder the weight. The water will take the rest.",
-    "quoted": "Pallbearer's rule",
-    "power": 4,
-    "legacyAttack": 2,
-    "legacyHealth": 4
-  },
-  {
-    "id": "drown_nun",
-    "name": "Drown Nun",
-    "faction": "The Drowned Parish",
-    "kind": "unit",
-    "rarity": "rare",
-    "cost": 4,
-    "oath": 0,
-    "keywords": [
-      "gills",
-      "seep"
-    ],
-    "text": "Gills. Seep. The adjacent enemy rusts at the start of your rite, and the river will not take her.",
-    "quote": "She prayed until the water answered in her voice.",
-    "quoted": "Drowned office",
+    "text": "Ranged Strike. Gills. The washer at the ford. Her keen reaches 2 circles in a straight line, never the diagonal, and is not answered.",
+    "quote": "If you see her beating a shirt, ask whose.",
+    "quoted": "The Whitethorn Coven",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
   },
   {
-    "id": "pilings_brute",
-    "name": "Pilings Brute",
-    "faction": "The Drowned Parish",
+    "id": "the_pooka",
+    "name": "The Pooka",
+    "faction": "The Whitethorn Coven",
     "kind": "unit",
-    "rarity": "common",
-    "cost": 5,
-    "oath": 0,
-    "keywords": [
-      "gills"
-    ],
-    "text": "Gills. A man made of pier-wood and river teeth. The tide does not bill him.",
-    "quote": "The piles go down farther than the city admits.",
-    "quoted": "Harbor note",
-    "power": 5,
-    "legacyAttack": 4,
-    "legacyHealth": 5
-  },
-  {
-    "id": "high_water",
-    "name": "High Water",
-    "faction": "The Drowned Parish",
-    "kind": "rite",
     "rarity": "uncommon",
-    "cost": 4,
-    "oath": 0,
-    "keywords": [],
-    "text": "Deal 1 to each enemy without Gills. Each unit you control with Gills heals 1.",
-    "quote": "Let it rise one step. That is enough.",
-    "quoted": "Flood mark",
-    "effect": {
-      "op": "tide"
-    }
-  },
-  {
-    "id": "the_grate_opens",
-    "name": "The Grate Opens",
-    "faction": "The Drowned Parish",
-    "kind": "rite",
-    "rarity": "common",
-    "cost": 3,
-    "oath": 0,
-    "keywords": [],
-    "text": "Name a unit. It cannot move or attack on its next rite.",
-    "quote": "Something took the ankles. It will give them back tomorrow.",
-    "quoted": "Drain rite",
-    "aim": true,
-    "effect": {
-      "op": "lock"
-    }
-  },
-  {
-    "id": "lung_of_the_river",
-    "name": "Lung of the River",
-    "faction": "The Drowned Parish",
-    "kind": "device",
-    "rarity": "common",
-    "cost": 2,
-    "oath": 0,
-    "keywords": [],
-    "text": "Device. Name a unit. It gains +2 power.",
-    "quote": "Breathe the green air. It is older than the street.",
-    "quoted": "River lung",
-    "aim": true,
-    "effect": {
-      "op": "empower",
-      "n": 2
-    }
-  },
-  {
-    "id": "pearl_of_the_culvert",
-    "name": "Pearl of the Culvert",
-    "faction": "The Drowned Parish",
-    "kind": "device",
-    "rarity": "uncommon",
-    "cost": 3,
-    "oath": 0,
-    "keywords": [],
-    "text": "Device. Draw 2 cards.",
-    "quote": "The pearl was a tooth. It still buys a secret.",
-    "quoted": "Culvert find",
-    "effect": {
-      "op": "draw",
-      "n": 2
-    }
-  },
-  {
-    "id": "the_flood_saint",
-    "name": "The Flood Saint",
-    "faction": "The Drowned Parish",
-    "kind": "hero",
-    "rarity": "patron",
-    "cost": 3,
-    "oath": 0,
-    "keywords": [],
-    "text": "Leader. Once in a sitting: pay 3. Deal 1 to each enemy without Gills. Your Gills units heal 1.",
-    "quote": "I married the river. The city is the dowry.",
-    "quoted": "The Flood Saint",
-    "leaderPower": {
-      "op": "tide"
-    }
-  },
-  {
-    "id": "static_child",
-    "name": "Static Child",
-    "faction": "The Numbers Station",
-    "kind": "unit",
-    "rarity": "common",
-    "cost": 1,
-    "oath": 0,
-    "keywords": [
-      "fast"
-    ],
-    "text": "Fast Attack. A voice that learned a body. It strikes first, and it does not last.",
-    "quote": "The numbers were a lullaby. The child believed them.",
-    "quoted": "Station log",
-    "power": 2,
-    "legacyAttack": 2,
-    "legacyHealth": 1
-  },
-  {
-    "id": "headset_acolyte",
-    "name": "Headset Acolyte",
-    "faction": "The Numbers Station",
-    "kind": "unit",
-    "rarity": "common",
     "cost": 2,
     "oath": 0,
     "keywords": [
-      "relay"
+      "fast",
+      "veiled"
     ],
-    "text": "Relay. When you muster another unit, draw 1 card. He repeats whatever the wire says.",
-    "quote": "Say it again. The first time was for the dead.",
-    "quoted": "Headset rule",
-    "power": 2,
-    "legacyAttack": 1,
-    "legacyHealth": 2
-  },
-  {
-    "id": "glass_dial",
-    "name": "Glass Dial",
-    "faction": "The Numbers Station",
-    "kind": "unit",
-    "rarity": "common",
-    "cost": 2,
-    "oath": 0,
-    "keywords": [
-      "relay"
-    ],
-    "text": "Relay. When you muster another unit, draw 1. The dial does not choose. It only turns.",
-    "quote": "Turn until the static becomes a sentence.",
-    "quoted": "Dial note",
+    "text": "Fast Attack. Untargetable. Strikes first. Strikes and rites pass over him. A black horse-man of the Irish road who will not be named.",
+    "quote": "Take the ride. You will not choose where it ends.",
+    "quoted": "The Whitethorn Coven",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2
   },
   {
-    "id": "wire_saint",
-    "name": "Wire Saint",
-    "faction": "The Numbers Station",
+    "id": "swan_maiden",
+    "name": "Swan Maiden",
+    "faction": "The Whitethorn Coven",
     "kind": "unit",
     "rarity": "common",
-    "cost": 3,
-    "oath": 0,
-    "keywords": [
-      "ranged"
-    ],
-    "text": "Ranged Strike. The shot is a frequency. It reaches 2 tiles and is not answered.",
-    "quote": "A wire can be a street if you walk it with your mouth.",
-    "quoted": "Wire sermon",
-    "power": 3,
-    "legacyAttack": 2,
-    "legacyHealth": 3
-  },
-  {
-    "id": "frequency_nun",
-    "name": "Frequency Nun",
-    "faction": "The Numbers Station",
-    "kind": "unit",
-    "rarity": "uncommon",
-    "cost": 3,
+    "cost": 2,
     "oath": 0,
     "keywords": [
       "relay",
-      "tithe"
+      "fast"
     ],
-    "text": "Relay. Tithe +1. She draws when you muster, and the bank thickens while she kneels.",
-    "quote": "Poverty is just a frequency we have not tuned.",
-    "quoted": "Nun's hour",
-    "power": 3,
-    "legacyAttack": 1,
-    "legacyHealth": 3
+    "text": "Fast Attack. Relay. Strikes first. When you muster another unit, draw 1. She left the feather-skin on the bank. Whoever holds it holds the next plate.",
+    "quote": "Do not hide the skin. She will find the house.",
+    "quoted": "The Whitethorn Coven",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
   },
   {
-    "id": "the_repeater",
-    "name": "The Repeater",
-    "faction": "The Numbers Station",
+    "id": "clurichaun",
+    "name": "Clurichaun",
+    "faction": "The Whitethorn Coven",
     "kind": "unit",
-    "rarity": "rare",
-    "cost": 4,
+    "rarity": "common",
+    "cost": 2,
     "oath": 0,
     "keywords": [
-      "relay"
+      "tithe2",
+      "hearth"
     ],
-    "text": "Relay. When you muster another unit, draw 1. It says your name back in a voice you buried.",
-    "quote": "Repeat the last true thing until it becomes a weapon.",
-    "quoted": "Repeater plate",
+    "text": "Greater Tithe. Hearth. Your bank yields +2 while he stands, and a resource he stands on banks twice. The cellar fairy who guards the cask and charges rent.",
+    "quote": "He is loyal to the wine, not to you.",
+    "quoted": "The Whitethorn Coven",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "the_fetch",
+    "name": "The Fetch",
+    "faction": "The Whitethorn Coven",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "fast",
+      "blooded"
+    ],
+    "text": "Fast Attack. If it survives a battle it struck in, it gains power. Your double, arrived early. It strikes first, and living makes the copy heavier.",
+    "quote": "If you meet it at noon, sit down.",
+    "quoted": "The Whitethorn Coven",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "brownie_of_the_stair",
+    "name": "Brownie of the Stair",
+    "faction": "The Whitethorn Coven",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "hearth",
+      "tithe"
+    ],
+    "text": "Hearth. Tithe. A resource it stands on banks twice, and your bank yields +1. The small person of the stair who works the night and leaves when you offer a wage.",
+    "quote": "A bowl of cream. Never a coin.",
+    "quoted": "The Whitethorn Coven",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "selkie_coat",
+    "name": "Selkie Coat",
+    "faction": "The Whitethorn Coven",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "gills",
+      "tough"
+    ],
+    "text": "Gills. Toughness. The first point of any blow is refused. The skin is the person. Fold it and the sea cannot take them. Unfold it and they are gone.",
+    "quote": "Lock the chest. Lose the marriage.",
+    "quoted": "The Whitethorn Coven",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
   },
   {
-    "id": "crosstalk",
-    "name": "Crosstalk",
-    "faction": "The Numbers Station",
+    "id": "fear_gortach",
+    "name": "Fear Gortach",
+    "faction": "The Whitethorn Coven",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "root",
+      "tough"
+    ],
+    "text": "Root. Toughness. The hunger grass. Enemy plates beside it cannot move or strike, and the first point of any blow is refused. Step on it and you are held until you are eaten by standing still.",
+    "quote": "The field looks ordinary. That is the trap.",
+    "quoted": "The Whitethorn Coven",
+    "power": 4,
+    "legacyAttack": 4,
+    "legacyHealth": 4
+  },
+  {
+    "id": "the_merrow",
+    "name": "The Merrow",
+    "faction": "The Whitethorn Coven",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "gills",
+      "seep"
+    ],
+    "text": "Gills. Seep. At the start of your rite, deal 1 to each adjacent enemy. The mermaid of the Irish coast, red cap, green hair, a net of names.",
+    "quote": "She keeps the drowned in a pocket of the sea.",
+    "quoted": "The Whitethorn Coven",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "the_sluagh",
+    "name": "The Sluagh",
+    "faction": "The Whitethorn Coven",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "cryptid",
+      "fast",
+      "ranged"
+    ],
+    "text": "Cryptid. Fast Attack. Ranged Strike. The host of the unforgiven dead, flying west to east. It strikes first. The shot is a straight line and is not answered.",
+    "quote": "Shut the west window. They come from that side.",
+    "quoted": "The Whitethorn Coven",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "night_mare_of_the_barrow",
+    "name": "Night-Mare of the Barrow",
+    "faction": "The Whitethorn Coven",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "cryptid",
+      "veiled"
+    ],
+    "text": "Cryptid. Untargetable. The pressing spirit of the mound. Strikes and rites pass over it. You wake with the weight and no one to blame.",
+    "quote": "It sits on the chest. It does not sit on the list.",
+    "quoted": "The Whitethorn Coven",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "whitethorn_bind",
+    "name": "Whitethorn Bind",
+    "faction": "The Whitethorn Coven",
     "kind": "rite",
     "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [],
+    "text": "Name a unit. It cannot move or attack on its next rite. A whitethorn tied on the named plate. The hedge holds the appointment.",
+    "quote": "The bush is the lock.",
+    "quoted": "The Whitethorn Coven",
+    "aim": true,
+    "effect": {
+      "op": "lock"
+    }
+  },
+  {
+    "id": "send_them_home",
+    "name": "Send Them Home",
+    "faction": "The Whitethorn Coven",
+    "kind": "rite",
+    "rarity": "uncommon",
     "cost": 3,
     "oath": 0,
     "keywords": [],
-    "text": "Name a unit and return it to its owner's hand.",
-    "quote": "Wrong number. They will have to call again.",
-    "quoted": "Crosstalk",
+    "text": "Name a unit and return it to the hand it came from. The good people are finished with the guest.",
+    "quote": "The door is the way you came.",
+    "quoted": "The Whitethorn Coven",
     "aim": true,
     "effect": {
       "op": "bounce"
     }
   },
   {
-    "id": "numbers_prayer",
-    "name": "Numbers Prayer",
-    "faction": "The Numbers Station",
+    "id": "iron_in_the_milk",
+    "name": "Iron in the Milk",
+    "faction": "The Whitethorn Coven",
     "kind": "rite",
     "rarity": "common",
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Draw 2 cards.",
-    "quote": "Four. Four. Two. Nine. The rest is mercy.",
-    "quoted": "Numbers prayer",
+    "text": "Name a unit. Deal 2 damage. A nail dropped in the pan. The fairy thing drinks and remembers it is not welcome.",
+    "quote": "Hospitality has a mineral.",
+    "quoted": "The Whitethorn Coven",
+    "aim": true,
     "effect": {
-      "op": "draw",
+      "op": "smite",
       "n": 2
     }
   },
   {
-    "id": "dead_air",
-    "name": "Dead Air",
-    "faction": "The Numbers Station",
-    "kind": "rite",
-    "rarity": "common",
-    "cost": 3,
-    "oath": 0,
-    "keywords": [],
-    "text": "Name a unit. It cannot move or attack on its next rite.",
-    "quote": "For one hour, even the brave have nothing to say.",
-    "quoted": "Dead air",
-    "aim": true,
-    "effect": {
-      "op": "lock"
-    }
-  },
-  {
-    "id": "the_open_microphone",
-    "name": "The Open Microphone",
-    "faction": "The Numbers Station",
+    "id": "the_good_peoples_cup",
+    "name": "The Good People's Cup",
+    "faction": "The Whitethorn Coven",
     "kind": "device",
     "rarity": "common",
-    "cost": 1,
+    "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Device. Bank 1 resources and draw 1 card.",
-    "quote": "Leave it on. Someone is always listening.",
-    "quoted": "Open mic",
+    "text": "Device. Bank 1 resources and draw 1 card. Leave it on the step. Something drinks, and a plate is paid back.",
+    "quote": "Never watch them drink it.",
+    "quoted": "The Whitethorn Coven",
     "effect": {
       "op": "bank_draw"
     }
   },
   {
-    "id": "the_night_announcer",
-    "name": "The Night Announcer",
-    "faction": "The Numbers Station",
+    "id": "the_may_queen",
+    "name": "The May Queen",
+    "faction": "The Whitethorn Coven",
     "kind": "hero",
     "rarity": "patron",
-    "cost": 2,
+    "cost": 3,
     "oath": 0,
     "keywords": [],
-    "text": "Leader. Once in a sitting: pay 2. Return the last rite or device in your discard to your hand. If there is none, draw 1.",
-    "quote": "War loves to come like a thief in the night; professions of eternal amity provide the night.",
-    "quoted": "Ambrose Bierce, The Devil's Dictionary",
+    "text": "Leader. Once in a sitting: pay 3. Name a unit you own. It gains Fast Attack and may act at once. The queen of the hawthorn puts the green on someone and they move before the hour does.",
+    "quote": "I am not a parish. I am the month the hedge is dangerous.",
+    "quoted": "The May Queen",
     "leaderPower": {
-      "op": "playback"
+      "op": "haste"
     }
   },
   {
-    "id": "ash_registrar",
-    "name": "Ash Registrar",
-    "faction": "The Dust Ballot",
-    "kind": "unit",
-    "rarity": "common",
-    "cost": 2,
-    "oath": 0,
-    "keywords": [
-      "tithe"
-    ],
-    "text": "While this unit stands, your bank yields +1. The dead are counted before the living.",
-    "quote": "A name on a list is a kind of vote.",
-    "quoted": "Registrar's pencil",
-    "power": 2,
-    "legacyAttack": 1,
-    "legacyHealth": 2
-  },
-  {
-    "id": "precinct_ghost",
-    "name": "Precinct Ghost",
-    "faction": "The Dust Ballot",
-    "kind": "unit",
-    "rarity": "common",
-    "cost": 2,
-    "oath": 0,
-    "keywords": [
-      "canvass"
-    ],
-    "text": "Canvass. When it conquers a street, it also claims one adjacent neutral street.",
-    "quote": "Once upon a midnight dreary, while I pondered, weak and weary.",
-    "quoted": "Edgar Allan Poe, The Raven",
-    "power": 2,
-    "legacyAttack": 2,
-    "legacyHealth": 2
-  },
-  {
-    "id": "ballot_widow",
-    "name": "Ballot Widow",
-    "faction": "The Dust Ballot",
-    "kind": "unit",
-    "rarity": "common",
-    "cost": 2,
-    "oath": 0,
-    "keywords": [
-      "poll"
-    ],
-    "text": "Poll. At the end of your rite, if she stands on a circle you hold, score 1 extra domination.",
-    "quote": "She votes for the house, and the house stays voted.",
-    "quoted": "Widow's ballot",
-    "power": 3,
-    "legacyAttack": 1,
-    "legacyHealth": 3
-  },
-  {
-    "id": "the_stuffing_crew",
-    "name": "The Stuffing Crew",
-    "faction": "The Dust Ballot",
+    "id": "aether_diver",
+    "name": "Aether Diver",
+    "faction": "The Helix Bureau",
     "kind": "unit",
     "rarity": "uncommon",
     "cost": 3,
     "oath": 0,
     "keywords": [
-      "canvass",
-      "fast"
+      "tithe2"
     ],
-    "text": "Fast Attack. Canvass. They strike first, and the street beside the one they take comes with them.",
-    "quote": "Fill the box before the count learns to read.",
-    "quoted": "Crew note",
+    "text": "Greater Tithe. While the suit is on the circle, your bank yields +2. An interwar diver of the luminiferous aether. The helmet should not work. The patent says it does.",
+    "quote": "He came back with frost on the inside of the glass.",
+    "quoted": "The Helix Bureau",
     "power": 3,
     "legacyAttack": 3,
-    "legacyHealth": 2
+    "legacyHealth": 3
   },
   {
-    "id": "tenement_saint",
-    "name": "Tenement Saint",
-    "faction": "The Dust Ballot",
+    "id": "chromium_surgeon",
+    "name": "Chromium Surgeon",
+    "faction": "The Helix Bureau",
     "kind": "unit",
-    "rarity": "common",
-    "cost": 4,
+    "rarity": "uncommon",
+    "cost": 3,
     "oath": 0,
-    "keywords": [],
-    "text": "A saint of stairwells and shared sinks. Four blows, four wounds, and the landing is hers.",
-    "quote": "Holiness is a room that still has a door.",
-    "quoted": "Tenement office",
-    "power": 4,
+    "keywords": [
+      "fast",
+      "blooded"
+    ],
+    "text": "Fast Attack. If it survives a battle it struck in, it gains power. A mad anatomist in a mirror-bright apron. Strikes first. The operation that lives becomes the next instrument.",
+    "quote": "He does not sew. He upgrades.",
+    "quoted": "The Helix Bureau",
+    "power": 3,
     "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "night_scope",
+    "name": "Night-Scope",
+    "faction": "The Helix Bureau",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "ranged",
+      "shutter"
+    ],
+    "text": "Ranged Strike. Shutter. A shot reaches 2 circles in a straight line, never the diagonal, and is not answered. Ranged strikes cannot choose this plate. An occult optic that sees the decade after this one.",
+    "quote": "The reticule is not aimed at anything you can name.",
+    "quoted": "The Helix Bureau",
+    "power": 4,
+    "legacyAttack": 4,
     "legacyHealth": 4
   },
   {
-    "id": "ward_heeler",
-    "name": "Ward Heeler",
-    "faction": "The Dust Ballot",
+    "id": "walking_dynamo",
+    "name": "Walking Dynamo",
+    "faction": "The Helix Bureau",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "tough",
+      "slow",
+      "crown"
+    ],
+    "text": "Slow Attack. Toughness. Lamp. It strikes last. The first point of any blow is refused. Adjacent units you control strike for +1 Power. A dynamo that stood up and went to work.",
+    "quote": "The floor hums when it clocks in.",
+    "quoted": "The Helix Bureau",
+    "power": 5,
+    "legacyAttack": 5,
+    "legacyHealth": 5
+  },
+  {
+    "id": "ozone_lieutenant",
+    "name": "Ozone Lieutenant",
+    "faction": "The Helix Bureau",
     "kind": "unit",
     "rarity": "uncommon",
     "cost": 3,
     "oath": 0,
     "keywords": [
-      "canvass"
+      "fast",
+      "crown"
     ],
-    "text": "Canvass. When he conquers a street, an adjacent neutral street joins the ward.",
-    "quote": "He does not buy the vote. He collects it.",
-    "quoted": "Heeler's route",
+    "text": "Fast Attack. Lamp. Strikes first. Adjacent units you control strike for +1 Power. She smells of lightning and filing cabinets. The bureau gave her a rank the army does not have.",
+    "quote": "Breathe after she passes. Not during.",
+    "quoted": "The Helix Bureau",
     "power": 3,
-    "legacyAttack": 2,
+    "legacyAttack": 3,
     "legacyHealth": 3
   },
   {
-    "id": "challenge_the_count",
-    "name": "Challenge the Count",
-    "faction": "The Dust Ballot",
-    "kind": "rite",
+    "id": "phosphor_clerk",
+    "name": "Phosphor Clerk",
+    "faction": "The Helix Bureau",
+    "kind": "unit",
     "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "relay",
+      "tithe"
+    ],
+    "text": "Relay. Tithe. When you muster another unit, draw 1. Your bank yields +1 while he stands. His cuffs glow. The ledger glows. He does not notice.",
+    "quote": "He files the living under Miscellaneous.",
+    "quoted": "The Helix Bureau",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "gyro_priest",
+    "name": "Gyro Priest",
+    "faction": "The Helix Bureau",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "tough",
+      "shutter"
+    ],
+    "text": "Toughness. Shutter. The first point of any blow is refused. Ranged strikes cannot choose him. A chaplain of the spinning compass. His vestments are ball bearings and black wool.",
+    "quote": "The sermon is a rate of turn.",
+    "quoted": "The Helix Bureau",
+    "power": 4,
+    "legacyAttack": 4,
+    "legacyHealth": 4
+  },
+  {
+    "id": "x_ray_confessor",
+    "name": "X-Ray Confessor",
+    "faction": "The Helix Bureau",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "ranged"
+    ],
+    "text": "Ranged Strike. The confession is a straight exposure, 2 circles, never the diagonal, and it is not answered. He sees the bone and the secret in the same plate.",
+    "quote": "Hold still. The sin develops in the darkroom.",
+    "quoted": "The Helix Bureau",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "the_patent_golem",
+    "name": "The Patent Golem",
+    "faction": "The Helix Bureau",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "slow",
+      "tough"
+    ],
+    "text": "Slow Attack. Toughness. It strikes last. The first point of any blow is refused. A golem filed at the bureau in 1927, stamped, witnessed, and wound with copper instead of a shem.",
+    "quote": "The name on its forehead is a registration number.",
+    "quoted": "The Helix Bureau",
+    "power": 5,
+    "legacyAttack": 5,
+    "legacyHealth": 5
+  },
+  {
+    "id": "broadcast_spire",
+    "name": "Broadcast Spire",
+    "faction": "The Helix Bureau",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "relay",
+      "crown"
+    ],
+    "text": "Relay. Lamp. When you muster another unit, draw 1. Adjacent units you control strike for +1 Power. A tower that repeats your muster to the whole yard.",
+    "quote": "It does not play music. It plays orders.",
+    "quoted": "The Helix Bureau",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "the_unlicensed_engine",
+    "name": "The Unlicensed Engine",
+    "faction": "The Helix Bureau",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "cryptid",
+      "tithe2",
+      "tough"
+    ],
+    "text": "Cryptid. Greater Tithe. Toughness. A machine the bureau never approved. Your bank yields +2. The first point of any blow is refused. It runs anyway.",
+    "quote": "There is no plate on the boiler. There is a pulse.",
+    "quoted": "The Helix Bureau",
+    "power": 4,
+    "legacyAttack": 4,
+    "legacyHealth": 4
+  },
+  {
+    "id": "the_glass_lung",
+    "name": "The Glass Lung",
+    "faction": "The Helix Bureau",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "cryptid",
+      "ranged",
+      "shutter"
+    ],
+    "text": "Cryptid. Ranged Strike. Shutter. A medical engine that learned to aim. The shot is a straight line and is not answered. Ranged strikes cannot choose it.",
+    "quote": "It breathes for whoever is inside. Then it chooses.",
+    "quoted": "The Helix Bureau",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "discharge",
+    "name": "Discharge",
+    "faction": "The Helix Bureau",
+    "kind": "rite",
+    "rarity": "uncommon",
     "cost": 3,
     "oath": 0,
     "keywords": [],
-    "text": "Name a unit. Deal 3 damage.",
-    "quote": "The tally was wrong. Correct it.",
-    "quoted": "Challenge",
+    "text": "Name a unit. Deal 3 damage. The bureau throws the helix past the red line. The named plate takes the whole arc.",
+    "quote": "The meter melts. That is the receipt.",
+    "quoted": "The Helix Bureau",
     "aim": true,
     "effect": {
       "op": "smite",
@@ -705,115 +560,574 @@
     }
   },
   {
-    "id": "pocket_precinct",
-    "name": "Pocket Precinct",
-    "faction": "The Dust Ballot",
+    "id": "filed_silence",
+    "name": "Filed Silence",
+    "faction": "The Helix Bureau",
+    "kind": "rite",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [],
+    "text": "Name a unit. It cannot move or attack on its next rite. A docket of quiet. The plate is pending and may not act.",
+    "quote": "Stamped. Held. Not destroyed.",
+    "quoted": "The Helix Bureau",
+    "aim": true,
+    "effect": {
+      "op": "lock"
+    }
+  },
+  {
+    "id": "melt_the_barrels",
+    "name": "Melt the Barrels",
+    "faction": "The Helix Bureau",
+    "kind": "rite",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [],
+    "text": "Deal 2 damage to every enemy unit with Ranged Strike. The bureau buys the guns as scrap and pours them the same afternoon.",
+    "quote": "Ordnance is an ore.",
+    "quoted": "The Helix Bureau",
+    "effect": {
+      "op": "snuff_guns"
+    }
+  },
+  {
+    "id": "spare_helix",
+    "name": "Spare Helix",
+    "faction": "The Helix Bureau",
     "kind": "device",
     "rarity": "common",
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Device. Bank 2 resources and draw 1 card.",
-    "quote": "A precinct can live in a coat if the coat is loyal.",
-    "quoted": "Pocket ward",
+    "text": "Device. Bank 1 resources and draw 1 card. One coil left in the cage, still warm from a test that was not logged.",
+    "quote": "Do not touch both ends.",
+    "quoted": "The Helix Bureau",
     "effect": {
-      "op": "bank",
-      "n": 2
-    },
-    "alsoDraw": 1
+      "op": "bank_draw"
+    }
   },
   {
-    "id": "sealed_return",
-    "name": "Sealed Return",
-    "faction": "The Dust Ballot",
-    "kind": "rite",
+    "id": "chief_adler",
+    "name": "Chief Adler",
+    "faction": "The Helix Bureau",
+    "kind": "hero",
+    "rarity": "patron",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [],
+    "text": "Leader. Once in a sitting: pay 2. Name a unit. It gains Shutter and Toughness. The chief of the bureau puts a patent on a body. Ranged strikes cannot choose it, and the first point of any blow is refused.",
+    "quote": "I do not invent the future. I license it.",
+    "quoted": "Chief Adler",
+    "leaderPower": {
+      "op": "snuff"
+    }
+  },
+  {
+    "id": "salt_magister",
+    "name": "Salt Magister",
+    "faction": "The Monad Faculty",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "tithe2"
+    ],
+    "text": "Greater Tithe. While he stands, your bank yields +2. Master of the salt that fixes a spirit in the flesh. The college pays him in resources and he pays them in what remains of the soul.",
+    "quote": "Nothing volatile survives his office.",
+    "quoted": "The Monad Faculty",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "the_living_equation",
+    "name": "The Living Monad",
+    "faction": "The Monad Faculty",
+    "kind": "unit",
     "rarity": "rare",
     "cost": 4,
     "oath": 0,
+    "keywords": [
+      "slow",
+      "tough"
+    ],
+    "text": "Slow Attack. Toughness. It strikes last. The first point of any blow is refused. A soul that acquired weight and will not settle until both sides have moved.",
+    "quote": "You may turn away. The one remains.",
+    "quoted": "The Monad Faculty",
+    "power": 5,
+    "legacyAttack": 5,
+    "legacyHealth": 5
+  },
+  {
+    "id": "projection_fellow",
+    "name": "Fellow of the Veil",
+    "faction": "The Monad Faculty",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "fast"
+    ],
+    "text": "Fast Attack. Strikes first. A junior who sends his subtle body ahead of his flesh. If the blow kills, it is not answered.",
+    "quote": "The shade arrives before the man.",
+    "quoted": "The Monad Faculty",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "athanor_keeper",
+    "name": "Athanor Keeper",
+    "faction": "The Monad Faculty",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "hearth",
+      "tough"
+    ],
+    "text": "Hearth. Toughness. A resource he stands on banks twice. The first point of any blow is refused. He keeps the furnace that never goes out. The faculty is a temperature.",
+    "quote": "Do not open the door to see if it is done.",
+    "quoted": "The Monad Faculty",
+    "power": 4,
+    "legacyAttack": 4,
+    "legacyHealth": 4
+  },
+  {
+    "id": "cipher_novice",
+    "name": "Novice of the Veil",
+    "faction": "The Monad Faculty",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 1,
+    "oath": 0,
+    "keywords": [
+      "relay",
+      "delay"
+    ],
+    "text": "Slow muster. Relay. It cannot move or attack the rite it arrives. When you muster another unit, draw 1. A student still learning to see with the inner eye.",
+    "quote": "The first night is the slow one.",
+    "quoted": "The Monad Faculty",
+    "power": 1,
+    "legacyAttack": 1,
+    "legacyHealth": 1
+  },
+  {
+    "id": "the_golden_lemma",
+    "name": "The Golden Visage",
+    "faction": "The Monad Faculty",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "crown",
+      "tithe"
+    ],
+    "text": "Lamp. Tithe. Adjacent units you control strike for +1 Power. Your bank yields +1. A small sun that makes every neighboring soul hit harder.",
+    "quote": "Behold it. The rest follows.",
+    "quoted": "The Monad Faculty",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "flask_archivist",
+    "name": "Flask Archivist",
+    "faction": "The Monad Faculty",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "relay"
+    ],
+    "text": "Relay. When you muster another unit, draw 1. She keeps the homunculi in labeled glass and already knows which plate you meant to draw.",
+    "quote": "The catalogue is alive. She pretends it is not.",
+    "quoted": "The Monad Faculty",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "the_fixed_star",
+    "name": "The Fixed Star",
+    "faction": "The Monad Faculty",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "ranged",
+      "shutter"
+    ],
+    "text": "Ranged Strike. Shutter. A shot of cold light, 2 circles, straight, never the diagonal, unanswered. Ranged strikes cannot choose it. An astronomer who nailed a star to the yard.",
+    "quote": "It does not wander. Neither does the wound.",
+    "quoted": "The Monad Faculty",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "abacus_saint",
+    "name": "Saint of the Inner Light",
+    "faction": "The Monad Faculty",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "crown",
+      "sprout"
+    ],
+    "text": "Lamp. If it is still standing at the end of its rite, it gains 1 power. Adjacent units you control strike for +1 Power. A saint of the inward fire. Every rite it survives, the light climbs.",
+    "quote": "Flame, not reckoning.",
+    "quoted": "The Monad Faculty",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "the_remainder",
+    "name": "The Unsaid Name",
+    "faction": "The Monad Faculty",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "fast",
+      "blooded"
+    ],
+    "text": "Fast Attack. If it survives a battle it struck in, it gains power. The name the college would not speak. It strikes first, and the unsaid part grows teeth.",
+    "quote": "Leave the last name unsaid. It will finish itself.",
+    "quoted": "The Monad Faculty",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "the_non_euclidean",
+    "name": "The Closed Eye",
+    "faction": "The Monad Faculty",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "cryptid",
+      "veiled",
+      "crown"
+    ],
+    "text": "Cryptid. Untargetable. Lamp. A face the college forbids novices to look at. Strikes pass over it. Adjacent units you control strike for +1 Power.",
+    "quote": "Shut your eyes. It is still there.",
+    "quoted": "The Monad Faculty",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "solid_of_the_fifth",
+    "name": "The Fifth Presence",
+    "faction": "The Monad Faculty",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "cryptid",
+      "tough",
+      "shutter"
+    ],
+    "text": "Cryptid. Toughness. Shutter. A presence that should not have a body. The first point of any blow is refused. Ranged strikes cannot choose it.",
+    "quote": "Do not name it. It is already here.",
+    "quoted": "The Monad Faculty",
+    "power": 4,
+    "legacyAttack": 4,
+    "legacyHealth": 4
+  },
+  {
+    "id": "strike_the_term",
+    "name": "Strike the Name",
+    "faction": "The Monad Faculty",
+    "kind": "rite",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
     "keywords": [],
-    "text": "Name a unit and return it to its owner's hand.",
-    "quote": "This ballot is spoiled. Cast it again.",
-    "quoted": "Sealed return",
+    "text": "Name a unit and return it to the hand it came from. The name is withdrawn. The plate goes back unsaid.",
+    "quote": "Unsay it. Do not burn it.",
+    "quoted": "The Monad Faculty",
     "aim": true,
     "effect": {
       "op": "bounce"
     }
   },
   {
-    "id": "voice_vote",
-    "name": "Voice Vote",
-    "faction": "The Dust Ballot",
+    "id": "two_lemmas",
+    "name": "Two Unveilings",
+    "faction": "The Monad Faculty",
     "kind": "rite",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [],
+    "text": "Draw 2 cards. Two visions, already finished, laid in the hand.",
+    "quote": "The long way was vanity.",
+    "quoted": "The Monad Faculty",
+    "effect": {
+      "op": "draw",
+      "n": 2
+    }
+  },
+  {
+    "id": "aqua_fortis",
+    "name": "Aqua Fortis",
+    "faction": "The Monad Faculty",
+    "kind": "rite",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [],
+    "text": "Name a unit. Deal 2 damage. Strong water of the retort. The faculty calls it a reagent. The plate calls it a hole.",
+    "quote": "Nitrate. Then silence.",
+    "quoted": "The Monad Faculty",
+    "aim": true,
+    "effect": {
+      "op": "smite",
+      "n": 2
+    }
+  },
+  {
+    "id": "faculty_advance",
+    "name": "Faculty Advance",
+    "faction": "The Monad Faculty",
+    "kind": "device",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [],
+    "text": "Device. Bank 1 resources and draw 1 card. The college advances a coin and a plate against a working you have not opened.",
+    "quote": "The debt comes due in the next rite.",
+    "quoted": "The Monad Faculty",
+    "effect": {
+      "op": "bank_draw"
+    }
+  },
+  {
+    "id": "rector_of_the_monad",
+    "name": "Rector of the Monad",
+    "faction": "The Monad Faculty",
+    "kind": "hero",
+    "rarity": "patron",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [],
+    "text": "Leader. Once in a sitting: pay 2. Name a unit you own. It gains +1 power, and you draw a card. The rector lays a word on a living body and keeps the vision.",
+    "quote": "We do not pray. We behold.",
+    "quoted": "Rector of the Monad",
+    "leaderPower": {
+      "op": "empower_draw",
+      "n": 1
+    }
+  },
+  {
+    "id": "the_mad_hieromonk",
+    "name": "The Mad Hieromonk",
+    "faction": "The Iconostasy",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "fast",
+      "tough"
+    ],
+    "text": "Fast Attack. Toughness. Strikes first. The first point of any blow is refused. A monk of the lavra who left the rule and kept the shoulders. He hits before the troparion ends.",
+    "quote": "The cowl is torn. The arm is not.",
+    "quoted": "The Iconostasy",
+    "power": 4,
+    "legacyAttack": 4,
+    "legacyHealth": 4
+  },
+  {
+    "id": "ovinnik",
+    "name": "Ovinnik",
+    "faction": "The Iconostasy",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "hearth",
+      "tithe"
+    ],
+    "text": "Hearth. Tithe. A resource it stands on banks twice, and your bank yields +1. The barn spirit. Black as a kiln. Leave the first sheaf or it burns the second.",
+    "quote": "The threshing floor has a landlord.",
+    "quoted": "The Iconostasy",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "nochnitsa",
+    "name": "Nochnitsa",
+    "faction": "The Iconostasy",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "veiled"
+    ],
+    "text": "Untargetable. The night-hag of the cradle. Strikes and rites pass over her. She cannot be named. You hear the breath. You do not get a target.",
+    "quote": "She sits where the child was going to sleep.",
+    "quoted": "The Iconostasy",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "gamayun",
+    "name": "Gamayun",
+    "faction": "The Iconostasy",
+    "kind": "unit",
     "rarity": "uncommon",
     "cost": 3,
     "oath": 0,
-    "keywords": [],
-    "text": "Bank 3 resources. The ayes have it, whether or not anyone spoke.",
-    "quote": "All in favor. The silence counted too.",
-    "quoted": "Voice vote",
-    "effect": {
-      "op": "bank",
-      "n": 3
-    }
-  },
-  {
-    "id": "the_ward_boss",
-    "name": "The Ward Boss",
-    "faction": "The Dust Ballot",
-    "kind": "hero",
-    "rarity": "patron",
-    "cost": 4,
-    "oath": 0,
-    "keywords": [],
-    "text": "Leader. Once in a sitting: pay 4 and claim an empty circle that is not a stronghold.",
-    "quote": "The district is whoever I say is standing in it.",
-    "quoted": "The Ward Boss",
-    "leaderPower": {
-      "op": "claim"
-    }
-  },
-  {
-    "id": "blackout_hound",
-    "name": "Blackout Hound",
-    "faction": "The Blackout Wardens",
-    "kind": "unit",
-    "rarity": "rare",
-    "cost": 3,
-    "oath": 0,
     "keywords": [
-      "cryptid",
-      "fast"
+      "ranged",
+      "crown"
     ],
-    "text": "Cryptid. Fast Attack. The dog that learned the blackout. It strikes first, and a killing blow is not answered.",
-    "quote": "It does not bark. The dark already knows.",
-    "quoted": "Roof watch",
+    "text": "Ranged Strike. Lamp. The prophetic bird of the Slavic east, a woman-face and a wingspan of omen. The cry reaches 2 circles in a straight line and is not answered. Adjacent units you control strike for +1 Power.",
+    "quote": "She speaks the future. The future is a wound.",
+    "quoted": "The Iconostasy",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
   },
   {
-    "id": "roof_moth",
-    "name": "Roof Moth",
-    "faction": "The Blackout Wardens",
+    "id": "likho",
+    "name": "Likho",
+    "faction": "The Iconostasy",
     "kind": "unit",
-    "rarity": "rare",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "fast",
+      "blooded"
+    ],
+    "text": "Fast Attack. If it survives a battle it struck in, it gains power. One-eyed misfortune. It strikes first, and if it lives the bad luck gets larger.",
+    "quote": "Do not look it in the only eye.",
+    "quoted": "The Iconostasy",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "the_skomorokh",
+    "name": "The Skomorokh",
+    "faction": "The Iconostasy",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "relay",
+      "fast"
+    ],
+    "text": "Fast Attack. Relay. Strikes first. When you muster another unit, draw 1. A holy-fool minstrel the church threw out and the village kept. His song is a muster list.",
+    "quote": "Laugh. Then draw.",
+    "quoted": "The Iconostasy",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "kupala_flame",
+    "name": "Kupala Flame",
+    "faction": "The Iconostasy",
+    "kind": "unit",
+    "rarity": "uncommon",
     "cost": 3,
     "oath": 0,
     "keywords": [
-      "cryptid",
-      "shutter"
+      "sprout",
+      "crown"
     ],
-    "text": "Cryptid. Shutter. Guns cannot call it. It settles, and the lamps refuse its name.",
-    "quote": "A moth the size of a visor, and just as quiet.",
-    "quoted": "Blackout ledger",
+    "text": "Lamp. If it is still standing at the end of its rite, it gains 1 power. Adjacent units you control strike for +1 Power. The midsummer fire that the shaman will not let go out.",
+    "quote": "Jump it if you are brave. Feed it if you are wise.",
+    "quoted": "The Iconostasy",
     "power": 3,
-    "legacyAttack": 2,
+    "legacyAttack": 3,
     "legacyHealth": 3
   },
   {
-    "id": "culvert_eel",
-    "name": "Culvert Eel",
-    "faction": "The Drowned Parish",
+    "id": "dvorovoi",
+    "name": "Dvorovoi",
+    "faction": "The Iconostasy",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "hearth",
+      "tough"
+    ],
+    "text": "Hearth. Toughness. A resource it stands on banks twice. The first point of any blow is refused. The yard spirit, grudging, hairy, loyal to the gate and not to guests.",
+    "quote": "He knows which chicken is yours.",
+    "quoted": "The Iconostasy",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "the_black_monk",
+    "name": "The Black Monk",
+    "faction": "The Iconostasy",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "slow",
+      "tough"
+    ],
+    "text": "Slow Attack. Toughness. He strikes last. The first point of any blow is refused. A starets who painted himself into the dark of an icon and then stepped out of it, late.",
+    "quote": "He arrives after you have spent your breath.",
+    "quoted": "The Iconostasy",
+    "power": 5,
+    "legacyAttack": 5,
+    "legacyHealth": 5
+  },
+  {
+    "id": "alkonost",
+    "name": "Alkonost",
+    "faction": "The Iconostasy",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "tithe2"
+    ],
+    "text": "Greater Tithe. The bird whose song makes a man forget his labor. While she sings, your bank yields +2. The work gets done by somebody who was not listening.",
+    "quote": "Cover your ears if you still want the wage.",
+    "quoted": "The Iconostasy",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "the_pike_tsar",
+    "name": "The Pike Tsar",
+    "faction": "The Iconostasy",
     "kind": "unit",
     "rarity": "rare",
     "cost": 4,
@@ -823,37 +1137,1260 @@
       "gills",
       "seep"
     ],
-    "text": "Cryptid. Gills. Seep. At the start of your rite, deal 1 to each adjacent enemy. The river grew a throat.",
-    "quote": "It came up the grate and did not ask to be counted.",
-    "quoted": "Tide ledger",
+    "text": "Cryptid. Gills. Seep. The great pike under the mill. At the start of your rite, deal 1 to each adjacent enemy. A shaman bargained with it. The bargain is still swimming.",
+    "quote": "By the pike, by my wish. Then pay.",
+    "quoted": "The Iconostasy",
     "power": 4,
-    "legacyAttack": 3,
+    "legacyAttack": 4,
     "legacyHealth": 4
   },
   {
-    "id": "drain_widow",
-    "name": "Drain Widow",
-    "faction": "The Drowned Parish",
+    "id": "the_grave_candle",
+    "name": "The Grave Candle",
+    "faction": "The Iconostasy",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "cryptid",
+      "veiled"
+    ],
+    "text": "Cryptid. Untargetable. A light on a Slavic grave that cannot be named or shot. Strikes pass over it. Follow it and you are in the wrong yard.",
+    "quote": "It is not a soul. It is a bill.",
+    "quoted": "The Iconostasy",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "bark_knot",
+    "name": "Bark Knot",
+    "faction": "The Iconostasy",
+    "kind": "rite",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [],
+    "text": "Name a unit. It cannot move or attack on its next rite. A shaman ties white bark around a name. The plate stands in the grove.",
+    "quote": "Three strips. One road, closed.",
+    "quoted": "The Iconostasy",
+    "aim": true,
+    "effect": {
+      "op": "lock"
+    }
+  },
+  {
+    "id": "break_the_face",
+    "name": "Break the Face",
+    "faction": "The Iconostasy",
+    "kind": "rite",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [],
+    "text": "Name a unit. Deal 3 damage. The mad monk breaks an icon across a plate. The gold leaf cuts.",
+    "quote": "Even a saint can be swung.",
+    "quoted": "The Iconostasy",
+    "aim": true,
+    "effect": {
+      "op": "smite",
+      "n": 3
+    }
+  },
+  {
+    "id": "out_of_the_house",
+    "name": "Out of the House",
+    "faction": "The Iconostasy",
+    "kind": "rite",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [],
+    "text": "Name a unit and return it to the hand it came from. The dvorovoi wants the guest off the yard before the stove cools.",
+    "quote": "Boots by the door. You are done.",
+    "quoted": "The Iconostasy",
+    "aim": true,
+    "effect": {
+      "op": "bounce"
+    }
+  },
+  {
+    "id": "coals_of_the_stove",
+    "name": "Coals of the Stove",
+    "faction": "The Iconostasy",
+    "kind": "device",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [],
+    "text": "Device. Bank 1 resources and draw 1 card. The stove pays a coal and deals a plate. The hut keeps its oath.",
+    "quote": "Sit on the warm side.",
+    "quoted": "The Iconostasy",
+    "effect": {
+      "op": "bank_draw"
+    }
+  },
+  {
+    "id": "father_of_the_last_icon",
+    "name": "Father of the Last Icon",
+    "faction": "The Iconostasy",
+    "kind": "hero",
+    "rarity": "patron",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [],
+    "text": "Leader. Once in a sitting: pay 3. Name a unit you own. It gains +3 power. The mad monk nails the last icon to a living chest and calls it armor.",
+    "quote": "Pray after. First, do not die.",
+    "quoted": "Father of the Last Icon",
+    "leaderPower": {
+      "op": "bulwark"
+    }
+  },
+  {
+    "id": "cailleach_of_the_thorn",
+    "name": "Cailleach of the Thorn",
+    "faction": "The Briar Sidhe",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "tough",
+      "crown"
+    ],
+    "text": "Toughness. Lamp. The first point of any blow is refused. Adjacent units you control strike for +1 Power. She is the winter witch of the hedge, not a court magician. The thorn beside her hits harder.",
+    "quote": "The hill goes white when she stands up.",
+    "quoted": "The Briar Sidhe",
+    "power": 4,
+    "legacyAttack": 4,
+    "legacyHealth": 4
+  },
+  {
+    "id": "sidhe_knight",
+    "name": "Sidhe Knight",
+    "faction": "The Briar Sidhe",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "fast"
+    ],
+    "text": "Fast Attack. Strikes first. A rider out of the hollow hill. If the blow kills, it is not answered.",
+    "quote": "He does not duel. He arrives.",
+    "quoted": "The Briar Sidhe",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "puck_of_the_gate",
+    "name": "Puck of the Gate",
+    "faction": "The Briar Sidhe",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "veiled"
+    ],
+    "text": "Untargetable. Strikes and rites pass over him. He cannot be named. The gate laughs and is not there to be hit.",
+    "quote": "Call him and you are calling a hedge.",
+    "quoted": "The Briar Sidhe",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "leanan_of_the_well",
+    "name": "Leanan of the Well",
+    "faction": "The Briar Sidhe",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "tithe2"
+    ],
+    "text": "Greater Tithe. While she stands, your bank yields +2. The muse of the well does not sing for free. She invoices in hawthorn.",
+    "quote": "Drink, and pay the green.",
+    "quoted": "The Briar Sidhe",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "kelpie_of_the_ford",
+    "name": "Kelpie of the Ford",
+    "faction": "The Briar Sidhe",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "gills",
+      "fast"
+    ],
+    "text": "Fast Attack. Gills. Strikes first. The horse in the ford is a fairy law, not a spell with a hat.",
+    "quote": "The bridle is wet. The rider is not coming back the same.",
+    "quoted": "The Briar Sidhe",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "the_dullahan",
+    "name": "The Dullahan",
+    "faction": "The Briar Sidhe",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "slow",
+      "tough"
+    ],
+    "text": "Slow Attack. Toughness. He strikes last, and the first point of any blow is refused. The headless rider of the Irish road. His whip is a spine.",
+    "quote": "He holds his own face up like a lantern.",
+    "quoted": "The Briar Sidhe",
+    "power": 5,
+    "legacyAttack": 5,
+    "legacyHealth": 5
+  },
+  {
+    "id": "changeling_cradle",
+    "name": "Changeling Cradle",
+    "faction": "The Briar Sidhe",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "relay"
+    ],
+    "text": "Relay. When you muster another unit, draw 1. The cradle at the door has the wrong child in it, and the wrong child knows your next plate.",
+    "quote": "They left a song where the baby was.",
+    "quoted": "The Briar Sidhe",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "redcap",
+    "name": "Redcap",
+    "faction": "The Briar Sidhe",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "fast",
+      "blooded"
+    ],
+    "text": "Fast Attack. If it survives a battle it struck in, it gains power. A border goblin in a dyed cap. It strikes first, and living makes it worse.",
+    "quote": "The cap stays red. He sees to that.",
+    "quoted": "The Briar Sidhe",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "the_green_man",
+    "name": "The Green Man",
+    "faction": "The Briar Sidhe",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "sprout",
+      "hearth",
+      "tough"
+    ],
+    "text": "Toughness. Hearth. If he is still standing at the end of its rite, he gains 1 power. A resource he stands on banks twice. The face in the oak is a parish, not a wizard.",
+    "quote": "Leaves in the mouth. Rent in the roots.",
+    "quoted": "The Briar Sidhe",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "banshee_of_the_barrow",
+    "name": "Banshee of the Barrow",
+    "faction": "The Briar Sidhe",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "ranged"
+    ],
+    "text": "Ranged Strike. The keen reaches 2 circles in a straight line, never the diagonal, and is not answered. She does not duel. She names the death from the mound.",
+    "quote": "Someone in the house has already heard her.",
+    "quoted": "The Briar Sidhe",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "the_each_uisge",
+    "name": "The Each-Uisge",
+    "faction": "The Briar Sidhe",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "cryptid",
+      "gills",
+      "fast"
+    ],
+    "text": "Cryptid. Fast Attack. Gills. The water-horse of the Highlands. It strikes first, and the ford does not give the body back.",
+    "quote": "Do not mount what came out of the loch wearing a smile.",
+    "quoted": "The Briar Sidhe",
+    "power": 4,
+    "legacyAttack": 4,
+    "legacyHealth": 4
+  },
+  {
+    "id": "will_of_the_marsh",
+    "name": "Will of the Marsh",
+    "faction": "The Briar Sidhe",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "cryptid",
+      "veiled"
+    ],
+    "text": "Cryptid. Untargetable. A light on the bog that cannot be named or shot. Strikes pass over it. Follow it and you are off the path.",
+    "quote": "The lamp is not yours. The path is not a path.",
+    "quoted": "The Briar Sidhe",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "hawthorn_lock",
+    "name": "Hawthorn Lock",
+    "faction": "The Briar Sidhe",
+    "kind": "rite",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [],
+    "text": "Name a unit. It cannot move or attack on its next rite. A whitethorn sprig on the door. The named plate waits in the hedge.",
+    "quote": "Iron is rude. Thorn is law.",
+    "quoted": "The Briar Sidhe",
+    "aim": true,
+    "effect": {
+      "op": "lock"
+    }
+  },
+  {
+    "id": "the_wild_courtesy",
+    "name": "The Wild Courtesy",
+    "faction": "The Briar Sidhe",
+    "kind": "rite",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [],
+    "text": "Name a unit and return it to its owner’s hand. The sidhe are polite. They send the guest home before the meal.",
+    "quote": "You were never invited to stay.",
+    "quoted": "The Briar Sidhe",
+    "aim": true,
+    "effect": {
+      "op": "bounce"
+    }
+  },
+  {
+    "id": "milk_and_iron",
+    "name": "Milk and Iron",
+    "faction": "The Briar Sidhe",
+    "kind": "rite",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [],
+    "text": "Name a unit. Deal 2 damage. Milk for the house. Iron for the thing that should not have crossed the stile.",
+    "quote": "One for the cow. One for the nail.",
+    "quoted": "The Briar Sidhe",
+    "aim": true,
+    "effect": {
+      "op": "smite",
+      "n": 2
+    }
+  },
+  {
+    "id": "rowan_nail",
+    "name": "Rowan Nail",
+    "faction": "The Briar Sidhe",
+    "kind": "device",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [],
+    "text": "Device. Bank 1 resources and draw 1 card. A rowan peg in the lintel. The house pays, and a plate comes to the hand.",
+    "quote": "Hang it where the good people knock.",
+    "quoted": "The Briar Sidhe",
+    "effect": {
+      "op": "bank_draw"
+    }
+  },
+  {
+    "id": "the_whitethorn_queen",
+    "name": "The Whitethorn Queen",
+    "faction": "The Briar Sidhe",
+    "kind": "hero",
+    "rarity": "patron",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [],
+    "text": "Leader. Once in a sitting: pay 2. Name a unit you own. It stands back up and gains +1 power. The queen of the hedge puts her own back on their feet.",
+    "quote": "I do not curse. I grow the door shut behind you.",
+    "quoted": "The Whitethorn Queen",
+    "leaderPower": {
+      "op": "mend"
+    }
+  },
+  {
+    "id": "coil_saint",
+    "name": "Coil Saint",
+    "faction": "The Mercury Works",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "crown",
+      "ranged"
+    ],
+    "text": "Lamp. Ranged Strike. Adjacent units you control strike for +1 Power. The shot is a straight line of coiled light, two circles, never the diagonal, and it is not answered. An interwar saint of the transformer yard.",
+    "quote": "She blesses the grid. The grid answers in white.",
+    "quoted": "The Mercury Works",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "gas_mask_chemist",
+    "name": "Gas-Mask Chemist",
+    "faction": "The Mercury Works",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "tithe",
+      "shutter"
+    ],
+    "text": "Tithe. Shutter. While he stands, your bank yields +1. Ranged strikes cannot choose him. The mask is a patent. The fog is a product.",
+    "quote": "Do not ask what the canister was for.",
+    "quoted": "The Mercury Works",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "cathode_acolyte",
+    "name": "Cathode Acolyte",
+    "faction": "The Mercury Works",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "relay",
+      "fast"
+    ],
+    "text": "Fast Attack. Relay. Strikes first. When you muster another unit, draw 1. A boy in a workshop apron who learned the tube before he learned the prayer.",
+    "quote": "The glass glows. He glows with it.",
+    "quoted": "The Mercury Works",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "ray_rifleman",
+    "name": "Ray Rifleman",
+    "faction": "The Mercury Works",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "ranged"
+    ],
+    "text": "Ranged Strike. A patent rifle. The shot reaches 2 circles in a straight line, never the diagonal, and is not answered. Interwar infantry for a war that has not been declared.",
+    "quote": "He does not aim at a man. He aims at a frequency.",
+    "quoted": "The Mercury Works",
+    "power": 4,
+    "legacyAttack": 4,
+    "legacyHealth": 4
+  },
+  {
+    "id": "brass_automaton",
+    "name": "Brass Automaton",
+    "faction": "The Mercury Works",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "tough",
+      "slow"
+    ],
+    "text": "Slow Attack. Toughness. It strikes last. The first point of any blow is refused. A walking lathe from a works that should not have the decade yet.",
+    "quote": "It does not tire. It does not enlist. It clocks in.",
+    "quoted": "The Mercury Works",
+    "power": 5,
+    "legacyAttack": 5,
+    "legacyHealth": 5
+  },
+  {
+    "id": "the_patent_airship",
+    "name": "The Patent Airship",
+    "faction": "The Mercury Works",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "tithe2"
+    ],
+    "text": "Greater Tithe. While it hangs over the circle, your bank yields +2. A black envelope with a laboratory in the gondola. The patent is older than the sky it flies in.",
+    "quote": "They filed the clouds in 1924.",
+    "quoted": "The Mercury Works",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "diagram_clerk",
+    "name": "Diagram Clerk",
+    "faction": "The Mercury Works",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "fast",
+      "blooded"
+    ],
+    "text": "Fast Attack. If it survives a battle it struck in, it gains power. The clerk opens the living like a schematic. Strikes first. Coming back from the cut makes the next cut worse.",
+    "quote": "Label the nerve. Then use it.",
+    "quoted": "The Mercury Works",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "difference_engine",
+    "name": "Difference Engine",
+    "faction": "The Mercury Works",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "hearth",
+      "delay"
+    ],
+    "text": "Slow muster. Hearth. It cannot move or attack the rite it arrives. A resource it stands on banks twice. The machine is doing a sum the faculty is not allowed to see.",
+    "quote": "It clicks when a man would have prayed.",
+    "quoted": "The Mercury Works",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "radium_sister",
+    "name": "Radium Sister",
+    "faction": "The Mercury Works",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "tough",
+      "crown"
+    ],
+    "text": "Toughness. Lamp. The first point of any blow is refused. Adjacent units you control strike for +1 Power. She paints the dials. The dials paint her hands. Everyone beside her hits brighter.",
+    "quote": "The glow does not wash off.",
+    "quoted": "The Mercury Works",
+    "power": 4,
+    "legacyAttack": 4,
+    "legacyHealth": 4
+  },
+  {
+    "id": "trench_radio",
+    "name": "Trench Radio",
+    "faction": "The Mercury Works",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "relay",
+      "shutter"
+    ],
+    "text": "Relay. Shutter. When you muster another unit, draw 1. Ranged strikes cannot choose it. A set that should be a decade away, already taking orders from the mud.",
+    "quote": "The voice in the headset is not on your side of the year.",
+    "quoted": "The Mercury Works",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "the_walking_lamp",
+    "name": "The Walking Lamp",
+    "faction": "The Mercury Works",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "cryptid",
+      "crown",
+      "ranged"
+    ],
+    "text": "Cryptid. Lamp. Ranged Strike. A lamp that grew legs in the works. Adjacent units you control strike for +1. The shot is a straight line and is not answered.",
+    "quote": "Do not follow the light into the yard after whistle.",
+    "quoted": "The Mercury Works",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "null_tank",
+    "name": "Null Tank",
+    "faction": "The Mercury Works",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 5,
+    "oath": 0,
+    "keywords": [
+      "cryptid",
+      "tough",
+      "shutter"
+    ],
+    "text": "Cryptid. Toughness. Shutter. The first point of any blow is refused. Ranged strikes cannot choose it. An armored saint with no crew and no decade it belongs to.",
+    "quote": "The hatch does not open from this side of the war.",
+    "quoted": "The Mercury Works",
+    "power": 5,
+    "legacyAttack": 5,
+    "legacyHealth": 5
+  },
+  {
+    "id": "overload",
+    "name": "Overload",
+    "faction": "The Mercury Works",
+    "kind": "rite",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [],
+    "text": "Name a unit. Deal 3 damage. The works throws the switch past the red line. The named plate takes the whole discharge.",
+    "quote": "The meter does not have a number for this.",
+    "quoted": "The Mercury Works",
+    "aim": true,
+    "effect": {
+      "op": "smite",
+      "n": 3
+    }
+  },
+  {
+    "id": "blackout_patent",
+    "name": "Blackout Patent",
+    "faction": "The Mercury Works",
+    "kind": "rite",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [],
+    "text": "Name a unit. It cannot move or attack on its next rite. A filed darkness. The plate is off the grid until the next rite.",
+    "quote": "We own the hour the lights go out.",
+    "quoted": "The Mercury Works",
+    "aim": true,
+    "effect": {
+      "op": "lock"
+    }
+  },
+  {
+    "id": "scrap_the_line",
+    "name": "Scrap the Line",
+    "faction": "The Mercury Works",
+    "kind": "rite",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [],
+    "text": "Deal 2 damage to every enemy unit with Ranged Strike. The works buys their barrels and melts them in the same shift.",
+    "quote": "Guns are a raw material.",
+    "quoted": "The Mercury Works",
+    "effect": {
+      "op": "snuff_guns"
+    }
+  },
+  {
+    "id": "spare_cathode",
+    "name": "Spare Cathode",
+    "faction": "The Mercury Works",
+    "kind": "device",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [],
+    "text": "Device. Bank 1 resources and draw 1 card. One tube left in the drawer, already warm.",
+    "quote": "Do not drop it. It knows your name.",
+    "quoted": "The Mercury Works",
+    "effect": {
+      "op": "bank_draw"
+    }
+  },
+  {
+    "id": "director_voss",
+    "name": "Director Voss",
+    "faction": "The Mercury Works",
+    "kind": "hero",
+    "rarity": "patron",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [],
+    "text": "Leader. Once in a sitting: pay 3. Name a unit you own. It gains Fast Attack and may act at once. She throws the switch on a living body and the body clocks in early.",
+    "quote": "The future is a patent. I hold the paper.",
+    "quoted": "Director Voss",
+    "leaderPower": {
+      "op": "haste"
+    }
+  },
+  {
+    "id": "geometer_of_the_circle",
+    "name": "Seer of the Threshold",
+    "faction": "The Closed Proof",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "crown"
+    ],
+    "text": "Lamp. Adjacent units you control strike for +1 Power. She sees the blow in the dark before it is thrown. The next plate beside her hits on her seeing.",
+    "quote": "The veil was here before the room.",
+    "quoted": "The Closed Proof",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "quicksilver_fellow",
+    "name": "Quicksilver Fellow",
+    "faction": "The Closed Proof",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "fast"
+    ],
+    "text": "Fast Attack. Strikes first. A junior of the retort who moves like the metal he keeps in his teeth. If the blow kills, it is not answered.",
+    "quote": "He does not sit for the portrait. The portrait has to catch him.",
+    "quoted": "The Closed Proof",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "homunculus_clerk",
+    "name": "Homunculus Clerk",
+    "faction": "The Closed Proof",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "relay"
+    ],
+    "text": "Relay. When you muster another unit, draw 1. A little man grown in a flask to file the faculty’s letters. He already knows the next plate.",
+    "quote": "He signs in a hand smaller than the law.",
+    "quoted": "The Closed Proof",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "vitriol_reader",
+    "name": "Vitriol Reader",
+    "faction": "The Closed Proof",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "ranged",
+      "shutter"
+    ],
+    "text": "Ranged Strike. Shutter. A shot of green glass reaches 2 circles in a straight line, never the diagonal, and is not answered. Ranged strikes cannot choose her. She reads the burn the way other people read a page.",
+    "quote": "The stain on the cuff is a citation.",
+    "quoted": "The Closed Proof",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "the_walking_thesis",
+    "name": "The Risen Adept",
+    "faction": "The Closed Proof",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "tough",
+      "slow"
+    ],
+    "text": "Slow Attack. Toughness. It strikes last. The first point of any blow is refused. A presence that stood up out of the body and will not sit until the work is done.",
+    "quote": "You may refuse. It has already arrived.",
+    "quoted": "The Closed Proof",
+    "power": 5,
+    "legacyAttack": 5,
+    "legacyHealth": 5
+  },
+  {
+    "id": "azoth_lecturer",
+    "name": "Azoth Lecturer",
+    "faction": "The Closed Proof",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "tithe2"
+    ],
+    "text": "Greater Tithe. While he stands, your bank yields +2. He teaches the solvent that opens a soul. The tuition is paid in resources.",
+    "quote": "The vessel drinks the fire and wants more.",
+    "quoted": "The Closed Proof",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "cabalist_of_number",
+    "name": "Cabalist of the Soul",
+    "faction": "The Closed Proof",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "tithe",
+      "crown"
+    ],
+    "text": "Tithe. Lamp. Your bank yields +1 while she stands. Adjacent units you control strike for +1 Power. A master of the living soul. What stands beside her strikes harder.",
+    "quote": "She does not measure. She consecrates.",
+    "quoted": "The Closed Proof",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "retort_warden",
+    "name": "Retort Warden",
+    "faction": "The Closed Proof",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "tough",
+      "hearth"
+    ],
+    "text": "Toughness. Hearth. The first point of any blow is refused. A resource he stands on banks twice. He keeps the furnace and the furnace keeps the faculty.",
+    "quote": "No one opens the vessel while he is watching the color.",
+    "quoted": "The Closed Proof",
+    "power": 4,
+    "legacyAttack": 4,
+    "legacyHealth": 4
+  },
+  {
+    "id": "sealed_formula",
+    "name": "The Waxed Spark",
+    "faction": "The Closed Proof",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 1,
+    "oath": 0,
+    "keywords": [
+      "delay",
+      "sprout"
+    ],
+    "text": "Slow muster. It cannot move or attack the rite it arrives. If it is still standing at the end of its rite, it gains 1 power. A sealed spark that learns a body.",
+    "quote": "Do not break the seal on the first night. Let it quicken.",
+    "quoted": "The Closed Proof",
+    "power": 1,
+    "legacyAttack": 1,
+    "legacyHealth": 1
+  },
+  {
+    "id": "the_minus_sign",
+    "name": "The Hidden Adept",
+    "faction": "The Closed Proof",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "fast",
+      "blooded"
+    ],
+    "text": "Fast Attack. If it survives a battle it struck in, it gains power. A name struck from the book that stood up anyway. It strikes first, and what it does not end is taken into the dark.",
+    "quote": "What is hidden does not leave.",
+    "quoted": "The Closed Proof",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "the_impossible_solid",
+    "name": "The Forbidden Presence",
+    "faction": "The Closed Proof",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "cryptid",
+      "tough",
+      "shutter"
+    ],
+    "text": "Cryptid. Toughness. Shutter. A presence the college forbids and the laboratory kept anyway. The first point is refused. Ranged strikes cannot choose it.",
+    "quote": "It stands where no body should stand.",
+    "quoted": "The Closed Proof",
+    "power": 4,
+    "legacyAttack": 4,
+    "legacyHealth": 4
+  },
+  {
+    "id": "proof_that_walks",
+    "name": "The Veiled Presence",
+    "faction": "The Closed Proof",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "cryptid",
+      "fast",
+      "crown"
+    ],
+    "text": "Cryptid. Fast Attack. Lamp. It strikes first. Adjacent units you control strike for +1 Power. The veil has a body under it, and a following.",
+    "quote": "Do not speak its name. Walk behind it.",
+    "quoted": "The Closed Proof",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "cancel_the_term",
+    "name": "Recall the Name",
+    "faction": "The Closed Proof",
+    "kind": "rite",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [],
+    "text": "Name a unit and return it to its owner’s hand. The name does not belong in this working. Send it back unsaid.",
+    "quote": "Take it off the tongue. Not out of the world.",
+    "quoted": "The Closed Proof",
+    "aim": true,
+    "effect": {
+      "op": "bounce"
+    }
+  },
+  {
+    "id": "the_short_proof",
+    "name": "The Brief Unveiling",
+    "faction": "The Closed Proof",
+    "kind": "rite",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [],
+    "text": "Draw 2 cards. Two visions, already finished, laid in the hand.",
+    "quote": "The long way was vanity.",
+    "quoted": "The Closed Proof",
+    "effect": {
+      "op": "draw",
+      "n": 2
+    }
+  },
+  {
+    "id": "vitriol",
+    "name": "Vitriol",
+    "faction": "The Closed Proof",
+    "kind": "rite",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [],
+    "text": "Name a unit. Deal 2 damage. Green oil of the retort. The faculty calls it a reagent. The plate calls it a wound.",
+    "quote": "Visit the interior of the earth. Rectify.",
+    "quoted": "The Closed Proof",
+    "aim": true,
+    "effect": {
+      "op": "smite",
+      "n": 2
+    }
+  },
+  {
+    "id": "loan_of_the_faculty",
+    "name": "Loan of the Faculty",
+    "faction": "The Closed Proof",
+    "kind": "device",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [],
+    "text": "Device. Bank 1 resources and draw 1 card. The college advances you a plate and a coin against a working you have not yet opened.",
+    "quote": "The debt is due in the next rite.",
+    "quoted": "The Closed Proof",
+    "effect": {
+      "op": "bank_draw"
+    }
+  },
+  {
+    "id": "provost_of_the_azoth",
+    "name": "Provost of the Azoth",
+    "faction": "The Closed Proof",
+    "kind": "hero",
+    "rarity": "patron",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [],
+    "text": "Leader. Once in a sitting: pay 2. Name a unit you own. It gains +1 power, and you draw a card. The provost lays a hand on a living body and takes the vision that follows.",
+    "quote": "We do not believe. We behold.",
+    "quoted": "Provost of the Azoth",
+    "leaderPower": {
+      "op": "empower_draw",
+      "n": 1
+    }
+  },
+  {
+    "id": "volkhv_of_the_birches",
+    "name": "Volkhv of the Birches",
+    "faction": "The Birch Vigil",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "crown",
+      "tithe"
+    ],
+    "text": "Lamp. Tithe. Adjacent units you control strike for +1 Power. While he stands, your bank yields +1. A grizzled shaman of the white trees. He does not wear a wizard’s hat. He wears bark and a knife.",
+    "quote": "He speaks to the grove. The grove answers in rent.",
+    "quoted": "The Birch Vigil",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "leshy",
+    "name": "Leshy",
+    "faction": "The Birch Vigil",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "tough",
+      "root"
+    ],
+    "text": "Toughness. Root. The first point of any blow is refused. Enemy plates beside him cannot move or strike. The master of the forest. One shoe, one height, and the path belongs to him.",
+    "quote": "You were tall when you entered. You will not leave tall.",
+    "quoted": "The Birch Vigil",
+    "power": 4,
+    "legacyAttack": 4,
+    "legacyHealth": 4
+  },
+  {
+    "id": "rusalka",
+    "name": "Rusalka",
+    "faction": "The Birch Vigil",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "gills",
+      "seep"
+    ],
+    "text": "Gills. Seep. At the start of your rite, deal 1 to each adjacent enemy. The drowned girl in the willow. The river is her parish.",
+    "quote": "She combs her hair with a bone and the bank listens.",
+    "quoted": "The Birch Vigil",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "domovoi",
+    "name": "Domovoi",
+    "faction": "The Birch Vigil",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "hearth",
+      "tithe"
+    ],
+    "text": "Hearth. Tithe. A resource he stands on banks twice, and your bank yields +1 besides. The grandfather behind the stove. Leave him bread or he hides the matches.",
+    "quote": "The house is a body. He is the cough.",
+    "quoted": "The Birch Vigil",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "bannik",
+    "name": "Bannik",
+    "faction": "The Birch Vigil",
+    "kind": "unit",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "shutter",
+      "tough"
+    ],
+    "text": "Shutter. Toughness. Ranged strikes cannot choose him. The first point of any blow is refused. The spirit of the bathhouse, naked, sooty, and older than the soap.",
+    "quote": "Do not bathe third. The third turn is his.",
+    "quoted": "The Birch Vigil",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "firebird",
+    "name": "Firebird",
+    "faction": "The Birch Vigil",
     "kind": "unit",
     "rarity": "rare",
     "cost": 3,
+    "oath": 0,
+    "keywords": [
+      "fast",
+      "blooded"
+    ],
+    "text": "Fast Attack. If it survives a battle it struck in, it gains power. The bird of the Slavic tale. It strikes first, and a feather left in the ash is a promotion.",
+    "quote": "Catch it and the tsar’s garden burns happier.",
+    "quoted": "The Birch Vigil",
+    "power": 3,
+    "legacyAttack": 3,
+    "legacyHealth": 3
+  },
+  {
+    "id": "bogatyr_monk",
+    "name": "Bogatyr Monk",
+    "faction": "The Birch Vigil",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "tough",
+      "fast"
+    ],
+    "text": "Fast Attack. Toughness. Strikes first. The first point of any blow is refused. A mad monk built like a gate. He hits before the prayer is finished.",
+    "quote": "The cowl does not make him small.",
+    "quoted": "The Birch Vigil",
+    "power": 4,
+    "legacyAttack": 4,
+    "legacyHealth": 4
+  },
+  {
+    "id": "kikimora",
+    "name": "Kikimora",
+    "faction": "The Birch Vigil",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "veiled"
+    ],
+    "text": "Untargetable. Strikes and rites pass over her. She cannot be named. The woman who spins in the cellar at the wrong hour. You hear the wheel. You do not get to point at it.",
+    "quote": "If the thread is wet, she is already in the house.",
+    "quoted": "The Birch Vigil",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "polevik",
+    "name": "Polevik",
+    "faction": "The Birch Vigil",
+    "kind": "unit",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [
+      "sprout",
+      "hearth"
+    ],
+    "text": "Hearth. If he is still standing at the end of its rite, he gains 1 power. A resource he stands on banks twice. The field spirit, black as noon-soil, who counts the sheaves.",
+    "quote": "Noon is when he is tallest. Do not sleep in the furrow.",
+    "quoted": "The Birch Vigil",
+    "power": 2,
+    "legacyAttack": 2,
+    "legacyHealth": 2
+  },
+  {
+    "id": "the_black_icon",
+    "name": "The Black Icon",
+    "faction": "The Birch Vigil",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
+    "oath": 0,
+    "keywords": [
+      "slow",
+      "tough"
+    ],
+    "text": "Slow Attack. Toughness. It strikes last. The first point of any blow is refused. A saint painted so dark the gold barely shows. It does not hurry. It arrives after you have spent yourself.",
+    "quote": "Kiss it and your mouth tastes of smoke.",
+    "quoted": "The Birch Vigil",
+    "power": 5,
+    "legacyAttack": 5,
+    "legacyHealth": 5
+  },
+  {
+    "id": "vodyanoy",
+    "name": "Vodyanoy",
+    "faction": "The Birch Vigil",
+    "kind": "unit",
+    "rarity": "rare",
+    "cost": 4,
     "oath": 0,
     "keywords": [
       "cryptid",
       "gills",
       "tough"
     ],
-    "text": "Cryptid. Gills. Toughness. The first point of any strike is refused. She keeps the drowned company.",
-    "quote": "She was a rumor until the water stood up.",
-    "quoted": "Culvert hymn",
+    "text": "Cryptid. Gills. Toughness. The mill-pond master: frog-mouthed, algae in the beard, a grudge against millers. The first point of any blow is refused.",
+    "quote": "He drowns what the river was going to spare.",
+    "quoted": "The Birch Vigil",
     "power": 4,
-    "legacyAttack": 2,
+    "legacyAttack": 4,
     "legacyHealth": 4
   },
   {
-    "id": "static_angel",
-    "name": "Static Angel",
-    "faction": "The Numbers Station",
+    "id": "upir_of_the_chapel",
+    "name": "Upir of the Chapel",
+    "faction": "The Birch Vigil",
     "kind": "unit",
     "rarity": "rare",
     "cost": 3,
@@ -861,71 +2398,98 @@
     "keywords": [
       "cryptid",
       "fast",
-      "relay"
+      "blooded"
     ],
-    "text": "Cryptid. Fast Attack. Relay. It strikes first. When you muster another unit, draw 1.",
-    "quote": "The numbers learned a body and would not hang up.",
-    "quoted": "Station log",
-    "power": 2,
-    "legacyAttack": 2,
-    "legacyHealth": 2
-  },
-  {
-    "id": "night_frequency",
-    "name": "Night Frequency",
-    "faction": "The Numbers Station",
-    "kind": "unit",
-    "rarity": "rare",
-    "cost": 3,
-    "oath": 0,
-    "keywords": [
-      "cryptid",
-      "ranged"
-    ],
-    "text": "Cryptid. Ranged Strike. The shot is a voice. It reaches 2 tiles and is not answered.",
-    "quote": "Deep into that darkness peering, long I stood there, wondering, fearing.",
-    "quoted": "Edgar Allan Poe, The Raven",
-    "power": 3,
-    "legacyAttack": 3,
-    "legacyHealth": 2
-  },
-  {
-    "id": "ballot_hound",
-    "name": "Ballot Hound",
-    "faction": "The Dust Ballot",
-    "kind": "unit",
-    "rarity": "rare",
-    "cost": 3,
-    "oath": 0,
-    "keywords": [
-      "cryptid",
-      "canvass"
-    ],
-    "text": "Cryptid. Canvass. When it conquers a street, it also claims one adjacent neutral street.",
-    "quote": "It knocks once. The second door opens itself.",
-    "quoted": "Precinct ghost",
+    "text": "Cryptid. Fast Attack. If it survives a battle it struck in, it gains power. The Slavic dead that will not stay under the chapel floor. It strikes first, and a meal makes it heavier.",
+    "quote": "Stake the rumor. The body already left.",
+    "quoted": "The Birch Vigil",
     "power": 3,
     "legacyAttack": 3,
     "legacyHealth": 3
   },
   {
-    "id": "empty_precinct",
-    "name": "Empty Precinct",
-    "faction": "The Dust Ballot",
-    "kind": "unit",
-    "rarity": "rare",
+    "id": "the_birch_knot",
+    "name": "The Birch Knot",
+    "faction": "The Birch Vigil",
+    "kind": "rite",
+    "rarity": "common",
     "cost": 2,
     "oath": 0,
-    "keywords": [
-      "cryptid",
-      "poll"
-    ],
-    "text": "Cryptid. Poll. At the end of your rite, if it stands on a circle you hold, score 1 extra domination.",
-    "quote": "The station voted, and nobody was inside.",
-    "quoted": "Widow's ballot",
-    "power": 3,
-    "legacyAttack": 1,
-    "legacyHealth": 3
+    "keywords": [],
+    "text": "Name a unit. It cannot move or attack on its next rite. A shaman’s knot in a white branch. The named plate stands in the grove and does not get to leave.",
+    "quote": "Three strips of bark. One name. No road.",
+    "quoted": "The Birch Vigil",
+    "aim": true,
+    "effect": {
+      "op": "lock"
+    }
+  },
+  {
+    "id": "icon_smash",
+    "name": "Icon Smash",
+    "faction": "The Birch Vigil",
+    "kind": "rite",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [],
+    "text": "Name a unit. Deal 3 damage. The mad monk breaks a face. The face was a plate, and the gold leaf cuts.",
+    "quote": "Even a saint can be used as a stone.",
+    "quoted": "The Birch Vigil",
+    "aim": true,
+    "effect": {
+      "op": "smite",
+      "n": 3
+    }
+  },
+  {
+    "id": "homeward",
+    "name": "Homeward",
+    "faction": "The Birch Vigil",
+    "kind": "rite",
+    "rarity": "uncommon",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [],
+    "text": "Name a unit and return it to its owner’s hand. The domovoi wants the guest out of the house before the stove cools.",
+    "quote": "Shoes by the door. You are done here.",
+    "quoted": "The Birch Vigil",
+    "aim": true,
+    "effect": {
+      "op": "bounce"
+    }
+  },
+  {
+    "id": "stove_of_the_hut",
+    "name": "Stove of the Hut",
+    "faction": "The Birch Vigil",
+    "kind": "device",
+    "rarity": "common",
+    "cost": 2,
+    "oath": 0,
+    "keywords": [],
+    "text": "Device. Bank 1 resources and draw 1 card. The hut’s stove pays a coal and deals a plate. Baba’s house is an oath, not a costume.",
+    "quote": "Sit on the warm side. The cold side belongs to her.",
+    "quoted": "The Birch Vigil",
+    "effect": {
+      "op": "bank_draw"
+    }
+  },
+  {
+    "id": "the_mad_starets",
+    "name": "The Mad Starets",
+    "faction": "The Birch Vigil",
+    "kind": "hero",
+    "rarity": "patron",
+    "cost": 3,
+    "oath": 0,
+    "keywords": [],
+    "text": "Leader. Once in a sitting: pay 3. Name a unit you own. It gains +3 power. The mad monk nails a black icon to a living chest and calls it armor.",
+    "quote": "Pray later. First, do not die.",
+    "quoted": "The Mad Starets",
+    "leaderPower": {
+      "op": "bulwark"
+    }
   },
   {
     "id": "coil_novice",
