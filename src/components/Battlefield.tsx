@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
 import { cardById, isExcludedPlateId } from '../data/catalog';
 import { pickTrainingAction, type AiSnapshot } from '../game/ai';
-import { applyDamage, combatantFrom, isDestroyed, resolveMelee } from '../game/combat';
 import {
   canDeployOn,
   initialControl,
@@ -28,8 +27,24 @@ import {
   resolveLeaderPower,
   type EffectCtx,
   type EffectUnit,
+  type DamagePip,
 } from '../game/effects';
-import { canBeStruck, crownBonus, hasKeyword, manhattan } from '../game/keywords';
+import {
+  airshipBeside,
+  chillActive,
+  cleanupDead,
+  conquestTriggers,
+  grazeAfterMove,
+  isRootedOnBoard,
+  leavesUnclaimed,
+  musterPower,
+  pollBonus,
+  refreshForRite,
+  resolveStrike,
+  riteOpenUpkeep,
+  sproutAtRiteEnd,
+} from '../game/rules';
+import { canBeStruck, hasKeyword, manhattan } from '../game/keywords';
 import { MAPS, mapById, tileLabel, tileLogName, type Side } from '../game/maps';
 import {
   legalEmptySteps,
@@ -164,8 +179,8 @@ type MatchOver = { winner: Side; kind: VictoryKind };
 
 type AimMode =
   | null
-  | { kind: 'cast'; handIndex: number; card: Card }
-  | { kind: 'leader' }
+  | { kind: 'cast'; handIndex: number; card: Card; unitUid?: string }
+  | { kind: 'leader'; unitUid?: string }
   | { kind: 'act'; uid: string };
 
 function deckFor(
@@ -362,6 +377,26 @@ export function Battlefield({
   const claimFlashTimer = useRef<number | null>(null);
   const domToastTimer = useRef<number | null>(null);
   const slideTimerRef = useRef<number | null>(null);
+  /** Melee clash nudge: per-uid lean direction for a short coin animation. */
+  const [clash, setClash] = useState<null | {
+    key: number;
+    byUid: Record<string, { dr: number; dc: number }>;
+  }>(null);
+  const clashTimerRef = useRef<number | null>(null);
+  /** Floating damage numbers (e.g. "-2") over coins / circles. */
+  const [pips, setPips] = useState<DamagePip[]>([]);
+  const showPips = useCallback((list: DamagePip[]) => {
+    const live = list.filter((p) => p.text && p.text !== '-0');
+    if (live.length === 0) return;
+    const stamped = live.map((p, i) => ({
+      ...p,
+      id: `${Date.now()}-${i}-${p.uid ?? 'tile'}-${p.r}-${p.c}-${p.text}`,
+    }));
+    setPips((cur) => [...cur, ...stamped]);
+    window.setTimeout(() => {
+      setPips((cur) => cur.filter((p) => !stamped.some((x) => x.id === p.id)));
+    }, 1400);
+  }, []);
   const [inspectCard, setInspectCard] = useState<Card | null>(null);
   /** Code unlocks (South Haven): Close/Esc only — no backdrop dismiss. */
   const [inspectSticky, setInspectSticky] = useState(false);
@@ -484,95 +519,88 @@ export function Battlefield({
       h: { blue: Card[]; red: Card[] },
       turnNum: number,
     ) => {
+      const prevSide: Side = nextSide === 'blue' ? 'red' : 'blue';
+      // Arrest ticks down on the side that just ended; the opening side
+      // refreshes (a foe-locked unit stays exhausted for this one rite).
       const cleared = b.map((row) =>
         row.map((u) => {
           if (!u) return null;
-          // Clear lock from previous; keep sick only for delay muster this rite
-          const prevSide: Side = nextSide === 'blue' ? 'red' : 'blue';
           let arrest = u.arrest ?? 0;
           if (u.side === prevSide && arrest > 0) arrest -= 1;
-          const next = {
-            ...u,
-            moved: false,
-            attacked: false,
-            powder: false,
-            used: false,
-            arrest,
-          };
-          if (u.powder) {
-            // was locked by foe — stays sick one rite then clears
-            next.sick = false;
-          }
-          return next;
+          return refreshForRite({ ...u, arrest }, nextSide);
         }),
       );
-      let working = cleared;
+      // Start-of-rite upkeep: Airship leak, Tax, Seep.
+      const upkeep = riteOpenUpkeep(cleared, nextSide, liveRef.current.loyalty[nextSide]);
+      upkeep.notes.forEach((line) => pushLog(line));
+      if (upkeep.hurts.length) {
+        showPips(upkeep.hurts.map((h) => ({ id: '', uid: h.uid, r: h.r, c: h.c, text: `-${h.damage}` })));
+      }
+      let working = upkeep.board;
 
-      // Lingering field poison resolves once at the start of the next turn.
+      // Resolve deaths (and lingering field poison) through the effect ctx so
+      // death triggers (burst, Salvage, Mourner) fire.
       const pendingPoison = fieldStatusRef.current.fieldPoisonDamage;
-      if (pendingPoison > 0) {
-        const poisonCtx: EffectCtx = {
-          side: nextSide,
-          loyalty: { ...liveRef.current.loyalty },
-          domination: { ...liveRef.current.domination },
-          hand: {
-            blue: [...liveRef.current.hand.blue],
-            red: [...liveRef.current.hand.red],
-          },
-          deck: {
-            blue: [...liveRef.current.deck.blue],
-            red: [...liveRef.current.deck.red],
-          },
-          discard: {
-            blue: [...liveRef.current.discard.blue],
-            red: [...liveRef.current.discard.red],
-          },
-          units: {},
-          board: Array.from({ length: 5 }, () => Array(5).fill(null)),
-          control: liveRef.current.control.map((row) => [...row]),
-          log: [],
-        };
-        for (let r = 0; r < 5; r++) {
-          for (let c = 0; c < 5; c++) {
-            const u = working[r][c];
-            if (!u) continue;
-            poisonCtx.board[r][c] = u.uid;
-            poisonCtx.units[u.uid] = {
-              uid: u.uid,
-              cardId: u.cardId,
-              name: u.name,
-              side: u.side,
-              power: u.power,
-              maxPower: u.maxPower,
-              loyalty: u.loyalty,
-              keywords: [...u.keywords],
-              moved: u.moved,
-              attacked: u.attacked,
-              sick: u.sick,
-              tough: u.tough,
-              fast: u.fast,
-              shutter: u.shutter,
-              silenced: u.silenced,
-              powder: u.powder,
-              used: u.used,
-              once: u.once,
-              arrest: u.arrest,
-            };
-          }
+      const riteCtx: EffectCtx = {
+        side: nextSide,
+        loyalty: { ...liveRef.current.loyalty, [nextSide]: upkeep.loyalty },
+        domination: { ...liveRef.current.domination },
+        hand: {
+          blue: [...h.blue],
+          red: [...h.red],
+        },
+        deck: {
+          blue: [...d.blue],
+          red: [...d.red],
+        },
+        discard: {
+          blue: [...liveRef.current.discard.blue],
+          red: [...liveRef.current.discard.red],
+        },
+        units: {},
+        board: Array.from({ length: 5 }, () => Array(5).fill(null)),
+        control: ctrl.map((row) => [...row]),
+        log: [],
+        tiles,
+      };
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+          const u = working[r][c];
+          if (!u) continue;
+          riteCtx.board[r][c] = u.uid;
+          riteCtx.units[u.uid] = { ...u, keywords: [...u.keywords] };
         }
-        applyPendingFieldPoison(poisonCtx, pendingPoison);
-        working = working.map((row) =>
-          row.map((u) => {
-            if (!u) return null;
-            const pu = poisonCtx.units[u.uid];
-            if (!pu) return null; // destroyed
-            return { ...u, power: pu.power, maxPower: pu.maxPower };
-          }),
-        );
-        poisonCtx.log.forEach((line) => pushLog(line));
+      }
+      if (pendingPoison > 0) {
+        applyPendingFieldPoison(riteCtx, pendingPoison);
         setFieldPoisonDamage(0);
         fieldStatusRef.current.fieldPoisonDamage = 0;
       }
+      cleanupDead(riteCtx);
+      if (riteCtx.pips?.length) showPips(riteCtx.pips);
+      working = working.map((row) =>
+        row.map((u) => {
+          if (!u) return null;
+          const pu = riteCtx.units[u.uid];
+          if (!pu) return null; // destroyed
+          return { ...u, power: pu.power, maxPower: pu.maxPower };
+        }),
+      );
+      riteCtx.log.forEach((line) => pushLog(line));
+      // Hand / deck may change on death draws (Mourner).
+      h = riteCtx.hand;
+      d = riteCtx.deck;
+      setLoyalty(riteCtx.loyalty);
+      setDiscard(riteCtx.discard);
+      setDomination(riteCtx.domination);
+      setControl(riteCtx.control);
+      liveRef.current = {
+        ...liveRef.current,
+        loyalty: { ...riteCtx.loyalty },
+        discard: { blue: [...riteCtx.discard.blue], red: [...riteCtx.discard.red] },
+        domination: { ...riteCtx.domination },
+        control: riteCtx.control.map((row) => [...row]),
+      };
 
       setBoard(working);
 
@@ -667,7 +695,7 @@ export function Battlefield({
 
       return { nextDeck, nextHand, cleared };
     },
-    [bankUnits, pushLog, blueFaction, redFaction, mode],
+    [bankUnits, pushLog, blueFaction, redFaction, mode, showPips],
   );
 
   const bootMatch = useCallback(
@@ -881,6 +909,7 @@ export function Battlefield({
               used: u.used,
               once: u.once,
               arrest: u.arrest,
+              gained: u.gained,
             };
           }
         }
@@ -906,9 +935,11 @@ export function Battlefield({
         log: [],
         fieldPoisonDamage,
         noBankOpens,
+        tiles: gameMap.tiles,
       };
     },
     [
+      gameMap,
       board,
       loyalty,
       domination,
@@ -950,6 +981,7 @@ export function Battlefield({
             used: u.used,
             once: u.once,
             arrest: u.arrest,
+            gained: (u.gained ?? 0) + (u.pendingGain ?? 0),
           };
         }
       setBoard(nextBoard);
@@ -996,8 +1028,9 @@ export function Battlefield({
           break;
         }
       }
+      if (ctx.pips?.length) showPips(ctx.pips);
     },
-    [pushLog],
+    [pushLog, showPips],
   );
 
   const castCard = useCallback(
@@ -1012,7 +1045,11 @@ export function Battlefield({
         if (!card || (card.kind !== 'rite' && card.kind !== 'device')) return false;
         if (effectNeedsAim(card.effect, card.aim) && !targetUid && !aimPos) {
           setAim({ kind: 'cast', handIndex, card });
-          pushLog(`Name a target for ${card.name}.`);
+          pushLog(
+          card.effect?.op === 'shove'
+            ? `Name an exhausted unit for ${card.name}, then the circle.`
+            : `Name a target for ${card.name}.`,
+        );
           return false;
         }
         friendSession.send({
@@ -1036,7 +1073,11 @@ export function Battlefield({
       }
       if (effectNeedsAim(card.effect, card.aim) && !targetUid && !aimPos) {
         setAim({ kind: 'cast', handIndex, card });
-        pushLog(`Name a target for ${card.name}.`);
+        pushLog(
+          card.effect?.op === 'shove'
+            ? `Name an exhausted unit for ${card.name}, then the circle.`
+            : `Name a target for ${card.name}.`,
+        );
         return false;
       }
       const ctx = buildEffectCtx(acting);
@@ -1085,7 +1126,11 @@ export function Battlefield({
         }
         if (leaderNeedsAim(hero) && !targetUid && !(hero.leaderPower?.op === 'claim' && aimPos)) {
           setAim({ kind: 'leader' });
-          pushLog(`Name a target for ${hero.name}.`);
+          pushLog(
+          hero.leaderPower?.op === 'slide'
+            ? `Name an exhausted unit for ${hero.name}, then the circle it slides to.`
+            : `Name a target for ${hero.name}.`,
+        );
           return false;
         }
         friendSession.send({
@@ -1107,7 +1152,11 @@ export function Battlefield({
       }
       if (leaderNeedsAim(hero) && !targetUid && !(hero.leaderPower?.op === 'claim' && aimPos)) {
         setAim({ kind: 'leader' });
-        pushLog(`Name a target for ${hero.name}.`);
+        pushLog(
+          hero.leaderPower?.op === 'slide'
+            ? `Name an exhausted unit for ${hero.name}, then the circle it slides to.`
+            : `Name a target for ${hero.name}.`,
+        );
         return false;
       }
       const ctx = buildEffectCtx(acting);
@@ -1435,22 +1484,33 @@ export function Battlefield({
         pushLog('That circle is occupied.');
         return false;
       }
-      if (!canDeployOn(gameMap.tiles[r][c], control, r, c, acting)) {
-        pushLog('Deploy onto your stronghold or a gate you hold.');
+      const deployTile = gameMap.tiles[r][c];
+      // Airship: may also muster onto an empty circle beside it.
+      const fromAirship =
+        airshipBeside(board, acting, r, c) &&
+        deployTile.kind !== 'void' &&
+        !isEnemyStronghold(deployTile, acting);
+      if (!canDeployOn(deployTile, control, r, c, acting) && !fromAirship) {
+        pushLog(
+          'Deploy onto your stronghold, a gate you hold, or an empty circle beside your airship.',
+        );
         return false;
       }
       if (loyalty[acting] < card.cost) {
         pushLog(`Not enough resources (need ${card.cost}).`);
         return false;
       }
-      const delayed = hasKeyword(card, 'delay');
+      // Delay (slow muster) or an enemy Chill unit: musters exhausted.
+      const delayed = hasKeyword(card, 'delay') || chillActive(board, acting);
+      // Warband: +1 power per other unit you already control.
+      const musterP = musterPower(card, board, acting);
       const unit: BoardUnit = {
         uid: uid(),
         cardId: card.id,
         name: card.name,
         side: acting,
-        power: card.power,
-        maxPower: card.power,
+        power: musterP,
+        maxPower: musterP,
         loyalty: card.cost,
         keywords: [...card.keywords],
         moved: delayed,
@@ -1472,20 +1532,58 @@ export function Battlefield({
         liveRef.current = { ...liveRef.current, loyalty: next };
         return next;
       });
-      setHand((H) => {
-        const next = {
-          ...H,
-          [acting]: H[acting].filter((_, i) => i !== handIndex),
-        };
-        liveRef.current = { ...liveRef.current, hand: next };
-        return next;
-      });
+      // Charm (foe) / Berserk (self): discard a random card on muster.
+      const discardSide: Side | null = hasKeyword(card, 'berserk')
+        ? acting
+        : hasKeyword(card, 'charm')
+          ? acting === 'blue'
+            ? 'red'
+            : 'blue'
+          : null;
+      const handAfter = {
+        ...hand,
+        [acting]: hand[acting].filter((_, i) => i !== handIndex),
+      };
+      let discarded: Card | null = null;
+      if (discardSide) {
+        const pool = [...handAfter[discardSide]];
+        if (pool.length > 0) {
+          const i = Math.floor(Math.random() * pool.length);
+          [discarded] = pool.splice(i, 1);
+          handAfter[discardSide] = pool;
+        }
+      }
+      setHand(handAfter);
+      liveRef.current = { ...liveRef.current, hand: handAfter };
       setSelectedHand(null);
       pushLog(
-        `${sideLabel(acting)} deploys ${card.name} (P${card.power} · L${card.cost})${
-          delayed ? ' · slow muster' : ''
-        }.`,
+        `${sideLabel(acting)} deploys ${card.name} (P${musterP} · L${card.cost})${
+          delayed ? ' · cannot act yet' : ''
+        }${fromAirship ? ' · from the airship' : ''}.`,
       );
+      // Scandal: the other chair loses 2 resources.
+      if (hasKeyword(card, 'scandal')) {
+        const other: Side = acting === 'blue' ? 'red' : 'blue';
+        setLoyalty((L) => {
+          const next = { ...L, [other]: Math.max(0, L[other] - 2) };
+          liveRef.current = { ...liveRef.current, loyalty: next };
+          return next;
+        });
+        pushLog(`${card.name} strips 2 resources from the other chair.`);
+      }
+      if (discardSide) {
+        if (discarded) {
+          const lost = discarded;
+          setDiscard((D) => {
+            const next = { ...D, [discardSide]: [...D[discardSide], lost] };
+            liveRef.current = { ...liveRef.current, discard: next };
+            return next;
+          });
+          pushLog(`${card.name} discards ${lost.name}.`);
+        } else {
+          pushLog(`${card.name} finds that hand empty.`);
+        }
+      }
       if (hasKeyword(card, 'cryptid')) {
         setCryptidSight(card.name);
         setTimeout(() => setCryptidSight(null), 2200);
@@ -1511,18 +1609,11 @@ export function Battlefield({
     [hand, board, control, gameMap, loyalty, pushLog],
   );
 
-  const strikePower = useCallback(
-    (unit: BoardUnit, r: number, c: number) => {
-      return unit.power + crownBonus(board, unit.side, r, c);
-    },
-    [board],
-  );
-
   const canStrikeTarget = useCallback(
     (atk: BoardUnit & Pos, def: BoardUnit & Pos): boolean => {
       if (def.side === atk.side) return false;
       const dist = manhattan(atk.r, atk.c, def.r, def.c);
-      return canBeStruck(atk, def, dist);
+      return canBeStruck(atk, def, dist, atk, def);
     },
     [],
   );
@@ -1580,6 +1671,10 @@ export function Battlefield({
         pushLog(`${atk.unit.name} is arrested and cannot move.`);
         return 'fail';
       }
+      if (isRootedOnBoard(board, atk.unit.side, atk.r, atk.c)) {
+        pushLog(`${atk.unit.name} is rooted and cannot move or strike.`);
+        return 'fail';
+      }
       const tile = gameMap.tiles[r][c];
       if (tile.kind === 'void') return 'fail';
       if (board[r][c]) {
@@ -1592,7 +1687,7 @@ export function Battlefield({
         return 'fail';
       }
 
-      if (isEnemyStronghold(tile, atk.unit.side)) {
+      if (isEnemyStronghold(tile, atk.unit.side) && !leavesUnclaimed(atk.unit)) {
         kickCoinSlide(atk.unit, atk.r, atk.c, r, c);
         setBoard((b) => {
           const next = b.map((row) => [...row]);
@@ -1615,33 +1710,75 @@ export function Battlefield({
         return 'storm';
       }
 
+      // Unclaiming / Veiled cross without conquering; conquest triggers
+      // (Glory, Bloom, Toll, Deed, Canvass) fire on a newly taken circle;
+      // Graze clears adjacent enemy claims after the step.
+      const unclaimed = leavesUnclaimed(atk.unit);
       const prevOwner = control[r][c];
-      const veiled = hasKeyword(atk.unit, 'veiled');
+      const conquers = !unclaimed && isPaintable(tile) && prevOwner !== atk.unit.side;
+      let ctrl = control.map((row) => [...row]);
+      let power = atk.unit.power;
+      let maxPower = atk.unit.maxPower;
+      let bank = 0;
+      let domGain = 0;
+      const notes: string[] = [];
+      if (unclaimed) {
+        notes.push(
+          tile.kind === 'stronghold'
+            ? `${atk.unit.name} crosses the stronghold and leaves it unclaimed.`
+            : `${atk.unit.name} crosses the circle and leaves it unclaimed.`,
+        );
+      } else if (isPaintable(tile)) {
+        ctrl = paintTile(ctrl, gameMap.tiles, r, c, atk.unit.side);
+        if (conquers) {
+          const won = conquestTriggers({ ...atk.unit }, gameMap.tiles, ctrl, r, c);
+          ctrl = won.control;
+          power = won.power;
+          maxPower = won.maxPower;
+          bank = won.bank;
+          domGain = won.domination;
+          notes.push(`${atk.unit.name} conquers the ${tileLogName(tile)}.`);
+          notes.push(...won.notes);
+          flashClaim(r, c, 'Conquered');
+        } else {
+          notes.push(`${atk.unit.name} advances.`);
+        }
+      } else {
+        notes.push(`${atk.unit.name} advances.`);
+      }
+      const grazed = grazeAfterMove(atk.unit, gameMap.tiles, ctrl, r, c);
+      ctrl = grazed.control;
+      notes.push(...grazed.notes);
       kickCoinSlide(atk.unit, atk.r, atk.c, r, c);
       setBoard((b) => {
         const next = b.map((row) => [...row]);
         next[atk.r][atk.c] = null;
-        next[r][c] = { ...atk.unit, moved: true };
+        next[r][c] = {
+          ...atk.unit,
+          power,
+          maxPower,
+          gained: (atk.unit.gained ?? 0) + Math.max(0, maxPower - atk.unit.maxPower),
+          moved: true,
+        };
         liveRef.current = { ...liveRef.current, board: next };
         return next;
       });
-      if (veiled) {
-        pushLog(`${atk.unit.name} advances without claiming (veiled).`);
-      } else if (isPaintable(tile)) {
-        setControl((C) => {
-          const next = paintTile(C, gameMap.tiles, r, c, atk.unit.side);
-          liveRef.current = { ...liveRef.current, control: next };
+      setControl(ctrl);
+      liveRef.current = { ...liveRef.current, control: ctrl };
+      notes.forEach((n) => pushLog(n));
+      if (bank > 0) {
+        setLoyalty((L) => {
+          const next = { ...L, [atk.unit.side]: applyBank(L[atk.unit.side], bank) };
+          liveRef.current = { ...liveRef.current, loyalty: next };
           return next;
         });
-        if (prevOwner !== atk.unit.side) {
-          const label = tileLogName(tile);
-          pushLog(`${atk.unit.name} conquers the ${label}.`);
-          flashClaim(r, c, 'Conquered');
-        } else {
-          pushLog(`${atk.unit.name} advances.`);
-        }
-      } else {
-        pushLog(`${atk.unit.name} advances.`);
+      }
+      if (domGain > 0) {
+        setDomination((D) => {
+          const next = { ...D, [atk.unit.side]: D[atk.unit.side] + domGain };
+          liveRef.current = { ...liveRef.current, domination: next };
+          return next;
+        });
       }
       setAttacker(null);
       setSelectedUnit(null);
@@ -1678,114 +1815,64 @@ export function Battlefield({
         pushLog('That foe cannot be struck (out of reach, shuttered, or veiled).');
         return false;
       }
-      const atkPow = strikePower(atk.unit, atk.r, atk.c);
-      const dist = manhattan(atk.r, atk.c, defR, defC);
-      const rangedShot = dist > 1 && hasKeyword(atk.unit, 'ranged');
-
-      if (rangedShot) {
-        // Ranged: attacker deals only, no counter
-        const resultAtk = combatantFrom({
-          id: atk.unit.uid,
-          name: atk.unit.name,
-          power: atkPow,
-          keywords: atk.unit.keywords,
-          tough: atk.unit.tough,
-          fast: atk.unit.fast,
-        });
-        const resultDef = combatantFrom({
-          id: here.uid,
-          name: here.name,
-          power: here.power,
-          keywords: here.keywords,
-          tough: here.tough,
-          fast: here.fast,
-        });
-        const dmg = applyDamage(resultDef, atkPow);
-        pushLog(
-          `Ranged: ${atk.unit.name} strikes ${here.name} for ${dmg} from ${dist} away.`,
+      const ctx = buildEffectCtx(atk.unit.side);
+      const out = resolveStrike(ctx, gameMap.tiles, atkUid, defR, defC);
+      if (out.error) {
+        pushLog(out.error);
+        return false;
+      }
+      if (out.slide) {
+        kickCoinSlide(
+          out.slide.unit as BoardUnit,
+          out.slide.fromR,
+          out.slide.fromC,
+          out.slide.toR,
+          out.slide.toC,
         );
-        gunshotSfx();
-        setPhase('melee');
-        setBoard((b) => {
-          const next = b.map((row) => [...row]);
-          next[atk.r][atk.c] = { ...atk.unit, attacked: true };
-          if (isDestroyed(resultDef)) next[defR][defC] = null;
-          else {
-            const wounded = resultDef.power < here.power;
-            next[defR][defC] = {
-              ...here,
-              power: resultDef.power,
-              ...(wounded && hasKeyword(atk.unit, 'arrest') ? { arrest: 2 } : {}),
-            };
-            if (wounded && hasKeyword(atk.unit, 'arrest')) {
-              pushLog(`${here.name} is arrested and cannot move for two turns.`);
-            }
-          }
-          return next;
+      }
+      applyEffectCtx(ctx);
+      if (!out.ranged) {
+        // Brief clash nudge: both coins lean into the blow.
+        const dr = Math.sign(defR - atk.r);
+        const dc = Math.sign(defC - atk.c);
+        if (clashTimerRef.current != null) window.clearTimeout(clashTimerRef.current);
+        setClash({
+          key: Date.now(),
+          byUid: { [atk.unit.uid]: { dr, dc }, [here.uid]: { dr: -dr, dc: -dc } },
         });
-        setAttacker(null);
-        setSelectedUnit(null);
-        setTimeout(() => setPhase((p) => (p === 'over' ? p : 'main')), 350);
-        void resultAtk;
-        return true;
+        clashTimerRef.current = window.setTimeout(() => {
+          clashTimerRef.current = null;
+          setClash(null);
+        }, 460);
       }
-
-      const result = resolveMelee(
-        combatantFrom({
-          id: atk.unit.uid,
-          name: atk.unit.name,
-          power: atkPow,
-          keywords: atk.unit.keywords,
-          tough: atk.unit.tough,
-          fast: atk.unit.fast,
-        }),
-        combatantFrom({
-          id: here.uid,
-          name: here.name,
-          power: here.power,
-          keywords: here.keywords,
-          tough: here.tough,
-          fast: here.fast,
-        }),
-      );
-      clashSfx();
+      if (out.ranged) gunshotSfx();
+      else clashSfx();
+      if (out.conquered) flashClaim(out.conquered.r, out.conquered.c, 'Conquered');
       setPhase('melee');
-      setBoard((b) => {
-        const next = b.map((row) => [...row]);
-        if (result.attackerDestroyed) next[atk.r][atk.c] = null;
-        else
-          next[atk.r][atk.c] = {
-            ...atk.unit,
-            power: result.attacker.power,
-            attacked: true,
-          };
-        if (result.defenderDestroyed) next[defR][defC] = null;
-        else {
-          const wounded = result.defender.power < here.power;
-          next[defR][defC] = {
-            ...here,
-            power: result.defender.power,
-            ...(wounded && hasKeyword(atk.unit, 'arrest') ? { arrest: 2 } : {}),
-          };
-        }
-        return next;
-      });
-      result.log.forEach((line) => pushLog(line));
-      if (
-        !result.defenderDestroyed &&
-        result.defender.power < here.power &&
-        hasKeyword(atk.unit, 'arrest')
-      ) {
-        pushLog(`${here.name} is arrested and cannot move for two turns.`);
-      }
       setAttacker(null);
       setSelectedUnit(null);
+      if (out.stronghold) {
+        finishMatch(
+          atk.unit.side,
+          'stronghold',
+          `${atk.unit.name} seizes the enemy stronghold. The hour is over.`,
+        );
+        return true;
+      }
+      if (ctx.domination[atk.unit.side] >= DOMINATION_WIN) {
+        finishMatch(
+          atk.unit.side,
+          'dominance',
+          `${sideLabel(atk.unit.side)} reaches ${DOMINATION_WIN} domination.`,
+        );
+        return true;
+      }
       setTimeout(() => {
         setPhase((p) => (p === 'over' ? p : 'main'));
       }, 350);
       return true;
     },
-    [findUnit, board, pushLog, canStrikeTarget, strikePower],
+    [findUnit, board, pushLog, canStrikeTarget, buildEffectCtx, applyEffectCtx, gameMap, kickCoinSlide, flashClaim, finishMatch],
   );
 
   const endRite = useCallback(() => {
@@ -1798,16 +1885,18 @@ export function Battlefield({
     brassClick();
     const acting = live.side;
     const holdings = countHoldings(live.gameMap.tiles, live.control, acting);
-    const scored = live.domination[acting] + holdings;
+    // Poll: +1 per poll unit standing on a circle this side holds.
+    const polled = pollBonus(live.board, live.control, acting);
+    const scored = live.domination[acting] + holdings + polled;
     const nextDom = { ...live.domination, [acting]: scored };
     setDomination(nextDom);
     liveRef.current = { ...liveRef.current, domination: nextDom };
     pushLog(
-      `${sideLabel(acting)} holds ${holdings} circles (+${holdings} Domination → ${scored}/${DOMINATION_WIN}).`,
+      `${sideLabel(acting)} holds ${holdings} circles${polled ? ` and polls ${polled}` : ''} (+${holdings + polled} Domination → ${scored}/${DOMINATION_WIN}).`,
     );
     if (domToastTimer.current != null) window.clearTimeout(domToastTimer.current);
     setDomToast(
-      `${sideLabel(acting)} · +${holdings} Domination · ${scored}/${DOMINATION_WIN}`,
+      `${sideLabel(acting)} · +${holdings + polled} Domination · ${scored}/${DOMINATION_WIN}`,
     );
     domToastTimer.current = window.setTimeout(() => {
       domToastTimer.current = null;
@@ -1821,6 +1910,14 @@ export function Battlefield({
         `${sideLabel(acting)} reaches ${DOMINATION_WIN} domination.`,
       );
       return;
+    }
+
+    // Sprout: a standing sprout unit grows +1 at the end of its own rite.
+    const sprouted = sproutAtRiteEnd(liveRef.current.board, acting);
+    if (sprouted.notes.length > 0) {
+      sprouted.notes.forEach((line) => pushLog(line));
+      setBoard(sprouted.board);
+      liveRef.current = { ...liveRef.current, board: sprouted.board };
     }
 
     const next: Side = acting === 'blue' ? 'red' : 'blue';
@@ -1895,7 +1992,21 @@ export function Battlefield({
     if (aim) {
       const here = unitAt(r, c);
       if (aim.kind === 'cast') {
-        if (aim.card.effect?.op === 'shove' || aim.card.effect?.op === 'claim') {
+        // Shove (e.g. Lapse of Nerve): name an exhausted unit, then the circle.
+        if (aim.card.effect?.op === 'shove') {
+          if (!aim.unitUid) {
+            if (!here) {
+              pushLog('Name an exhausted unit.');
+              return;
+            }
+            setAim({ ...aim, unitUid: here.uid });
+            pushLog('Name an empty adjacent circle that is not a stronghold.');
+            return;
+          }
+          castCard(inputSide, aim.handIndex, aim.unitUid, { r, c });
+          return;
+        }
+        if (aim.card.effect?.op === 'claim') {
           castCard(inputSide, aim.handIndex, here?.uid, { r, c });
         } else if (here) {
           castCard(inputSide, aim.handIndex, here.uid);
@@ -1906,6 +2017,20 @@ export function Battlefield({
       }
       if (aim.kind === 'leader') {
         const hero = inputSide === 'blue' ? blueHero : redHero;
+        // Slide (e.g. The Birch Crone): name an exhausted unit, then the circle.
+        if (hero?.leaderPower?.op === 'slide') {
+          if (!aim.unitUid) {
+            if (!here) {
+              pushLog('Name an exhausted unit.');
+              return;
+            }
+            setAim({ kind: 'leader', unitUid: here.uid });
+            pushLog('Name an empty adjacent circle that is not a stronghold.');
+            return;
+          }
+          useLeader(inputSide, aim.unitUid, { r, c });
+          return;
+        }
         if (hero?.leaderPower?.op === 'claim') {
           useLeader(inputSide, undefined, { r, c });
         } else if (here) {
@@ -2417,6 +2542,28 @@ export function Battlefield({
     return out;
   }, [attacker, inputLocked, findUnit, board, canStrikeTarget]);
 
+  // Shove / slide: once the exhausted unit is named, light the circles it may go to.
+  const lapseGhost = useMemo(() => {
+    const out = new Set<string>();
+    if (!aim || aim.kind === 'act' || !aim.unitUid) return out;
+    const found = findUnit(aim.unitUid);
+    if (!found) return out;
+    for (const [dr, dc] of [
+      [-1, 0],
+      [1, 0],
+      [0, -1],
+      [0, 1],
+    ]) {
+      const r = found.r + dr;
+      const c = found.c + dc;
+      const t = gameMap.tiles[r]?.[c];
+      if (!t || t.kind === 'void' || t.kind === 'stronghold') continue;
+      if (board[r]?.[c]) continue;
+      out.add(`${r},${c}`);
+    }
+    return out;
+  }, [aim, findUnit, gameMap, board]);
+
   const selectedHint = useMemo(() => {
     if (!attacker || inputLocked) return null;
     const atk = findUnit(attacker);
@@ -2428,7 +2575,7 @@ export function Battlefield({
     if (ranged) chips.push('Ranged');
     return {
       name: atk.unit.name,
-      strikeLabel: ranged ? 'ranged within 2' : 'melee adjacent',
+      strikeLabel: ranged ? 'straight line, 2 circles' : 'melee adjacent',
       chips,
     };
   }, [attacker, inputLocked, findUnit]);
@@ -2657,7 +2804,12 @@ export function Battlefield({
             : aim.kind === 'act'
               ? cardById(findUnit(aim.uid)?.unit.cardId ?? '')?.name ?? 'power'
               : activeHero?.name}{' '}
-          — name a target on the field.{' '}
+          {(aim.kind === 'cast' && aim.card.effect?.op === 'shove') ||
+          (aim.kind === 'leader' && activeHero?.leaderPower?.op === 'slide')
+            ? aim.unitUid
+              ? '— name an empty adjacent circle that is not a stronghold.'
+              : '— name an exhausted unit.'
+            : '— name a target on the field.'}{' '}
           <button type="button" className="dev-link" onClick={() => setAim(null)}>
             Cancel
           </button>
@@ -2741,6 +2893,7 @@ export function Battlefield({
                 const moveOk = legalMove.empty.has(key);
                 const moveDir = legalMove.dirs.get(key);
                 const strikeOk = legalStrike.has(key);
+                const ghostOk = lapseGhost.has(key);
                 const isOrigin =
                   !!here &&
                   (selectedUnit === here.uid || attacker === here.uid);
@@ -2757,7 +2910,7 @@ export function Battlefield({
                       deployOk ? 'legal-tile' : ''
                     } ${moveOk ? 'legal-move' : ''} ${
                       strikeOk ? 'legal-strike' : ''
-                    } ${isOrigin ? 'stone-origin' : ''} ${
+                    } ${ghostOk ? 'lapse-ghost' : ''} ${isOrigin ? 'stone-origin' : ''} ${
                       dragHand != null && deployOk ? 'drag-target' : ''
                     } ${unit ? 'has-unit' : ''} ${
                       justClaimed ? 'just-claimed' : ''
@@ -2769,6 +2922,7 @@ export function Battlefield({
                       (e.currentTarget as HTMLButtonElement).blur();
                     }}
                   >
+                    {ghostOk && <span className="lapse-ghost-light" aria-hidden />}
                     {tile.kind === 'gate' && (
                       <span
                         className={`tile-mark gate-mark gate-${tile.home ?? 'neutral'}${unit ? ' mark-under' : ''}`}
@@ -2795,6 +2949,13 @@ export function Battlefield({
                         {claimLabel}
                       </span>
                     )}
+                    {pips
+                      .filter((p) => p.r === r && p.c === c && p.uid !== unit?.uid)
+                      .map((p) => (
+                        <span key={p.id} className="dmg-float" aria-hidden>
+                          {p.text}
+                        </span>
+                      ))}
                     {moveOk && moveDir && (
                       <svg
                         className={`move-way move-${moveDir}`}
@@ -2875,6 +3036,18 @@ export function Battlefield({
                           coinSlide.toR === r &&
                           coinSlide.toC === c
                         }
+                        clash={
+                          clash?.byUid[unit.uid]
+                            ? {
+                                key: clash.key,
+                                dx: clash.byUid[unit.uid].dc * 18,
+                                dy: clash.byUid[unit.uid].dr * 18,
+                              }
+                            : null
+                        }
+                        hits={pips
+                          .filter((p) => p.uid === unit.uid)
+                          .map((p) => ({ id: p.id, text: p.text }))}
                         onClick={() => onTileClick(r, c)}
                         onInspect={() => {
                           const def = cardById(unit.cardId);

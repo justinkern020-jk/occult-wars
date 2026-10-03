@@ -141,7 +141,7 @@ export function validateDeck(
     if (isSecretHandDropId(card.id)) {
       return {
         ok: false,
-        error: `${card.name} is a secret unlock — not a working plate.`,
+        error: `${card.name} answers a code — it is not a working plate.`,
       };
     }
     if (!legalCardForHero(heroId, card)) {

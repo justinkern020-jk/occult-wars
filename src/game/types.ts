@@ -59,6 +59,11 @@ export interface Combatant {
   fast?: boolean;
   /** Runtime Slow Attack flag (or keyword `slow`). */
   slow?: boolean;
+  /**
+   * Extra strike Power for this fight only (e.g. adjacent allied Lamp/crown).
+   * Added to the blow dealt; never added to the unit's lasting Power.
+   */
+  strikeBonus?: number;
 }
 
 export type CombatMode = 'normal' | 'fast' | 'slow';
@@ -73,5 +78,8 @@ export interface CombatResult {
   defender: Combatant;
   attackerDestroyed: boolean;
   defenderDestroyed: boolean;
+  /** Power actually lost by the attacker / defender in this fight. */
+  dmgToAtk: number;
+  dmgToDef: number;
   log: string[];
 }

@@ -319,37 +319,20 @@ export function importLedger(json: string): { error: string } | { profile: Profi
 }
 
 
-/** Add seth_kern to collection (+ first custom deck if room and legal). */
+/**
+ * Seth Kern answers a code (secret hand-drop) — never a collectible or
+ * working plate. Strip any leaked copies from collection / workings.
+ */
 export function applySethKernUnlock(p: Profile): Profile {
-  if (p.username.trim().toLowerCase() !== 'seth kern') return p;
-  const id = 'seth_kern';
-  const collection = p.collection.includes(id)
-    ? p.collection
-    : [...p.collection, id];
-  const card = cardById(id);
-  const customDecks = p.customDecks.map((d) => {
-    if (!card || d.cards.includes(id) || d.cards.length >= 40) return d;
-    const hero = CARDS.find((c) => c.id === d.heroId);
-    if (!hero || !isLegalForOrder(hero.faction, card.faction)) return d;
-    return { ...d, cards: [...d.cards, id] };
-  });
-  return { ...p, collection, customDecks };
+  return stripAftermathId(p, 'seth_kern');
 }
 
-/** Unlock justin_kern into collection (+ first working if room). */
+/**
+ * Justin Kern answers a code (secret hand-drop) — never a collectible or
+ * working plate. Strip any leaked copies from collection / workings.
+ */
 export function applyJustinKernUnlock(p: Profile): Profile {
-  const id = 'justin_kern';
-  const collection = p.collection.includes(id)
-    ? p.collection
-    : [...p.collection, id];
-  const card = cardById(id);
-  const customDecks = p.customDecks.map((d) => {
-    if (!card || d.cards.includes(id) || d.cards.length >= 40) return d;
-    const hero = CARDS.find((c) => c.id === d.heroId);
-    if (!hero || !isLegalForOrder(hero.faction, card.faction)) return d;
-    return { ...d, cards: [...d.cards, id] };
-  });
-  return { ...p, collection, customDecks };
+  return stripAftermathId(p, 'justin_kern');
 }
 
 /**

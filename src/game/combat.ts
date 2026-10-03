@@ -28,7 +28,13 @@ function clone(u: Combatant): Combatant {
     tough: u.tough,
     fast: u.fast,
     slow: u.slow,
+    strikeBonus: u.strikeBonus,
   };
+}
+
+/** Blow dealt: current Power (floored at 0) plus any one-fight strike bonus. */
+function blowOf(u: Combatant): number {
+  return Math.max(0, u.power) + Math.max(0, u.strikeBonus ?? 0);
 }
 
 /** Incoming strike damage after Toughness. */
@@ -64,8 +70,10 @@ export function resolveMelee(
   const mode: CombatMode = combatModeFor(attacker, defender);
   const log: string[] = [];
 
-  const atkPow = () => Math.max(0, attacker.power);
-  const defPow = () => Math.max(0, defender.power);
+  const atkPow = () => blowOf(attacker);
+  const defPow = () => blowOf(defender);
+  let dmgToAtkTotal = 0;
+  let dmgToDefTotal = 0;
 
   if (mode === 'normal') {
     // Simultaneous: both deal their pre-strike Power.
@@ -73,6 +81,8 @@ export function resolveMelee(
     const dDeal = defPow();
     const dmgToDef = applyDamage(defender, aDeal);
     const dmgToAtk = applyDamage(attacker, dDeal);
+    dmgToDefTotal = dmgToDef;
+    dmgToAtkTotal = dmgToAtk;
     log.push(
       `Normal (simultaneous): ${attacker.name} (${aDeal}) and ${defender.name} (${dDeal}) exchange blows.`,
     );
@@ -86,6 +96,7 @@ export function resolveMelee(
     // Attacker has higher initiative (Fast vs Normal/Slow).
     const aDeal = atkPow();
     const dmgToDef = applyDamage(defender, aDeal);
+    dmgToDefTotal = dmgToDef;
     log.push(
       `Fast Attack: ${attacker.name} strikes first for ${dmgToDef} (from Power ${aDeal}).`,
     );
@@ -99,6 +110,7 @@ export function resolveMelee(
     } else {
       const dDeal = defPow(); // reduced Power
       const dmgToAtk = applyDamage(attacker, dDeal);
+      dmgToAtkTotal = dmgToAtk;
       log.push(
         `${defender.name} answers for ${dmgToAtk} (from Power ${dDeal}).`,
       );
@@ -110,6 +122,7 @@ export function resolveMelee(
     // Defender has higher initiative (defender Fast, or attacker Slow).
     const dDeal = defPow();
     const dmgToAtk = applyDamage(attacker, dDeal);
+    dmgToAtkTotal = dmgToAtk;
     const defFast = hasKeyword(defender, 'fast');
     log.push(
       defFast
@@ -128,6 +141,7 @@ export function resolveMelee(
     } else {
       const aDeal = atkPow(); // possibly reduced
       const dmgToDef = applyDamage(defender, aDeal);
+      dmgToDefTotal = dmgToDef;
       log.push(
         `${attacker.name} then strikes for ${dmgToDef} (from Power ${aDeal}).`,
       );
@@ -150,6 +164,8 @@ export function resolveMelee(
     defender,
     attackerDestroyed: isDestroyed(attacker),
     defenderDestroyed: isDestroyed(defender),
+    dmgToAtk: dmgToAtkTotal,
+    dmgToDef: dmgToDefTotal,
     log,
   };
 }
@@ -164,6 +180,7 @@ export function combatantFrom(
     tough?: boolean;
     fast?: boolean;
     slow?: boolean;
+    strikeBonus?: number;
   },
 ): Combatant {
   return {
@@ -174,5 +191,6 @@ export function combatantFrom(
     tough: partial.tough,
     fast: partial.fast,
     slow: partial.slow,
+    strikeBonus: partial.strikeBonus,
   };
 }

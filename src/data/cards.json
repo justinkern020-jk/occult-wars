@@ -1165,7 +1165,7 @@
       "airship",
       "unclaiming"
     ],
-    "text": "Airship. Does not conquer. It has no ranged strike, and a diagonal is out of reach. It fights only by stepping into an adjacent enemy. Loses 1 health at the start of your rite. You may muster a unit on an empty circle beside it. The envelope crosses the circle and leaves the ground unclaimed.",
+    "text": "Airship. Does not conquer. It has no ranged strike, and a diagonal is out of reach. It fights only by stepping into an adjacent enemy. Loses 1 power at the start of your rite. You may muster a unit on an empty circle beside it. The envelope crosses the circle and leaves the ground unclaimed.",
     "power": 4,
     "legacyAttack": 3,
     "legacyHealth": 4,
@@ -1554,7 +1554,7 @@
     "cost": 3,
     "oath": 2,
     "keywords": [],
-    "text": "Exhaust: a unit gains +1 health. The hymn is a laying-on of hands.",
+    "text": "Exhaust: a unit gains +1 power. The hymn is a laying-on of hands.",
     "power": 3,
     "legacyAttack": 2,
     "legacyHealth": 3,
@@ -1764,7 +1764,7 @@
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Device. Name a unit. It gains +1 health and Toughness. Draw 1 card.",
+    "text": "Device. Name a unit. It gains +1 power and Toughness. Draw 1 card.",
     "aim": true,
     "effect": {
       "op": "empower",
@@ -1803,7 +1803,7 @@
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Leader. Once in a sitting: pay 2. A unit gains +2 health and +1 power.",
+    "text": "Leader. Once in a sitting: pay 2. A unit you own gains +3 power.",
     "leaderPower": {
       "op": "bulwark"
     },
@@ -1853,7 +1853,7 @@
     "keywords": [
       "sprout"
     ],
-    "text": "If it survives a battle, it gains 1 health. A cutting that learned to walk. It grows only if you keep it.",
+    "text": "If it survives a battle, it gains 1 power. At the end of its own rite, if it is still standing, it gains 1 power. A cutting that learned to walk. It grows only if you keep it.",
     "power": 1,
     "legacyAttack": 1,
     "legacyHealth": 1,
@@ -2095,7 +2095,7 @@
     "keywords": [
       "bloom"
     ],
-    "text": "When she conquers a tile, she gains 1 health. A duchess who married the hedge, and the ground feeds her.",
+    "text": "When she conquers a tile, she gains +1 power. A duchess who married the hedge, and the ground feeds her.",
     "power": 4,
     "legacyAttack": 4,
     "legacyHealth": 4,
@@ -2959,7 +2959,7 @@
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Leader. Once in a sitting: pay 2. A unit stands back up at full health with +1 power.",
+    "text": "Leader. Once in a sitting: pay 2. A unit you own stands back up and gains +1 power.",
     "leaderPower": {
       "op": "mend"
     },

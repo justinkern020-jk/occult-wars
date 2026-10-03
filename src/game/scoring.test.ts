@@ -18,7 +18,7 @@ describe('holdings + bank (grok formulas)', () => {
     // Azure stronghold + azure gates (home-painted)
     const blue = countHoldings(map.tiles, control, 'blue');
     const red = countHoldings(map.tiles, control, 'red');
-    // ashen-cross: .rRr. / .s1s. / 2dsd2 / .s1s. / .bBb.
+    // ashen-cross: .rRr. / .s2s. / 1dsd1 / .s2s. / .bBb.
     // blue: stronghold B + two gates b → 3
     expect(blue).toBe(3);
     expect(red).toBe(3);
@@ -31,15 +31,15 @@ describe('holdings + bank (grok formulas)', () => {
 
   it('resource seals add 1 or 2 when controlled; hearth doubles', () => {
     const painted = control.map((row) => [...row]);
-    // claim a +1 node at (1,2) glyph 1 and a +2 at (2,0)
+    // claim a +2 node at (1,2) glyph 2 and a +1 at (2,0)
     painted[1][2] = 'blue';
     painted[2][0] = 'blue';
-    expect(bankFromHoldings(map.tiles, painted, 'blue')).toBe(2 + 1 + 2);
+    expect(bankFromHoldings(map.tiles, painted, 'blue')).toBe(2 + 2 + 1);
     expect(
       bankFromHoldings(map.tiles, painted, 'blue', [
-        { side: 'blue', keywords: ['hearth'], r: 2, c: 0 },
+        { side: 'blue', keywords: ['hearth'], r: 1, c: 2 },
       ]),
-    ).toBe(2 + 1 + 4);
+    ).toBe(2 + 4 + 1);
   });
 
   it('loyalty caps at 14', () => {

@@ -275,7 +275,7 @@ export function pickTrainingAction(snap: AiSnapshot): AiAction {
         const foe = snap.board[r][c];
         if (!foe || foe.side === side) continue;
         const dist = manhattan(unit.r, unit.c, r, c);
-        if (!canBeStruck(unit, foe, dist)) continue;
+        if (!canBeStruck(unit, foe, dist, unit, { r, c })) continue;
         const score = attackScore(unit, foe) + (dist > 1 ? 5 : 0);
         if (!bestAtk || score > bestAtk.score) {
           bestAtk = { uid: unit.uid, targetUid: foe.uid, score };

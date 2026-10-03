@@ -60,46 +60,42 @@ function R(
 }
 
 export const MAPS: GameMap[] = [
-  R('leaden-court', 'The Leaden Court', 'Facing strongholds and single-yield nodes.', [
-    '.rRr.',
-    's1s1s',
-    'sdsds',
-    's1s1s',
-    '.bBb.',
-  ]),
-  R('ashen-cross', 'The Ashen Cross', 'A cross, not a square. Side-arm +2 seals.', [
-    '.rRr.',
-    '.s1s.',
-    '2dsd2',
-    '.s1s.',
-    '.bBb.',
-  ]),
-  R('twin-vaults', 'The Twin Vaults', 'Double-yield vaults sit off the lane.', [
-    'srRrs',
-    '1sds1',
-    '2sss2',
-    '1sds1',
-    'sbBbs',
-  ]),
-  R('outer-seal', 'The Outer Seal', 'Peripheral +2 nodes; center deployment gate.', [
-    '.sRs.',
-    'r1d1r',
-    's2s2s',
-    'b1d1b',
-    '.sBs.',
-  ]),
+  R(
+    'leaden-court',
+    'The Leaden Court',
+    'Doubles sit against your gates. The middle of that rank is an open street.',
+    ['.rRr.', '21s12', 'sdsds', '21s12', '.bBb.'],
+  ),
+  R(
+    'ashen-cross',
+    'The Ashen Cross',
+    'A cross. The heavy seals are on the stem. The arms only pay one.',
+    ['.rRr.', '.s2s.', '1dsd1', '.s2s.', '.bBb.'],
+  ),
+  R(
+    'twin-vaults',
+    'The Twin Vaults',
+    'Double vaults beside the doors. The mid lane only pays one.',
+    ['srRrs', '2sds2', '1sss1', '2sds2', 'sbBbs'],
+  ),
+  R(
+    'outer-seal',
+    'The Outer Seal',
+    'Fat seals on your wings. The center road pays less.',
+    ['.sRs.', 'r2d2r', 's1s1s', 'b2d2b', '.sBs.'],
+  ),
   R(
     'blackout-yard',
     'The Blackout Yard',
-    'The second hour. A yard of streets where the dark can walk.',
-    ['.rRr.', 's2s1s', 'sdsds', 's1s2s', '.bBb.'],
+    'A split yard. Two lanes, a hole between them. The seals are not across from each other.',
+    ['.rRr.', 's2.1s', 'sd.ds', 's1.2s', '.bBb.'],
     'second',
   ),
   R(
     'culvert-court',
     'The Culvert Court',
-    'The second hour. Water under the seals, and a long street for the vote.',
-    ['srRrs', '2sds1', 'sssss', '1sds2', 'sbBbs'],
+    'A culvert. Doubles under the doors. The banks of that rank are cut away.',
+    ['srRrs', '.2s2.', 's1s1s', '.2s2.', 'sbBbs'],
     'second',
   ),
 ];

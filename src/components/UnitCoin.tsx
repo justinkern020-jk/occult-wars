@@ -1,4 +1,4 @@
-import type { KeyboardEvent } from 'react';
+import type { CSSProperties, KeyboardEvent } from 'react';
 import type { Side } from '../game/maps';
 import { hasKeyword } from '../game/keywords';
 import { CardArt } from './CardArt';
@@ -29,6 +29,8 @@ export interface BoardUnit {
   once?: boolean;
   /** Turns remaining this unit cannot move (Arrest). */
   arrest?: number;
+  /** Lasting power earned in play (shown as +N on the coin). */
+  gained?: number;
 }
 
 /**
@@ -44,6 +46,8 @@ export function UnitCoin({
   canStep,
   onClick,
   onInspect,
+  clash,
+  hits,
 }: {
   unit: BoardUnit;
   selected?: boolean;
@@ -54,8 +58,13 @@ export function UnitCoin({
   canStep?: boolean;
   onClick?: () => void;
   onInspect?: () => void;
+  /** Melee clash nudge toward (dx, dy) px; key restarts the animation. */
+  clash?: { key: number; dx: number; dy: number } | null;
+  /** Floating damage numbers over this coin. */
+  hits?: { id: string; text: string }[];
 }) {
   const hurt = unit.power < unit.maxPower;
+  const gained = unit.gained ?? 0;
   const veiled = hasKeyword(unit, 'veiled');
   const fast = hasKeyword(unit, 'fast');
   const onKey = (e: KeyboardEvent) => {
@@ -68,9 +77,15 @@ export function UnitCoin({
   const veilTitle = veiled ? ' · veiled · untargetable' : '';
   return (
     <div
+      key={clash ? `clash-${clash.key}` : undefined}
       role="button"
       tabIndex={0}
-      className={`stone-coin is-${unit.side} ${foe ? 'coin-foe' : 'coin-mine'} ${selected ? 'stone-picked' : ''} ${unit.sick ? 'is-sick' : ''} ${veiled ? 'is-veiled' : ''} ${sliding ? 'coin-slide-hide' : ''} ${canStep && !selected ? 'can-step' : ''}`}
+      className={`stone-coin is-${unit.side} ${foe ? 'coin-foe' : 'coin-mine'} ${selected ? 'stone-picked' : ''} ${unit.sick ? 'is-sick' : ''} ${veiled ? 'is-veiled' : ''} ${sliding ? 'coin-slide-hide' : ''} ${canStep && !selected ? 'can-step' : ''} ${clash ? 'coin-clash' : ''}`}
+      style={
+        clash
+          ? ({ '--dx': `${clash.dx}px`, '--dy': `${clash.dy}px`, animationDelay: '0s' } as CSSProperties)
+          : undefined
+      }
       onClick={(e) => {
         e.stopPropagation();
         onClick?.();
@@ -96,13 +111,25 @@ export function UnitCoin({
         <abbr>L</abbr>
         {unit.loyalty}
       </span>
-      <span
-        className={`coin-stat coin-power ${hurt ? 'coin-hurt' : ''}`}
-        title="Power · vitality and damage"
-      >
-        <abbr>P</abbr>
-        {unit.power}
+      <span className="coin-power-slot">
+        <span
+          className={`coin-stat coin-power ${hurt ? 'coin-hurt' : ''}`}
+          title="Power · vitality and damage"
+        >
+          <abbr>P</abbr>
+          {unit.power}
+        </span>
+        {gained > 0 && (
+          <span className="coin-gained" title={`Earned power +${gained}. It stays.`}>
+            +{gained}
+          </span>
+        )}
       </span>
+      {hits?.map((h) => (
+        <span key={h.id} className="coin-dmg-float" aria-hidden>
+          {h.text}
+        </span>
+      ))}
       {fast && (
         <span
           className="coin-fast-dagger"

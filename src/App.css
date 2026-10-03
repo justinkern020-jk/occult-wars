@@ -3130,7 +3130,7 @@ input[type='search'] {
   0%, 100% { filter: none; }
   50% { filter: brightness(1.35) saturate(1.2); }
 }
-.battlefield[data-phase='melee'] .stone-coin {
+.battlefield[data-phase='melee'] .stone-coin:not(.coin-clash) {
   animation: melee-flash 0.35s ease;
 }
 
@@ -3673,4 +3673,124 @@ input[type='search'] {
   background: url(/assets/maps/resource-jewel.svg) center / contain no-repeat;
   filter: drop-shadow(0 1px 2px #000a) drop-shadow(0 0 4px #7dff9a77);
   pointer-events: none;
+}
+
+/* ── Imported from occultwar.grok.me (Oct 2026): earned power, damage pips, melee clash ── */
+.coin-power-slot {
+  z-index: 5;
+  pointer-events: none;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.08rem;
+  display: flex;
+  position: absolute;
+  bottom: 2%;
+  right: 1%;
+}
+.coin-power-slot .coin-power {
+  position: static;
+  bottom: auto;
+  right: auto;
+}
+.coin-gained {
+  z-index: 7;
+  color: #2ee56a;
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+  text-shadow: 0 0 6px #0d4a22, 0 1px #02140a, 0 0 2px #02140a;
+  pointer-events: none;
+  font-size: clamp(0.72rem, 2.1vw, 0.92rem);
+  font-weight: 800;
+  line-height: 1;
+  position: static;
+}
+.coin-dmg-float {
+  z-index: 30;
+  color: #fff4f4;
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 8px #ff2048, 0 0 18px #ff1838cc, 0 2px #3a0008;
+  pointer-events: none;
+  font-size: clamp(1.25rem, 4.6vw, 1.85rem);
+  font-weight: 800;
+  line-height: 1;
+  animation: 1.3s forwards coin-dmg-rise;
+  position: absolute;
+  bottom: 34%;
+  right: 2%;
+}
+@keyframes coin-dmg-rise {
+  0% { opacity: 0; transform: translateY(10px) scale(0.65); }
+  14% { opacity: 1; transform: translateY(0) scale(1.18); }
+  to { opacity: 0; transform: translateY(-42px) scale(1); }
+}
+.dmg-float {
+  z-index: 20;
+  color: #ffe4e4;
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 8px #ff3050, 0 0 16px #ff1838aa, 0 2px #3a0008;
+  pointer-events: none;
+  font-size: clamp(1.2rem, 4.2vw, 1.7rem);
+  font-weight: 800;
+  animation: 1.3s forwards dmg-rise;
+  position: absolute;
+  top: 38%;
+  left: 50%;
+}
+@keyframes dmg-rise {
+  0% { opacity: 0; transform: translate(-50%, 8px) scale(0.72); }
+  16% { opacity: 1; transform: translate(-50%, -2px) scale(1.12); }
+  to { opacity: 0; transform: translate(-50%, -34px) scale(1); }
+}
+.battlefield .stone-coin.coin-clash,
+.battlefield[data-phase='melee'] .stone-coin.coin-clash {
+  animation: 0.46s cubic-bezier(0.2, 0.75, 0.2, 1) coin-clash;
+}
+@keyframes coin-clash {
+  0% { transform: translate(0); }
+  34% { transform: translate(var(--dx), var(--dy)); }
+  62% { transform: translate(calc(var(--dx) * -0.35), calc(var(--dy) * -0.35)); }
+  to { transform: translate(0); }
+}
+.stone.lapse-ghost {
+  z-index: 8;
+  box-shadow:
+    0 0 0 1px #06140c,
+    0 0 0 3px #8dffc4,
+    0 0 0 6px #145c38,
+    0 0 22px 4px #3dff9acc,
+    inset 0 0 16px #c8ffe866;
+}
+.lapse-ghost-light {
+  z-index: 6;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    #f3fff855 0%,
+    #3dff9a73 36%,
+    #0d4a2800 72%
+  );
+  border-radius: 50%;
+  animation: 1.05s ease-in-out infinite lapse-ghost-pulse;
+  position: absolute;
+  inset: 12%;
+  box-shadow: 0 0 18px 6px #5dffb0cc;
+}
+@keyframes lapse-ghost-pulse {
+  0%,
+  to {
+    opacity: 0.38;
+    transform: scale(0.84);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lapse-ghost-light {
+    opacity: 0.9;
+    animation: none;
+  }
 }

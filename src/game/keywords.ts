@@ -37,7 +37,7 @@ export const KEYWORDS: Record<string, KeywordInfo> = {
     key: 'ranged',
     glyph: 'R',
     title:
-      'Ranged Strike. May strike a foe within Manhattan distance 2 instead of stepping into melee.',
+      'Ranged Strike. A shot reaches 2 circles in a straight line — the same rank or file — and is not answered. It cannot shoot on a diagonal. Stepping into an adjacent enemy is an ordinary fight.',
   },
   crown: {
     key: 'crown',
@@ -72,7 +72,7 @@ export const KEYWORDS: Record<string, KeywordInfo> = {
   gills: {
     key: 'gills',
     glyph: '≈',
-    title: 'Gills. Immune to Tide; may heal 1 when Tide rises.',
+    title: 'Gills. Seep cannot wound this unit.',
   },
   relay: {
     key: 'relay',
@@ -93,21 +93,36 @@ export const KEYWORDS: Record<string, KeywordInfo> = {
   },
 };
 
-/** True if attacker may choose defender for a strike at the given Manhattan distance. */
+/**
+ * True if attacker may choose defender for a strike at the given Manhattan distance.
+ * When `from`/`to` are given, a ranged shot (dist > 1) must travel a straight
+ * line — same rank or file — never a diagonal.
+ */
 export function canBeStruck(
   attacker: { keywords: string[] },
   defender: { keywords: string[]; shutter?: boolean },
   dist: number,
+  from?: { r: number; c: number },
+  to?: { r: number; c: number },
 ): boolean {
   if (dist < 1) return false;
   if (hasKeyword(defender, 'veiled')) return false;
   const reach = rangedReach(attacker);
   if (dist > reach) return false;
+  if (dist > 1 && from && to && !isStraightLine(from, to)) return false;
   // Ranged shot (beyond melee adjacency) cannot choose Shutter.
   if (dist > 1 && (hasKeyword(defender, 'shutter') || defender.shutter)) {
     return false;
   }
   return true;
+}
+
+/** Same rank or same file (a ranged shot's lane). */
+export function isStraightLine(
+  from: { r: number; c: number },
+  to: { r: number; c: number },
+): boolean {
+  return from.r === to.r || from.c === to.c;
 }
 
 

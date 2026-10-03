@@ -7,7 +7,7 @@ import { applyDamage, isDestroyed } from './combat';
 import { hasKeyword, manhattan } from './keywords';
 import { cardById } from '../data/catalog';
 import { LOYALTY_CAP, HAND_CAP, applyBank } from './scoring';
-import type { Side } from './maps';
+import type { Side, Tile } from './maps';
 import type { ActSpec, Card } from './types';
 
 export type EffectUnit = {
@@ -33,7 +33,14 @@ export type EffectUnit = {
   /** Once-in-a-sitting activated ability already called. */
   once?: boolean;
   arrest?: number;
+  /** Power earned this rite by effects (shown as a lasting +N on the coin). */
+  pendingGain?: number;
+  /** Lasting power earned in play (Battlefield coin marker). */
+  gained?: number;
 };
+
+/** Floating damage pip (e.g. "-2") emitted by effect damage. */
+export type DamagePip = { id: string; uid?: string; r: number; c: number; text: string };
 
 export type EffectCtx = {
   side: Side;
@@ -58,6 +65,10 @@ export type EffectCtx = {
    * Set by no_bank; decremented when a rite open would bank.
    */
   noBankOpens?: number;
+  /** Board tiles (for slide/shove legality and claims). Optional for tests. */
+  tiles?: Tile[][];
+  /** Damage pips emitted while resolving (for floating -N numbers). */
+  pips?: DamagePip[];
 };
 
 export type AimPos = { r: number; c: number };
@@ -111,7 +122,7 @@ function drawCards(ctx: EffectCtx, side: Side, n: number) {
   }
 }
 
-function dealTo(_ctx: EffectCtx, unit: EffectUnit, raw: number): number {
+function dealTo(ctx: EffectCtx, unit: EffectUnit, raw: number): number {
   const combatant = {
     id: unit.uid,
     name: unit.name,
@@ -120,28 +131,94 @@ function dealTo(_ctx: EffectCtx, unit: EffectUnit, raw: number): number {
     tough: unit.tough || hasKeyword(unit, 'tough'),
   };
   const dmg = applyDamage(combatant, raw);
-  unit.power = combatant.power;
+  unit.power = Math.max(0, combatant.power);
+  if (dmg > 0) {
+    const pos = findPos(ctx, unit.uid);
+    if (pos) {
+      const pips = (ctx.pips ??= []);
+      pips.push({ id: `${unit.uid}-${pips.length}-${dmg}`, uid: unit.uid, r: pos.r, c: pos.c, text: `-${dmg}` });
+    }
+  }
   return dmg;
 }
 
-function destroyUnit(ctx: EffectCtx, uid: string) {
+function addGain(unit: EffectUnit, n: number) {
+  if (n > 0) unit.pendingGain = (unit.pendingGain ?? 0) + n;
+}
+
+/**
+ * Unmake a unit: discard it, then resolve death triggers —
+ * death burst (card.death) against adjacent units, deathBank, Salvage
+ * (allied salvage units bank +1 each), and Mourner (enemy mourners draw 1).
+ */
+export function destroyUnit(ctx: EffectCtx, uid: string, seen?: Set<string>) {
+  const visited = seen ?? new Set<string>();
+  if (visited.has(uid)) return;
   const u = ctx.units[uid];
   if (!u) return;
+  visited.add(uid);
   const pos = findPos(ctx, uid);
+  const def = cardById(u.cardId);
+  const burst = def?.death ?? 0;
+  const deathBank = (def as { deathBank?: number } | undefined)?.deathBank ?? 0;
+  const burstTargets: string[] = [];
+  if (pos && burst > 0) {
+    for (const [dr, dc] of [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ] as const) {
+      const id = ctx.board[pos.r + dr]?.[pos.c + dc];
+      if (id && id !== uid) burstTargets.push(id);
+    }
+  }
+  let salvage = 0;
+  const mourners: EffectUnit[] = [];
+  for (const other of Object.values(ctx.units)) {
+    if (other.uid === uid) continue;
+    if (other.side === u.side && hasKeyword(other, 'salvage')) salvage += 1;
+    if (other.side !== u.side && hasKeyword(other, 'mourner')) mourners.push(other);
+  }
   if (pos) ctx.board[pos.r][pos.c] = null;
-  ctx.discard[u.side].push({
-    id: u.cardId,
-    name: u.name,
-    faction: '',
-    kind: 'unit',
-    rarity: 'common',
-    cost: u.loyalty,
-    oath: 0,
-    power: u.maxPower,
-    keywords: u.keywords,
-    text: '',
-  });
+  ctx.discard[u.side].push(
+    def
+      ? { ...def }
+      : {
+          id: u.cardId,
+          name: u.name,
+          faction: '',
+          kind: 'unit',
+          rarity: 'common',
+          cost: u.loyalty,
+          oath: 0,
+          power: u.maxPower,
+          keywords: [...u.keywords],
+          text: '',
+        },
+  );
   delete ctx.units[uid];
+  pushLog(ctx, `${u.name} is unmade.`);
+  if (deathBank > 0) {
+    bankLoyalty(ctx, u.side, deathBank);
+    pushLog(ctx, `${u.name} leaves ${deathBank} resources.`);
+  }
+  if (salvage > 0) {
+    bankLoyalty(ctx, u.side, salvage);
+    pushLog(ctx, `Salvage banks ${salvage}.`);
+  }
+  for (const m of mourners) {
+    if (!ctx.units[m.uid]) continue;
+    drawCards(ctx, m.side, 1);
+    pushLog(ctx, `${m.name} draws as ${u.name} falls.`);
+  }
+  for (const id of burstTargets) {
+    const t = ctx.units[id];
+    if (!t) continue;
+    const dmg = dealTo(ctx, t, burst);
+    pushLog(ctx, `${u.name} bursts for ${dmg} against ${t.name}.`);
+    if (t.power <= 0) destroyUnit(ctx, id, visited);
+  }
 }
 
 function lockUnit(ctx: EffectCtx, unit: EffectUnit, casterSide: Side, reason: string) {
@@ -242,6 +319,7 @@ export function resolveEffect(
         if (u.side === side) {
           u.power += n;
           u.maxPower += n;
+          addGain(u, n);
         }
       }
       pushLog(ctx, `${card.name} lifts your units by ${n}.`);
@@ -292,12 +370,14 @@ export function resolveEffect(
       if (n > 0) {
         target!.power += n;
         target!.maxPower += n;
+        addGain(target!, n);
         pushLog(ctx, `${target!.name} gains +${n} power.`);
       }
       if ((card.alsoHealth ?? 0) > 0) {
         target!.power += card.alsoHealth!;
         target!.maxPower += card.alsoHealth!;
-        pushLog(ctx, `${target!.name} gains +${card.alsoHealth} health.`);
+        addGain(target!, card.alsoHealth!);
+        pushLog(ctx, `${target!.name} gains +${card.alsoHealth} power.`);
       }
       if (card.alsoTough) target!.tough = true;
       break;
@@ -317,6 +397,7 @@ export function resolveEffect(
     case 'set_power': {
       const err = needTarget();
       if (err) return err;
+      addGain(target!, Math.max(0, n - target!.maxPower));
       target!.power = n;
       target!.maxPower = n;
       if (card.alsoSilence) target!.silenced = true;
@@ -365,10 +446,27 @@ export function resolveEffect(
       if (!aimPos) return 'Name an empty adjacent circle.';
       const pos = findPos(ctx, target!.uid);
       if (!pos) return 'That unit is not on the field.';
+      if (manhattan(pos.r, pos.c, aimPos.r, aimPos.c) !== 1) return 'Slide onto an adjacent circle.';
+      if (!target!.sick && !target!.moved && !target!.attacked) {
+        return 'Only an exhausted unit will slide.';
+      }
+      const dest = ctx.tiles?.[aimPos.r]?.[aimPos.c];
+      if (dest && (dest.kind === 'void' || dest.kind === 'stronghold')) {
+        return 'That circle cannot take the slide.';
+      }
       if (ctx.board[aimPos.r][aimPos.c]) return 'That circle is occupied.';
       ctx.board[pos.r][pos.c] = null;
       ctx.board[aimPos.r][aimPos.c] = target!.uid;
-      pushLog(ctx, `${target!.name} is shoved onto the next circle.`);
+      const noClaim = hasKeyword(target!, 'unclaiming') || hasKeyword(target!, 'veiled');
+      if (!noClaim && dest && dest.kind !== 'void' && dest.kind !== 'stronghold') {
+        ctx.control[aimPos.r][aimPos.c] = target!.side;
+      }
+      pushLog(
+        ctx,
+        noClaim
+          ? `${target!.name} slides across and leaves the circle unclaimed.`
+          : `${target!.name} slides onto the circle.`,
+      );
       break;
     }
     case 'destroy_refund': {
@@ -391,6 +489,7 @@ export function resolveEffect(
       else {
         target!.power += 2;
         target!.maxPower += 2;
+        addGain(target!, 2);
         pushLog(ctx, `${target!.name} survives and gains +2 power.`);
       }
       break;
@@ -562,14 +661,26 @@ export function resolveLeaderPower(
 
   if (op === 'martyr') {
     if (target.side !== side) return 'Unmake a unit you own.';
+    const pos = findPos(ctx, target.uid);
+    const adj = pos ? neighborsOf(ctx, pos.r, pos.c).map((u) => u.uid) : [];
     ctx.loyalty[side] -= cost;
     const name = target.name;
     destroyUnit(ctx, target.uid);
+    for (const uid of adj) {
+      const u = ctx.units[uid];
+      if (!u) continue;
+      const dmg = dealTo(ctx, u, 2);
+      pushLog(ctx, `${leader.name} deals ${dmg} to ${u.name}.`);
+      if (u.power <= 0) destroyUnit(ctx, uid);
+    }
     pushLog(ctx, `${leader.name} martyrs ${name}.`);
     return null;
   }
   if (['mend', 'haste', 'bulwark', 'empower_draw'].includes(op) && target.side !== side) {
     return 'Name a unit you own.';
+  }
+  if (op === 'slide' && !target.sick && !target.moved && !target.attacked) {
+    return 'Only an exhausted unit will slide.';
   }
   ctx.loyalty[side] -= cost;
   if (op === 'haste') {
@@ -580,11 +691,10 @@ export function resolveLeaderPower(
     return null;
   }
   if (op === 'bulwark') {
-    target.maxPower += 2;
-    target.power += 2;
-    target.power += 1;
-    target.maxPower += 1;
-    pushLog(ctx, `${target.name} gains +2 health and +1 power.`);
+    target.maxPower += 3;
+    target.power += 3;
+    addGain(target, 3);
+    pushLog(ctx, `${target.name} gains +3 power.`);
     return null;
   }
   if (op === 'empower_draw') {
@@ -817,7 +927,8 @@ export function resolveActivatedAbility(
     source.attacked = true;
     target.power += 1;
     target.maxPower += 1;
-    pushLog(ctx, `${target.name} gains 1 health.`);
+    addGain(target, 1);
+    pushLog(ctx, `${target.name} gains +1 power.`);
     markUsed();
     return null;
   }

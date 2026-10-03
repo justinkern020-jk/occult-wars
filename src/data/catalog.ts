@@ -99,7 +99,7 @@ export function isNukeAftermathCard(card: Card): boolean {
  * mid-match or next circle via pending flag only. Collection still shows
  * the plate as an archive face (not auto-unlocked).
  */
-export const SECRET_HAND_DROP_IDS = ['south_haven_dispatch'] as const;
+export const SECRET_HAND_DROP_IDS = ['south_haven_dispatch', 'justin_kern', 'seth_kern'] as const;
 
 export function isSecretHandDropId(id: string): boolean {
   return (SECRET_HAND_DROP_IDS as readonly string[]).includes(id);

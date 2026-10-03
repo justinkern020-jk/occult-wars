@@ -111,7 +111,7 @@ describe('nuke aftermath never enter workings / hands', () => {
 
   it('migrateProfile strips leaked nuke aftermath from collection and decks', () => {
     const next = migrateProfile({
-      collection: ['radiation_poisoning', 'nuclear_winter', 'justin_kern'],
+      collection: ['radiation_poisoning', 'nuclear_winter', 'lamp_bearer'],
       customDecks: [
         {
           id: 'first-working',
@@ -122,7 +122,7 @@ describe('nuke aftermath never enter workings / hands', () => {
       ],
       secondCards: ['nuclear_winter', 'lamp_bearer'],
     });
-    expect(next.collection).toEqual(['justin_kern']);
+    expect(next.collection).toEqual(['lamp_bearer']);
     expect(next.customDecks[0]?.cards).toEqual(['lamp_bearer']);
     expect(next.secondCards).toEqual(['lamp_bearer']);
   });
@@ -192,7 +192,7 @@ describe('South Haven Dispatch is secret hand-drop only', () => {
     const withShd = [...base.slice(0, 29), SHD];
     const v = validateDeck(hero.id, withShd);
     expect(v.ok).toBe(false);
-    if (!v.ok) expect(v.error.toLowerCase()).toMatch(/secret/);
+    if (!v.ok) expect(v.error.toLowerCase()).toMatch(/code|secret/);
 
     const cards = buildOrderAllyWorkingIds('The Columbia Lodge', 30);
     cards[0] = SHD;
@@ -209,7 +209,7 @@ describe('South Haven Dispatch is secret hand-drop only', () => {
   it('applySouthHavenDispatchUnlock strips collection / decks (no grant)', () => {
     const base = {
       ...defaultProfile(),
-      collection: [SHD, 'justin_kern'],
+      collection: [SHD, 'lamp_bearer'],
       customDecks: [
         {
           id: 'first-working',
@@ -220,7 +220,7 @@ describe('South Haven Dispatch is secret hand-drop only', () => {
       ],
     };
     const next = applySouthHavenDispatchUnlock(base);
-    expect(next.collection).toEqual(['justin_kern']);
+    expect(next.collection).toEqual(['lamp_bearer']);
     expect(next.customDecks[0]?.cards).toEqual(['lamp_bearer']);
     // Idempotent — never grants
     const again = applySouthHavenDispatchUnlock(defaultProfile());
@@ -229,7 +229,7 @@ describe('South Haven Dispatch is secret hand-drop only', () => {
 
   it('migrateProfile strips leaked south_haven_dispatch', () => {
     const next = migrateProfile({
-      collection: [SHD, 'justin_kern'],
+      collection: [SHD, 'lamp_bearer'],
       customDecks: [
         {
           id: 'first-working',
@@ -240,12 +240,37 @@ describe('South Haven Dispatch is secret hand-drop only', () => {
       ],
       secondCards: [SHD, 'lamp_bearer'],
     });
-    expect(next.collection).toEqual(['justin_kern']);
+    expect(next.collection).toEqual(['lamp_bearer']);
     expect(next.customDecks[0]?.cards).toEqual(['lamp_bearer']);
     expect(next.secondCards).toEqual(['lamp_bearer']);
   });
 
   it('catalog still holds the card for code-unlock reveal art', () => {
     expect(CARDS.some((c) => c.id === SHD)).toBe(true);
+  });
+});
+
+describe('Justin / Seth Kern are secret hand-drops only', () => {
+  it('are flagged as secret hand-drops', () => {
+    expect(isSecretHandDropId('justin_kern')).toBe(true);
+    expect(isSecretHandDropId('seth_kern')).toBe(true);
+  });
+
+  it('migrateProfile strips leaked Kern plates from collection and workings', () => {
+    const next = migrateProfile({
+      collection: ['justin_kern', 'seth_kern', 'lamp_bearer'],
+      customDecks: [
+        {
+          id: 'first-working',
+          name: 'Leak',
+          heroId: 'the_rune_colonel',
+          cards: ['justin_kern', 'seth_kern', 'lamp_bearer'],
+        },
+      ],
+      secondCards: ['justin_kern', 'lamp_bearer'],
+    });
+    expect(next.collection).toEqual(['lamp_bearer']);
+    expect(next.customDecks[0]?.cards).toEqual(['lamp_bearer']);
+    expect(next.secondCards).toEqual(['lamp_bearer']);
   });
 });
