@@ -18,16 +18,27 @@ import type { Card } from '../game/types';
 import { CardArt } from './CardArt';
 import { MapMini } from './MapMini';
 import { TarotPop } from './TarotPop';
+import { AiMindPicker } from './AiMindPicker';
+import type { AiDifficulty } from '../game/ai';
 
 type Props = {
   profile: Profile;
   onUpdate: (p: Profile) => void;
   onEnter: (mapId: string, order: SealedCenturyOrder, rival: SealedCenturyOrder) => void;
   onBack: () => void;
+  aiDifficulty?: AiDifficulty;
+  onAiDifficulty?: (next: AiDifficulty) => void;
 };
 
 /** The Sealed Century: four loyalties of the old work, seven grounds. */
-export function SealedCentury({ profile, onUpdate, onEnter, onBack }: Props) {
+export function SealedCentury({
+  profile,
+  onUpdate,
+  onEnter,
+  onBack,
+  aiDifficulty = 'expert',
+  onAiDifficulty,
+}: Props) {
   const sworn =
     profile.oldOrder && isSealedCenturyOrder(profile.oldOrder) ? profile.oldOrder : null;
   const [editing, setEditing] = useState(false);
@@ -111,6 +122,7 @@ export function SealedCentury({ profile, onUpdate, onEnter, onBack }: Props) {
         {rival}. The grounds are not the same shape. Some seals sit under your
         door. Some you only reach by crossing. A shot is still a straight line.
       </p>
+      {onAiDifficulty && <AiMindPicker value={aiDifficulty} onChange={onAiDifficulty} />}
       <div className="map-grid">
         {grounds.map((m) => (
           <button

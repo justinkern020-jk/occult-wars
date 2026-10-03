@@ -409,6 +409,8 @@ export default function App() {
         <SealedCentury
           profile={profile}
           onUpdate={update}
+          aiDifficulty={aiDifficulty}
+          onAiDifficulty={setAiDifficulty}
           onEnter={(mid, order, rival) => {
             setMapId(mid);
             setBlueFaction(order);
