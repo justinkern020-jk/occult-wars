@@ -87,6 +87,12 @@ export function placeCandles(
   const bottom = Math.min(H - 6, Math.max(120, fold));
   const pts: { x: number; y: number }[] = [];
   for (let y = 100; y <= bottom; y += 10) for (let x = 20; x <= W - 20; x += 8) if (fits(x, y, TALL)) pts.push({ x, y });
+  /** Where a shorter companion fits beside a tall candle (toward the middle of the frame first). */
+  const pairDx = (x: number, y: number): number | null => {
+    const inward = x < W / 2 ? 1 : -1;
+    for (const dx of [22 * inward, -22 * inward, 26 * inward, -26 * inward]) if (fits(x + dx, y + 4, 36)) return dx;
+    return null;
+  };
   const edge = (x: number) => Math.min(x, W - x) / Math.max(1, W / 2); // 0 at a side, 1 mid-frame
   const sites: { x: number; y: number }[] = [];
   const clusters = Math.ceil(max / 2);
@@ -96,8 +102,8 @@ export function placeCandles(
     for (const p of pts) {
       const far = sites.length ? Math.min(...sites.map((s) => Math.hypot(s.x - p.x, s.y - p.y))) : 400;
       if (far < 150) continue;
-      // Spread out, hug the sides, sit low in the hero rather than at the very top.
-      const score = Math.min(far, 420) - edge(p.x) * 260 + (p.y / bottom) * 60;
+      // Spread out, hug the sides, sit low in the hero, leave room for a companion.
+      const score = Math.min(far, 420) - edge(p.x) * 260 + (p.y / bottom) * 60 + (pairDx(p.x, p.y) !== null ? 120 : 0);
       if (score > bestScore) {
         bestScore = score;
         best = p;
@@ -110,16 +116,9 @@ export function placeCandles(
     if (out.length >= max) break;
     add(s.x, s.y, TALL - Math.round(rand() * 8), out.length < 2);
     if (out.length >= max) break;
-    // A shorter companion, set toward the middle of the frame if it fits there.
-    const inward = s.x < W / 2 ? 1 : -1;
-    for (const dx of [22 * inward, -22 * inward, 30 * inward, -30 * inward]) {
-      const h = 26 + Math.round(rand() * 10);
-      const y = s.y + (rand() < 0.5 ? 0 : 4);
-      if (fits(s.x + dx, y, h) && clear(s.x + dx, y, 18)) {
-        add(s.x + dx, y, h, false);
-        break;
-      }
-    }
+    // A shorter companion beside it.
+    const dx = pairDx(s.x, s.y);
+    if (dx !== null && clear(s.x + dx, s.y + 4, 18)) add(s.x + dx, s.y + 4, 26 + Math.round(rand() * 10), false);
   }
   // Nothing free on the first screen (a very full phone layout): line the lower edge.
   for (const k of [0.08, 0.92, 0.26, 0.74, 0.5]) {
