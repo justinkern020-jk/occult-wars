@@ -61,6 +61,17 @@ function busyCtx(): EffectCtx {
   // Foes adjacent to ally A, one ranged.
   put(mk('foeA', 'red', 4, { keywords: ['ranged'] }), 1, 2);
   put(mk('foeB', 'red', 2, { moved: true, attacked: true }), 2, 3);
+  // Faction-tagged allies for green_surge / ready_works audits.
+  const lion = CARDS.find((c) => c.faction === 'Sons of the Green Lion' && c.kind === 'unit')!;
+  const works = CARDS.find((c) => c.faction === 'The Mercury Works' && c.kind === 'unit')!;
+  const thorn = CARDS.find((c) => c.faction === 'The Whitethorn Coven' && c.kind === 'unit')!;
+  put({ ...mk('lionA', 'blue', 2), cardId: lion.id, name: lion.name, keywords: [...lion.keywords] }, 4, 0);
+  put({ ...mk('worksA', 'blue', 2, { sick: true, moved: true, attacked: true }), cardId: works.id, name: works.name, keywords: [...works.keywords] }, 4, 1);
+  ctx.discard.blue.push(thorn);
+  ctx.control[2][0] = 'blue';
+  // Deck with a rite so seek/scry3 always find something.
+  const riteCard = CARDS.find((c) => c.kind === 'rite')!;
+  ctx.deck.blue = [filler, riteCard, filler, filler, filler, filler, filler, filler, filler, filler];
   return ctx;
 }
 
@@ -83,6 +94,10 @@ function targetsFor(op: string): { target?: string; aimPos?: { r: number; c: num
     case 'haste':
     case 'bulwark':
     case 'empower_draw':
+    case 'ward':
+    case 'last_stand':
+    case 'charge':
+    case 'breach':
     case 'martyr':
     case 'snuff':
     case 'recall':
@@ -97,7 +112,13 @@ function targetsFor(op: string): { target?: string; aimPos?: { r: number; c: num
     case 'slide':
       return { target: 'allyA', aimPos: { r: 2, c: 1 } };
     case 'claim':
+      return { aimPos: { r: 3, c: 3 } };
+    case 'revive_coven':
       return { aimPos: { r: 2, c: 0 } };
+    case 'copy_kw':
+      return { target: 'allyA' };
+    case 'transmute':
+      return { target: 'foeA' };
     case 'jab':
     case 'sacrifice-hit':
     case 'once-sting':
@@ -133,11 +154,22 @@ describe('card audit: every leader working is handled', () => {
   const heroes = CARDS.filter((c) => c.kind === 'hero' && c.leaderPower);
   it.each(heroes.map((c) => [c.id, c] as [string, Card]))('%s', (_id, hero) => {
     const ctx = busyCtx();
-    const { target, aimPos } = targetsFor(hero.leaderPower!.op);
+    const op = hero.leaderPower!.op;
+    const { target, aimPos } = targetsFor(op);
+    const opts =
+      op === 'copy_kw'
+        ? { secondUid: 'allyB' }
+        : op === 'scry3'
+          ? { pick: 0 }
+          : op === 'seek'
+            ? { seek: 'unit' as const }
+            : op === 'revive_coven'
+              ? { discardIndex: ctx.discard.blue.findIndex((c) => c.faction === 'The Whitethorn Coven') }
+              : {};
     const base = structuredClone(ctx);
     base.loyalty.blue -= hero.cost;
     const before = stateKey(base);
-    const err = resolveLeaderPower(ctx, hero, target, aimPos);
+    const err = resolveLeaderPower(ctx, hero, target, aimPos, opts);
     expect(err).toBeNull();
     expect(ctx.log.join(' | ')).not.toMatch(SILENT_NOOP);
     expect(stateKey(ctx)).not.toBe(before);

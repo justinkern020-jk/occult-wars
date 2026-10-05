@@ -6321,3 +6321,19 @@ input[type='search'] {
   color: #d4b56a;
   font-size: 0.85rem;
 }
+
+.leader-choice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 0.75rem;
+}
+.leader-choice-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.leader-choice .brass-btn {
+  font-size: 0.78rem;
+  padding: 0.35rem 0.7rem;
+}

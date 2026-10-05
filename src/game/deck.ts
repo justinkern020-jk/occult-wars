@@ -12,6 +12,7 @@ export function buildWorkingIds(faction: string, size = 30): string[] {
       c.faction === faction &&
       c.kind !== 'hero' &&
       !c.keywords.includes('cryptid') &&
+      !c.keywords.includes('token') &&
       !isExcludedPlateId(c.id) &&
       !isLossInjectId(c.id),
   );
@@ -174,7 +175,8 @@ export function withSecretHandDrop(hand: Card[], card: Card, cap = 7): { hand: C
  */
 export function deckForWorking(faction: string, ids?: string[]): Card[] {
   const stripNonPlates = (cards: Card[]) =>
-    cards.filter((c) => !c.keywords.includes('cryptid') && !isExcludedPlateId(c.id));
+    cards.filter((c) => !c.keywords.includes('cryptid') &&
+      !c.keywords.includes('token') && !isExcludedPlateId(c.id));
   if (ids && ids.length >= 30) {
     const cleaned = stripNonPlates(cardsFromIds(ids));
     if (cleaned.length >= 30) return shuffleInPlace(cleaned);

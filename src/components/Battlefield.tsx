@@ -36,11 +36,14 @@ import {
   castFromHand,
   effectNeedsAim,
   leaderNeedsAim,
+  leaderNeedsChoice,
   resolveActivatedAbility,
   resolveLeaderPower,
+  tickLeaderAuras,
   type EffectCtx,
   type EffectUnit,
   type DamagePip,
+  type LeaderOpts,
 } from '../game/effects';
 import {
   airshipBeside,
@@ -235,8 +238,14 @@ type MatchOver = { winner: Side; kind: VictoryKind };
 type AimMode =
   | null
   | { kind: 'cast'; handIndex: number; card: Card; unitUid?: string }
-  | { kind: 'leader'; unitUid?: string }
+  | { kind: 'leader'; unitUid?: string; secondUid?: string; discardIndex?: number }
   | { kind: 'act'; uid: string };
+
+type LeaderChoice =
+  | null
+  | { kind: 'scry3'; cards: Card[] }
+  | { kind: 'seek' }
+  | { kind: 'revive'; cards: { card: Card; index: number }[] };
 
 function deckFor(
   faction: string,
@@ -520,8 +529,26 @@ export function Battlefield({
   const [fieldPoisonDamage, setFieldPoisonDamage] = useState(0);
   /** Remaining rite-opens that skip Resource banking (2 ≈ one turn). */
   const [noBankOpens, setNoBankOpens] = useState(0);
-  const fieldStatusRef = useRef({ fieldPoisonDamage: 0, noBankOpens: 0 });
-  fieldStatusRef.current = { fieldPoisonDamage, noBankOpens };
+  const [iconHarvestSide, setIconHarvestSide] = useState<Side | null>(null);
+  const [iconHarvestOpens, setIconHarvestOpens] = useState(0);
+  const [deathTitheSide, setDeathTitheSide] = useState<Side | null>(null);
+  const [deathTitheOpens, setDeathTitheOpens] = useState(0);
+  const fieldStatusRef = useRef({
+    fieldPoisonDamage: 0,
+    noBankOpens: 0,
+    iconHarvestSide: null as Side | null,
+    iconHarvestOpens: 0,
+    deathTitheSide: null as Side | null,
+    deathTitheOpens: 0,
+  });
+  fieldStatusRef.current = {
+    fieldPoisonDamage,
+    noBankOpens,
+    iconHarvestSide,
+    iconHarvestOpens,
+    deathTitheSide,
+    deathTitheOpens,
+  };
   const codeRealNameRef = useRef(
     profile?.username &&
       !isSecondHourCode(profile.username) &&
@@ -669,6 +696,7 @@ export function Battlefield({
   /** Resume AI (or other) after the player finishes reading a muster reveal. */
   const revealResumeRef = useRef<(() => void) | null>(null);
   const [aim, setAim] = useState<AimMode>(null);
+  const [leaderChoice, setLeaderChoice] = useState<LeaderChoice>(null);
   const [leaderUsed, setLeaderUsed] = useState({ blue: false, red: false });
   const leaderUsedRef = useRef(leaderUsed);
   leaderUsedRef.current = leaderUsed;
@@ -751,6 +779,30 @@ export function Battlefield({
           riteCtx.units[u.uid] = { ...u, keywords: [...u.keywords] };
         }
       }
+      // Carry turn auras into the rite ctx, then tick (2 opens ≈ one full turn).
+      riteCtx.iconHarvestSide = fieldStatusRef.current.iconHarvestSide ?? undefined;
+      riteCtx.iconHarvestOpens = fieldStatusRef.current.iconHarvestOpens;
+      riteCtx.deathTitheSide = fieldStatusRef.current.deathTitheSide ?? undefined;
+      riteCtx.deathTitheOpens = fieldStatusRef.current.deathTitheOpens;
+      tickLeaderAuras(riteCtx);
+      setIconHarvestSide(riteCtx.iconHarvestSide ?? null);
+      setIconHarvestOpens(riteCtx.iconHarvestOpens ?? 0);
+      setDeathTitheSide(riteCtx.deathTitheSide ?? null);
+      setDeathTitheOpens(riteCtx.deathTitheOpens ?? 0);
+      fieldStatusRef.current.iconHarvestSide = riteCtx.iconHarvestSide ?? null;
+      fieldStatusRef.current.iconHarvestOpens = riteCtx.iconHarvestOpens ?? 0;
+      fieldStatusRef.current.deathTitheSide = riteCtx.deathTitheSide ?? null;
+      fieldStatusRef.current.deathTitheOpens = riteCtx.deathTitheOpens ?? 0;
+      // Persist breach/mustStrike clears onto the working board.
+      working = working.map((row) =>
+        row.map((u) => {
+          if (!u) return null;
+          const pu = riteCtx.units[u.uid];
+          if (!pu) return u;
+          return { ...u, breach: pu.breach, mustStrike: pu.mustStrike, lastStand: pu.lastStand, warded: pu.warded };
+        }),
+      );
+
       if (pendingPoison > 0) {
         applyPendingFieldPoison(riteCtx, pendingPoison);
         setFieldPoisonDamage(0);
@@ -1121,6 +1173,10 @@ export function Battlefield({
               once: u.once,
               arrest: u.arrest,
               gained: u.gained,
+              warded: u.warded,
+              lastStand: u.lastStand,
+              breach: u.breach,
+              mustStrike: u.mustStrike,
             };
           }
         }
@@ -1146,6 +1202,10 @@ export function Battlefield({
         log: [],
         fieldPoisonDamage,
         noBankOpens,
+        iconHarvestSide: iconHarvestSide ?? undefined,
+        iconHarvestOpens,
+        deathTitheSide: deathTitheSide ?? undefined,
+        deathTitheOpens,
         tiles: gameMap.tiles,
       };
     },
@@ -1160,6 +1220,10 @@ export function Battlefield({
       control,
       fieldPoisonDamage,
       noBankOpens,
+      iconHarvestSide,
+      iconHarvestOpens,
+      deathTitheSide,
+      deathTitheOpens,
     ],
   );
 
@@ -1193,6 +1257,10 @@ export function Battlefield({
             once: u.once,
             arrest: u.arrest,
             gained: (u.gained ?? 0) + (u.pendingGain ?? 0),
+            warded: u.warded,
+            lastStand: u.lastStand,
+            breach: u.breach,
+            mustStrike: u.mustStrike,
           };
         }
       setBoard(nextBoard);
@@ -1230,6 +1298,22 @@ export function Battlefield({
       if (ctx.noBankOpens != null) {
         setNoBankOpens(ctx.noBankOpens);
         fieldStatusRef.current.noBankOpens = ctx.noBankOpens;
+      }
+      if (ctx.iconHarvestSide !== undefined || ctx.iconHarvestOpens != null) {
+        const side = ctx.iconHarvestSide ?? null;
+        const opens = ctx.iconHarvestOpens ?? 0;
+        setIconHarvestSide(side);
+        setIconHarvestOpens(opens);
+        fieldStatusRef.current.iconHarvestSide = side;
+        fieldStatusRef.current.iconHarvestOpens = opens;
+      }
+      if (ctx.deathTitheSide !== undefined || ctx.deathTitheOpens != null) {
+        const side = ctx.deathTitheSide ?? null;
+        const opens = ctx.deathTitheOpens ?? 0;
+        setDeathTitheSide(side);
+        setDeathTitheOpens(opens);
+        fieldStatusRef.current.deathTitheSide = side;
+        fieldStatusRef.current.deathTitheOpens = opens;
       }
 
       for (const u of Object.values(ctx.units)) {
@@ -1307,50 +1391,119 @@ export function Battlefield({
   );
 
   const invokeLeader = useCallback(
-    (acting: Side, targetUid?: string, aimPos?: Pos): boolean => {
-      if (isFriendGuest && friendSession) {
-        const hero = acting === 'blue' ? blueHero : redHero;
-        if (!hero) {
-          pushLog('No leader sworn for this chair.');
-          return false;
-        }
-        if (leaderNeedsAim(hero) && !targetUid && !(hero.leaderPower?.op === 'claim' && aimPos)) {
-          setAim({ kind: 'leader' });
-          pushLog(
-          hero.leaderPower?.op === 'slide'
-            ? `Name an exhausted unit for ${hero.name}, then the circle it slides to.`
-            : `Name a target for ${hero.name}.`,
-        );
-          return false;
-        }
-        friendSession.send({
-          v: 1,
-          type: 'intent',
-          intent: { kind: 'useLeader', targetUid, aimPos },
-        });
-        setAim(null);
-        return true;
-      }
+    (
+      acting: Side,
+      targetUid?: string,
+      aimPos?: Pos,
+      opts: LeaderOpts = {},
+    ): boolean => {
       const hero = acting === 'blue' ? blueHero : redHero;
       if (!hero) {
         pushLog('No leader sworn for this chair.');
         return false;
       }
+      const op = hero.leaderPower?.op;
+      const choice = leaderNeedsChoice(hero);
+
+      // Multi-step / choice gates before paying.
+      if (choice === 'scry3' && opts.pick == null && !leaderChoice) {
+        const top = deck[acting].slice(0, 3);
+        if (!top.length) {
+          pushLog('Your well is dry.');
+          return false;
+        }
+        setLeaderChoice({ kind: 'scry3', cards: top });
+        pushLog(`Look at the top ${top.length} for ${hero.name}. Name one for your hand.`);
+        return false;
+      }
+      if (choice === 'seek' && !opts.seek && !leaderChoice) {
+        setLeaderChoice({ kind: 'seek' });
+        pushLog(`Name unit or spell for ${hero.name}.`);
+        return false;
+      }
+      if (choice === 'revive') {
+        if (opts.discardIndex == null && aim?.kind === 'leader' && aim.discardIndex == null && !leaderChoice) {
+          const cards = discard[acting]
+            .map((card, index) => ({ card, index }))
+            .filter((x) => x.card.kind === 'unit' && x.card.faction === 'The Whitethorn Coven');
+          if (!cards.length) {
+            pushLog('No Whitethorn Coven unit lies in your discard.');
+            return false;
+          }
+          setLeaderChoice({ kind: 'revive', cards });
+          pushLog(`Name a slain Whitethorn Coven unit for ${hero.name}.`);
+          return false;
+        }
+        const discIdx = opts.discardIndex ?? (aim?.kind === 'leader' ? aim.discardIndex : undefined);
+        if (discIdx != null && !aimPos) {
+          setAim({ kind: 'leader', discardIndex: discIdx });
+          setLeaderChoice(null);
+          pushLog('Name an empty circle you control that is not a stronghold.');
+          return false;
+        }
+        if (discIdx != null) opts = { ...opts, discardIndex: discIdx };
+      }
+      if (choice === 'copy_kw') {
+        if (!targetUid) {
+          setAim({ kind: 'leader' });
+          pushLog(`Name the teacher for ${hero.name} (keywords to copy).`);
+          return false;
+        }
+        if (!opts.secondUid && !(aim?.kind === 'leader' && aim.secondUid)) {
+          setAim({ kind: 'leader', unitUid: targetUid });
+          pushLog(`Name the pupil for ${hero.name} (receives the keywords).`);
+          return false;
+        }
+        if (!opts.secondUid && aim?.kind === 'leader' && aim.secondUid) {
+          opts = { ...opts, secondUid: aim.secondUid };
+        }
+      }
+
+      if (isFriendGuest && friendSession) {
+        if (leaderNeedsAim(hero) && !targetUid && !(op === 'claim' && aimPos) && !(op === 'revive_coven' && aimPos)) {
+          setAim({ kind: 'leader' });
+          pushLog(`Name a target for ${hero.name}.`);
+          return false;
+        }
+        friendSession.send({
+          v: 1,
+          type: 'intent',
+          intent: {
+            kind: 'useLeader',
+            targetUid,
+            secondUid: opts.secondUid ?? undefined,
+            aimPos,
+            pick: opts.pick,
+            seek: opts.seek,
+            discardIndex: opts.discardIndex,
+          },
+        });
+        setAim(null);
+        setLeaderChoice(null);
+        return true;
+      }
       if (leaderUsed[acting]) {
         pushLog(`${hero.name} has already spoken this sitting.`);
         return false;
       }
-      if (leaderNeedsAim(hero) && !targetUid && !(hero.leaderPower?.op === 'claim' && aimPos)) {
+      if (
+        leaderNeedsAim(hero) &&
+        !targetUid &&
+        !(op === 'claim' && aimPos) &&
+        !(op === 'revive_coven' && aimPos)
+      ) {
         setAim({ kind: 'leader' });
         pushLog(
-          hero.leaderPower?.op === 'slide'
+          op === 'slide'
             ? `Name an exhausted unit for ${hero.name}, then the circle it slides to.`
-            : `Name a target for ${hero.name}.`,
+            : op === 'transmute'
+              ? `Name an enemy unit for ${hero.name}.`
+              : `Name a target for ${hero.name}.`,
         );
         return false;
       }
       const ctx = buildEffectCtx(acting);
-      const err = resolveLeaderPower(ctx, hero, targetUid, aimPos);
+      const err = resolveLeaderPower(ctx, hero, targetUid, aimPos, opts);
       if (err) {
         pushLog(err);
         return false;
@@ -1358,6 +1511,7 @@ export function Battlefield({
       applyEffectCtx(ctx);
       setLeaderUsed((L) => ({ ...L, [acting]: true }));
       setAim(null);
+      setLeaderChoice(null);
       leaderCallSfx();
       leaderBark(hotseat || acting === tallySide ? 'power' : 'foe');
       if (acting === tallySide) tallyRef.current.leader++;
@@ -1370,6 +1524,14 @@ export function Battlefield({
       buildEffectCtx,
       applyEffectCtx,
       pushLog,
+      deck,
+      discard,
+      aim,
+      leaderChoice,
+      isFriendGuest,
+      friendSession,
+      hotseat,
+      tallySide,
     ],
   );
 
@@ -2318,8 +2480,9 @@ export function Battlefield({
       }
       if (aim.kind === 'leader') {
         const hero = inputSide === 'blue' ? blueHero : redHero;
+        const op = hero?.leaderPower?.op;
         // Slide (e.g. The Birch Crone): name an exhausted unit, then the circle.
-        if (hero?.leaderPower?.op === 'slide') {
+        if (op === 'slide') {
           if (!aim.unitUid) {
             if (!here) {
               pushLog('Name an exhausted unit.');
@@ -2332,7 +2495,30 @@ export function Battlefield({
           invokeLeader(inputSide, aim.unitUid, { r, c });
           return;
         }
-        if (hero?.leaderPower?.op === 'claim') {
+        // Provost: teacher then pupil.
+        if (op === 'copy_kw') {
+          if (!aim.unitUid) {
+            if (!here || here.side !== inputSide) {
+              pushLog('Name a unit you own (the teacher).');
+              return;
+            }
+            setAim({ kind: 'leader', unitUid: here.uid });
+            pushLog('Name the pupil (receives the keywords).');
+            return;
+          }
+          if (!here || here.side !== inputSide) {
+            pushLog('Name a unit you own (the pupil).');
+            return;
+          }
+          invokeLeader(inputSide, aim.unitUid, undefined, { secondUid: here.uid });
+          return;
+        }
+        // Whitethorn Queen: discard already chosen; name an empty controlled circle.
+        if (op === 'revive_coven') {
+          invokeLeader(inputSide, undefined, { r, c }, { discardIndex: aim.discardIndex });
+          return;
+        }
+        if (op === 'claim') {
           invokeLeader(inputSide, undefined, { r, c });
         } else if (here) {
           invokeLeader(inputSide, here.uid, { r, c });
@@ -2673,7 +2859,12 @@ export function Battlefield({
             );
             break;
           case 'useLeader':
-            invokeLeaderRef.current(acting, intent.targetUid, intent.aimPos);
+            invokeLeaderRef.current(acting, intent.targetUid, intent.aimPos, {
+              secondUid: intent.secondUid,
+              pick: intent.pick,
+              seek: intent.seek,
+              discardIndex: intent.discardIndex,
+            });
             break;
           case 'callPower':
             callPowerRef.current(acting, intent.uid, intent.targetUid);
@@ -3434,16 +3625,77 @@ export function Battlefield({
             : aim.kind === 'act'
               ? cardById(findUnit(aim.uid)?.unit.cardId ?? '')?.name ?? 'power'
               : activeHero?.name}{' '}
-          {(aim.kind === 'cast' && aim.card.effect?.op === 'shove') ||
-          (aim.kind === 'leader' && activeHero?.leaderPower?.op === 'slide')
+          {aim.kind === 'leader' && activeHero?.leaderPower?.op === 'copy_kw'
             ? aim.unitUid
-              ? '— name an empty adjacent circle that is not a stronghold.'
-              : '— name an exhausted unit.'
-            : '— name a target on the field.'}{' '}
-          <button type="button" className="dev-link" onClick={() => setAim(null)}>
+              ? '— name the pupil (receives the keywords).'
+              : '— name the teacher (keywords to copy).'
+            : aim.kind === 'leader' && activeHero?.leaderPower?.op === 'revive_coven'
+              ? '— name an empty circle you control that is not a stronghold.'
+              : (aim.kind === 'cast' && aim.card.effect?.op === 'shove') ||
+                  (aim.kind === 'leader' && activeHero?.leaderPower?.op === 'slide')
+                ? aim.unitUid
+                  ? '— name an empty adjacent circle that is not a stronghold.'
+                  : '— name an exhausted unit.'
+                : '— name a target on the field.'}{' '}
+          <button type="button" className="dev-link" onClick={() => { setAim(null); setLeaderChoice(null); }}>
             Cancel
           </button>
         </p>
+      ) : leaderChoice ? (
+        <div className="aim-banner leader-choice" data-testid="leader-choice">
+          {leaderChoice.kind === 'scry3' && (
+            <>
+              <span>Name one for your hand; the rest sink to the bottom.</span>
+              <div className="leader-choice-row">
+                {leaderChoice.cards.map((c, i) => (
+                  <button
+                    key={`${c.id}-${i}`}
+                    type="button"
+                    className="brass-btn"
+                    data-testid={`scry-pick-${i}`}
+                    onClick={() => invokeLeader(inputSide, undefined, undefined, { pick: i })}
+                  >
+                    {c.name}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+          {leaderChoice.kind === 'seek' && (
+            <>
+              <span>Name a kind for the sleeping prophet.</span>
+              <div className="leader-choice-row">
+                <button type="button" className="brass-btn" data-testid="seek-unit" onClick={() => invokeLeader(inputSide, undefined, undefined, { seek: 'unit' })}>
+                  Unit
+                </button>
+                <button type="button" className="brass-btn" data-testid="seek-rite" onClick={() => invokeLeader(inputSide, undefined, undefined, { seek: 'rite' })}>
+                  Spell
+                </button>
+              </div>
+            </>
+          )}
+          {leaderChoice.kind === 'revive' && (
+            <>
+              <span>Name a slain Whitethorn Coven unit.</span>
+              <div className="leader-choice-row">
+                {leaderChoice.cards.map(({ card, index }) => (
+                  <button
+                    key={`${card.id}-${index}`}
+                    type="button"
+                    className="brass-btn"
+                    data-testid={`revive-pick-${index}`}
+                    onClick={() => invokeLeader(inputSide, undefined, undefined, { discardIndex: index })}
+                  >
+                    {card.name}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+          <button type="button" className="dev-link" onClick={() => setLeaderChoice(null)}>
+            Cancel
+          </button>
+        </div>
       ) : selectedHint ? (
         <p className="move-banner" data-testid="move-banner">
           <strong>{selectedHint.name}</strong>

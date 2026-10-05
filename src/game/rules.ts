@@ -39,7 +39,7 @@ export const HANDLED_KEYWORDS: ReadonlySet<string> = new Set([
   // death
   'salvage', 'mourner',
   // flavour / presentation (no rule beyond the sighting & siren)
-  'cryptid', 'gas',
+  'cryptid', 'gas', 'token',
 ]);
 
 const ORTHO = [

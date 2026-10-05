@@ -51,7 +51,11 @@ export type FriendIntent =
   | {
       kind: 'useLeader';
       targetUid?: string;
+      secondUid?: string;
       aimPos?: { r: number; c: number };
+      pick?: number;
+      seek?: 'unit' | 'rite';
+      discardIndex?: number;
     }
   | { kind: 'callPower'; uid: string; targetUid?: string }
   | { kind: 'endRite' }

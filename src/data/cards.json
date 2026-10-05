@@ -305,11 +305,11 @@
     "cost": 3,
     "oath": 0,
     "keywords": [],
-    "text": "Leader. Once in a sitting: pay 3. Name a unit you own. It gains Fast Attack and may act at once. The queen of the hawthorn puts the green on someone and they move before the hour does.",
+    "text": "Leader. Once in a sitting: pay 3. Name a unit you own. It gains Fast Attack, may act at once, and this activation must attack an adjacent enemy if able.",
     "quote": "For I'm to be Queen o' the May, mother, I'm to be Queen o' the May.",
     "quoted": "Alfred, Lord Tennyson, The May Queen (1833)",
     "leaderPower": {
-      "op": "haste"
+      "op": "charge"
     }
   },
   {
@@ -928,12 +928,11 @@
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Leader. Once in a sitting: pay 2. Name a unit you own. It gains +1 power, and you draw a card. The rector lays a word on a living body and keeps the vision.",
+    "text": "Leader. Once in a sitting: pay 2. Look at the top 3 cards of your deck. Put 1 into your hand and the other 2 on the bottom in any order.",
     "quote": "The Monads have no windows, through which anything could come in or go out.",
     "quoted": "Gottfried Wilhelm Leibniz, Monadology (1714)",
     "leaderPower": {
-      "op": "empower_draw",
-      "n": 1
+      "op": "scry3"
     }
   },
   {
@@ -1240,11 +1239,11 @@
     "cost": 3,
     "oath": 0,
     "keywords": [],
-    "text": "Leader. Once in a sitting: pay 3. Name a unit you own. It gains +3 power. The mad monk nails the last icon to a living chest and calls it armor.",
+    "text": "Leader. Once in a sitting: pay 3. Until end of turn, whenever an enemy unit dies, bank 2 Resources.",
     "quote": "Beauty will save the world.",
     "quoted": "Fyodor Dostoevsky, The Idiot (1869)",
     "leaderPower": {
-      "op": "bulwark"
+      "op": "icon_harvest"
     }
   },
   {
@@ -1549,11 +1548,11 @@
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Leader. Once in a sitting: pay 2. Name a unit you own. It stands back up and gains +1 power. The queen of the hedge puts her own back on their feet.",
+    "text": "Leader. Once in a sitting: pay 2. Return a slain Whitethorn Coven unit from your discard to an empty non-stronghold circle you control at 1 power (exhausted).",
     "quote": "I am but the queen of fair Elfland, that am hither come to visit thee.",
     "quoted": "Thomas the Rhymer, Border ballad",
     "leaderPower": {
-      "op": "mend"
+      "op": "revive_coven"
     }
   },
   {
@@ -1860,11 +1859,11 @@
     "cost": 3,
     "oath": 0,
     "keywords": [],
-    "text": "Leader. Once in a sitting: pay 3. Name a unit you own. It gains Fast Attack and may act at once. She throws the switch on a living body and the body clocks in early.",
+    "text": "Leader. Once in a sitting: pay 3. Ready every Mercury Works unit you own.",
     "quote": "Beware; for I am fearless, and therefore powerful.",
     "quoted": "Mary Shelley, Frankenstein (1818)",
     "leaderPower": {
-      "op": "haste"
+      "op": "ready_works"
     }
   },
   {
@@ -2170,12 +2169,11 @@
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Leader. Once in a sitting: pay 2. Name a unit you own. It gains +1 power, and you draw a card. The provost lays a hand on a living body and takes the vision that follows.",
+    "text": "Leader. Once in a sitting: pay 2. Name two units you own. The second gains the first's keywords for the sitting.",
     "quote": "It is brought to birth in the soul on a sudden, as light that is kindled by a leaping spark, and thereafter it nourishes itself.",
     "quoted": "Plato, Seventh Letter",
     "leaderPower": {
-      "op": "empower_draw",
-      "n": 1
+      "op": "copy_kw"
     }
   },
   {
@@ -2484,11 +2482,11 @@
     "cost": 3,
     "oath": 0,
     "keywords": [],
-    "text": "Leader. Once in a sitting: pay 3. Name a unit you own. It gains +3 power. The mad monk nails a black icon to a living chest and calls it armor.",
+    "text": "Leader. Once in a sitting: pay 3. Name a unit you own. It gains Toughness, and the next time it would be slain this sitting, it survives at 1 power instead.",
     "quote": "Pray to God, but row for the shore.",
     "quoted": "Russian proverb",
     "leaderPower": {
-      "op": "bulwark"
+      "op": "last_stand"
     }
   },
   {
@@ -2936,9 +2934,9 @@
     "cost": 3,
     "oath": 0,
     "keywords": [],
-    "text": "Leader. Once in a sitting: pay 3. A unit gains Fast Attack and may act at once.",
+    "text": "Leader. Once in a sitting: pay 3. Name a unit you own. It may act at once, ignores stronghold walls this turn, and if adjacent to an enemy stronghold must strike it if able.",
     "leaderPower": {
-      "op": "haste"
+      "op": "breach"
     },
     "quote": "Fire tests gold; misfortune tests brave men.",
     "quoted": "Seneca, On Providence"
@@ -3370,9 +3368,9 @@
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Leader. Once in a sitting: pay 2. A unit you own gains +3 power.",
+    "text": "Leader. Once in a sitting: pay 2. Name a unit you own. Enemy spells and leader powers cannot choose it this sitting.",
     "leaderPower": {
-      "op": "bulwark"
+      "op": "ward"
     },
     "quote": "The eye, which is called the window of the soul.",
     "quoted": "Leonardo da Vinci"
@@ -3818,10 +3816,9 @@
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Leader. Once in a sitting: pay 2. A unit gains +1 power, and you draw a card.",
+    "text": "Leader. Once in a sitting: pay 2. Every Sons of the Green Lion unit you own gains +1 power.",
     "leaderPower": {
-      "op": "empower_draw",
-      "n": 1
+      "op": "green_surge"
     },
     "quote": "In wildness is the preservation of the world.",
     "quoted": "Henry David Thoreau, Walking"
@@ -4268,12 +4265,12 @@
     "faction": "The Hermetic Circle",
     "kind": "hero",
     "rarity": "patron",
-    "cost": 4,
+    "cost": 3,
     "oath": 0,
     "keywords": [],
-    "text": "Leader. Once in a sitting: pay 4 and return a unit to its owner's hand.",
+    "text": "Leader. Once in a sitting: pay 3. Transform an enemy unit into a 1-power exhausted Homunculus for the sitting.",
     "leaderPower": {
-      "op": "bounce"
+      "op": "transmute"
     },
     "quote": "Those who know do not speak; those who speak do not know.",
     "quoted": "Laozi, Tao Te Ching"
@@ -4287,10 +4284,9 @@
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Leader. Once in a sitting: pay 2 and draw 2 cards.",
+    "text": "Leader. Once in a sitting: pay 2. Steal 2 Resources from the foe (or bank 2 if they have fewer).",
     "leaderPower": {
-      "op": "draw",
-      "n": 2
+      "op": "steal_res"
     },
     "quote": "All that glisters is not gold.",
     "quoted": "William Shakespeare, The Merchant of Venice"
@@ -4529,9 +4525,9 @@
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Leader. Once in a sitting: pay 2. A unit you own stands back up and gains +1 power.",
+    "text": "Leader. Once in a sitting: pay 2. Until end of turn, when a unit you own dies, draw 1 and bank 1 Resource.",
     "leaderPower": {
-      "op": "mend"
+      "op": "death_tithe"
     },
     "quote": "Blessed are they that mourn: for they shall be comforted.",
     "quoted": "Matthew 5:4"
@@ -4966,10 +4962,9 @@
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Leader of the Columbia Lodge. Once in a sitting: pay 2 and draw 2 cards. The sleeping prophet names what the rite still hides.",
+    "text": "Leader of the Columbia Lodge. Once in a sitting: pay 2. Name unit or spell; reveal cards from your deck until you find one of that kind, put it into your hand, and shuffle the rest back.",
     "leaderPower": {
-      "op": "draw",
-      "n": 2
+      "op": "seek"
     },
     "quote": "Mind is the builder.",
     "quoted": "Edgar Cayce"

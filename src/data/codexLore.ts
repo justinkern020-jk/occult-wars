@@ -78,7 +78,7 @@ export const CARD_LORE: Record<string, string> = {
   the_good_peoples_cup:
     "People in Ireland and Scotland spoke of the fairies by flattering names, 'the Good People' or 'the Gentry', so as not to offend them. A drop of milk or the first of the drink was often left out for them.",
   the_may_queen:
-    "May Eve and Bealtaine were thresholds when the fairies were most abroad; villages crowned a May Queen and decked May bushes against them. Tennyson's \"The May Queen\" was one of the best-loved poems of its century.",
+    "May Eve and Bealtaine were thresholds when the fairies were most abroad; villages crowned a May Queen and decked May bushes against them. Tennyson's \"The May Queen\" was one of the best-loved poems of its century. Once in a sitting she sends a fighter charging: Fast Attack, act at once, and they must strike an adjacent foe if able.",
   // ── The Helix Bureau ──
   aether_diver:
     'Nineteenth-century physicists believed light travelled through a luminiferous aether filling all space. The Michelson–Morley experiment of 1887 found no trace of it, and relativity made it unnecessary.',
@@ -148,7 +148,7 @@ export const CARD_LORE: Record<string, string> = {
   faculty_advance:
     "Aristotle notes in the Nicomachean Ethics that money is called nomisma because it exists by nomos, custom or law, and not by nature. The Faculty's bursar takes that as licence to lend against workings not yet begun, advancing a coin and a plate to any fellow who signs the book.",
   rector_of_the_monad:
-    "Leibniz wrote that monads 'have no windows', nothing can enter or leave them. Each unfolds its own nature in a harmony set in advance by God.",
+    "Leibniz wrote that monads 'have no windows', nothing can enter or leave them. Each unfolds its own nature in a harmony set in advance by God. The Rector peeks at the top three plates of the well, keeps one, and sinks the other two.",
   // ── The Iconostasy ──
   the_mad_hieromonk:
     'A hieromonk is an Orthodox monk who is also an ordained priest. The Sayings of the Desert Fathers gathers the words of the hermits of the Egyptian desert in the fourth and fifth centuries.',
@@ -183,7 +183,7 @@ export const CARD_LORE: Record<string, string> = {
   coals_of_the_stove:
     'Theophan the Recluse (1815–1894) was a Russian bishop who gave up his see to live in seclusion and write on prayer. Much of his advice was gathered in The Art of Prayer.',
   father_of_the_last_icon:
-    "'Beauty will save the world' is an idea attributed to Prince Myshkin in Dostoevsky's The Idiot (1869). The novel's 'holy fool' hero is a type long honoured in Russian piety.",
+    "'Beauty will save the world' is an idea attributed to Prince Myshkin in Dostoevsky's The Idiot (1869). The novel's 'holy fool' hero is a type long honoured in Russian piety. Once in a sitting the Father opens the last icon: every enemy death banks 2 Resources until the turn ends.",
   // ── The Briar Sidhe ──
   cailleach_of_the_thorn:
     "The Cailleach is the divine hag of Irish and Scottish myth, a winter power said to have shaped mountains and to keep the deer. Clooth-na-Bare in Yeats's line is a form of Cailleach Bhéarra, the Hag of Beara; his note says she roamed the world seeking a lake deep enough to drown her fairy life, and found it in little Lough Ia in Sligo.",
@@ -218,7 +218,7 @@ export const CARD_LORE: Record<string, string> = {
   rowan_nail:
     'In Scotland and Ireland the rowan, or mountain ash, was a charm against witches and fairies, tied with red thread over doors and byres. The Scottish rhyme says rowan and red thread put the witches to their speed.',
   the_whitethorn_queen:
-    'In the ballad of Thomas the Rhymer (Child Ballad 37) the Queen of Elfland meets Thomas under the Eildon tree and takes him away for seven years.',
+    'In the ballad of Thomas the Rhymer (Child Ballad 37) the Queen of Elfland meets Thomas under the Eildon tree and takes him away for seven years. Once in a sitting she returns a slain Whitethorn Coven unit from the discard to a circle she holds, at 1 power and exhausted.',
   // ── The Mercury Works ──
   coil_saint:
     "Michael Faraday discovered electromagnetic induction in 1831, the principle behind every dynamo and transformer. A blacksmith's son with little schooling, he became the greatest experimenter of his age.",
@@ -253,7 +253,7 @@ export const CARD_LORE: Record<string, string> = {
   spare_cathode:
     'Thales of Miletus, of the sixth century BC, is remembered as the first Greek philosopher. Aristotle reports that he thought the lodestone had a soul, because it moves iron.',
   director_voss:
-    "Mary Shelley's Frankenstein (1818) was begun at the Villa Diodati in 1816 during a ghost-story contest with Byron. Its subtitle is The Modern Prometheus.",
+    "Mary Shelley's Frankenstein (1818) was begun at the Villa Diodati in 1816 during a ghost-story contest with Byron. Its subtitle is The Modern Prometheus. Once in a sitting she throws the switch and every Mercury Works unit you own stands ready.",
   // ── The Closed Proof ──
   geometer_of_the_circle:
     "Valerius Maximus tells that when Syracuse fell in 212 BC, Archimedes was bent over figures in the dust and begged the Roman soldier not to disturb them. The Closed Proof's Seer of the Threshold keeps that plea as a ward; she reads a blow in the dark before it is thrown, and the plate beside her strikes on what she sees.",
@@ -288,7 +288,7 @@ export const CARD_LORE: Record<string, string> = {
   loan_of_the_faculty:
     "Seneca's first letter to Lucilius warns that nothing is truly ours except time, which most people squander while guarding their money. The Closed Proof's lending office turns the advice around, advancing coin and a plate freely and collecting the interest later in hours, out of the borrower's own working.",
   provost_of_the_azoth:
-    'In the Seventh Letter, whose authorship scholars still debate, Plato says the highest knowledge cannot be written down but is kindled in the soul all at once, like light from a leaping spark. The Provost of the Azoth teaches only that way: a hand laid on a living fellow, a sudden strengthening, and a vision the provost keeps as fee.',
+    'In the Seventh Letter, whose authorship scholars still debate, Plato says the highest knowledge cannot be written down but is kindled in the soul all at once, like light from a leaping spark. The Provost of the Azoth teaches only that way: keywords leap from one living fellow onto another for the sitting.',
   // ── The Birch Vigil ──
   volkhv_of_the_birches:
     'The volkhvy were the pagan priest-sorcerers of early Rus. The Primary Chronicle tells how one foretold that Prince Oleg would die by his horse, the tale Pushkin retold in 1822.',
@@ -323,7 +323,7 @@ export const CARD_LORE: Record<string, string> = {
   stove_of_the_hut:
     "Baba Yaga's hut stands on chicken legs, and the hero bids it turn its back to the forest and its front to him. Alexander Afanasyev published his great collection of Russian folktales from 1855.",
   the_mad_starets:
-    'A starets is an elder of Orthodox monasticism, sought out for spiritual counsel. Grigori Rasputin was popularly called one, though he never held any such office.',
+    'A starets is an elder of Orthodox monasticism, sought out for spiritual counsel. Grigori Rasputin was popularly called one, though he never held any such office. Once in a sitting he grants a fighter Toughness and a last stand: the next time it would be slain, it survives at 1 power.',
   // ── The Vril Syndicate ──
   coil_novice:
     "In Plato's Theaetetus Socrates tells the young mathematician Theaetetus that wonder is where philosophy begins, and that whoever made Iris the child of Thaumas, 'Wonder', knew his genealogy. A Syndicate novice begins with a single coil lit in the chest at initiation: cheap, but enough to keep him on his feet after the first blow.",
@@ -374,7 +374,7 @@ export const CARD_LORE: Record<string, string> = {
   the_rune_colonel:
     "Chapter 7 of the Tao Te Ching says the sage puts himself last and so comes first. The Rune Colonel commands the Syndicate's line from behind it, and his one great order costs a soldier of his own: the man is unmade, and the blast takes two from everyone beside him.",
   the_iron_saint:
-    "Seneca's essay On Providence argues that the gods try good men with hardship as fire tries gold. The Iron Saint is the Syndicate's patron of that idea, a figure of riveted plate said to have been forged rather than born; once in a sitting the saint lays a hand on a soldier, who moves and strikes at once.",
+    "Seneca's essay On Providence argues that the gods try good men with hardship as fire tries gold. The Iron Saint is the Syndicate's patron of that idea, a figure of riveted plate said to have been forged rather than born; once in a sitting the saint sends a soldier through stronghold walls, and if a foe's door stands adjacent the soldier must strike it.",
   vril_wyrm:
     "G. K. Chesterton's essay in Tremendous Trifles (1909) defends fairy tales: children already know the dragon, the tale gives them the St. George to kill it.",
   foo_fighter:
@@ -427,7 +427,7 @@ export const CARD_LORE: Record<string, string> = {
   leaden_egg:
     "Milton's sonnet on his blindness, written in the 1650s, ends with the consolation that they also serve who only stand and wait. The 'philosophical egg' was the sealed vessel in which alchemists slowly cooked their matter, and the Lead Dawn's leaden egg rewards the same patience with two cards and two resources when it is cracked.",
   the_leaden_stare:
-    'Leonardo da Vinci called the eye the window of the soul in his notes comparing painting with poetry, gathered after his death into the Treatise on Painting. The Leaden Stare is a Lead Dawn patron whose gaze weighs like the metal, and once in a sitting it settles on one of its own fighters and adds three to its power.',
+    'Leonardo da Vinci called the eye the window of the soul in his notes comparing painting with poetry, gathered after his death into the Treatise on Painting. The Leaden Stare is a Lead Dawn patron whose gaze weighs like the metal, and once in a sitting it wards one of its own fighters so enemy spells and leader powers cannot choose them.',
   the_birch_crone:
     "The Malian writer and ethnologist Amadou Hampâté Bâ told UNESCO in 1960 that in Africa, when an old man dies, a library burns, pleading for oral tradition to be written down. The Birch Crone is the Lead Dawn's keeper of such memory; she knows every path through the grove and can slide a spent fighter onto open ground before the enemy notices.",
   black_shuck:
@@ -482,7 +482,7 @@ export const CARD_LORE: Record<string, string> = {
   false_vintage:
     "Phaedrus, a freedman of the emperor Augustus, put Aesop's fables into Latin verse, and warns in one of them that first appearances deceive many. The false vintage is the Sons' counterfeit wine; whoever drinks is healed to full, then finds every gift gone and a single point of power left.",
   the_green_sovereign:
-    "Thoreau's essay 'Walking', published in the Atlantic Monthly in June 1862 just after his death, declares that in wildness is the preservation of the world. The Green Sovereign wears that wildness as a crown, and once in a sitting lays a hand on a follower, who grows stronger, while a card comes to the court.",
+    "Thoreau's essay 'Walking', published in the Atlantic Monthly in June 1862 just after his death, declares that in wildness is the preservation of the world. The Green Sovereign wears that wildness as a crown, and once in a sitting every Son of the Green Lion on the field surges with +1 power.",
   queen_of_the_hedgerow:
     'Elizabeth I spoke to her troops at Tilbury in August 1588, as the Spanish Armada threatened invasion, saying she had the heart and stomach of a king.',
   green_man:
@@ -537,9 +537,9 @@ export const CARD_LORE: Record<string, string> = {
   carve_the_seal:
     "The verse goes on 'for love is strong as death', and the seal in it is the signet a person wore and pressed into wax as a mark of self. Carve the seal cuts a sigil into a fighter, making it two points stronger but so heavy with the mark that it cannot move or strike on its next rite.",
   the_mute_alchemist:
-    "Chapter 56 of the Tao Te Ching holds that those who know do not speak, and those who speak do not know. The Mute Alchemist leads the Circle without a word, and once in a sitting, at great cost, sends a fighter back to its owner's hand with a single gesture.",
+    "Chapter 56 of the Tao Te Ching holds that those who know do not speak, and those who speak do not know. The Mute Alchemist leads the Circle without a word, and once in a sitting transforms an enemy fighter into a 1-power Homunculus for the sitting.",
   the_gold_fraud:
-    'Alchemists who promised gold to princes risked their necks. Edward Kelley, who claimed to have transmuted metal before Emperor Rudolf II, died a prisoner in Bohemia around 1597.',
+    'Alchemists who promised gold to princes risked their necks. Edward Kelley, who claimed to have transmuted metal before Emperor Rudolf II, died a prisoner in Bohemia around 1597. Once in a sitting the Fraud steals 2 Resources from the foe, or banks 2 if they have fewer.',
   spring_heeled_jack:
     'Spring-heeled Jack was a leaping figure reported around London from 1837, said to have clawed hands and to breathe blue flame. In 1838 Jane Alsop told magistrates he had attacked her at her door.',
   mirror_hag:
@@ -572,7 +572,7 @@ export const CARD_LORE: Record<string, string> = {
   cement_shoes:
     "Longfellow's 'Retribution' renders an epigram by the seventeenth-century German poet Friedrich von Logau, itself a version of an old Greek saying that the mills of the gods grind slowly. Cement shoes are the Assembly's slower justice: the named plate is fixed where it stands and cannot move or attack on its next rite.",
   the_widowed_saint:
-    "The promise that those who mourn shall be comforted is the second of the Beatitudes as Matthew gives them in the Sermon on the Mount. The Widowed Saint is the Assembly's patron of the bereaved, a veiled figure who walks the wakes, and once in a sitting she raises one of her own back to its feet, stronger than before.",
+    "The promise that those who mourn shall be comforted is the second of the Beatitudes as Matthew gives them in the Sermon on the Mount. The Widowed Saint is the Assembly's patron of the bereaved, a veiled figure who walks the wakes, and once in a sitting every death on her side draws a card and banks a Resource until the turn ends.",
   the_laughing_coroner:
     "In Book IX of the Meditations Marcus Aurelius tells himself not to despise death but to welcome it as one of the things nature wills. The Assembly's laughing coroner has signed too many certificates to take death seriously; once in a sitting he reopens the last file in the discard, hands it back, and draws another.",
   grave_ape:
@@ -627,7 +627,7 @@ export const CARD_LORE: Record<string, string> = {
   mojo_hand:
     "A mojo, or mojo hand, is a small cloth charm bag of hoodoo, filled with roots, herbs and curios. Muddy Waters made 'Got My Mojo Working' famous in the late 1950s.",
   edgar_cayce:
-    'Edgar Cayce (1877–1945), "the Sleeping Prophet", gave thousands of trance readings on health and past lives, many of them from Virginia Beach. His readings are kept by the association he founded.',
+    'Edgar Cayce (1877–1945), "the Sleeping Prophet", gave thousands of trance readings on health and past lives, many of them from Virginia Beach. His readings are kept by the association he founded. Once in a sitting he names unit or spell, reveals from the deck until he finds one, and puts it in hand.',
   edgar_allan_poe:
     'Edgar Allan Poe (1809–1849) shaped the Gothic tale, the detective story and the modern short story. "The Raven" made him famous when it was published in January 1845.',
   mothman:

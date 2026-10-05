@@ -37,6 +37,14 @@ export type EffectUnit = {
   pendingGain?: number;
   /** Lasting power earned in play (Battlefield coin marker). */
   gained?: number;
+  /** Enemy spells and leader powers cannot choose this unit (sitting). */
+  warded?: boolean;
+  /** Next lethal blow this sitting leaves it at 1 power instead (once). */
+  lastStand?: boolean;
+  /** May storm / must strike an adjacent enemy stronghold this turn. */
+  breach?: boolean;
+  /** This activation must attack an adjacent enemy if able. */
+  mustStrike?: boolean;
 };
 
 /** Floating damage pip (e.g. "-2") emitted by effect damage. */
@@ -69,6 +77,14 @@ export type EffectCtx = {
   tiles?: Tile[][];
   /** Damage pips emitted while resolving (for floating -N numbers). */
   pips?: DamagePip[];
+  /**
+   * Until-end-of-turn auras from leader workings. Each openRite decrements
+   * the opens counter (2 ≈ one full turn for both chairs), then clears.
+   */
+  iconHarvestSide?: Side;
+  iconHarvestOpens?: number;
+  deathTitheSide?: Side;
+  deathTitheOpens?: number;
 };
 
 export type AimPos = { r: number; c: number };
@@ -156,8 +172,18 @@ export function destroyUnit(ctx: EffectCtx, uid: string, seen?: Set<string>) {
   if (visited.has(uid)) return;
   const u = ctx.units[uid];
   if (!u) return;
+  // Mad Starets: the next time it would be slain this sitting, it survives at 1.
+  if (u.lastStand) {
+    u.lastStand = false;
+    u.power = Math.max(1, u.power);
+    if (u.power < 1) u.power = 1;
+    u.power = 1;
+    pushLog(ctx, `${u.name} refuses the grave and stands at 1 power.`);
+    return;
+  }
   visited.add(uid);
   const pos = findPos(ctx, uid);
+  const deadSide = u.side;
   const def = cardById(u.cardId);
   // A silenced unit (Lion's Mask / False Vintage) has lost its abilities.
   const burst = u.silenced ? 0 : (def?.death ?? 0);
@@ -202,6 +228,17 @@ export function destroyUnit(ctx: EffectCtx, uid: string, seen?: Set<string>) {
   );
   delete ctx.units[uid];
   pushLog(ctx, `${u.name} is unmade.`);
+  // Father of the Last Icon: enemy deaths bank 2 for the icon's chair.
+  if (ctx.iconHarvestSide && deadSide !== ctx.iconHarvestSide && (ctx.iconHarvestOpens ?? 0) > 0) {
+    bankLoyalty(ctx, ctx.iconHarvestSide, 2);
+    pushLog(ctx, `The last icon banks 2 from the fall.`);
+  }
+  // Widowed Saint: your deaths draw 1 and bank 1.
+  if (ctx.deathTitheSide === deadSide && (ctx.deathTitheOpens ?? 0) > 0) {
+    drawCards(ctx, deadSide, 1);
+    bankLoyalty(ctx, deadSide, 1);
+    pushLog(ctx, `The widow's tithe: draw 1 and bank 1.`);
+  }
   if (deathBank > 0) {
     bankLoyalty(ctx, u.side, deathBank);
     pushLog(ctx, `${u.name} leaves ${deathBank} resources.`);
@@ -341,6 +378,7 @@ export function resolveEffect(
   const needTarget = () => {
     if (!target) return 'Name a unit on the field.';
     if (hasKeyword(target, 'veiled')) return 'That unit cannot be named.';
+    if (target.warded && target.side !== side) return 'That unit is warded against your workings.';
     return null;
   };
 
@@ -655,7 +693,80 @@ const LEADER_AIMED = new Set([
   'snuff',
   'slide',
   'trepan',
+  'ward',
+  'last_stand',
+  'charge',
+  'breach',
+  'copy_kw',
+  'revive_coven',
+  'transmute',
 ]);
+
+/** Extra choices for multi-step leader workings. */
+export type LeaderOpts = {
+  /** Provost: the pupil that receives the teacher's keywords. */
+  secondUid?: string | null;
+  /** Rector: which of the top 3 (0..2) goes to hand. */
+  pick?: number;
+  /** Rector: order of the other two on the bottom (indices into the remaining). */
+  bottom?: number[];
+  /** Cayce: search for a unit or a spell (rite/device). */
+  seek?: 'unit' | 'rite';
+  /** Whitethorn Queen: index into your discard of the slain coven unit. */
+  discardIndex?: number;
+};
+
+function applyCopiedKeywords(u: EffectUnit, kws: string[]) {
+  const next = [...u.keywords];
+  for (const k of kws) {
+    if (!next.includes(k)) next.push(k);
+    if (k === 'tough') u.tough = true;
+    if (k === 'fast') u.fast = true;
+    if (k === 'shutter') u.shutter = true;
+  }
+  u.keywords = next;
+}
+
+function readyUnit(u: EffectUnit) {
+  u.sick = false;
+  if (!u.powder) {
+    u.moved = false;
+    u.attacked = false;
+  }
+}
+
+function unitFaction(u: EffectUnit): string {
+  return cardById(u.cardId)?.faction ?? '';
+}
+
+/** Tick until-end-of-turn leader auras (call from each openRite). */
+export function tickLeaderAuras(ctx: EffectCtx) {
+  if ((ctx.iconHarvestOpens ?? 0) > 0) {
+    ctx.iconHarvestOpens = (ctx.iconHarvestOpens ?? 0) - 1;
+    if (ctx.iconHarvestOpens <= 0) {
+      ctx.iconHarvestOpens = 0;
+      ctx.iconHarvestSide = undefined;
+    }
+  }
+  if ((ctx.deathTitheOpens ?? 0) > 0) {
+    ctx.deathTitheOpens = (ctx.deathTitheOpens ?? 0) - 1;
+    if (ctx.deathTitheOpens <= 0) {
+      ctx.deathTitheOpens = 0;
+      ctx.deathTitheSide = undefined;
+    }
+  }
+  // Breach / mustStrike last one rite for the unit's chair.
+  for (const u of Object.values(ctx.units)) {
+    if (u.breach || u.mustStrike) {
+      // Cleared when the side that does not own them becomes active? Cleared on
+      // every openRite for units whose side is not the opening side (their turn ended).
+      if (u.side !== ctx.side) {
+        u.breach = false;
+        u.mustStrike = false;
+      }
+    }
+  }
+}
 
 /** Once-per-sitting leader power. Returns error string or null on success. */
 export function resolveLeaderPower(
@@ -663,6 +774,7 @@ export function resolveLeaderPower(
   leader: Card,
   targetUid?: string | null,
   aimPos?: AimPos | null,
+  opts: LeaderOpts = {},
 ): string | null {
   const power = leader.leaderPower;
   if (!power) return 'This leader has no working.';
@@ -674,26 +786,38 @@ export function resolveLeaderPower(
   const op = power.op;
   const n = power.n ?? 0;
 
-  if (op === 'draw') {
+  const pay = () => {
     ctx.loyalty[side] -= cost;
+  };
+  const guardTarget = (u: EffectUnit | undefined, needOwn?: boolean, needFoe?: boolean): string | null => {
+    if (!u) return 'Name a unit on the field.';
+    if (hasKeyword(u, 'veiled')) return 'That unit cannot be named.';
+    if (u.warded && u.side !== side) return 'That unit is warded against your workings.';
+    if (needOwn && u.side !== side) return 'Name a unit you own.';
+    if (needFoe && u.side === side) return 'Name an enemy unit.';
+    return null;
+  };
+
+  if (op === 'draw') {
+    pay();
     drawCards(ctx, side, n);
     pushLog(ctx, `${leader.name} draws ${n}.`);
     return null;
   }
   if (op === 'master') {
-    ctx.loyalty[side] -= cost;
+    pay();
     drawCards(ctx, side, 2);
     bankLoyalty(ctx, side, 2);
     pushLog(ctx, `${leader.name} draws 2 and banks 2.`);
     return null;
   }
   if (op === 'tide') {
-    ctx.loyalty[side] -= cost;
+    pay();
     tide(ctx, side, leader.name);
     return null;
   }
   if (op === 'playback') {
-    ctx.loyalty[side] -= cost;
+    pay();
     const disc = ctx.discard[side];
     for (let i = disc.length - 1; i >= 0; i--) {
       const c = disc[i];
@@ -709,7 +833,7 @@ export function resolveLeaderPower(
     return null;
   }
   if (op === 'grave') {
-    ctx.loyalty[side] -= cost;
+    pay();
     const c = ctx.discard[side].pop();
     if (c) {
       if (ctx.hand[side].length < HAND_CAP) ctx.hand[side].push(c);
@@ -727,39 +851,272 @@ export function resolveLeaderPower(
     if (tile && (tile.kind === 'void' || tile.kind === 'stronghold')) {
       return 'Claim an empty circle that is not a stronghold.';
     }
-    ctx.loyalty[side] -= cost;
+    pay();
     ctx.control[r][c] = side;
     pushLog(ctx, `${leader.name} claims the circle.`);
     return null;
   }
   if (op === 'snuff') {
-    if (!target) return 'Name a unit.';
-    if (hasKeyword(target, 'veiled')) return 'That unit cannot be named.';
-    ctx.loyalty[side] -= cost;
-    target.shutter = true;
-    target.tough = true;
-    if (!target.keywords.includes('shutter')) target.keywords = [...target.keywords, 'shutter'];
-    if (!target.keywords.includes('tough')) target.keywords = [...target.keywords, 'tough'];
-    pushLog(ctx, `${target.name} gains Shutter and Toughness.`);
+    const err = guardTarget(target);
+    if (err) return err;
+    pay();
+    target!.shutter = true;
+    target!.tough = true;
+    if (!target!.keywords.includes('shutter')) target!.keywords = [...target!.keywords, 'shutter'];
+    if (!target!.keywords.includes('tough')) target!.keywords = [...target!.keywords, 'tough'];
+    pushLog(ctx, `${target!.name} gains Shutter and Toughness.`);
     return null;
   }
 
+  // ── Redesigned unique workings ──────────────────────────────────────────
+  if (op === 'green_surge') {
+    pay();
+    let nHit = 0;
+    for (const u of Object.values(ctx.units)) {
+      if (u.side !== side) continue;
+      if (unitFaction(u) !== 'Sons of the Green Lion') continue;
+      u.power += 1;
+      u.maxPower += 1;
+      addGain(u, 1);
+      nHit += 1;
+    }
+    pushLog(ctx, nHit ? `${leader.name} surges ${nHit} Sons of the Green Lion (+1 power).` : `${leader.name} finds no Sons of the Green Lion on the field.`);
+    return null;
+  }
+  if (op === 'ready_works') {
+    pay();
+    let nHit = 0;
+    for (const u of Object.values(ctx.units)) {
+      if (u.side !== side) continue;
+      if (unitFaction(u) !== 'The Mercury Works') continue;
+      readyUnit(u);
+      nHit += 1;
+    }
+    pushLog(ctx, nHit ? `${leader.name} readies ${nHit} Mercury Works units.` : `${leader.name} finds no Mercury Works units on the field.`);
+    return null;
+  }
+  if (op === 'steal_res') {
+    pay();
+    const other = foe(side);
+    const take = Math.min(2, ctx.loyalty[other]);
+    ctx.loyalty[other] -= take;
+    bankLoyalty(ctx, side, 2);
+    pushLog(
+      ctx,
+      take >= 2
+        ? `${leader.name} steals 2 Resources.`
+        : `${leader.name} banks 2 Resources (the foe had only ${take}).`,
+    );
+    return null;
+  }
+  if (op === 'icon_harvest') {
+    pay();
+    ctx.iconHarvestSide = side;
+    ctx.iconHarvestOpens = 2;
+    pushLog(ctx, `${leader.name} opens the last icon: enemy deaths bank 2 this turn.`);
+    return null;
+  }
+  if (op === 'death_tithe') {
+    pay();
+    ctx.deathTitheSide = side;
+    ctx.deathTitheOpens = 2;
+    pushLog(ctx, `${leader.name} walks the wakes: your deaths draw 1 and bank 1 this turn.`);
+    return null;
+  }
+  if (op === 'scry3') {
+    const deck = ctx.deck[side];
+    if (deck.length === 0) return 'Your well is dry.';
+    pay();
+    const top = deck.splice(0, Math.min(3, deck.length));
+    const pick = Math.max(0, Math.min(opts.pick ?? 0, top.length - 1));
+    const chosen = top[pick]!;
+    const rest = top.filter((_, i) => i !== pick);
+    // Optional reorder of the bottom cards.
+    if (opts.bottom && opts.bottom.length === rest.length) {
+      const ordered = opts.bottom.map((i) => rest[i]).filter(Boolean) as Card[];
+      if (ordered.length === rest.length) rest.splice(0, rest.length, ...ordered);
+    }
+    if (ctx.hand[side].length < HAND_CAP) ctx.hand[side].push(chosen);
+    else ctx.discard[side].push(chosen);
+    deck.push(...rest);
+    pushLog(ctx, `${leader.name} takes ${chosen.name} from the top of the well${rest.length ? `; ${rest.map((c) => c.name).join(' and ')} sink to the bottom` : ''}.`);
+    return null;
+  }
+  if (op === 'seek') {
+    const kind = opts.seek ?? 'unit';
+    const deck = ctx.deck[side];
+    if (deck.length === 0) return 'Your well is dry.';
+    const match = (c: Card) => (kind === 'unit' ? c.kind === 'unit' : c.kind === 'rite' || c.kind === 'device');
+    pay();
+    const revealed: Card[] = [];
+    let hit: Card | null = null;
+    while (deck.length) {
+      const c = deck.shift()!;
+      if (!hit && match(c)) {
+        hit = c;
+        break;
+      }
+      revealed.push(c);
+    }
+    // Shuffle revealed (misses) back into the remaining deck.
+    const rest = [...revealed, ...deck];
+    for (let i = rest.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const t = rest[i]!;
+      rest[i] = rest[j]!;
+      rest[j] = t;
+    }
+    ctx.deck[side] = rest;
+    if (hit) {
+      if (ctx.hand[side].length < HAND_CAP) ctx.hand[side].push(hit);
+      else ctx.discard[side].push(hit);
+      pushLog(ctx, `${leader.name} names a ${kind === 'unit' ? 'unit' : 'spell'} and finds ${hit.name}.`);
+    } else {
+      pushLog(ctx, `${leader.name} names a ${kind === 'unit' ? 'unit' : 'spell'} and finds none.`);
+    }
+    return null;
+  }
+  if (op === 'copy_kw') {
+    const err = guardTarget(target, true);
+    if (err) return err;
+    const pupil = opts.secondUid ? ctx.units[opts.secondUid] : undefined;
+    const err2 = guardTarget(pupil, true);
+    if (err2) return 'Name a second unit you own.';
+    if (pupil!.uid === target!.uid) return 'Name two different units.';
+    pay();
+    applyCopiedKeywords(pupil!, [...target!.keywords]);
+    pushLog(ctx, `${leader.name} copies ${target!.name}'s keywords onto ${pupil!.name}.`);
+    return null;
+  }
+  if (op === 'ward') {
+    const err = guardTarget(target, true);
+    if (err) return err;
+    pay();
+    target!.warded = true;
+    pushLog(ctx, `${target!.name} is warded against enemy spells and leader powers.`);
+    return null;
+  }
+  if (op === 'last_stand') {
+    const err = guardTarget(target, true);
+    if (err) return err;
+    pay();
+    target!.tough = true;
+    if (!target!.keywords.includes('tough')) target!.keywords = [...target!.keywords, 'tough'];
+    target!.lastStand = true;
+    pushLog(ctx, `${target!.name} gains Toughness and a last stand.`);
+    return null;
+  }
+  if (op === 'charge') {
+    const err = guardTarget(target, true);
+    if (err) return err;
+    pay();
+    if (target!.sick && !target!.powder) {
+      target!.moved = false;
+      target!.attacked = false;
+    }
+    target!.sick = false;
+    target!.fast = true;
+    if (!target!.keywords.includes('fast')) target!.keywords = [...target!.keywords, 'fast'];
+    target!.mustStrike = true;
+    pushLog(ctx, `${target!.name} gains Fast Attack, may act at once, and must attack if able.`);
+    return null;
+  }
+  if (op === 'breach') {
+    const err = guardTarget(target, true);
+    if (err) return err;
+    pay();
+    readyUnit(target!);
+    target!.breach = true;
+    pushLog(ctx, `${target!.name} ignores stronghold walls and must strike an enemy stronghold if able.`);
+    return null;
+  }
+  if (op === 'revive_coven') {
+    if (!aimPos) return 'Name an empty circle you control.';
+    const { r, c } = aimPos;
+    if (ctx.board[r][c]) return 'That circle is occupied.';
+    if (ctx.control[r]?.[c] !== side) return 'Claim a circle you control.';
+    const tile = ctx.tiles?.[r]?.[c];
+    if (tile && (tile.kind === 'void' || tile.kind === 'stronghold')) {
+      return 'Return them to an empty circle that is not a stronghold.';
+    }
+    const disc = ctx.discard[side];
+    let idx = opts.discardIndex;
+    if (idx == null || idx < 0 || idx >= disc.length) {
+      idx = disc.findIndex((card) => card.kind === 'unit' && card.faction === 'The Whitethorn Coven');
+    }
+    if (idx < 0 || idx >= disc.length) return 'No Whitethorn Coven unit lies in your discard.';
+    const card = disc[idx]!;
+    if (card.kind !== 'unit' || card.faction !== 'The Whitethorn Coven') {
+      return 'Name a Whitethorn Coven unit in your discard.';
+    }
+    pay();
+    disc.splice(idx, 1);
+    const uid = `rev_${Math.random().toString(36).slice(2, 9)}`;
+    ctx.units[uid] = {
+      uid,
+      cardId: card.id,
+      name: card.name,
+      side,
+      power: 1,
+      maxPower: 1,
+      loyalty: card.cost,
+      keywords: [...card.keywords],
+      sick: true,
+      moved: true,
+      attacked: true,
+      tough: card.keywords.includes('tough'),
+      fast: card.keywords.includes('fast'),
+      shutter: card.keywords.includes('shutter'),
+    };
+    ctx.board[r][c] = uid;
+    pushLog(ctx, `${leader.name} returns ${card.name} to the hedge at 1 power, exhausted.`);
+    return null;
+  }
+  if (op === 'transmute') {
+    const err = guardTarget(target, false, true);
+    if (err) return err;
+    pay();
+    const name = target!.name;
+    target!.cardId = 'homunculus_token';
+    target!.name = 'Homunculus';
+    target!.power = 1;
+    target!.maxPower = 1;
+    target!.loyalty = 0;
+    target!.keywords = ['token'];
+    target!.tough = false;
+    target!.fast = false;
+    target!.shutter = false;
+    target!.silenced = true;
+    target!.warded = false;
+    target!.lastStand = false;
+    target!.breach = false;
+    target!.mustStrike = false;
+    target!.sick = true;
+    target!.moved = true;
+    target!.attacked = true;
+    pushLog(ctx, `${leader.name} transforms ${name} into a Homunculus.`);
+    return null;
+  }
+
+  // ── Legacy aimed workings (kept for any leftover plates) ────────────────
   if (!LEADER_AIMED.has(op) && op !== 'bounce') {
     pushLog(ctx, `${leader.name} works (${op}).`);
-    ctx.loyalty[side] -= cost;
+    pay();
     return null;
   }
 
-  if (!target) return 'Name a unit on the field.';
-  if (hasKeyword(target, 'veiled')) return 'That unit cannot be named.';
+  {
+    const err = guardTarget(target);
+    if (err) return err;
+  }
 
   if (op === 'martyr') {
-    if (target.side !== side) return 'Unmake a unit you own.';
-    const pos = findPos(ctx, target.uid);
+    if (target!.side !== side) return 'Unmake a unit you own.';
+    const pos = findPos(ctx, target!.uid);
     const adj = pos ? neighborsOf(ctx, pos.r, pos.c).map((u) => u.uid) : [];
-    ctx.loyalty[side] -= cost;
-    const name = target.name;
-    destroyUnit(ctx, target.uid);
+    pay();
+    const name = target!.name;
+    destroyUnit(ctx, target!.uid);
     for (const uid of adj) {
       const u = ctx.units[uid];
       if (!u) continue;
@@ -770,54 +1127,52 @@ export function resolveLeaderPower(
     pushLog(ctx, `${leader.name} martyrs ${name}.`);
     return null;
   }
-  if (['mend', 'haste', 'bulwark', 'empower_draw'].includes(op) && target.side !== side) {
+  if (['mend', 'haste', 'bulwark', 'empower_draw'].includes(op) && target!.side !== side) {
     return 'Name a unit you own.';
   }
-  if (op === 'slide' && !target.sick && !target.moved && !target.attacked) {
+  if (op === 'slide' && !target!.sick && !target!.moved && !target!.attacked) {
     return 'Only an exhausted unit will slide.';
   }
-  ctx.loyalty[side] -= cost;
+  pay();
   if (op === 'haste') {
-    // "may act at once": a unit that could not act yet (slow muster / chill)
-    // is freed. A unit that already acted this rite does not act twice.
-    if (target.sick && !target.powder) {
-      target.moved = false;
-      target.attacked = false;
+    if (target!.sick && !target!.powder) {
+      target!.moved = false;
+      target!.attacked = false;
     }
-    target.sick = false;
-    target.fast = true;
-    if (!target.keywords.includes('fast')) target.keywords = [...target.keywords, 'fast'];
-    pushLog(ctx, `${target.name} gains Fast Attack and may act at once.`);
+    target!.sick = false;
+    target!.fast = true;
+    if (!target!.keywords.includes('fast')) target!.keywords = [...target!.keywords, 'fast'];
+    pushLog(ctx, `${target!.name} gains Fast Attack and may act at once.`);
     return null;
   }
   if (op === 'bulwark') {
-    target.maxPower += 3;
-    target.power += 3;
-    addGain(target, 3);
-    pushLog(ctx, `${target.name} gains +3 power.`);
+    target!.maxPower += 3;
+    target!.power += 3;
+    addGain(target!, 3);
+    pushLog(ctx, `${target!.name} gains +3 power.`);
     return null;
   }
   if (op === 'empower_draw') {
-    target.power += n;
-    target.maxPower += n;
+    target!.power += n;
+    target!.maxPower += n;
     drawCards(ctx, side, 1);
-    pushLog(ctx, `${target.name} gains +${n} power. You draw.`);
+    pushLog(ctx, `${target!.name} gains +${n} power. You draw.`);
     return null;
   }
   if (op === 'mend') {
-    target.power = target.maxPower;
-    target.power += 1;
-    target.maxPower += 1;
-    target.sick = false;
-    pushLog(ctx, `${target.name} stands back up.`);
+    target!.power = target!.maxPower;
+    target!.power += 1;
+    target!.maxPower += 1;
+    target!.sick = false;
+    pushLog(ctx, `${target!.name} stands back up.`);
     return null;
   }
   if (op === 'bounce') {
-    return resolveEffect(ctx, { op: 'bounce' }, { name: leader.name }, target.uid);
+    return resolveEffect(ctx, { op: 'bounce' }, { name: leader.name }, target!.uid);
   }
   if (op === 'slide') {
     if (!aimPos) return 'Name an empty adjacent circle.';
-    return resolveEffect(ctx, { op: 'shove' }, { name: leader.name }, target.uid, aimPos);
+    return resolveEffect(ctx, { op: 'shove' }, { name: leader.name }, target!.uid, aimPos);
   }
 
   pushLog(ctx, `${leader.name} works (${op}).`);
@@ -1117,7 +1472,18 @@ export function resolveActivatedAbility(
 export function leaderNeedsAim(leader: Card): boolean {
   const op = leader.leaderPower?.op;
   if (!op) return false;
+  if (op === 'scry3' || op === 'seek') return false; // modal choice, not a board aim
   return LEADER_AIMED.has(op) || op === 'claim' || op === 'slide';
+}
+
+/** Leader workings that open a choice plate before (or instead of) board aim. */
+export function leaderNeedsChoice(leader: Card): 'scry3' | 'seek' | 'revive' | 'copy_kw' | null {
+  const op = leader.leaderPower?.op;
+  if (op === 'scry3') return 'scry3';
+  if (op === 'seek') return 'seek';
+  if (op === 'revive_coven') return 'revive';
+  if (op === 'copy_kw') return 'copy_kw';
+  return null;
 }
 
 export { LOYALTY_CAP, foe as foeSide };

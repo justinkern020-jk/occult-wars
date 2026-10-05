@@ -31,6 +31,14 @@ export interface BoardUnit {
   arrest?: number;
   /** Lasting power earned in play (already counted in power; tooltip only). */
   gained?: number;
+  /** Enemy spells / leader powers cannot choose this unit. */
+  warded?: boolean;
+  /** Next lethal blow leaves it at 1 power (once). */
+  lastStand?: boolean;
+  /** Must prefer an enemy stronghold this turn. */
+  breach?: boolean;
+  /** Must attack an adjacent enemy if able this activation. */
+  mustStrike?: boolean;
 }
 
 /**

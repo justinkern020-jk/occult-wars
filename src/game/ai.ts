@@ -719,8 +719,41 @@ function leaderCandidates(s: AiSnapshot, threats: Set<string>, out: Scored[]) {
     if (mine) push(16 + (threats.size > 0 ? 4 : 0), { type: 'leader', targetUid: mine.uid });
     return;
   }
-  const friendly = new Set(['mend', 'haste', 'bulwark', 'empower_draw', 'empower']);
-  const hostile = new Set(['smite', 'lock', 'set_power', 'destroy', 'bounce', 'trepan', 'martyr']);
+  // Untargeted unique workings.
+  if (op === 'green_surge') {
+    const nHit = units(s, s.side).filter((u) => cardById(u.cardId ?? '')?.faction === 'Sons of the Green Lion').length;
+    return push(6 + nHit * 8, { type: 'leader' });
+  }
+  if (op === 'ready_works') {
+    const nHit = units(s, s.side).filter(
+      (u) => cardById(u.cardId ?? '')?.faction === 'The Mercury Works' && (u.sick || u.moved || u.attacked),
+    ).length;
+    return push(4 + nHit * 14, { type: 'leader' });
+  }
+  if (op === 'steal_res') return push(18, { type: 'leader' });
+  if (op === 'icon_harvest') return push(units(s, foeOf(s.side)).length >= 2 ? 20 : 8, { type: 'leader' });
+  if (op === 'death_tithe') return push(12, { type: 'leader' });
+  if (op === 'scry3') return push(s.hand.length < 5 ? 16 : 6, { type: 'leader', pick: 0 });
+  if (op === 'seek') return push(s.hand.length < 5 ? 18 : 8, { type: 'leader', seek: 'unit' });
+  if (op === 'revive_coven') {
+    // Prefer any empty controlled non-stronghold circle; AI skips discard pick (engine finds one).
+    let best: Scored | null = null;
+    for (let r = 0; r < 5; r++)
+      for (let c = 0; c < 5; c++) {
+        if (s.board[r][c] || s.control[r][c] !== s.side) continue;
+        const t = s.tiles[r][c];
+        if (!t || t.kind === 'void' || t.kind === 'stronghold') continue;
+        const score = 22 - cost;
+        if (!best || score > best.score) best = { action: { type: 'leader', r, c }, score };
+      }
+    if (best && best.score > 0) out.push(best);
+    return;
+  }
+  const friendly = new Set([
+    'mend', 'haste', 'bulwark', 'empower_draw', 'empower',
+    'ward', 'last_stand', 'charge', 'breach', 'copy_kw',
+  ]);
+  const hostile = new Set(['smite', 'lock', 'set_power', 'destroy', 'bounce', 'trepan', 'martyr', 'transmute']);
   if (!friendly.has(op) && !hostile.has(op)) return push(4, { type: 'leader' });
   let best: Scored | null = null;
   for (const u of units(s)) {
@@ -735,9 +768,23 @@ function leaderCandidates(s: AiSnapshot, threats: Set<string>, out: Scored[]) {
         const dead = o.power - d <= 0;
         v += o.side === s.side ? (dead ? -unitWorth(o) : -d * 3) : dead ? unitWorth(o) * 0.8 : d * 3;
       }
-    } else if (op === 'haste') {
+    } else if (op === 'haste' || op === 'charge' || op === 'breach') {
       if (u.side !== s.side) continue;
       v = canStrikeNow(s, u) ? 8 : 28 + u.power * 2;
+      if (op === 'breach') v += 6;
+      if (op === 'charge') v += 4;
+    } else if (op === 'ward' || op === 'last_stand') {
+      if (u.side !== s.side) continue;
+      v = 14 + u.power * 2 + (threats.has(u.uid) ? 8 : 0);
+    } else if (op === 'copy_kw') {
+      if (u.side !== s.side) continue;
+      const pupil = units(s, s.side).find((o) => o.uid !== u.uid);
+      if (!pupil) continue;
+      v = 10 + (u.keywords?.length ?? 0) * 4;
+      const score = v - cost;
+      if (!best || score > best.score)
+        best = { action: { type: 'leader', targetUid: u.uid, secondUid: pupil.uid }, score };
+      continue;
     } else if (op === 'bulwark' || op === 'mend') {
       if (u.side !== s.side) continue;
       const lost = (u.maxPower ?? u.power) - u.power;
@@ -745,6 +792,9 @@ function leaderCandidates(s: AiSnapshot, threats: Set<string>, out: Scored[]) {
     } else if (op === 'empower_draw' || op === 'empower') {
       if (u.side !== s.side) continue;
       v = (n || 1) * 6 + 4;
+    } else if (op === 'transmute') {
+      if (u.side === s.side) continue;
+      v = unitWorth(u) * 0.85;
     } else {
       v = aimedScore(s, op, n || (op === 'smite' ? 2 : 0), u, threats);
     }

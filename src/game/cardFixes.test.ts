@@ -133,13 +133,13 @@ describe('claim leaders: an empty circle that is not a stronghold', () => {
   });
 });
 
-describe('The Iron Saint haste: may act at once', () => {
-  it('frees a slow-muster unit to act this rite', () => {
+describe('The Iron Saint breach: may act at once and ignore walls', () => {
+  it('frees a slow-muster unit and marks breach', () => {
     const ctx = ctx0();
     put(ctx, 'lead_golem', 'g', 'blue', 3, 2, { sick: true, moved: true, attacked: true });
     expect(resolveLeaderPower(ctx, cardById('the_iron_saint')!, 'g')).toBeNull();
     expect(ctx.units.g.sick || ctx.units.g.moved || ctx.units.g.attacked).toBe(false);
-    expect(ctx.units.g.keywords).toContain('fast');
+    expect(ctx.units.g.breach).toBe(true);
   });
 });
 

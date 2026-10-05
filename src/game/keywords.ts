@@ -82,6 +82,12 @@ export const KEYWORDS: Record<string, KeywordInfo> = {
     glyph: '◊',
     title: 'Cryptid. A sighting at the edge of the map.',
   },
+  token: {
+    key: 'token',
+    name: 'Token',
+    glyph: '○',
+    title: 'Token. A vessel with no will of its own. Not part of any working.',
+  },
   gills: {
     key: 'gills',
     name: 'Undine',

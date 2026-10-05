@@ -14,6 +14,8 @@ import {
   castFromHand,
   resolveActivatedAbility,
   resolveLeaderPower,
+  tickLeaderAuras,
+  type LeaderOpts,
   applyPendingFieldPoison,
 } from './effects';
 import {
@@ -48,7 +50,7 @@ export type EngineAction =
   | { type: 'move'; uid: string; r: number; c: number }
   | { type: 'attack'; uid: string; targetUid: string }
   | { type: 'cast'; index: number; targetUid?: string; r?: number; c?: number }
-  | { type: 'leader'; targetUid?: string; r?: number; c?: number }
+  | { type: 'leader'; targetUid?: string; secondUid?: string; r?: number; c?: number; pick?: number; seek?: 'unit' | 'rite'; discardIndex?: number }
   | { type: 'act'; uid: string; targetUid?: string }
   | { type: 'end' };
 
@@ -230,7 +232,13 @@ export function applyAction(s: EngineState, a: EngineAction): string | null {
       if (!hero) return 'No leader sworn for this chair.';
       if (s.leaderUsed[acting]) return 'The leader has already spoken.';
       const aim = a.r != null && a.c != null ? { r: a.r, c: a.c } : undefined;
-      const err = resolveLeaderPower(ctx, hero, a.targetUid, aim);
+      const opts: LeaderOpts = {
+        secondUid: a.secondUid,
+        pick: a.pick,
+        seek: a.seek,
+        discardIndex: a.discardIndex,
+      };
+      const err = resolveLeaderPower(ctx, hero, a.targetUid, aim, opts);
       if (err) return err;
       s.leaderUsed[acting] = true;
       pruneUnits(ctx);
@@ -387,6 +395,7 @@ function openRite(s: EngineState) {
   const ctx = s.ctx;
   const next = s.side;
   const prev = foeOf(next);
+  tickLeaderAuras(ctx);
   for (const id of Object.keys(ctx.units)) {
     const u = ctx.units[id];
     let arrest = u.arrest ?? 0;
