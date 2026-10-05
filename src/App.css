@@ -6362,3 +6362,17 @@ input[type='search'] {
   font-size: 0.9rem;
   padding: 0.55rem 0.95rem;
 }
+
+.leader-choice-kind {
+  font-style: normal;
+  opacity: 0.72;
+  font-size: 0.82em;
+  font-weight: 400;
+}
+.leader-choice-row .brass-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  line-height: 1.2;
+}

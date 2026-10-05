@@ -712,9 +712,16 @@ export type LeaderOpts = {
   bottom?: number[];
   /** Cayce: search for a unit or a spell (rite/device). */
   seek?: 'unit' | 'rite';
-  /** Whitethorn Queen: index into your discard of the slain coven unit. */
+  /** Whitethorn Queen / Cayce recall: index into your discard. */
   discardIndex?: number;
 };
+
+/** Cards Cayce (and similar) may lift from the discard: units and spells. */
+export function isRecallableFromDiscard(card: Card): boolean {
+  return card.kind === 'unit' || card.kind === 'rite' || card.kind === 'device';
+}
+
+
 
 function applyCopiedKeywords(u: EffectUnit, kws: string[]) {
   const next = [...u.keywords];
@@ -944,6 +951,21 @@ export function resolveLeaderPower(
     pushLog(ctx, `${leader.name} takes ${chosen.name} from the top of the well${rest.length ? `; ${rest.map((c) => c.name).join(' and ')} sink to the bottom` : ''}.`);
     return null;
   }
+  if (op === 'recall') {
+    // Explicit discard pick — never silent first-match.
+    if (opts.discardIndex == null) return 'Name a unit or spell in your discard.';
+    const disc = ctx.discard[side];
+    const idx = opts.discardIndex;
+    if (idx < 0 || idx >= disc.length) return 'Name a unit or spell in your discard.';
+    const card = disc[idx]!;
+    if (!isRecallableFromDiscard(card)) return 'Name a unit or spell in your discard.';
+    if (ctx.hand[side].length >= HAND_CAP) return "Your hand is sealed.";
+    pay();
+    disc.splice(idx, 1);
+    ctx.hand[side].push(card);
+    pushLog(ctx, `${leader.name} recalls ${card.name} from the discard.`);
+    return null;
+  }
   if (op === 'seek') {
     // Kind must be an explicit player (or AI) choice — never default to unit.
     if (opts.seek !== 'unit' && opts.seek !== 'rite') return 'Name unit or spell.';
@@ -1047,11 +1069,9 @@ export function resolveLeaderPower(
       return 'Return them to an empty circle that is not a stronghold.';
     }
     const disc = ctx.discard[side];
-    let idx = opts.discardIndex;
-    if (idx == null || idx < 0 || idx >= disc.length) {
-      idx = disc.findIndex((card) => card.kind === 'unit' && card.faction === 'The Whitethorn Coven');
-    }
-    if (idx < 0 || idx >= disc.length) return 'No Whitethorn Coven unit lies in your discard.';
+    if (opts.discardIndex == null) return 'Name a Whitethorn Coven unit in your discard.';
+    const idx = opts.discardIndex;
+    if (idx < 0 || idx >= disc.length) return 'Name a Whitethorn Coven unit in your discard.';
     const card = disc[idx]!;
     if (card.kind !== 'unit' || card.faction !== 'The Whitethorn Coven') {
       return 'Name a Whitethorn Coven unit in your discard.';
@@ -1485,6 +1505,7 @@ export function leaderChoicePending(
 ): boolean {
   const op = leader.leaderPower?.op;
   if (op === 'seek') return opts.seek !== 'unit' && opts.seek !== 'rite';
+  if (op === 'recall') return opts.discardIndex == null;
   if (op === 'scry3') return opts.pick == null;
   if (op === 'revive_coven') {
     const disc = opts.discardIndex ?? aim?.discardIndex;
@@ -1497,15 +1518,16 @@ export function leaderChoicePending(
 export function leaderNeedsAim(leader: Card): boolean {
   const op = leader.leaderPower?.op;
   if (!op) return false;
-  if (op === 'scry3' || op === 'seek') return false; // modal choice, not a board aim
+  if (op === 'scry3' || op === 'seek' || op === 'recall') return false; // modal choice, not a board aim
   return LEADER_AIMED.has(op) || op === 'claim' || op === 'slide';
 }
 
 /** Leader workings that open a choice plate before (or instead of) board aim. */
-export function leaderNeedsChoice(leader: Card): 'scry3' | 'seek' | 'revive' | 'copy_kw' | null {
+export function leaderNeedsChoice(leader: Card): 'scry3' | 'seek' | 'recall' | 'revive' | 'copy_kw' | null {
   const op = leader.leaderPower?.op;
   if (op === 'scry3') return 'scry3';
   if (op === 'seek') return 'seek';
+  if (op === 'recall') return 'recall';
   if (op === 'revive_coven') return 'revive';
   if (op === 'copy_kw') return 'copy_kw';
   return null;

@@ -38,6 +38,7 @@ import {
   leaderNeedsAim,
   leaderNeedsChoice,
   leaderChoicePending,
+  isRecallableFromDiscard,
   resolveActivatedAbility,
   resolveLeaderPower,
   tickLeaderAuras,
@@ -246,7 +247,15 @@ type LeaderChoice =
   | null
   | { kind: 'scry3'; cards: Card[] }
   | { kind: 'seek' }
+  | { kind: 'recall'; cards: { card: Card; index: number }[] }
   | { kind: 'revive'; cards: { card: Card; index: number }[] };
+
+function kindLabel(card: Card): string {
+  if (card.kind === 'unit') return 'unit';
+  if (card.kind === 'rite') return 'spell';
+  if (card.kind === 'device') return 'device';
+  return card.kind;
+}
 
 function deckFor(
   faction: string,
@@ -1425,6 +1434,20 @@ export function Battlefield({
         if (!leaderChoice || leaderChoice.kind !== 'seek') {
           setLeaderChoice({ kind: 'seek' });
           pushLog(`Name unit or spell for ${hero.name}.`);
+        }
+        return false;
+      }
+      if (choice === 'recall' && opts.discardIndex == null) {
+        const cards = discard[acting]
+          .map((card, index) => ({ card, index }))
+          .filter((x) => isRecallableFromDiscard(x.card));
+        if (!cards.length) {
+          pushLog('No unit or spell lies in your discard.');
+          return false;
+        }
+        if (!leaderChoice || leaderChoice.kind !== 'recall') {
+          setLeaderChoice({ kind: 'recall', cards });
+          pushLog(`Name a unit or spell in your discard for ${hero.name}.`);
         }
         return false;
       }
@@ -3177,6 +3200,7 @@ export function Battlefield({
           ),
         ),
         hand: live.hand.red,
+        discard: live.discard.red,
         loyalty: live.loyalty.red,
         domination: { ...live.domination },
         leader: redHero ?? undefined,
@@ -3218,14 +3242,16 @@ export function Battlefield({
           discardIndex: action.discardIndex,
         };
         // Choice-plate ops need their pick on the action (AI always supplies one).
-        // Revive: the engine can pick a Whitethorn unit from discard when the AI only names a circle.
         const needsPick =
           !!redHero &&
-          !(redHero.leaderPower?.op === 'revive_coven' && aimPos) &&
           leaderChoicePending(
             redHero,
             leaderOpts,
-            action.targetUid ? { unitUid: action.targetUid, secondUid: action.secondUid } : null,
+            action.targetUid
+              ? { unitUid: action.targetUid, secondUid: action.secondUid, discardIndex: action.discardIndex }
+              : action.discardIndex != null
+                ? { discardIndex: action.discardIndex }
+                : null,
           );
         if (
           redHero &&
@@ -4219,9 +4245,11 @@ export function Battlefield({
             <p className="leader-choice-title">
               {leaderChoice.kind === 'seek'
                 ? `${activeHero?.name ?? 'Leader'}: name unit or spell`
-                : leaderChoice.kind === 'scry3'
-                  ? `${activeHero?.name ?? 'Leader'}: name one for your hand`
-                  : `${activeHero?.name ?? 'Leader'}: name a slain Whitethorn Coven unit`}
+                : leaderChoice.kind === 'recall'
+                  ? `${activeHero?.name ?? 'Leader'}: name a card in your discard`
+                  : leaderChoice.kind === 'scry3'
+                    ? `${activeHero?.name ?? 'Leader'}: name one for your hand`
+                    : `${activeHero?.name ?? 'Leader'}: name a slain Whitethorn Coven unit`}
             </p>
             {leaderChoice.kind === 'scry3' && (
               <div className="leader-choice-row">
@@ -4258,6 +4286,22 @@ export function Battlefield({
                 </button>
               </div>
             )}
+            {leaderChoice.kind === 'recall' && (
+              <div className="leader-choice-row">
+                {leaderChoice.cards.map(({ card, index }) => (
+                  <button
+                    key={`${card.id}-${index}`}
+                    type="button"
+                    className="brass-btn"
+                    data-testid={`recall-pick-${index}`}
+                    onClick={() => invokeLeader(inputSide, undefined, undefined, { discardIndex: index })}
+                  >
+                    {card.name}
+                    <em className="leader-choice-kind"> · {kindLabel(card)}</em>
+                  </button>
+                ))}
+              </div>
+            )}
             {leaderChoice.kind === 'revive' && (
               <div className="leader-choice-row">
                 {leaderChoice.cards.map(({ card, index }) => (
@@ -4269,6 +4313,7 @@ export function Battlefield({
                     onClick={() => invokeLeader(inputSide, undefined, undefined, { discardIndex: index })}
                   >
                     {card.name}
+                    <em className="leader-choice-kind"> · unit</em>
                   </button>
                 ))}
               </div>

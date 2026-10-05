@@ -163,9 +163,15 @@ describe('card audit: every leader working is handled', () => {
           ? { pick: 0 }
           : op === 'seek'
             ? { seek: 'unit' as const }
-            : op === 'revive_coven'
-              ? { discardIndex: ctx.discard.blue.findIndex((c) => c.faction === 'The Whitethorn Coven') }
-              : {};
+            : op === 'recall'
+              ? {
+                  discardIndex: ctx.discard.blue.findIndex(
+                    (c) => c.kind === 'unit' || c.kind === 'rite' || c.kind === 'device',
+                  ),
+                }
+              : op === 'revive_coven'
+                ? { discardIndex: ctx.discard.blue.findIndex((c) => c.faction === 'The Whitethorn Coven') }
+                : {};
     const base = structuredClone(ctx);
     base.loyalty.blue -= hero.cost;
     const before = stateKey(base);

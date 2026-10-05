@@ -4962,9 +4962,9 @@
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Leader of the Columbia Lodge. Once in a sitting: pay 2. Name unit or spell; reveal cards from your deck until you find one of that kind, put it into your hand, and shuffle the rest back.",
+    "text": "Leader of the Columbia Lodge. Once in a sitting: pay 2. Name a unit or spell in your discard; put it into your hand.",
     "leaderPower": {
-      "op": "seek"
+      "op": "recall"
     },
     "quote": "Mind is the builder.",
     "quoted": "Edgar Cayce"

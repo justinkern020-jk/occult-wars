@@ -22,7 +22,7 @@ import { canDeployOn, isEnemyStronghold, isPaintable } from './control';
 import { canBeStruck, hasKeyword, manhattan, rangedReach } from './keywords';
 import { applyDamage, combatantFrom, resolveMelee } from './combat';
 import { MEASURED_BLOODED, bloodedResult, crownBonusOnBoard, type RulesBoard } from './rules';
-import type { EffectUnit } from './effects';
+import { isRecallableFromDiscard, type EffectUnit } from './effects';
 import {
   applyAction,
   cloneState,
@@ -86,6 +86,8 @@ export type AiSnapshot = {
   control: ControlGrid;
   board: (AiUnit | null)[][];
   hand: Card[];
+  /** Own discard (for Cayce recall / Whitethorn revive). */
+  discard?: Card[];
   loyalty: number;
   domination?: { blue: number; red: number };
   leader?: Card;
@@ -735,8 +737,27 @@ function leaderCandidates(s: AiSnapshot, threats: Set<string>, out: Scored[]) {
   if (op === 'death_tithe') return push(12, { type: 'leader' });
   if (op === 'scry3') return push(s.hand.length < 5 ? 16 : 6, { type: 'leader', pick: 0 });
   if (op === 'seek') return push(s.hand.length < 5 ? 18 : 8, { type: 'leader', seek: 'unit' });
+  if (op === 'recall') {
+    if (s.hand.length >= 7) return; // HAND_CAP
+    const disc = s.discard ?? [];
+    let bestIdx = -1;
+    let bestV = -Infinity;
+    for (let i = 0; i < disc.length; i++) {
+      const c = disc[i]!;
+      if (!isRecallableFromDiscard(c)) continue;
+      const v = c.kind === 'unit' ? 12 + (c.power ?? 0) * 2 : 14 + (c.cost ?? 0);
+      if (v > bestV) {
+        bestV = v;
+        bestIdx = i;
+      }
+    }
+    if (bestIdx >= 0) push(bestV, { type: 'leader', discardIndex: bestIdx });
+    return;
+  }
   if (op === 'revive_coven') {
-    // Prefer any empty controlled non-stronghold circle; AI skips discard pick (engine finds one).
+    const disc = s.discard ?? [];
+    const discIdx = disc.findIndex((c) => c.kind === 'unit' && c.faction === 'The Whitethorn Coven');
+    if (discIdx < 0) return;
     let best: Scored | null = null;
     for (let r = 0; r < 5; r++)
       for (let c = 0; c < 5; c++) {
@@ -744,7 +765,8 @@ function leaderCandidates(s: AiSnapshot, threats: Set<string>, out: Scored[]) {
         const t = s.tiles[r][c];
         if (!t || t.kind === 'void' || t.kind === 'stronghold') continue;
         const score = 22 - cost;
-        if (!best || score > best.score) best = { action: { type: 'leader', r, c }, score };
+        if (!best || score > best.score)
+          best = { action: { type: 'leader', r, c, discardIndex: discIdx }, score };
       }
     if (best && best.score > 0) out.push(best);
     return;
@@ -1064,6 +1086,7 @@ export function snapshotFromState(st: EngineState, side: Side = st.side): AiSnap
     control: ctx.control,
     board,
     hand: ctx.hand[side],
+    discard: ctx.discard[side],
     loyalty: ctx.loyalty[side],
     domination: { ...ctx.domination },
     leader: st.leaders[side],
@@ -1655,10 +1678,14 @@ function cloneSnap(s: AiSnapshot): AiSnapshot {
     control: s.control.map((row) => row.slice()),
     board: s.board.map((row) => row.map((u) => (u ? { ...u } : null))),
     hand: s.hand.slice(),
+    discard: s.discard?.slice(),
     loyalty: s.loyalty,
     domination: s.domination ? { ...s.domination } : undefined,
     leader: s.leader,
     leaderUsed: s.leaderUsed,
+    foeLoyalty: s.foeLoyalty,
+    turn: s.turn,
+    avoid: s.avoid ? [...s.avoid] : undefined,
   };
 }
 

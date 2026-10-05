@@ -13,6 +13,7 @@ import {
   type EffectUnit,
 } from './effects';
 import { mapById, type Side } from './maps';
+import { HAND_CAP } from './scoring';
 
 const tiles = mapById('leaden-court').tiles;
 
@@ -228,40 +229,68 @@ describe('Gold Fraud steal_res', () => {
   });
 });
 
-describe('Edgar Cayce seek', () => {
-  it('refuses to fire without an explicit unit/spell choice (no silent default)', () => {
+describe('Edgar Cayce recall (discard pick)', () => {
+  it('refuses to fire without an explicit discardIndex (no silent first-match)', () => {
     const ctx = ctx0();
     const unit = cardById('devoted_clerk')!;
-    ctx.deck.blue = [{ ...unit }, { ...unit }];
+    ctx.discard.blue = [{ ...unit }, { ...cardById('the_hydesville_knock')! }];
     const before = ctx.loyalty.blue;
     const err = resolveLeaderPower(ctx, cardById('edgar_cayce')!);
-    expect(err).toMatch(/unit or spell/i);
+    expect(err).toMatch(/discard/i);
     expect(ctx.loyalty.blue).toBe(before);
     expect(ctx.hand.blue).toHaveLength(0);
+    expect(ctx.discard.blue).toHaveLength(2);
     expect(leaderChoicePending(cardById('edgar_cayce')!)).toBe(true);
-    expect(leaderChoicePending(cardById('edgar_cayce')!, { seek: 'unit' })).toBe(false);
+    expect(leaderChoicePending(cardById('edgar_cayce')!, { discardIndex: 1 })).toBe(false);
   });
 
-  it('aborts with a clear message (no pay) when the well has none of that kind', () => {
+  it('aborts with a clear message (no pay) when discard has nothing eligible', () => {
     const ctx = ctx0();
-    const rite = cardById('the_hydesville_knock')!;
-    ctx.deck.blue = [{ ...rite }, { ...rite }];
+    // Heroes are not recallable.
+    ctx.discard.blue = [{ ...cardById('edgar_cayce')! }];
     const before = ctx.loyalty.blue;
-    const err = resolveLeaderPower(ctx, cardById('edgar_cayce')!, undefined, undefined, { seek: 'unit' });
-    expect(err).toMatch(/no unit remains/i);
+    const err = resolveLeaderPower(ctx, cardById('edgar_cayce')!, undefined, undefined, { discardIndex: 0 });
+    expect(err).toMatch(/unit or spell/i);
     expect(ctx.loyalty.blue).toBe(before);
-    expect(ctx.deck.blue).toHaveLength(2);
+    expect(ctx.discard.blue).toHaveLength(1);
   });
 
-  it('finds the named kind and shuffles the rest back', () => {
+  it('puts the named discard card into hand', () => {
     const ctx = ctx0();
     const unit = cardById('devoted_clerk')!;
     const rite = cardById('the_hydesville_knock')!;
-    ctx.deck.blue = [{ ...rite }, { ...rite }, { ...unit }, { ...rite }];
-    expect(resolveLeaderPower(ctx, cardById('edgar_cayce')!, undefined, undefined, { seek: 'unit' })).toBeNull();
-    expect(ctx.hand.blue[0].id).toBe(unit.id);
-    expect(ctx.deck.blue).toHaveLength(3);
-    expect(ctx.deck.blue.every((c) => c.id === rite.id)).toBe(true);
+    ctx.discard.blue = [{ ...unit }, { ...rite }];
+    expect(resolveLeaderPower(ctx, cardById('edgar_cayce')!, undefined, undefined, { discardIndex: 1 })).toBeNull();
+    expect(ctx.hand.blue[0].id).toBe(rite.id);
+    expect(ctx.discard.blue.map((c) => c.id)).toEqual([unit.id]);
+    expect(ctx.loyalty.blue).toBe(8);
+  });
+
+  it('refuses when the hand is sealed (no pay)', () => {
+    const ctx = ctx0();
+    const unit = cardById('devoted_clerk')!;
+    ctx.discard.blue = [{ ...unit }];
+    ctx.hand.blue = Array.from({ length: HAND_CAP }, () => ({ ...unit }));
+    const before = ctx.loyalty.blue;
+    expect(resolveLeaderPower(ctx, cardById('edgar_cayce')!, undefined, undefined, { discardIndex: 0 })).toMatch(
+      /hand is sealed/i,
+    );
+    expect(ctx.loyalty.blue).toBe(before);
+    expect(ctx.discard.blue).toHaveLength(1);
+  });
+});
+
+describe('Whitethorn revive requires an explicit discard pick', () => {
+  it('refuses without discardIndex (no silent first Whitethorn)', () => {
+    const ctx = ctx0();
+    const T = thorn();
+    ctx.discard.blue.push({ ...T });
+    ctx.control[2][0] = 'blue';
+    const before = ctx.loyalty.blue;
+    const err = resolveLeaderPower(ctx, cardById('the_whitethorn_queen')!, undefined, { r: 2, c: 0 });
+    expect(err).toMatch(/whitethorn/i);
+    expect(ctx.loyalty.blue).toBe(before);
+    expect(ctx.board[2][0]).toBeNull();
   });
 });
 

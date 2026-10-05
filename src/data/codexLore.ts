@@ -627,7 +627,7 @@ export const CARD_LORE: Record<string, string> = {
   mojo_hand:
     "A mojo, or mojo hand, is a small cloth charm bag of hoodoo, filled with roots, herbs and curios. Muddy Waters made 'Got My Mojo Working' famous in the late 1950s.",
   edgar_cayce:
-    'Edgar Cayce (1877–1945), "the Sleeping Prophet", gave thousands of trance readings on health and past lives, many of them from Virginia Beach. His readings are kept by the association he founded. Once in a sitting he names unit or spell, reveals from the deck until he finds one, and puts it in hand.',
+    'Edgar Cayce (1877–1945), "the Sleeping Prophet", gave thousands of trance readings on health and past lives, many of them from Virginia Beach. His readings are kept by the association he founded. Once in a sitting the sleeping prophet recalls a unit or spell that already fell into the discard, and returns it to the hand.',
   edgar_allan_poe:
     'Edgar Allan Poe (1809–1849) shaped the Gothic tale, the detective story and the modern short story. "The Raven" made him famous when it was published in January 1845.',
   mothman:
