@@ -37,6 +37,7 @@ import {
   effectNeedsAim,
   leaderNeedsAim,
   leaderNeedsChoice,
+  leaderChoicePending,
   resolveActivatedAbility,
   resolveLeaderPower,
   tickLeaderAuras,
@@ -1406,23 +1407,30 @@ export function Battlefield({
       const choice = leaderNeedsChoice(hero);
 
       // Multi-step / choice gates before paying.
-      if (choice === 'scry3' && opts.pick == null && !leaderChoice) {
+      // Never fall through while a required pick is missing — a second Speak
+      // click used to skip the plate and auto-default (Cayce → unit, Rector → first card).
+      if (choice === 'scry3' && opts.pick == null) {
         const top = deck[acting].slice(0, 3);
         if (!top.length) {
           pushLog('Your well is dry.');
           return false;
         }
-        setLeaderChoice({ kind: 'scry3', cards: top });
-        pushLog(`Look at the top ${top.length} for ${hero.name}. Name one for your hand.`);
+        if (!leaderChoice || leaderChoice.kind !== 'scry3') {
+          setLeaderChoice({ kind: 'scry3', cards: top });
+          pushLog(`Look at the top ${top.length} for ${hero.name}. Name one for your hand.`);
+        }
         return false;
       }
-      if (choice === 'seek' && !opts.seek && !leaderChoice) {
-        setLeaderChoice({ kind: 'seek' });
-        pushLog(`Name unit or spell for ${hero.name}.`);
+      if (choice === 'seek' && opts.seek !== 'unit' && opts.seek !== 'rite') {
+        if (!leaderChoice || leaderChoice.kind !== 'seek') {
+          setLeaderChoice({ kind: 'seek' });
+          pushLog(`Name unit or spell for ${hero.name}.`);
+        }
         return false;
       }
       if (choice === 'revive') {
-        if (opts.discardIndex == null && aim?.kind === 'leader' && aim.discardIndex == null && !leaderChoice) {
+        const discIdx = opts.discardIndex ?? (aim?.kind === 'leader' ? aim.discardIndex : undefined);
+        if (discIdx == null) {
           const cards = discard[acting]
             .map((card, index) => ({ card, index }))
             .filter((x) => x.card.kind === 'unit' && x.card.faction === 'The Whitethorn Coven');
@@ -1430,18 +1438,19 @@ export function Battlefield({
             pushLog('No Whitethorn Coven unit lies in your discard.');
             return false;
           }
-          setLeaderChoice({ kind: 'revive', cards });
-          pushLog(`Name a slain Whitethorn Coven unit for ${hero.name}.`);
+          if (!leaderChoice || leaderChoice.kind !== 'revive') {
+            setLeaderChoice({ kind: 'revive', cards });
+            pushLog(`Name a slain Whitethorn Coven unit for ${hero.name}.`);
+          }
           return false;
         }
-        const discIdx = opts.discardIndex ?? (aim?.kind === 'leader' ? aim.discardIndex : undefined);
-        if (discIdx != null && !aimPos) {
+        if (!aimPos) {
           setAim({ kind: 'leader', discardIndex: discIdx });
           setLeaderChoice(null);
           pushLog('Name an empty circle you control that is not a stronghold.');
           return false;
         }
-        if (discIdx != null) opts = { ...opts, discardIndex: discIdx };
+        opts = { ...opts, discardIndex: discIdx };
       }
       if (choice === 'copy_kw') {
         if (!targetUid) {
@@ -1457,6 +1466,10 @@ export function Battlefield({
         if (!opts.secondUid && aim?.kind === 'leader' && aim.secondUid) {
           opts = { ...opts, secondUid: aim.secondUid };
         }
+      }
+      // Hard stop: engine also refuses, but keep the plate up if something slipped.
+      if (leaderChoicePending(hero, opts, aim?.kind === 'leader' ? aim : null)) {
+        return false;
       }
 
       if (isFriendGuest && friendSession) {
@@ -3198,7 +3211,28 @@ export function Battlefield({
         const aimPos =
           action.r != null && action.c != null ? { r: action.r, c: action.c } : undefined;
         const unaimed = !!redHero && leaderNeedsAim(redHero) && !action.targetUid && !aimPos;
-        if (redHero && !unaimed && invokeLeaderRef.current(AI_SIDE, action.targetUid, aimPos)) {
+        const leaderOpts = {
+          secondUid: action.secondUid,
+          pick: action.pick,
+          seek: action.seek,
+          discardIndex: action.discardIndex,
+        };
+        // Choice-plate ops need their pick on the action (AI always supplies one).
+        // Revive: the engine can pick a Whitethorn unit from discard when the AI only names a circle.
+        const needsPick =
+          !!redHero &&
+          !(redHero.leaderPower?.op === 'revive_coven' && aimPos) &&
+          leaderChoicePending(
+            redHero,
+            leaderOpts,
+            action.targetUid ? { unitUid: action.targetUid, secondUid: action.secondUid } : null,
+          );
+        if (
+          redHero &&
+          !unaimed &&
+          !needsPick &&
+          invokeLeaderRef.current(AI_SIDE, action.targetUid, aimPos, leaderOpts)
+        ) {
           showAiReveal(redHero, () => later(run, 280));
           return;
         }
@@ -3641,61 +3675,6 @@ export function Battlefield({
             Cancel
           </button>
         </p>
-      ) : leaderChoice ? (
-        <div className="aim-banner leader-choice" data-testid="leader-choice">
-          {leaderChoice.kind === 'scry3' && (
-            <>
-              <span>Name one for your hand; the rest sink to the bottom.</span>
-              <div className="leader-choice-row">
-                {leaderChoice.cards.map((c, i) => (
-                  <button
-                    key={`${c.id}-${i}`}
-                    type="button"
-                    className="brass-btn"
-                    data-testid={`scry-pick-${i}`}
-                    onClick={() => invokeLeader(inputSide, undefined, undefined, { pick: i })}
-                  >
-                    {c.name}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-          {leaderChoice.kind === 'seek' && (
-            <>
-              <span>Name a kind for the sleeping prophet.</span>
-              <div className="leader-choice-row">
-                <button type="button" className="brass-btn" data-testid="seek-unit" onClick={() => invokeLeader(inputSide, undefined, undefined, { seek: 'unit' })}>
-                  Unit
-                </button>
-                <button type="button" className="brass-btn" data-testid="seek-rite" onClick={() => invokeLeader(inputSide, undefined, undefined, { seek: 'rite' })}>
-                  Spell
-                </button>
-              </div>
-            </>
-          )}
-          {leaderChoice.kind === 'revive' && (
-            <>
-              <span>Name a slain Whitethorn Coven unit.</span>
-              <div className="leader-choice-row">
-                {leaderChoice.cards.map(({ card, index }) => (
-                  <button
-                    key={`${card.id}-${index}`}
-                    type="button"
-                    className="brass-btn"
-                    data-testid={`revive-pick-${index}`}
-                    onClick={() => invokeLeader(inputSide, undefined, undefined, { discardIndex: index })}
-                  >
-                    {card.name}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-          <button type="button" className="dev-link" onClick={() => setLeaderChoice(null)}>
-            Cancel
-          </button>
-        </div>
       ) : selectedHint ? (
         <p className="move-banner" data-testid="move-banner">
           <strong>{selectedHint.name}</strong>
@@ -4232,6 +4211,73 @@ export function Battlefield({
             setInspectSticky(false);
           }}
         />
+      )}
+
+      {leaderChoice && (
+        <div className="leader-choice-veil" data-testid="leader-choice" role="dialog" aria-modal="true">
+          <div className="leader-choice-plate">
+            <p className="leader-choice-title">
+              {leaderChoice.kind === 'seek'
+                ? `${activeHero?.name ?? 'Leader'}: name unit or spell`
+                : leaderChoice.kind === 'scry3'
+                  ? `${activeHero?.name ?? 'Leader'}: name one for your hand`
+                  : `${activeHero?.name ?? 'Leader'}: name a slain Whitethorn Coven unit`}
+            </p>
+            {leaderChoice.kind === 'scry3' && (
+              <div className="leader-choice-row">
+                {leaderChoice.cards.map((c, i) => (
+                  <button
+                    key={`${c.id}-${i}`}
+                    type="button"
+                    className="brass-btn"
+                    data-testid={`scry-pick-${i}`}
+                    onClick={() => invokeLeader(inputSide, undefined, undefined, { pick: i })}
+                  >
+                    {c.name}
+                  </button>
+                ))}
+              </div>
+            )}
+            {leaderChoice.kind === 'seek' && (
+              <div className="leader-choice-row">
+                <button
+                  type="button"
+                  className="brass-btn"
+                  data-testid="seek-unit"
+                  onClick={() => invokeLeader(inputSide, undefined, undefined, { seek: 'unit' })}
+                >
+                  Unit
+                </button>
+                <button
+                  type="button"
+                  className="brass-btn"
+                  data-testid="seek-rite"
+                  onClick={() => invokeLeader(inputSide, undefined, undefined, { seek: 'rite' })}
+                >
+                  Spell
+                </button>
+              </div>
+            )}
+            {leaderChoice.kind === 'revive' && (
+              <div className="leader-choice-row">
+                {leaderChoice.cards.map(({ card, index }) => (
+                  <button
+                    key={`${card.id}-${index}`}
+                    type="button"
+                    className="brass-btn"
+                    data-testid={`revive-pick-${index}`}
+                    onClick={() => invokeLeader(inputSide, undefined, undefined, { discardIndex: index })}
+                  >
+                    {card.name}
+                  </button>
+                ))}
+              </div>
+            )}
+            <button type="button" className="dev-link" onClick={() => setLeaderChoice(null)}>
+              Cancel
+            </button>
+          </div>
+        </div>
       )}
 
       {revealCard && (

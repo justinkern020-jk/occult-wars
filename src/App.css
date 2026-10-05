@@ -6322,18 +6322,43 @@ input[type='search'] {
   font-size: 0.85rem;
 }
 
-.leader-choice {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.55rem 0.75rem;
+.leader-choice-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: rgba(6, 4, 2, 0.72);
+  backdrop-filter: blur(2px);
+}
+.leader-choice-plate {
+  width: min(28rem, 100%);
+  padding: 1.1rem 1.25rem 1rem;
+  border: 1px solid rgba(212, 175, 95, 0.55);
+  border-radius: 10px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 190, 100, 0.12), transparent 55%),
+    linear-gradient(180deg, #1a140c 0%, #0e0a06 100%);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+  color: #f0e2c4;
+  text-align: center;
+}
+.leader-choice-title {
+  margin: 0 0 0.85rem;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
 }
 .leader-choice-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
+  justify-content: center;
+  gap: 0.55rem;
+  margin-bottom: 0.75rem;
 }
-.leader-choice .brass-btn {
-  font-size: 0.78rem;
-  padding: 0.35rem 0.7rem;
+.leader-choice-plate .brass-btn {
+  min-width: 6.5rem;
+  font-size: 0.9rem;
+  padding: 0.55rem 0.95rem;
 }

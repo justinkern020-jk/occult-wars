@@ -924,11 +924,13 @@ export function resolveLeaderPower(
     return null;
   }
   if (op === 'scry3') {
+    // Pick must be explicit (0 is a valid choice) — never default the first card.
+    if (opts.pick == null) return 'Name which of the top cards to take.';
     const deck = ctx.deck[side];
     if (deck.length === 0) return 'Your well is dry.';
     pay();
     const top = deck.splice(0, Math.min(3, deck.length));
-    const pick = Math.max(0, Math.min(opts.pick ?? 0, top.length - 1));
+    const pick = Math.max(0, Math.min(opts.pick, top.length - 1));
     const chosen = top[pick]!;
     const rest = top.filter((_, i) => i !== pick);
     // Optional reorder of the bottom cards.
@@ -943,10 +945,14 @@ export function resolveLeaderPower(
     return null;
   }
   if (op === 'seek') {
-    const kind = opts.seek ?? 'unit';
+    // Kind must be an explicit player (or AI) choice — never default to unit.
+    if (opts.seek !== 'unit' && opts.seek !== 'rite') return 'Name unit or spell.';
+    const kind = opts.seek;
     const deck = ctx.deck[side];
     if (deck.length === 0) return 'Your well is dry.';
     const match = (c: Card) => (kind === 'unit' ? c.kind === 'unit' : c.kind === 'rite' || c.kind === 'device');
+    const label = kind === 'unit' ? 'unit' : 'spell';
+    if (!deck.some(match)) return `No ${label} remains in your well.`;
     pay();
     const revealed: Card[] = [];
     let hit: Card | null = null;
@@ -970,9 +976,10 @@ export function resolveLeaderPower(
     if (hit) {
       if (ctx.hand[side].length < HAND_CAP) ctx.hand[side].push(hit);
       else ctx.discard[side].push(hit);
-      pushLog(ctx, `${leader.name} names a ${kind === 'unit' ? 'unit' : 'spell'} and finds ${hit.name}.`);
+      pushLog(ctx, `${leader.name} names a ${label} and finds ${hit.name}.`);
     } else {
-      pushLog(ctx, `${leader.name} names a ${kind === 'unit' ? 'unit' : 'spell'} and finds none.`);
+      // Should be unreachable after the pre-check; restore safely if it ever is.
+      pushLog(ctx, `${leader.name} names a ${label} and finds none.`);
     }
     return null;
   }
@@ -1467,6 +1474,24 @@ export function resolveActivatedAbility(
   }
 
   return 'That power does not answer.';
+}
+
+
+/** True when a choice-plate op still needs the player's pick before it may fire. */
+export function leaderChoicePending(
+  leader: Card,
+  opts: LeaderOpts = {},
+  aim?: { unitUid?: string; secondUid?: string; discardIndex?: number } | null,
+): boolean {
+  const op = leader.leaderPower?.op;
+  if (op === 'seek') return opts.seek !== 'unit' && opts.seek !== 'rite';
+  if (op === 'scry3') return opts.pick == null;
+  if (op === 'revive_coven') {
+    const disc = opts.discardIndex ?? aim?.discardIndex;
+    return disc == null;
+  }
+  if (op === 'copy_kw') return !opts.secondUid && !aim?.secondUid;
+  return false;
 }
 
 export function leaderNeedsAim(leader: Card): boolean {

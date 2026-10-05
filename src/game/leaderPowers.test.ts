@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { cardById, CARDS } from '../data/catalog';
 import {
   destroyUnit,
+  leaderChoicePending,
   resolveEffect,
   resolveLeaderPower,
   tickLeaderAuras,
@@ -228,6 +229,30 @@ describe('Gold Fraud steal_res', () => {
 });
 
 describe('Edgar Cayce seek', () => {
+  it('refuses to fire without an explicit unit/spell choice (no silent default)', () => {
+    const ctx = ctx0();
+    const unit = cardById('devoted_clerk')!;
+    ctx.deck.blue = [{ ...unit }, { ...unit }];
+    const before = ctx.loyalty.blue;
+    const err = resolveLeaderPower(ctx, cardById('edgar_cayce')!);
+    expect(err).toMatch(/unit or spell/i);
+    expect(ctx.loyalty.blue).toBe(before);
+    expect(ctx.hand.blue).toHaveLength(0);
+    expect(leaderChoicePending(cardById('edgar_cayce')!)).toBe(true);
+    expect(leaderChoicePending(cardById('edgar_cayce')!, { seek: 'unit' })).toBe(false);
+  });
+
+  it('aborts with a clear message (no pay) when the well has none of that kind', () => {
+    const ctx = ctx0();
+    const rite = cardById('the_hydesville_knock')!;
+    ctx.deck.blue = [{ ...rite }, { ...rite }];
+    const before = ctx.loyalty.blue;
+    const err = resolveLeaderPower(ctx, cardById('edgar_cayce')!, undefined, undefined, { seek: 'unit' });
+    expect(err).toMatch(/no unit remains/i);
+    expect(ctx.loyalty.blue).toBe(before);
+    expect(ctx.deck.blue).toHaveLength(2);
+  });
+
   it('finds the named kind and shuffles the rest back', () => {
     const ctx = ctx0();
     const unit = cardById('devoted_clerk')!;
@@ -237,6 +262,30 @@ describe('Edgar Cayce seek', () => {
     expect(ctx.hand.blue[0].id).toBe(unit.id);
     expect(ctx.deck.blue).toHaveLength(3);
     expect(ctx.deck.blue.every((c) => c.id === rite.id)).toBe(true);
+  });
+});
+
+describe('Rector scry3 choice is required', () => {
+  it('refuses to fire without an explicit pick (no silent first-card default)', () => {
+    const ctx = ctx0();
+    const a = cardById('devoted_clerk')!;
+    ctx.deck.blue = [{ ...a }, { ...a }, { ...a }];
+    const before = ctx.loyalty.blue;
+    expect(resolveLeaderPower(ctx, cardById('rector_of_the_monad')!)).toMatch(/name which/i);
+    expect(ctx.loyalty.blue).toBe(before);
+    expect(leaderChoicePending(cardById('rector_of_the_monad')!)).toBe(true);
+    expect(leaderChoicePending(cardById('rector_of_the_monad')!, { pick: 0 })).toBe(false);
+  });
+});
+
+describe('Whitethorn revive and Provost copy still need their picks', () => {
+  it('revive stays pending until a discard index is named', () => {
+    expect(leaderChoicePending(cardById('the_whitethorn_queen')!)).toBe(true);
+    expect(leaderChoicePending(cardById('the_whitethorn_queen')!, { discardIndex: 0 })).toBe(false);
+  });
+  it('copy_kw stays pending until a pupil is named', () => {
+    expect(leaderChoicePending(cardById('provost_of_the_azoth')!)).toBe(true);
+    expect(leaderChoicePending(cardById('provost_of_the_azoth')!, { secondUid: 'p' })).toBe(false);
   });
 });
 
