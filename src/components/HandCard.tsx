@@ -3,6 +3,7 @@ import type { Card } from '../game/types';
 import { cardGeneratesResources } from '../data/catalog';
 import { CardArt } from './CardArt';
 import { ArtMotion, FoilSheen, useFoilPointer } from './CardFx';
+import { GESTURE_SLOP, classifyGesture } from './handGesture';
 
 /** Compact hand strip card — Resources left, Power right (Cabals). */
 export function HandCard({
@@ -90,12 +91,13 @@ export function HandCard({
         if (!startPos.current) return;
         const dx = e.clientX - startPos.current.x;
         const dy = e.clientY - startPos.current.y;
-        if (Math.hypot(dx, dy) < 10) return;
-        clearPress();
-        // In a hand that slides, a sideways swipe scrolls the hand (the row and the
-        // browser take it); only an up/down drag lifts the plate to muster.
+        // In a hand that slides, a sideways swipe scrolls the hand (the row takes it);
+        // an up/down drag lifts the plate to muster.
         const slides = !!(e.currentTarget as HTMLElement).closest?.('.hand-scroller.is-overflowing');
-        if (slides && Math.abs(dx) > Math.abs(dy)) {
+        const g = classifyGesture(dx, dy, slides, GESTURE_SLOP);
+        if (g === 'wait') return;
+        clearPress();
+        if (g === 'scroll') {
           startPos.current = null;
           dragged.current = true;
           window.setTimeout(() => {

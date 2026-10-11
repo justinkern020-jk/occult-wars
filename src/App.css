@@ -6146,9 +6146,11 @@ input[type='search'] {
 .hand-row.hand-row-slide::-webkit-scrollbar {
   display: none;
 }
-/* In a hand that slides, a sideways swipe pans it; an upward drag still lifts a plate to muster. */
+/* In a hand that slides, a sideways swipe pans it and an upward drag lifts a plate to muster.
+   Draggable plates stay touch-action: none (iOS Safari lets a pan-x plate start a page
+   scroll, which cancels the drag); the row pans itself on touch (HandScroller). */
 .hand-scroller.is-overflowing .hand-card.is-draggable {
-  touch-action: pan-x;
+  touch-action: none;
 }
 .hand-scroller.is-overflowing .hand-row-slide {
   cursor: grab;
@@ -6178,6 +6180,7 @@ input[type='search'] {
   opacity: 0;
 }
 .hand-arrow {
+  touch-action: none; /* a swipe that lands on an arrow still slides the hand */
   position: absolute;
   top: 50%;
   z-index: 5;

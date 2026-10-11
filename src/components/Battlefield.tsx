@@ -3475,10 +3475,28 @@ export function Battlefield({
       setSelectedUnit(null);
       setAim(null);
 
+      // Near the top edge of a short (phone) screen the page creeps up, so a circle
+      // above the fold can still be reached while carrying a plate up from the hand.
+      let edgeY: number | null = null;
+      let edgeRaf: number | null = null;
+      const edgeTick = () => {
+        edgeRaf = null;
+        if (edgeY == null) return;
+        const band = 64;
+        const d = edgeY < band ? -(band - edgeY) / 4 : 0;
+        if (d && window.scrollY > 0) {
+          window.scrollBy(0, d);
+          edgeRaf = requestAnimationFrame(edgeTick);
+        }
+      };
       const onMove = (ev: PointerEvent) => {
         setDragPos({ x: ev.clientX, y: ev.clientY });
+        edgeY = ev.clientY;
+        if (edgeRaf == null) edgeRaf = requestAnimationFrame(edgeTick);
       };
       const onUp = (ev: PointerEvent) => {
+        edgeY = null;
+        if (edgeRaf != null) cancelAnimationFrame(edgeRaf);
         window.removeEventListener('pointermove', onMove);
         window.removeEventListener('pointerup', onUp);
         window.removeEventListener('pointercancel', onUp);
