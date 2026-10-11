@@ -227,7 +227,7 @@ export function destroyUnit(ctx: EffectCtx, uid: string, seen?: Set<string>) {
         },
   );
   delete ctx.units[uid];
-  pushLog(ctx, `${u.name} is unmade.`);
+  pushLog(ctx, `${u.name} is destroyed.`);
   // Father of the Last Icon: enemy deaths bank 2 for the icon's chair.
   if (ctx.iconHarvestSide && deadSide !== ctx.iconHarvestSide && (ctx.iconHarvestOpens ?? 0) > 0) {
     bankLoyalty(ctx, ctx.iconHarvestSide, 2);
@@ -256,7 +256,7 @@ export function destroyUnit(ctx: EffectCtx, uid: string, seen?: Set<string>) {
     const t = ctx.units[id];
     if (!t) continue;
     const dmg = dealTo(ctx, t, burst);
-    pushLog(ctx, `${u.name} bursts for ${dmg} against ${t.name}.`);
+    pushLog(ctx, `${u.name} bursts, dealing ${dmg} damage to ${t.name}.`);
     if (t.power <= 0) destroyUnit(ctx, id, visited);
   }
 }
@@ -316,7 +316,7 @@ function snuffGuns(ctx: EffectCtx, side: Side, sourceName: string) {
     const u = ctx.units[uid];
     if (!u || u.side === side || !hasKeyword(u, 'ranged')) continue;
     const dmg = dealTo(ctx, u, 2);
-    pushLog(ctx, `${sourceName} snuffs ${u.name} for ${dmg}.`);
+    pushLog(ctx, `${sourceName} snuffs ${u.name} for ${dmg} damage.`);
     if (isDestroyed({ ...u, id: u.uid, power: u.power, keywords: u.keywords })) {
       destroyUnit(ctx, uid);
     }
@@ -388,7 +388,7 @@ export function resolveEffect(
         const u = ctx.units[uid];
         if (!u) continue;
         const dmg = dealTo(ctx, u, n);
-        pushLog(ctx, `${card.name} deals ${dmg} to ${u.name}.`);
+        pushLog(ctx, `${card.name} deals ${dmg} damage to ${u.name}.`);
         if (u.power <= 0) destroyUnit(ctx, uid);
       }
       break;
@@ -445,7 +445,7 @@ export function resolveEffect(
         pushLog(ctx, `Papa John's root strengthens the dust.`);
       }
       const dmg = dealTo(ctx, target!, smiteN);
-      pushLog(ctx, `${card.name} deals ${dmg} to ${target!.name}.`);
+      pushLog(ctx, `${card.name} deals ${dmg} damage to ${target!.name}.`);
       if (target!.power <= 0) destroyUnit(ctx, target!.uid);
       break;
     }
@@ -477,7 +477,7 @@ export function resolveEffect(
       if (card.id === 'hot_foot_powder' && hasAlliedPapaJohn(ctx, side)) {
         pushLog(ctx, `Papa John's root burns through the powder.`);
         const dmg = dealTo(ctx, target!, 1);
-        pushLog(ctx, `${card.name} deals ${dmg} to ${target!.name}.`);
+        pushLog(ctx, `${card.name} deals ${dmg} damage to ${target!.name}.`);
         if (target!.power <= 0) destroyUnit(ctx, target!.uid);
       }
       break;
@@ -511,7 +511,7 @@ export function resolveEffect(
         const u = ctx.units[uid];
         if (!u) continue;
         const dmg = dealTo(ctx, u, n);
-        pushLog(ctx, `${name} bursts for ${dmg} against ${u.name}.`);
+        pushLog(ctx, `${name} bursts, dealing ${dmg} damage to ${u.name}.`);
         if (u.power <= 0) destroyUnit(ctx, uid);
       }
       break;
@@ -571,7 +571,7 @@ export function resolveEffect(
       const err = needTarget();
       if (err) return err;
       const dmg = dealTo(ctx, target!, 1);
-      pushLog(ctx, `${card.name} deals ${dmg} to ${target!.name}.`);
+      pushLog(ctx, `${card.name} deals ${dmg} damage to ${target!.name}.`);
       if (target!.power <= 0) destroyUnit(ctx, target!.uid);
       else {
         target!.power += 2;
@@ -1148,7 +1148,7 @@ export function resolveLeaderPower(
       const u = ctx.units[uid];
       if (!u) continue;
       const dmg = dealTo(ctx, u, 2);
-      pushLog(ctx, `${leader.name} deals ${dmg} to ${u.name}.`);
+      pushLog(ctx, `${leader.name} deals ${dmg} damage to ${u.name}.`);
       if (u.power <= 0) destroyUnit(ctx, uid);
     }
     pushLog(ctx, `${leader.name} martyrs ${name}.`);
@@ -1220,7 +1220,7 @@ export function applyPendingFieldPoison(ctx: EffectCtx, damage: number): number 
     const u = ctx.units[uid];
     if (!u) continue;
     const dmg = dealTo(ctx, u, damage);
-    pushLog(ctx, `Lingering poison deals ${dmg} to ${u.name}.`);
+    pushLog(ctx, `Lingering poison deals ${dmg} damage to ${u.name}.`);
     struck += 1;
     if (u.power <= 0) destroyUnit(ctx, uid);
   }
@@ -1360,7 +1360,7 @@ export function resolveActivatedAbility(
     if (!target) return 'Name a unit.';
     const raw = act.op === 'sacrifice-hit' ? (act.n ?? 3) : 1;
     const dmg = dealTo(ctx, target, raw);
-    pushLog(ctx, `${card.name} deals ${dmg} to ${target.name}.`);
+    pushLog(ctx, `${card.name} deals ${dmg} damage to ${target.name}.`);
     if (target.power <= 0) destroyUnit(ctx, target.uid);
     if (act.op === 'once-sting') {
       source.moved = true;

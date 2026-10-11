@@ -50,7 +50,7 @@ export const KEYWORDS: Record<string, KeywordInfo> = {
     key: 'crown',
     name: 'Lamp',
     glyph: '☼',
-    title: 'Lamp. Adjacent units you control strike for +1 Power.',
+    title: 'Lamp. Adjacent units you control deal 1 extra damage when they strike.',
   },
   shutter: {
     key: 'shutter',

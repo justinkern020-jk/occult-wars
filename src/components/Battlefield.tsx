@@ -1122,7 +1122,8 @@ export function Battlefield({
       setSelectedUnit(null);
       setAim(null);
       setAiBusy(false);
-      pushLog(msg);
+      // The rules already chronicle a stronghold seizure; never print it twice.
+      setLog((L) => (L.includes(msg) ? L : [msg, ...L].slice(0, 12)));
       const playerWon = sharedTwoPlayer
         ? winner === (friend ? mySide : side)
         : winner === PLAYER;
@@ -3653,8 +3654,16 @@ export function Battlefield({
               data-testid="bf-field-select"
               value={mapId}
               onChange={(e) => {
+                const next = e.target.value;
+                // Switching the field mid-sitting restarts it: ask first, once play is under way.
+                const underway = turn > 1 || listUnits(board).length > 0;
+                const name = mapById(next)?.name ?? 'the new field';
+                if (underway && !window.confirm(`Start a new sitting on ${name}? This one will be lost.`)) {
+                  e.target.value = mapId;
+                  return;
+                }
                 bootedFor.current = null;
-                setMapId(e.target.value);
+                setMapId(next);
               }}
             >
               <optgroup label="The First Hour">

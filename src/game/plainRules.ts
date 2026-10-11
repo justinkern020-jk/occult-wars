@@ -20,7 +20,7 @@ export type PlainRules = {
 
 /** Plainer wording where the glossary line is terse. */
 const PLAIN_KEYWORD: Record<string, string> = {
-  crown: 'Your units next to it (above, below, left or right) strike for +1 Power.',
+  crown: 'Your units next to it (above, below, left or right) deal 1 extra damage when they strike.',
   root: 'Enemy units next to it cannot move or strike.',
   seep: 'At the start of your rite (turn), it deals 1 damage to each enemy next to it.',
   tough: 'The first point of damage from any strike against it is ignored.',

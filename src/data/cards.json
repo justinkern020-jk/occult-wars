@@ -11,7 +11,7 @@
       "tithe",
       "crown"
     ],
-    "text": "Tithe. Lamp. While she stands, your bank yields +1. Adjacent units you control strike for +1 Power. A country doctor of the sidhe. She diagnoses the fairy stroke and invoices the hedge.",
+    "text": "Tithe. Lamp. While she stands, your bank yields +1. Adjacent units you control deal 1 extra damage when they strike. A country doctor of the sidhe. She diagnoses the fairy stroke and invoices the hedge.",
     "quote": "The most celebrated fairy doctors are sometimes people the fairies loved and carried away, and kept with them for seven years.",
     "quoted": "W. B. Yeats, Fairy and Folk Tales of the Irish Peasantry (1888)",
     "power": 3,
@@ -182,7 +182,7 @@
       "gills",
       "seep"
     ],
-    "text": "Undine. Seep cannot wound it. Seep. At the start of your rite, deal 1 to each adjacent enemy. The mermaid of the Irish coast, red cap, green hair, a net of names.",
+    "text": "Undine. Seep cannot wound it. Seep. At the start of your rite, deal 1 damage to each adjacent enemy. The mermaid of the Irish coast, red cap, green hair, a net of names.",
     "quote": "Full fathom five thy father lies; of his bones are coral made; those are pearls that were his eyes.",
     "quoted": "William Shakespeare, The Tempest (1611)",
     "power": 3,
@@ -381,7 +381,7 @@
       "slow",
       "crown"
     ],
-    "text": "Slow Attack. Toughness. Lamp. It strikes last. The first point of any blow is refused. Adjacent units you control strike for +1 Power. A dynamo that stood up and went to work.",
+    "text": "Slow Attack. Toughness. Lamp. It strikes last. The first point of any blow is refused. Adjacent units you control deal 1 extra damage when they strike. A dynamo that stood up and went to work.",
     "quote": "He began to feel the forty-foot dynamos as a moral force, much as the early Christians felt the Cross.",
     "quoted": "Henry Adams, The Education of Henry Adams (1907)",
     "power": 5,
@@ -400,7 +400,7 @@
       "fast",
       "crown"
     ],
-    "text": "Fast Attack. Lamp. Strikes first. Adjacent units you control strike for +1 Power. She smells of lightning and filing cabinets. The bureau gave her a rank the army does not have.",
+    "text": "Fast Attack. Lamp. Strikes first. Adjacent units you control deal 1 extra damage when they strike. She smells of lightning and filing cabinets. The bureau gave her a rank the army does not have.",
     "quote": "As soon as any of the thunder clouds come over the kite, the pointed wire will draw the electric fire from them.",
     "quoted": "Benjamin Franklin, Pennsylvania Gazette (1752)",
     "power": 3,
@@ -494,7 +494,7 @@
       "relay",
       "crown"
     ],
-    "text": "Relay. Lamp. When you muster another unit, draw 1. Adjacent units you control strike for +1 Power. A tower that repeats your muster to the whole yard.",
+    "text": "Relay. Lamp. When you muster another unit, draw 1. Adjacent units you control deal 1 extra damage when they strike. A tower that repeats your muster to the whole yard.",
     "quote": "What hath God wrought.",
     "quoted": "Samuel Morse, first long-distance telegraph message (1844)",
     "power": 2,
@@ -729,7 +729,7 @@
       "crown",
       "tithe"
     ],
-    "text": "Lamp. Tithe. Adjacent units you control strike for +1 Power. Your bank yields +1. A small sun that makes every neighboring soul hit harder.",
+    "text": "Lamp. Tithe. Adjacent units you control deal 1 extra damage when they strike. Your bank yields +1. A small sun that makes every neighboring soul hit harder.",
     "quote": "They supposed the elements of numbers to be the elements of all things, and the whole heaven to be a musical scale and a number.",
     "quoted": "Aristotle, on the Pythagoreans, Metaphysics",
     "power": 3,
@@ -785,7 +785,7 @@
       "crown",
       "sprout"
     ],
-    "text": "Lamp. If it is still standing at the end of its rite, it gains 1 power. If it survives a battle, it gains 1 power. Adjacent units you control strike for +1 Power. A saint of the inward fire. Every rite it survives, the light climbs.",
+    "text": "Lamp. If it is still standing at the end of its rite, it gains 1 power. If it survives a battle, it gains 1 power. Adjacent units you control deal 1 extra damage when they strike. A saint of the inward fire. Every rite it survives, the light climbs.",
     "quote": "FIRE. God of Abraham, God of Isaac, God of Jacob, not of the philosophers and of the learned.",
     "quoted": "Blaise Pascal, Memorial (1654)",
     "power": 3,
@@ -824,7 +824,7 @@
       "veiled",
       "crown"
     ],
-    "text": "Cryptid. Untargetable. Lamp. A face the college forbids novices to look at. Strikes pass over it. Adjacent units you control strike for +1 Power.",
+    "text": "Cryptid. Untargetable. Lamp. A face the college forbids novices to look at. Strikes pass over it. Adjacent units you control deal 1 extra damage when they strike.",
     "quote": "Out of nothing I have created a strange new universe.",
     "quoted": "János Bolyai, letter to his father (1823)",
     "power": 3,
@@ -1003,7 +1003,7 @@
       "ranged",
       "crown"
     ],
-    "text": "Ranged Strike. Lamp. The prophetic bird of the Slavic east, a woman-face and a wingspan of omen. The cry reaches 2 circles in a straight line and is not answered. Adjacent units you control strike for +1 Power.",
+    "text": "Ranged Strike. Lamp. The prophetic bird of the Slavic east, a woman-face and a wingspan of omen. The cry reaches 2 circles in a straight line and is not answered. Adjacent units you control deal 1 extra damage when they strike.",
     "quote": "On the smooth of endless waters, clothed in purple by the sunset, she prophesies and sings, unable to lift her troubled wings.",
     "quoted": "Alexander Blok, Gamayun, the Prophetic Bird (1899)",
     "power": 3,
@@ -1060,7 +1060,7 @@
       "sprout",
       "crown"
     ],
-    "text": "Lamp. If it is still standing at the end of its rite, it gains 1 power. If it survives a battle, it gains 1 power. Adjacent units you control strike for +1 Power. The midsummer fire that the shaman will not let go out.",
+    "text": "Lamp. If it is still standing at the end of its rite, it gains 1 power. If it survives a battle, it gains 1 power. Adjacent units you control deal 1 extra damage when they strike. The midsummer fire that the shaman will not let go out.",
     "quote": "If you will, you can become all flame.",
     "quoted": "Abba Joseph of Panephysis, Sayings of the Desert Fathers",
     "power": 3,
@@ -1136,7 +1136,7 @@
       "gills",
       "seep"
     ],
-    "text": "Cryptid. Undine. Seep cannot wound it. Seep. The great pike under the mill. At the start of your rite, deal 1 to each adjacent enemy. A shaman bargained with it. The bargain is still swimming.",
+    "text": "Cryptid. Undine. Seep cannot wound it. Seep. The great pike under the mill. At the start of your rite, deal 1 damage to each adjacent enemy. A shaman bargained with it. The bargain is still swimming.",
     "quote": "By the pike's command, by my own wish.",
     "quoted": "Russian folktale formula, Emelya the Fool",
     "power": 4,
@@ -1258,7 +1258,7 @@
       "tough",
       "crown"
     ],
-    "text": "Toughness. Lamp. The first point of any blow is refused. Adjacent units you control strike for +1 Power. She is the winter witch of the hedge, not a court magician. The thorn beside her hits harder.",
+    "text": "Toughness. Lamp. The first point of any blow is refused. Adjacent units you control deal 1 extra damage when they strike. She is the winter witch of the hedge, not a court magician. The thorn beside her hits harder.",
     "quote": "The host is riding from Knocknarea and over the grave of Clooth-na-Bare.",
     "quoted": "W. B. Yeats, The Hosting of the Sidhe (1899)",
     "power": 4,
@@ -1567,7 +1567,7 @@
       "crown",
       "ranged"
     ],
-    "text": "Lamp. Ranged Strike. Adjacent units you control strike for +1 Power. The shot is a straight line of coiled light, two circles, never the diagonal, and it is not answered. An interwar saint of the transformer yard.",
+    "text": "Lamp. Ranged Strike. Adjacent units you control deal 1 extra damage when they strike. The shot is a straight line of coiled light, two circles, never the diagonal, and it is not answered. An interwar saint of the transformer yard.",
     "quote": "Nothing is too wonderful to be true, if it be consistent with the laws of nature.",
     "quoted": "Michael Faraday, laboratory diary (1849)",
     "power": 3,
@@ -1717,7 +1717,7 @@
       "crown",
       "seep"
     ],
-    "text": "Lamp. Seep. Adjacent units you control strike for +1 Power. At the start of your rite, deal 1 to each adjacent enemy. She paints the dials. The dials paint her hands. The glow gets into everyone beside her.",
+    "text": "Lamp. Seep. Adjacent units you control deal 1 extra damage when they strike. At the start of your rite, deal 1 damage to each adjacent enemy. She paints the dials. The dials paint her hands. The glow gets into everyone beside her.",
     "quote": "One of our joys was to go into our workroom at night. The glowing tubes looked like faint, fairy lights.",
     "quoted": "Marie Curie, Autobiographical Notes (1923)",
     "power": 3,
@@ -1756,7 +1756,7 @@
       "crown",
       "ranged"
     ],
-    "text": "Cryptid. Lamp. Ranged Strike. A lamp that grew legs in the works. Adjacent units you control strike for +1. The shot is a straight line and is not answered.",
+    "text": "Cryptid. Lamp. Ranged Strike. A lamp that grew legs in the works. Adjacent units you control deal 1 extra damage when they strike. The shot is a straight line and is not answered.",
     "quote": "Hail, holy Light, offspring of Heav'n first-born.",
     "quoted": "John Milton, Paradise Lost (1667)",
     "power": 3,
@@ -1877,7 +1877,7 @@
     "keywords": [
       "crown"
     ],
-    "text": "Lamp. Adjacent units you control strike for +1 Power. She sees the blow in the dark before it is thrown. The next plate beside her hits on her seeing.",
+    "text": "Lamp. Adjacent units you control deal 1 extra damage when they strike. She sees the blow in the dark before it is thrown. The next plate beside her hits on her seeing.",
     "quote": "I beg you, do not disturb this.",
     "quoted": "Archimedes, as told by Valerius Maximus",
     "power": 3,
@@ -1988,7 +1988,7 @@
       "tithe",
       "crown"
     ],
-    "text": "Tithe. Lamp. Your bank yields +1 while she stands. Adjacent units you control strike for +1 Power. A master of the living soul. What stands beside her strikes harder.",
+    "text": "Tithe. Lamp. Your bank yields +1 while she stands. Adjacent units you control deal 1 extra damage when they strike. A master of the living soul. What stands beside her strikes harder.",
     "quote": "All things which from the very first original being of things have been framed and made do appear to be formed by the reason of numbers.",
     "quoted": "John Dee, Mathematical Preface to Euclid (1570)",
     "power": 3,
@@ -2085,7 +2085,7 @@
       "fast",
       "crown"
     ],
-    "text": "Cryptid. Fast Attack. Lamp. It strikes first. Adjacent units you control strike for +1 Power. The veil has a body under it, and a following.",
+    "text": "Cryptid. Fast Attack. Lamp. It strikes first. Adjacent units you control deal 1 extra damage when they strike. The veil has a body under it, and a following.",
     "quote": "All things excellent are as difficult as they are rare.",
     "quoted": "Baruch Spinoza, Ethics (1677)",
     "power": 3,
@@ -2188,7 +2188,7 @@
       "crown",
       "tithe"
     ],
-    "text": "Lamp. Tithe. Adjacent units you control strike for +1 Power. While he stands, your bank yields +1. A grizzled shaman of the white trees. He does not wear a wizard’s hat. He wears bark and a knife.",
+    "text": "Lamp. Tithe. Adjacent units you control deal 1 extra damage when they strike. While he stands, your bank yields +1. A grizzled shaman of the white trees. He does not wear a wizard’s hat. He wears bark and a knife.",
     "quote": "The wise men fear not mighty lords, and have no need of princely gifts; truthful and free is their prophetic tongue, and friendly with the will of heaven.",
     "quoted": "Alexander Pushkin, The Song of Oleg the Wise (1822)",
     "power": 3,
@@ -2226,7 +2226,7 @@
       "gills",
       "seep"
     ],
-    "text": "Undine. Seep cannot wound it. Seep. At the start of your rite, deal 1 to each adjacent enemy. The drowned girl in the willow. The river is her parish.",
+    "text": "Undine. Seep cannot wound it. Seep. At the start of your rite, deal 1 damage to each adjacent enemy. The drowned girl in the willow. The river is her parish.",
     "quote": "A rusalka swam down the blue river, lit by the full moon, and strove to splash up to the moon the silvery foam of the wave.",
     "quoted": "Mikhail Lermontov, The Rusalka (1832)",
     "power": 3,
@@ -2918,7 +2918,7 @@
     "cost": 4,
     "oath": 0,
     "keywords": [],
-    "text": "Leader. Once in a sitting: pay 4, unmake a unit you own, and deal 2 to every unit beside it.",
+    "text": "Leader. Once in a sitting: pay 4, unmake a unit you own, and deal 2 damage to every unit beside it.",
     "leaderPower": {
       "op": "martyr"
     },
@@ -4591,7 +4591,7 @@
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "While Papa John is on the field, your powder rites hit harder (Goofer Dust deals 4; Hot-Foot Powder also deals 1).",
+    "text": "While Papa John is on the field, your powder rites hit harder (Goofer Dust deals 4 damage; Hot-Foot Powder also deals 1 damage).",
     "power": 2,
     "legacyAttack": 2,
     "legacyHealth": 2,

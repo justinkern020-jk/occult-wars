@@ -1080,3 +1080,146 @@ html[data-foe-coin-skin='bone'] .stone-coin.coin-foe:not([data-skin]) {
 .portal-patron-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
 .portal-patron code { font-family: ui-monospace, monospace; color: #f0d78a; user-select: all; }
 .portal-patron .is-revoked code { text-decoration: line-through; color: #8a7a5c; }
+
+/* ════════ Sweep 3: phones keep the "playing" pill off the page's own buttons ════════ */
+@media (max-width: 640px) {
+  .playing-now:not(.is-docked) {
+    flex-wrap: nowrap;
+    gap: 0.3rem;
+    top: max(0.4rem, env(safe-area-inset-top));
+    right: 0.5rem;
+    max-width: calc(100% - 1rem);
+    padding: 0.2rem 0.25rem 0.2rem 0.5rem;
+  }
+  .playing-now:not(.is-docked) .playing-now-challenge {
+    flex: 0 0 auto;
+    margin: 0 0 0 0.2rem;
+    padding: 0.28rem 0.6rem;
+  }
+  .playing-now:not(.is-docked) .playing-now-note {
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    right: 0;
+    padding: 0.25rem 0.5rem;
+    background: #120e0ae6;
+    border: 1px solid #c6a15b66;
+    border-radius: 0.5rem;
+    white-space: nowrap;
+  }
+  /* Room above each page for the one-row pill (the field docks it in its own bar). */
+  .menu-root,
+  .app.app-shell:not(:has(#playing-dock)) {
+    padding-top: 3rem;
+  }
+  .challenge-issued {
+    top: 3.1rem;
+  }
+}
+
+/* ════════ Sweep 3: score plates keep their words inside the brass frame ════════ */
+.score-chip {
+  padding: 1.4rem 2rem 1.4rem;
+}
+.bf-turn {
+  padding: 1.15rem 1.5rem 1.2rem;
+}
+
+/* ════════ Sweep 3: the field on a phone — board and hand on one screen ════════ */
+@media (max-width: 640px) {
+  .bf-hud {
+    gap: 0.4rem;
+    padding: 0.25rem 0 0.2rem;
+  }
+  .bf-hud .bf-scores {
+    flex: 1 1 100%;
+    flex-wrap: nowrap;
+    gap: 0.3rem;
+  }
+  .bf-hud .score-chip,
+  .bf-hud .bf-turn {
+    background: linear-gradient(#120d09f2, #070504f2);
+    border: 1px solid #8a6a32;
+    border-radius: 0.55rem;
+    box-shadow: inset 0 0 0 1px #2a1e12, 0 4px 10px #0008;
+    filter: none;
+    min-width: 0;
+    padding: 0.3rem 0.45rem 0.35rem;
+  }
+  .bf-hud .score-chip {
+    flex: 1 1 0;
+  }
+  .bf-hud .bf-turn {
+    flex: 0 0 auto;
+    min-width: 3.4rem;
+  }
+  .bf-hud .score-chip dt {
+    font-size: 0.52rem;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .bf-hud .score-chip dd {
+    gap: 0.2rem;
+    font-size: 1rem;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+  .bf-hud .score-chip .score-loyalty {
+    font-size: 1.2rem;
+  }
+  .bf-hud .score-chip .score-resource-jewel {
+    width: 1rem;
+    height: 1rem;
+  }
+  /* The jewel says "Resources"; keep only the "dom" word on a phone. */
+  .bf-hud .score-chip dd > span:nth-of-type(2) {
+    display: none;
+  }
+  .bf-hud .score-chip dd em {
+    margin-left: 0.15rem;
+  }
+  .bf-hud .score-chip .bf-hold {
+    font-size: 0.5rem;
+    letter-spacing: 0.04em;
+    margin-top: 0.15rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .bf-hud .bf-turn strong {
+    font-size: 1.1rem;
+  }
+  .bf-hud .bf-turn-label,
+  .bf-hud .bf-side {
+    font-size: 0.5rem;
+    letter-spacing: 0.1em;
+  }
+  /* Hand straight under the board; the legend and log follow. */
+  .battlefield {
+    display: flex;
+    flex-direction: column;
+  }
+  .battlefield > .board-key {
+    order: 2;
+    margin-top: 0.6rem;
+  }
+  .battlefield > .bf-occultist-socket {
+    order: 3;
+  }
+  .battlefield > .bf-log {
+    order: 4;
+  }
+}
+@media (max-width: 640px) {
+  .playing-now.is-docked {
+    flex-wrap: nowrap;
+    max-width: none;
+    padding: 0.2rem 0.25rem 0.2rem 0.5rem;
+  }
+  .playing-now.is-docked .playing-now-challenge {
+    flex: 0 0 auto;
+    margin: 0 0 0 0.2rem;
+    padding: 0.28rem 0.6rem;
+  }
+}

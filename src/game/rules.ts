@@ -708,7 +708,7 @@ export function resolveStrike(
     pip(ctx, def.uid, dmg);
     atk.moved = true;
     atk.attacked = true;
-    log(ctx, `Ranged: ${atk.name} strikes ${def.name} for ${dmg} from ${dist} away.`);
+    log(ctx, `Ranged: ${atk.name} strikes ${def.name} for ${dmg} damage from ${dist} away.`);
     if (def.power > 0 && def.power < defBefore && hasKeyword(atk, 'arrest')) {
       def.arrest = 2;
       log(ctx, `${def.name} is arrested and cannot move for two turns.`);

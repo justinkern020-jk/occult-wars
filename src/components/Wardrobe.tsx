@@ -1,3 +1,4 @@
+import { useEscape } from '../hooks/useEscape';
 /**
  * The Wardrobe: choose a card back and a coin skin; enter a patron code.
  * Also the small draw pile beside the hand (drawn in the worn back).
@@ -27,6 +28,7 @@ export function WardrobePanel({ profile, onUpdate, onClose }: Props) {
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
+  useEscape(onClose);
   const set = (patch: { back?: string; coin?: string; patron?: string }) =>
     onUpdate((p) => ({ ...p, wardrobe: { ...(p.wardrobe ?? {}), ...patch } }));
 

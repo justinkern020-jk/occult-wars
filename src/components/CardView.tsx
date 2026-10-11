@@ -4,6 +4,11 @@ import { cardGeneratesResources } from '../data/catalog';
 import { CardArt } from './CardArt';
 import { ArtMotion, FoilSheen, useFoilPointer } from './CardFx';
 
+/** Order name for the narrow plate foot: drop the article so it fits (full name stays on hover). */
+function shortFaction(faction: string): string {
+  return faction.replace(/^(Order of the|Sons of the|The)\s+/i, '');
+}
+
 const KIND_LABEL: Record<string, string> = {
   unit: 'Unit',
   rite: 'Rite',
@@ -88,7 +93,9 @@ export function CardView({
       </div>
 
       <footer className="tarot-foot">
-        <p className="tarot-faction">{card.faction}</p>
+        <p className="tarot-faction" title={card.faction}>
+          {shortFaction(card.faction)}
+        </p>
         <p className="tarot-life">
           {card.kind === 'unit'
             ? `Power ${shownPower ?? '—'}`

@@ -84,13 +84,13 @@ export function resolveMelee(
     dmgToDefTotal = dmgToDef;
     dmgToAtkTotal = dmgToAtk;
     log.push(
-      `Normal (simultaneous): ${attacker.name} (${aDeal}) and ${defender.name} (${dDeal}) exchange blows.`,
+      `${attacker.name} and ${defender.name} trade blows at the same moment.`,
     );
     log.push(
-      `${attacker.name} deals ${dmgToDef}; ${defender.name} is now Power ${Math.max(0, defender.power)}.`,
+      `${attacker.name} deals ${dmgToDef} damage; ${defender.name} drops to Power ${Math.max(0, defender.power)}.`,
     );
     log.push(
-      `${defender.name} deals ${dmgToAtk}; ${attacker.name} is now Power ${Math.max(0, attacker.power)}.`,
+      `${defender.name} deals ${dmgToAtk} damage; ${attacker.name} drops to Power ${Math.max(0, attacker.power)}.`,
     );
   } else if (mode === 'fast') {
     // Attacker has higher initiative (Fast vs Normal/Slow).
@@ -98,24 +98,24 @@ export function resolveMelee(
     const dmgToDef = applyDamage(defender, aDeal);
     dmgToDefTotal = dmgToDef;
     log.push(
-      `Fast Attack: ${attacker.name} strikes first for ${dmgToDef} (from Power ${aDeal}).`,
+      `Fast Attack: ${attacker.name} strikes first for ${dmgToDef} damage.`,
     );
     log.push(
-      `${defender.name} is now Power ${Math.max(0, defender.power)}.`,
+      `${defender.name} drops to Power ${Math.max(0, defender.power)}.`,
     );
     if (isDestroyed(defender)) {
       log.push(
-        `${defender.name} is destroyed and does not strike back.`,
+        `${defender.name} falls before it can strike back.`,
       );
     } else {
       const dDeal = defPow(); // reduced Power
       const dmgToAtk = applyDamage(attacker, dDeal);
       dmgToAtkTotal = dmgToAtk;
       log.push(
-        `${defender.name} answers for ${dmgToAtk} (from Power ${dDeal}).`,
+        `${defender.name} strikes back for ${dmgToAtk} damage.`,
       );
       log.push(
-        `${attacker.name} is now Power ${Math.max(0, attacker.power)}.`,
+        `${attacker.name} drops to Power ${Math.max(0, attacker.power)}.`,
       );
     }
   } else {
@@ -126,33 +126,32 @@ export function resolveMelee(
     const defFast = hasKeyword(defender, 'fast');
     log.push(
       defFast
-        ? `Fast Attack: ${defender.name} strikes first for ${dmgToAtk} (from Power ${dDeal}).`
-        : `Slow Attack: ${defender.name} deals first for ${dmgToAtk} (from Power ${dDeal}).`,
+        ? `Fast Attack: ${defender.name} strikes first for ${dmgToAtk} damage.`
+        : `Slow Attack: ${defender.name} hits first for ${dmgToAtk} damage.`,
     );
     log.push(
-      `${attacker.name} is now Power ${Math.max(0, attacker.power)}.`,
+      `${attacker.name} drops to Power ${Math.max(0, attacker.power)}.`,
     );
     if (isDestroyed(attacker)) {
       log.push(
         defFast
-          ? `${attacker.name} is destroyed and does not strike back.`
-          : `${attacker.name} is destroyed and never delivers its Slow blow.`,
+          ? `${attacker.name} falls before it can strike back.`
+          : `${attacker.name} falls before its Slow blow lands.`,
       );
     } else {
       const aDeal = atkPow(); // possibly reduced
       const dmgToDef = applyDamage(defender, aDeal);
       dmgToDefTotal = dmgToDef;
       log.push(
-        `${attacker.name} then strikes for ${dmgToDef} (from Power ${aDeal}).`,
+        `${attacker.name} then strikes for ${dmgToDef} damage.`,
       );
       log.push(
-        `${defender.name} is now Power ${Math.max(0, defender.power)}.`,
+        `${defender.name} drops to Power ${Math.max(0, defender.power)}.`,
       );
     }
   }
 
-  if (isDestroyed(attacker)) log.push(`${attacker.name} is destroyed.`);
-  if (isDestroyed(defender)) log.push(`${defender.name} is destroyed.`);
+  // Deaths are announced once, by the removal itself ("… is destroyed.").
 
   // Clamp display power at 0
   if (attacker.power < 0) attacker.power = 0;

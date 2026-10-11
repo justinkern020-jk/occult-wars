@@ -4,6 +4,7 @@ import { useSettings, writeSetting, type Settings } from '../game/settings';
 import { brassClick } from '../game/sfx';
 import { haptic, hapticsSupported } from '../game/haptics';
 import { promptInstall, useInstallState } from '../net/pwa';
+import { useEscape } from '../hooks/useEscape';
 
 const ROWS: { key: keyof Settings; label: string; sub: string }[] = [
   { key: 'voice', label: 'Leader voices', sub: 'Short gramophone barks on leader powers, victory and defeat (with subtitles)' },
@@ -57,6 +58,7 @@ export function InstallGrimoire({ compact = false }: { compact?: boolean }) {
 
 export function SettingsPanel({ onClose, onWardrobe }: { onClose: () => void; onWardrobe?: () => void }) {
   const s = useSettings();
+  useEscape(onClose);
   return (
     <div className="codex-page-scrim" role="dialog" aria-modal aria-label="Settings" onClick={onClose}>
       <div className="settings-panel plate" onClick={(e) => e.stopPropagation()} data-testid="settings-panel">

@@ -6,7 +6,7 @@ describe('plainRules', () => {
   it('explains Lamp in plain words', () => {
     const k = plainKeyword('crown');
     expect(k.name).toBe('Lamp');
-    expect(k.text).toMatch(/next to it.*\+1 Power/);
+    expect(k.text).toMatch(/next to it.*1 extra damage when they strike/);
   });
 
   it('splits rules from lore and drops bare keyword names', () => {
