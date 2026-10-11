@@ -22,7 +22,7 @@ import { canDeployOn, isEnemyStronghold, isPaintable } from './control';
 import { canBeStruck, hasKeyword, manhattan, rangedReach } from './keywords';
 import { applyDamage, combatantFrom, resolveMelee } from './combat';
 import { MEASURED_BLOODED, bloodedResult, crownBonusOnBoard, type RulesBoard } from './rules';
-import { isRecallableFromDiscard, type EffectUnit } from './effects';
+import { isQueenCourtUnit, isRecallableFromDiscard, type EffectUnit } from './effects';
 import {
   applyAction,
   cloneState,
@@ -756,7 +756,7 @@ function leaderCandidates(s: AiSnapshot, threats: Set<string>, out: Scored[]) {
   }
   if (op === 'revive_coven') {
     const disc = s.discard ?? [];
-    const discIdx = disc.findIndex((c) => c.kind === 'unit' && c.faction === 'The Whitethorn Coven');
+    const discIdx = disc.findIndex((c) => isQueenCourtUnit(c));
     if (discIdx < 0) return;
     let best: Scored | null = null;
     for (let r = 0; r < 5; r++)

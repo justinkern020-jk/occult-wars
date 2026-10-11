@@ -617,7 +617,7 @@
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Leader. Once in a sitting: pay 2. Name a unit. It gains Shutter and Toughness. The chief of the bureau puts a patent on a body. Ranged strikes cannot choose it, and the first point of any blow is refused.",
+    "text": "Leader. Once in a sitting: pay 2. Name a unit you own. It gains Shutter and Toughness. The chief of the bureau puts a patent on a body. Ranged strikes cannot choose it, and the first point of any blow is refused.",
     "quote": "Knowledge itself is power.",
     "quoted": "Francis Bacon, Meditationes Sacrae (1597)",
     "leaderPower": {
@@ -1548,7 +1548,7 @@
     "cost": 2,
     "oath": 0,
     "keywords": [],
-    "text": "Leader. Once in a sitting: pay 2. Return a slain Whitethorn Coven unit from your discard to an empty non-stronghold circle you control at 1 power (exhausted).",
+    "text": "Leader. Once in a sitting: pay 2. Return a slain Briar Sidhe unit from your discard to an empty non-stronghold circle you control at 1 power (exhausted).",
     "quote": "I am but the queen of fair Elfland, that am hither come to visit thee.",
     "quoted": "Thomas the Rhymer, Border ballad",
     "leaderPower": {

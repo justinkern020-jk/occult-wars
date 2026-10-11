@@ -36,6 +36,8 @@ import {
   castFromHand,
   effectNeedsAim,
   leaderNeedsAim,
+  leaderAimKind,
+  isQueenCourtUnit,
   leaderNeedsChoice,
   leaderChoicePending,
   isRecallableFromDiscard,
@@ -348,6 +350,16 @@ function CoinSlideLayer({
     </div>
   );
 }
+
+/** Aim banner tail for each leader target kind (the matching circles are lit). */
+const LEADER_AIM_PHRASE: Record<string, string> = {
+  own: '— name a unit you own (lit in gold).',
+  foe: '— name an enemy unit (lit in gold).',
+  any: '— name any unit on the field (lit in gold).',
+  exhausted: '— name an exhausted unit.',
+  empty: '— name an empty circle that is not a stronghold (lit in gold).',
+  'held-empty': '— name an empty circle you control that is not a stronghold.',
+};
 
 export function Battlefield({
   initialMapId = 'ashen-cross',
@@ -1457,14 +1469,14 @@ export function Battlefield({
         if (discIdx == null) {
           const cards = discard[acting]
             .map((card, index) => ({ card, index }))
-            .filter((x) => x.card.kind === 'unit' && x.card.faction === 'The Whitethorn Coven');
+            .filter((x) => isQueenCourtUnit(x.card));
           if (!cards.length) {
-            pushLog('No Whitethorn Coven unit lies in your discard.');
+            pushLog('No Briar Sidhe unit lies in your discard.');
             return false;
           }
           if (!leaderChoice || leaderChoice.kind !== 'revive') {
             setLeaderChoice({ kind: 'revive', cards });
-            pushLog(`Name a slain Whitethorn Coven unit for ${hero.name}.`);
+            pushLog(`Name a slain Briar Sidhe unit for ${hero.name}.`);
           }
           return false;
         }
@@ -1535,7 +1547,13 @@ export function Battlefield({
             ? `Name an exhausted unit for ${hero.name}, then the circle it slides to.`
             : op === 'transmute'
               ? `Name an enemy unit for ${hero.name}.`
-              : `Name a target for ${hero.name}.`,
+              : leaderAimKind(hero) === 'own'
+                ? `Name a unit you own for ${hero.name}.`
+                : leaderAimKind(hero) === 'empty'
+                  ? `Name an empty circle for ${hero.name}.`
+                  : leaderAimKind(hero) === 'any'
+                    ? `Name any unit for ${hero.name}.`
+                    : `Name a target for ${hero.name}.`,
         );
         return false;
       }
@@ -3331,6 +3349,37 @@ export function Battlefield({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [side, phase, matchOver, sharedTwoPlayer, aiDifficulty, redHero]);
 
+  /** Circles a leader's aim may name right now (gold light), so the target is never a guess. */
+  const leaderAimTiles = useMemo(() => {
+    const out = new Set<string>();
+    if (aim?.kind !== 'leader') return out;
+    const hero = inputSide === 'blue' ? blueHero : redHero;
+    const kind = leaderAimKind(hero);
+    if (!kind) return out;
+    if (kind === 'empty' || kind === 'held-empty') {
+      gameMap.tiles.forEach((row, r) =>
+        row.forEach((t, c) => {
+          if (t.kind === 'void' || t.kind === 'stronghold' || board[r][c]) return;
+          if (kind === 'held-empty' && control[r][c] !== inputSide) return;
+          out.add(`${r},${c}`);
+        }),
+      );
+      return out;
+    }
+    if (kind === 'exhausted' && aim.unitUid) return out;
+    for (const u of listUnits(board)) {
+      if (u.keywords.includes('veiled')) continue;
+      const mine = u.side === inputSide;
+      if (!mine && u.warded) continue;
+      if (kind === 'own' && !mine) continue;
+      if (kind === 'foe' && mine) continue;
+      if (kind === 'exhausted' && !(u.sick || u.moved || u.attacked)) continue;
+      if (aim.unitUid && u.uid === aim.unitUid) continue;
+      out.add(`${u.r},${u.c}`);
+    }
+    return out;
+  }, [aim, inputSide, blueHero, redHero, gameMap, board, control]);
+
   const legalMove = useMemo(() => {
     const empty = new Set<string>();
     const dirs = new Map<string, MoveDir>();
@@ -3362,6 +3411,11 @@ export function Battlefield({
   const lapseGhost = useMemo(() => {
     const out = new Set<string>();
     if (!aim || aim.kind === 'act' || !aim.unitUid) return out;
+    // Only a shove / slide moves the named unit; Provost's pupil step names a unit, not a circle.
+    const slides =
+      (aim.kind === 'cast' && aim.card.effect?.op === 'shove') ||
+      (aim.kind === 'leader' && (inputSide === 'blue' ? blueHero : redHero)?.leaderPower?.op === 'slide');
+    if (!slides) return out;
     const found = findUnit(aim.unitUid);
     if (!found) return out;
     for (const [dr, dc] of [
@@ -3378,7 +3432,7 @@ export function Battlefield({
       out.add(`${r},${c}`);
     }
     return out;
-  }, [aim, findUnit, gameMap, board]);
+  }, [aim, findUnit, gameMap, board, inputSide, blueHero, redHero]);
 
   const selectedHint = useMemo(() => {
     if (!attacker || inputLocked) return null;
@@ -3705,7 +3759,17 @@ export function Battlefield({
                 ? aim.unitUid
                   ? '— name an empty adjacent circle that is not a stronghold.'
                   : '— name an exhausted unit.'
-                : '— name a target on the field.'}{' '}
+                : aim.kind === 'leader'
+                  ? LEADER_AIM_PHRASE[leaderAimKind(activeHero) ?? 'any']
+                  : '— name a target on the field.'}{' '}
+          {aim.kind === 'leader' &&
+          leaderAimKind(activeHero) &&
+          !(leaderAimKind(activeHero) === 'exhausted' && aim.unitUid) &&
+          leaderAimTiles.size === 0 ? (
+            <em className="aim-none" data-testid="aim-none">
+              Nothing can be named right now.{' '}
+            </em>
+          ) : null}
           <button type="button" className="dev-link" onClick={() => { setAim(null); setLeaderChoice(null); }}>
             Cancel
           </button>
@@ -3810,7 +3874,7 @@ export function Battlefield({
                       deployOk ? 'legal-tile' : ''
                     } ${moveOk ? 'legal-move' : ''} ${
                       strikeOk ? 'legal-strike' : ''
-                    } ${ghostOk ? 'lapse-ghost' : ''} ${isOrigin ? 'stone-origin' : ''} ${
+                    } ${ghostOk ? 'lapse-ghost' : ''} ${leaderAimTiles.has(key) ? 'aim-target' : ''} ${isOrigin ? 'stone-origin' : ''} ${
                       dragHand != null && deployOk ? 'drag-target' : ''
                     } ${unit ? 'has-unit' : ''} ${
                       justClaimed ? 'just-claimed' : ''
@@ -4258,7 +4322,7 @@ export function Battlefield({
                   ? `${activeHero?.name ?? 'Leader'}: name a card in your discard`
                   : leaderChoice.kind === 'scry3'
                     ? `${activeHero?.name ?? 'Leader'}: name one for your hand`
-                    : `${activeHero?.name ?? 'Leader'}: name a slain Whitethorn Coven unit`}
+                    : `${activeHero?.name ?? 'Leader'}: name a slain Briar Sidhe unit`}
             </p>
             {leaderChoice.kind === 'scry3' && (
               <div className="leader-choice-row">

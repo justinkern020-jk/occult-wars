@@ -406,7 +406,10 @@ export function CampaignHour({
         <div className="campaign-cutscene cutscene">
           <p className="campaign-veil plate-kicker">{stage.cutscene.veil}</p>
           <div className="deco-rule" />
-          <p className="cutscene-line lede">{stage.cutscene.vo}</p>
+          {/* The spoken line usually opens the briefing; print it once. */}
+          {!stage.briefing.includes(stage.cutscene.vo.split(/(?<=[.?!])\s/)[0]) && (
+            <p className="cutscene-line lede">{stage.cutscene.vo}</p>
+          )}
           <p className="campaign-brief">{stage.briefing}</p>
           <p className="campaign-foe">Foe · {stage.foe}</p>
           {onAiDifficulty && <AiMindPicker value={aiDifficulty} onChange={onAiDifficulty} />}

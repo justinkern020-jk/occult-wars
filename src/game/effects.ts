@@ -864,7 +864,7 @@ export function resolveLeaderPower(
     return null;
   }
   if (op === 'snuff') {
-    const err = guardTarget(target);
+    const err = guardTarget(target, true);
     if (err) return err;
     pay();
     target!.shutter = true;
@@ -1056,7 +1056,7 @@ export function resolveLeaderPower(
     pay();
     readyUnit(target!);
     target!.breach = true;
-    pushLog(ctx, `${target!.name} ignores stronghold walls and must strike an enemy stronghold if able.`);
+    pushLog(ctx, `${target!.name} may act at once, ignores stronghold walls this turn, and must strike an enemy stronghold if able.`);
     return null;
   }
   if (op === 'revive_coven') {
@@ -1069,12 +1069,12 @@ export function resolveLeaderPower(
       return 'Return them to an empty circle that is not a stronghold.';
     }
     const disc = ctx.discard[side];
-    if (opts.discardIndex == null) return 'Name a Whitethorn Coven unit in your discard.';
+    if (opts.discardIndex == null) return 'Name a slain Briar Sidhe unit in your discard.';
     const idx = opts.discardIndex;
-    if (idx < 0 || idx >= disc.length) return 'Name a Whitethorn Coven unit in your discard.';
+    if (idx < 0 || idx >= disc.length) return 'Name a slain Briar Sidhe unit in your discard.';
     const card = disc[idx]!;
-    if (card.kind !== 'unit' || card.faction !== 'The Whitethorn Coven') {
-      return 'Name a Whitethorn Coven unit in your discard.';
+    if (!isQueenCourtUnit(card)) {
+      return 'Name a slain Briar Sidhe unit in your discard.';
     }
     pay();
     disc.splice(idx, 1);
@@ -1520,6 +1520,29 @@ export function leaderNeedsAim(leader: Card): boolean {
   if (!op) return false;
   if (op === 'scry3' || op === 'seek' || op === 'recall') return false; // modal choice, not a board aim
   return LEADER_AIMED.has(op) || op === 'claim' || op === 'slide';
+}
+
+/** The Whitethorn Queen raises her own court: slain Briar Sidhe units (her working's order). */
+export const QUEEN_COURT = 'The Briar Sidhe';
+export function isQueenCourtUnit(card: Card | null | undefined): boolean {
+  return !!card && card.kind === 'unit' && card.faction === QUEEN_COURT;
+}
+
+/** What a leader's board aim may name — drives the banner wording and the lit circles. */
+export type LeaderAimKind = 'own' | 'foe' | 'any' | 'exhausted' | 'empty' | 'held-empty';
+const LEADER_AIM_OWN = new Set([
+  'charge', 'copy_kw', 'ward', 'last_stand', 'breach', 'martyr', 'snuff', 'mend', 'haste', 'bulwark', 'empower_draw',
+]);
+export function leaderAimKind(leader: Card | null | undefined): LeaderAimKind | null {
+  const op = leader?.leaderPower?.op;
+  if (!op) return null;
+  if (LEADER_AIM_OWN.has(op)) return 'own';
+  if (op === 'transmute') return 'foe';
+  if (op === 'slide') return 'exhausted';
+  if (op === 'claim') return 'empty';
+  if (op === 'revive_coven') return 'held-empty';
+  if (LEADER_AIMED.has(op)) return 'any';
+  return null;
 }
 
 /** Leader workings that open a choice plate before (or instead of) board aim. */

@@ -64,7 +64,7 @@ function busyCtx(): EffectCtx {
   // Faction-tagged allies for green_surge / ready_works audits.
   const lion = CARDS.find((c) => c.faction === 'Sons of the Green Lion' && c.kind === 'unit')!;
   const works = CARDS.find((c) => c.faction === 'The Mercury Works' && c.kind === 'unit')!;
-  const thorn = CARDS.find((c) => c.faction === 'The Whitethorn Coven' && c.kind === 'unit')!;
+  const thorn = CARDS.find((c) => c.faction === 'The Briar Sidhe' && c.kind === 'unit')!;
   put({ ...mk('lionA', 'blue', 2), cardId: lion.id, name: lion.name, keywords: [...lion.keywords] }, 4, 0);
   put({ ...mk('worksA', 'blue', 2, { sick: true, moved: true, attacked: true }), cardId: works.id, name: works.name, keywords: [...works.keywords] }, 4, 1);
   ctx.discard.blue.push(thorn);
@@ -170,7 +170,7 @@ describe('card audit: every leader working is handled', () => {
                   ),
                 }
               : op === 'revive_coven'
-                ? { discardIndex: ctx.discard.blue.findIndex((c) => c.faction === 'The Whitethorn Coven') }
+                ? { discardIndex: ctx.discard.blue.findIndex((c) => c.faction === 'The Briar Sidhe') }
                 : {};
     const base = structuredClone(ctx);
     base.loyalty.blue -= hero.cost;

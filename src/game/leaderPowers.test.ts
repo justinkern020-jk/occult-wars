@@ -61,7 +61,7 @@ function put(
 
 const lion = () => CARDS.find((c) => c.faction === 'Sons of the Green Lion' && c.kind === 'unit')!;
 const works = () => CARDS.find((c) => c.faction === 'The Mercury Works' && c.kind === 'unit')!;
-const thorn = () => CARDS.find((c) => c.faction === 'The Whitethorn Coven' && c.kind === 'unit')!;
+const thorn = () => CARDS.find((c) => c.faction === 'The Briar Sidhe' && c.kind === 'unit')!;
 const otherUnit = () => CARDS.find((c) => c.faction === 'The Vril Syndicate' && c.kind === 'unit')!;
 
 describe('Green Sovereign green_surge', () => {
@@ -288,7 +288,7 @@ describe('Whitethorn revive requires an explicit discard pick', () => {
     ctx.control[2][0] = 'blue';
     const before = ctx.loyalty.blue;
     const err = resolveLeaderPower(ctx, cardById('the_whitethorn_queen')!, undefined, { r: 2, c: 0 });
-    expect(err).toMatch(/whitethorn/i);
+    expect(err).toMatch(/briar sidhe/i);
     expect(ctx.loyalty.blue).toBe(before);
     expect(ctx.board[2][0]).toBeNull();
   });
@@ -348,5 +348,14 @@ describe('tickLeaderAuras', () => {
     tickLeaderAuras(ctx);
     expect(ctx.iconHarvestSide).toBeUndefined();
     expect(ctx.deathTitheSide).toBeUndefined();
+  });
+});
+
+describe('Whitethorn Queen can raise her own court', () => {
+  it('her Briar Sidhe working can hold the units she revives', async () => {
+    const { isLegalForOrder } = await import('./orders');
+    const queen = cardById('the_whitethorn_queen')!;
+    expect(isLegalForOrder(queen.faction, 'The Briar Sidhe')).toBe(true);
+    expect(queen.text).toMatch(/slain Briar Sidhe unit/);
   });
 });

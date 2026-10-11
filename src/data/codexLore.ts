@@ -218,7 +218,7 @@ export const CARD_LORE: Record<string, string> = {
   rowan_nail:
     'In Scotland and Ireland the rowan, or mountain ash, was a charm against witches and fairies, tied with red thread over doors and byres. The Scottish rhyme says rowan and red thread put the witches to their speed.',
   the_whitethorn_queen:
-    'In the ballad of Thomas the Rhymer (Child Ballad 37) the Queen of Elfland meets Thomas under the Eildon tree and takes him away for seven years. Once in a sitting she returns a slain Whitethorn Coven unit from the discard to a circle she holds, at 1 power and exhausted.',
+    'In the ballad of Thomas the Rhymer (Child Ballad 37) the Queen of Elfland meets Thomas under the Eildon tree and takes him away for seven years. Once in a sitting she returns a slain unit of her Briar Sidhe court from the discard to a circle she holds, at 1 power and exhausted.',
   // ── The Mercury Works ──
   coil_saint:
     "Michael Faraday discovered electromagnetic induction in 1831, the principle behind every dynamo and transformer. A blacksmith's son with little schooling, he became the greatest experimenter of his age.",

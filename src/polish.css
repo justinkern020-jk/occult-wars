@@ -1117,11 +1117,19 @@ html[data-foe-coin-skin='bone'] .stone-coin.coin-foe:not([data-skin]) {
 }
 
 /* ════════ Sweep 3: score plates keep their words inside the brass frame ════════ */
+/* The socket art's opening is ~71% x 55% of the plate (frame ~14.5% each side,
+   ~21% top, ~24% bottom), so the padding matches it rather than a guess. */
 .score-chip {
-  padding: 1.4rem 2rem 1.4rem;
+  padding: 2.05rem 3rem 2.2rem;
+  background:
+    linear-gradient(#050403f2, #050403f2) center 46% / 70% 54% no-repeat,
+    url('/assets/images/bf_chip_socket.png') center / 100% 100% no-repeat;
 }
 .bf-turn {
-  padding: 1.15rem 1.5rem 1.2rem;
+  padding: 1.6rem 2.1rem 1.8rem;
+  background:
+    linear-gradient(#050403f2, #050403f2) center 46% / 66% 52% no-repeat,
+    url('/assets/images/bf_chip_socket.png') center / 100% 100% no-repeat;
 }
 
 /* ════════ Sweep 3: the field on a phone — board and hand on one screen ════════ */
@@ -1222,4 +1230,36 @@ html[data-foe-coin-skin='bone'] .stone-coin.coin-foe:not([data-skin]) {
     margin: 0 0 0 0.2rem;
     padding: 0.28rem 0.6rem;
   }
+}
+
+/* ════════ Sweep 3: leader aim lights its legal targets ════════ */
+.stone.aim-target {
+  z-index: 8;
+  outline: 2px solid #ffd77a;
+  outline-offset: 3px;
+  box-shadow: 0 0 14px #ffd77a99, inset 0 0 12px #ffd77a55;
+  animation: 1.3s ease-in-out infinite legal-pulse;
+  cursor: crosshair;
+}
+
+/* ════════ Sweep 3: match end — toasts and the spoken line step aside from the plate ════════ */
+@media (min-width: 900px) {
+  body:has(.match-veil) .honour-toasts {
+    left: auto;
+    right: 1rem;
+    transform: none;
+    width: min(20rem, calc(50vw - 18rem));
+  }
+  body:has(.match-veil) .bark-sub {
+    left: 1.25rem;
+    bottom: 1.25rem;
+    transform: none;
+    max-width: calc(50vw - 18.5rem);
+  }
+}
+
+/* Sweep 3: a leader aim with no legal target says so instead of leaving the field dark. */
+.aim-banner .aim-none {
+  color: #e0a0a0;
+  font-style: normal;
 }
