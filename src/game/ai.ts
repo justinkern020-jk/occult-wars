@@ -990,7 +990,10 @@ export function scoredCandidates(s: AiSnapshot): Scored[] {
 function passesLevel(d: AiDifficulty, a: AiAction, score: number): boolean {
   if (d === 'easy') {
     if (score >= 2000) return true;
-    if (a.type === 'leader' || a.type === 'cast') return false;
+    // Easy only dabbles in rites / leader powers: a higher bar than Experienced,
+    // and pickAiAction only lets them into the pool on some turns.
+    if (a.type === 'leader') return score > 8;
+    if (a.type === 'cast') return score > 12;
     if (a.type === 'act') return score > 28;
     if (a.type === 'attack') return score > 32;
     if (a.type === 'move') return score > 16;
@@ -1005,10 +1008,14 @@ function passesLevel(d: AiDifficulty, a: AiAction, score: number): boolean {
   return score > 2;
 }
 
-function rankedFor(s: AiSnapshot, d: AiDifficulty): Scored[] {
+/** Share of Easy decisions that may consider a rite or leader power at all. */
+export const EASY_MAGIC_CHANCE = 0.4;
+
+function rankedFor(s: AiSnapshot, d: AiDifficulty, magic = true): Scored[] {
   const avoid = new Set(s.avoid ?? []);
   return scoredCandidates(s)
     .filter((x) => !avoid.has(actionKey(x.action)))
+    .filter((x) => magic || x.score >= 2000 || (x.action.type !== 'cast' && x.action.type !== 'leader'))
     .map((x) => (d === 'easy' && x.action.type === 'deploy' ? { ...x, score: x.score + 36 } : x))
     .filter((x) => passesLevel(d, x.action, x.score))
     .sort((a, b) => b.score - a.score);
@@ -1030,7 +1037,7 @@ export type PickOptions = {
 export function pickAiAction(s: AiSnapshot, d: AiDifficulty = 'expert', opts: PickOptions = {}): AiAction {
   if (d === 'expert') return expertPick(s, opts);
   const rand = opts.rand ?? Math.random;
-  const ranked = rankedFor(s, d);
+  const ranked = rankedFor(s, d, d !== 'easy' || rand() < EASY_MAGIC_CHANCE);
   if (ranked.length === 0) return { type: 'end' };
   if (d === 'easy') {
     const near = ranked.filter((x) => x.score >= ranked[0].score - 16);
