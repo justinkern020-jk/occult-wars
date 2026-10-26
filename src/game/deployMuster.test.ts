@@ -2,6 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { canDeployOn, initialControl, paintTile } from './control';
 import { mapById } from './maps';
 import { scoredCandidates, type AiSnapshot, type AiUnit } from './ai';
+import { airshipBeside, isAirshipUnit } from './rules';
+import { cardById } from '../data/catalog';
+import {
+  resolveLeaderPower,
+  type EffectCtx,
+  type EffectUnit,
+} from './effects';
+import type { Side } from './maps';
 import type { Card } from './types';
 
 function emptyBoard(): (AiUnit | null)[][] {
@@ -153,5 +161,105 @@ describe('airship is the only street hand-muster path', () => {
       x.action.type === 'deploy' ? `${x.action.r},${x.action.c}` : '',
     );
     expect(cells.some((k) => k === '1,2' || k === '3,2')).toBe(true);
+  });
+});
+
+
+describe('only Night Zeppelin grants airship muster', () => {
+  it('isAirshipUnit is true only for night_zeppelin with airship', () => {
+    expect(isAirshipUnit({ cardId: 'night_zeppelin', keywords: ['airship', 'unclaiming'] })).toBe(true);
+    expect(isAirshipUnit({ cardId: 'lamp_bearer', keywords: ['airship'] })).toBe(false);
+    expect(isAirshipUnit({ keywords: ['airship'] })).toBe(false);
+    expect(isAirshipUnit({ cardId: 'night_zeppelin', keywords: [] })).toBe(false);
+  });
+
+  it('Night Zeppelin unlocks adjacent empty non-void non-enemy-stronghold muster via airshipBeside', () => {
+    const map = mapById('leaden-court');
+    const board: (AiUnit | null)[][] = Array.from({ length: 5 }, () => Array(5).fill(null));
+    board[2][2] = {
+      uid: 'zep',
+      side: 'red',
+      power: 4,
+      keywords: ['airship', 'unclaiming'],
+      moved: true,
+      attacked: true,
+      r: 2,
+      c: 2,
+      cardId: 'night_zeppelin',
+    };
+    // Ortho street (1,2) / (3,2) on leaden-court mid column.
+    expect(airshipBeside(board as never, 'red', 1, 2)).toBe(true);
+    expect(airshipBeside(board as never, 'red', 3, 2)).toBe(true);
+    const tile = map.tiles[1][2];
+    expect(tile.kind).not.toBe('void');
+    expect(tile.kind === 'stronghold' && tile.home === 'blue').toBe(false);
+  });
+
+  it('a unit with keyword airship but cardId !== night_zeppelin does not unlock airshipBeside', () => {
+    const board: (AiUnit | null)[][] = Array.from({ length: 5 }, () => Array(5).fill(null));
+    board[2][2] = {
+      uid: 'fake',
+      side: 'red',
+      power: 3,
+      keywords: ['airship'],
+      moved: true,
+      attacked: true,
+      r: 2,
+      c: 2,
+      cardId: 'lamp_bearer',
+    };
+    expect(airshipBeside(board as never, 'red', 1, 2)).toBe(false);
+    expect(airshipBeside(board as never, 'red', 3, 2)).toBe(false);
+    expect(airshipBeside(board as never, 'red', 2, 1)).toBe(false);
+  });
+
+  it('copy_kw from Night Zeppelin does not give the pupil airship or unlock airshipBeside', () => {
+    const tiles = mapById('leaden-court').tiles;
+    const ctx: EffectCtx = {
+      side: 'blue',
+      loyalty: { blue: 10, red: 10 },
+      domination: { blue: 0, red: 0 },
+      hand: { blue: [], red: [] },
+      deck: { blue: [], red: [] },
+      discard: { blue: [], red: [] },
+      units: {},
+      board: Array.from({ length: 5 }, () => Array(5).fill(null)),
+      control: Array.from({ length: 5 }, () => Array(5).fill(null)),
+      log: [],
+      tiles,
+    };
+    const zep = cardById('night_zeppelin')!;
+    const teacher: EffectUnit = {
+      uid: 't',
+      cardId: zep.id,
+      name: zep.name,
+      side: 'blue' as Side,
+      power: zep.power ?? 4,
+      maxPower: zep.power ?? 4,
+      loyalty: zep.cost,
+      keywords: [...zep.keywords],
+    };
+    const pupil: EffectUnit = {
+      uid: 'p',
+      cardId: 'devoted_clerk',
+      name: 'Devoted Clerk',
+      side: 'blue',
+      power: 1,
+      maxPower: 1,
+      loyalty: 1,
+      keywords: [],
+    };
+    ctx.units.t = teacher;
+    ctx.units.p = pupil;
+    ctx.board[2][2] = 't';
+    ctx.board[2][3] = 'p';
+    expect(resolveLeaderPower(ctx, cardById('provost_of_the_azoth')!, 't', undefined, { secondUid: 'p' })).toBeNull();
+    expect(ctx.units.p.keywords).not.toContain('airship');
+    // Rebuild a RulesBoard-shaped grid from ctx for airshipBeside
+    const board = Array.from({ length: 5 }, () => Array(5).fill(null)) as (EffectUnit | null)[][];
+    board[2][3] = ctx.units.p;
+    expect(airshipBeside(board as never, 'blue', 2, 4)).toBe(false);
+    expect(airshipBeside(board as never, 'blue', 1, 3)).toBe(false);
+    expect(isAirshipUnit(ctx.units.p)).toBe(false);
   });
 });

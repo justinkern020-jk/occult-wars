@@ -100,6 +100,12 @@ export function isRootedOnBoard(
   return false;
 }
 
+
+/** True only for the Night Zeppelin itself — never a copied `airship` keyword. */
+export function isAirshipUnit(u: { cardId?: string; keywords: string[] }): boolean {
+  return u.cardId === 'night_zeppelin' && hasKeyword(u, 'airship');
+}
+
 /** True if `side` has an Airship adjacent to (r, c) — muster beside it. */
 export function airshipBeside(
   board: RulesBoard,
@@ -109,7 +115,7 @@ export function airshipBeside(
 ): boolean {
   for (const [dr, dc] of ORTHO) {
     const u = board[r + dr]?.[c + dc];
-    if (u && u.side === side && hasKeyword(u, 'airship')) return true;
+    if (u && u.side === side && isAirshipUnit(u)) return true;
   }
   return false;
 }
@@ -192,7 +198,7 @@ export function riteOpenUpkeep<U extends RulesUnit>(
   for (let r = 0; r < 5; r++)
     for (let c = 0; c < 5; c++) {
       const u = b[r][c];
-      if (!u || u.side !== side || !hasKeyword(u, 'airship')) continue;
+      if (!u || u.side !== side || !isAirshipUnit(u)) continue;
       const soak = hasKeyword(u, 'tough') || u.tough ? 1 : 0;
       const dmg = Math.max(0, 1 - soak);
       u.power -= dmg;

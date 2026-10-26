@@ -726,6 +726,8 @@ export function isRecallableFromDiscard(card: Card): boolean {
 function applyCopiedKeywords(u: EffectUnit, kws: string[]) {
   const next = [...u.keywords];
   for (const k of kws) {
+    // Airship muster is unique to Night Zeppelin — never copy it.
+    if (k === 'airship') continue;
     if (!next.includes(k)) next.push(k);
     if (k === 'tough') u.tough = true;
     if (k === 'fast') u.fast = true;

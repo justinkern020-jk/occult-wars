@@ -21,7 +21,7 @@ import { DOMINATION_WIN, bankFromHoldings, countHoldings } from './scoring';
 import { canDeployOn, isEnemyStronghold, isPaintable } from './control';
 import { canBeStruck, hasKeyword, manhattan, rangedReach } from './keywords';
 import { applyDamage, combatantFrom, resolveMelee } from './combat';
-import { MEASURED_BLOODED, bloodedResult, crownBonusOnBoard, type RulesBoard } from './rules';
+import { MEASURED_BLOODED, bloodedResult, crownBonusOnBoard, isAirshipUnit, type RulesBoard } from './rules';
 import { isQueenCourtUnit, isRecallableFromDiscard, type EffectUnit } from './effects';
 import {
   applyAction,
@@ -153,7 +153,7 @@ function rooted(s: AiSnapshot, side: Side, r: number, c: number): boolean {
 function airshipNear(s: AiSnapshot, side: Side, r: number, c: number): boolean {
   for (const p of ortho(r, c)) {
     const u = s.board[p.r][p.c];
-    if (u && u.side === side && hasKeyword(u, 'airship')) return true;
+    if (u && u.side === side && isAirshipUnit(u)) return true;
   }
   return false;
 }
@@ -425,7 +425,7 @@ function deployScore(s: AiSnapshot, card: Card, r: number, c: number): number {
     uid: `new-${card.id}`,
     side,
     power: p,
-    keywords: card.keywords,
+    keywords: [...card.keywords],
     moved: false,
     attacked: false,
     r,

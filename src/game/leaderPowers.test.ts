@@ -91,6 +91,19 @@ describe('Provost of the Azoth copy_kw', () => {
     expect(ctx.units.p.tough).toBe(true);
     expect(ctx.units.p.fast).toBe(true);
   });
+
+  it('never copies the airship keyword from Night Zeppelin', () => {
+    const ctx = ctx0();
+    put(ctx, 'night_zeppelin', 't', 'blue', 2, 2);
+    put(ctx, 'devoted_clerk', 'p', 'blue', 2, 3, { keywords: [] });
+    expect(ctx.units.t.keywords).toContain('airship');
+    expect(resolveLeaderPower(ctx, cardById('provost_of_the_azoth')!, 't', undefined, { secondUid: 'p' })).toBeNull();
+    expect(ctx.units.p.keywords).not.toContain('airship');
+    // Other printable keywords from the Zeppelin still copy.
+    for (const k of ctx.units.t.keywords.filter((x) => x !== 'airship')) {
+      expect(ctx.units.p.keywords).toContain(k);
+    }
+  });
 });
 
 describe('Rector of the Monad scry3', () => {
