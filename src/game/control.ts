@@ -44,16 +44,33 @@ export function paintTile(
   return next;
 }
 
-/** Deploy on own stronghold, or a gate this side currently holds. */
+/**
+ * Deploy on own stronghold, or a gate this side currently holds.
+ * Streets and resource nodes are never muster spots — paint alone does not unlock them.
+ *
+ * `ashLock`: after Justin Kern's gadget, the burned chair (the foe) may only
+ * muster on its own home stronghold / home gates until the lock clears. Pass
+ * null/undefined for ordinary play.
+ */
 export function canDeployOn(
   tile: Tile,
   control: ControlGrid,
   r: number,
   c: number,
   side: Side,
+  ashLock?: Side | null,
 ): boolean {
-  if (tile.kind === 'void') return false;
+  if (!tile || tile.kind === 'void') return false;
+  // Hard reject: painted streets/resources are never legal muster circles.
+  if (tile.kind === 'street' || tile.kind === 'resource') return false;
+
+  if (ashLock === side) {
+    // Burned chair: only own doors, not conquered mid-board gates.
+    if (tile.kind === 'stronghold' || tile.kind === 'gate') return tile.home === side;
+    return false;
+  }
+
   if (tile.kind === 'stronghold') return tile.home === side;
-  if (tile.kind === 'gate') return control[r][c] === side;
+  if (tile.kind === 'gate') return control[r]?.[c] === side;
   return false;
 }
