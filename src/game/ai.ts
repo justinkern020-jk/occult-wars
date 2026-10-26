@@ -1066,7 +1066,7 @@ export function snapshotFromState(st: EngineState, side: Side = st.side): AiSnap
         uid: u.uid,
         side: u.side,
         power: u.power,
-        keywords: u.keywords,
+        keywords: [...u.keywords],
         moved: !!u.moved || !!u.sick,
         attacked: !!u.attacked || !!u.sick,
         sick: !!u.sick,
@@ -1683,7 +1683,9 @@ function cloneSnap(s: AiSnapshot): AiSnapshot {
     side: s.side,
     tiles: s.tiles,
     control: s.control.map((row) => row.slice()),
-    board: s.board.map((row) => row.map((u) => (u ? { ...u } : null))),
+    board: s.board.map((row) =>
+      row.map((u) => (u ? { ...u, keywords: [...u.keywords] } : null)),
+    ),
     hand: s.hand.slice(),
     discard: s.discard?.slice(),
     loyalty: s.loyalty,
@@ -1835,6 +1837,11 @@ function rolloutApply(s: AiSnapshot, a: AiAction, root: Side, stash: RolloutStas
   if (a.type === 'deploy') {
     const card = s.hand[a.index];
     if (!card || card.kind !== 'unit' || card.power == null || card.cost > s.loyalty || s.board[a.r][a.c]) return null;
+    const tile = s.tiles[a.r]?.[a.c];
+    if (!tile || tile.kind === 'void') return null;
+    const air = airshipNear(s, s.side, a.r, a.c) && !isEnemyStronghold(tile, s.side);
+    // Rollouts used to skip muster legality — that could score illegal street drops.
+    if (!canDeployOn(tile, s.control, a.r, a.c, s.side) && !air) return null;
     const slow = card.keywords.includes('delay') || units(s, foeOf(s.side)).some((f) => hasKeyword(f, 'chill'));
     let p = card.power;
     if (card.keywords.includes('warband')) p += units(s, s.side).length;
@@ -1845,7 +1852,7 @@ function rolloutApply(s: AiSnapshot, a: AiAction, root: Side, stash: RolloutStas
       side: s.side,
       power: p,
       maxPower: p,
-      keywords: card.keywords,
+      keywords: [...card.keywords],
       moved: slow,
       attacked: slow,
       sick: slow,

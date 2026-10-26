@@ -1112,7 +1112,10 @@ export function Battlefield({
       gameMap.tiles.forEach((row, r) =>
         row.forEach((t, c) => {
           if (board[r][c]) return;
-          if (canDeployOn(t, control, r, c, s)) out.push({ r, c });
+          if (!t || t.kind === 'void') return;
+          const air =
+            airshipBeside(board, s, r, c) && !isEnemyStronghold(t, s);
+          if (canDeployOn(t, control, r, c, s) || air) out.push({ r, c });
         }),
       );
       return out;
@@ -2008,6 +2011,16 @@ export function Battlefield({
         airshipBeside(board, acting, r, c) &&
         deployTile.kind !== 'void' &&
         !isEnemyStronghold(deployTile, acting);
+      // Paint never unlocks streets/resources — only a real door or an airship.
+      if (
+        (deployTile.kind === 'street' || deployTile.kind === 'resource') &&
+        !fromAirship
+      ) {
+        pushLog(
+          'Deploy onto your stronghold, a gate you hold, or an empty circle beside your airship.',
+        );
+        return false;
+      }
       if (!canDeployOn(deployTile, control, r, c, acting) && !fromAirship) {
         pushLog(
           'Deploy onto your stronghold, a gate you hold, or an empty circle beside your airship.',
@@ -3196,7 +3209,7 @@ export function Battlefield({
                   uid: u.uid,
                   side: u.side,
                   power: u.power,
-                  keywords: u.keywords,
+                  keywords: [...u.keywords],
                   moved: !!u.moved || !!u.sick,
                   attacked: !!u.attacked || !!u.sick,
                   sick: !!u.sick,

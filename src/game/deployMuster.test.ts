@@ -83,3 +83,75 @@ describe('muster never uses painted streets/resources', () => {
     expect(canDeployOn(map.tiles[0][2], control, 0, 2, 'red', 'red')).toBe(true);
   });
 });
+
+describe('airship is the only street hand-muster path', () => {
+  it('without an airship, painted streets never appear in AI muster cells', () => {
+    const map = mapById('ashen-cross');
+    let control = initialControl(map.tiles);
+    for (let r = 0; r < 5; r++)
+      for (let c = 0; c < 5; c++) control = paintTile(control, map.tiles, r, c, 'red');
+    const board = emptyBoard();
+    board[2][2] = {
+      uid: 'grunt',
+      side: 'red',
+      power: 3,
+      keywords: [],
+      moved: true,
+      attacked: true,
+      r: 2,
+      c: 2,
+      cardId: 'lamp_bearer',
+    };
+    const snap: AiSnapshot = {
+      side: 'red',
+      tiles: map.tiles,
+      control,
+      board,
+      hand: [unitCard({ id: 'u1', name: 'Lamp Bearer', cost: 2, power: 2 })],
+      loyalty: 6,
+    };
+    for (const x of scoredCandidates(snap)) {
+      if (x.action.type !== 'deploy') continue;
+      const kind = map.tiles[x.action.r][x.action.c].kind;
+      expect(kind === 'street' || kind === 'resource').toBe(false);
+    }
+  });
+
+  it('with an airship on leaden-court, an empty adjacent street is offered as a muster cell', () => {
+    const map = mapById('leaden-court');
+    const control = initialControl(map.tiles);
+    const board = emptyBoard();
+    // Mid street (2,2); ortho streets at (2,0)/(2,4) are streets in sdsds — (2,0)=s, (2,1)=d gate, (2,2)=s.
+    board[2][2] = {
+      uid: 'zep',
+      side: 'red',
+      power: 4,
+      keywords: ['airship', 'unclaiming'],
+      moved: true,
+      attacked: true,
+      r: 2,
+      c: 2,
+      cardId: 'night_zeppelin',
+    };
+    const snap: AiSnapshot = {
+      side: 'red',
+      tiles: map.tiles,
+      control,
+      board,
+      hand: [unitCard({ id: 'u1', name: 'Lamp Bearer', cost: 2, power: 2 })],
+      loyalty: 6,
+    };
+    const streetDeploys = scoredCandidates(snap).filter((x) => {
+      if (x.action.type !== 'deploy') return false;
+      return map.tiles[x.action.r][x.action.c].kind === 'street';
+    });
+    expect(streetDeploys.length).toBeGreaterThan(0);
+    // Adjacent street (2,0) or (2,4) — manhattan 2 from center in sdsds? 
+    // sdsds: (2,0)=s (2,1)=d (2,2)=s (2,3)=d (2,4)=s. Zeppelin on (2,2) blocks that cell.
+    // Ortho empty streets: none on same row (gates beside). Row (1,2)=s and (3,2)=s are ortho streets.
+    const cells = streetDeploys.map((x) =>
+      x.action.type === 'deploy' ? `${x.action.r},${x.action.c}` : '',
+    );
+    expect(cells.some((k) => k === '1,2' || k === '3,2')).toBe(true);
+  });
+});
